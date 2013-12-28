@@ -63,6 +63,24 @@ namespace Server.MirObjects
                     return new BoneFamiliar(info);
                 case 24:
                     return new DigOutZombie(info);
+                case 25:
+                    return new RevivingZombie(info);
+                case 26:
+                    return new ShamanZombie(info);
+                case 27:
+                    return new Khazard(info);
+                case 28:
+                    return new ToxicGhoul(info);
+                case 29:
+                    return new BoneSpearman(info);
+                case 30:
+                    return new BoneLord(info);
+                case 31:
+                    return new RightGuard(info);
+                case 32:
+                    return new LeftGuard(info);
+                case 33:
+                    return new MinotaurKing(info);
                 default:
                     return new MonsterObject(info);
             }
@@ -127,7 +145,7 @@ namespace Server.MirObjects
         public uint HP, MaxHP;
         public ushort MoveSpeed;
 
-        public const int RegenDelay = 10000, EXPOwnerDelay = 5000, DeadDelay = 180000, SearchDelay = 3000, RoamDelay = 1000, HealDelay = 600;
+        public const int RegenDelay = 10000, EXPOwnerDelay = 5000, DeadDelay = 180000, SearchDelay = 3000, RoamDelay = 1000, HealDelay = 600, RevivalDelay = 2000;
         public long ActionTime, MoveTime, AttackTime, RegenTime, DeadTime, SearchTime, RoamTime, HealTime;
         public long ShockTime, RageTime;
 
@@ -361,6 +379,24 @@ namespace Server.MirObjects
 
             PoisonList.Clear();
             Envir.MonsterCount--;
+
+        }
+
+        public void Revive(uint hp)
+        {
+            if (!Dead) return;
+
+            SetHP(hp);
+
+            Dead = false;
+            ActionTime = Envir.Time + RevivalDelay;
+
+            Broadcast(new S.ObjectRevived { ObjectID = ObjectID, Effect = false });
+
+            if (Respawn != null)
+                Respawn.Count++;
+
+            Envir.MonsterCount++;
 
         }
 

@@ -1409,6 +1409,38 @@ namespace ServerPackets
             writer.Write(Level);
         }
     }
+    public sealed class ObjectSecondAttack : Packet
+    {
+        public override short Index
+        {
+            get { return 117; }
+        }
+
+        public uint ObjectID;
+        public Point Location;
+        public MirDirection Direction;
+        public Spell Spell;
+        public byte Level;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Location = new Point(reader.ReadInt32(), reader.ReadInt32());
+            Direction = (MirDirection)reader.ReadByte();
+            Spell = (Spell)reader.ReadByte();
+            Level = reader.ReadByte();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Location.X);
+            writer.Write(Location.Y);
+            writer.Write((byte)Direction);
+            writer.Write((byte)Spell);
+            writer.Write(Level);
+        }
+    }
     public sealed class Struck : Packet
     {
         public override short Index
@@ -2371,14 +2403,17 @@ namespace ServerPackets
     {
         public override short Index { get { return 97; } }
         public uint ObjectID;
+        public bool Effect;
 
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
+            Effect = reader.ReadBoolean();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(ObjectID);
+            writer.Write(Effect);
         }
     }
     public sealed class SpellToggle : Packet
@@ -2544,6 +2579,7 @@ namespace ServerPackets
         public uint ObjectID;
         public Point Location;
         public Spell Spell;
+        public MirDirection Direction;
 
 
         protected override void ReadPacket(BinaryReader reader)
@@ -2551,6 +2587,7 @@ namespace ServerPackets
             ObjectID = reader.ReadUInt32();
             Location = new Point(reader.ReadInt32(), reader.ReadInt32());
             Spell = (Spell) reader.ReadByte();
+            Direction = (MirDirection) reader.ReadByte();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -2559,6 +2596,7 @@ namespace ServerPackets
             writer.Write(Location.X);
             writer.Write(Location.Y);
             writer.Write((byte) Spell);
+            writer.Write((byte)Direction);
         }
     }
     public sealed class UserDash : Packet

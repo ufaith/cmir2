@@ -23,6 +23,7 @@ namespace Client.MirObjects
 
         public Spell Spell;
         public int FrameCount, FrameInterval, FrameIndex;
+        public bool Blend;
         
 
         public SpellObject(uint objectID) : base(objectID)
@@ -35,6 +36,7 @@ namespace Client.MirObjects
             MapLocation = info.Location;
             GameScene.Scene.MapControl.AddObject(this);
             Spell = info.Spell;
+            Direction = info.Direction;
 
             switch (Spell)
             {
@@ -43,6 +45,7 @@ namespace Client.MirObjects
                     DrawFrame = 1390;
                     FrameInterval = 100;
                     FrameCount = 10;
+                    Blend = true;
                     break;
                 case Spell.FireWall:
                     BodyLibrary = Libraries.Magic;
@@ -50,6 +53,7 @@ namespace Client.MirObjects
                     FrameInterval = 120;
                     FrameCount = 6;
                     Light = 3;
+                    Blend = true;
                     break;
                 case Spell.PoisonField:
                     BodyLibrary = Libraries.Magic2;
@@ -57,6 +61,13 @@ namespace Client.MirObjects
                     FrameInterval = 120;
                     FrameCount = 20;
                     Light = 3;
+                    Blend = true;
+                    break;
+                case Spell.DigOutZombie:
+                    BodyLibrary = (ushort)Monster.DigOutZombie < Libraries.Monsters.Count() ? Libraries.Monsters[(ushort)Monster.DigOutZombie] : Libraries.Magic;
+                    DrawFrame = 304 + (byte) Direction;
+                    FrameCount = 0;
+                    Blend = false;
                     break;
             }
 
@@ -82,7 +93,10 @@ namespace Client.MirObjects
         {
             if (BodyLibrary == null) return;
 
-            BodyLibrary.DrawBlend(DrawFrame + FrameIndex, DrawLocation, DrawColour, true, 0.8F);
+            if (Blend)
+                BodyLibrary.DrawBlend(DrawFrame + FrameIndex, DrawLocation, DrawColour, true, 0.8F);
+            else
+                BodyLibrary.Draw(DrawFrame + FrameIndex, DrawLocation, DrawColour, true);
         }
 
         public override bool MouseOver(Point p)

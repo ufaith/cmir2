@@ -201,7 +201,8 @@ namespace Client.MirSounds
             MaleDie = 10144,
             FemaleDie = 10145,
 
-            Revive = 20791;
+            Revive = 20791,
+            ZombieRevive = 0705;
 
     }
 }

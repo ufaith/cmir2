@@ -812,6 +812,9 @@ namespace Client.MirScenes
                 case 116:
                     MarketSuccess((S.MarketSuccess)p);
                     break;
+                case 117:
+                    ObjectSecondAttack((S.ObjectSecondAttack)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1436,6 +1439,21 @@ namespace Client.MirScenes
                 return;
             }
         }
+        private void ObjectSecondAttack(S.ObjectSecondAttack p)
+        {
+            if (p.ObjectID == User.ObjectID) return;
+
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID) continue;
+                QueuedAction action = new QueuedAction { Action = MirAction.Attack2, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                action.Params.Add(p.Spell);
+                action.Params.Add(p.Level);
+                ob.ActionFeed.Add(action);
+                return;
+            }
+        }
         private void Struck(S.Struck p)
         {
             NextRunTime = CMain.Time + 2500;
@@ -2025,8 +2043,14 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                ob.Effects.Add(new Effect(Libraries.Magic2, 1220, 20, 2000, ob));
-                SoundManager.PlaySound(SoundList.Revive);
+                if (p.Effect)
+                {
+                    ob.Effects.Add(new Effect(Libraries.Magic2, 1220, 20, 2000, ob));
+                    SoundManager.PlaySound(SoundList.Revive);
+                }
+                ob.Dead = false;
+                ob.ActionFeed.Clear();
+                ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Revive, Direction = ob.Direction, Location = ob.CurrentLocation });
                 return;
             }
         }
@@ -4006,6 +4030,7 @@ namespace Client.MirScenes
 
             return (MirDirection)(angle / ratio);
         }
+
         public static int Direction16(Point source, Point destination)
         {
             PointF c = new PointF(source.X, source.Y);
