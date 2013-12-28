@@ -191,7 +191,8 @@ namespace Server.MirObjects
                     {
                         ObjectID = ObjectID,
                         Location = CastLocation,
-                        Spell = Spell
+                        Spell = Spell,
+                        Direction = Direction
                     };
 
                 default:
@@ -199,7 +200,8 @@ namespace Server.MirObjects
                     {
                         ObjectID = ObjectID,
                         Location = CurrentLocation,
-                        Spell = Spell
+                        Spell = Spell,
+                        Direction = Direction
                     };
             }
 

@@ -13,7 +13,7 @@ C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.pdb
 C:\Users\Dan\Documents\C# MIR Source\Release\Client\Client.exe.config
 C:\Users\Dan\Documents\C# MIR Source\Release\Client\Client.exe
 C:\Users\Dan\Documents\C# MIR Source\Release\Client\Client.pdb
-C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.csprojResolveAssemblyReference.cache
 C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.CMain.resources
 C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.Properties.Resources.resources
 C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.csproj.GenerateResource.Cache
+C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.csprojResolveAssemblyReference.cache

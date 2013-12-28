@@ -96,8 +96,6 @@ namespace Server.MirDatabase
                                 CresentSlash;
 
 
-
-
         public Spell Spell;
         public byte BaseCost, LevelCost, Icon;
         public byte Level1, Level2, Level3;

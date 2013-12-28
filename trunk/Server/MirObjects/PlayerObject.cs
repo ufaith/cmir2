@@ -1035,7 +1035,7 @@ namespace Server.MirObjects
 
             GetObjects();
             Enqueue(new S.Revived());
-            Broadcast(new S.ObjectRevived {ObjectID = ObjectID});
+            Broadcast(new S.ObjectRevived {ObjectID = ObjectID, Effect = true});
 
 
             InSafeZone = true;

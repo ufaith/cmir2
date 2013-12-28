@@ -132,13 +132,13 @@ namespace Client.MirObjects
         public bool Explode;
 
 
-        public Missile(MLibrary library, int baseIndex, int count, int duration, MapObject owner, Point target)
+        public Missile(MLibrary library, int baseIndex, int count, int duration, MapObject owner, Point target, bool direction16 = true)
             : base(library, baseIndex, count, duration, owner)
         {
             Missiles.Add(this);
             Source = Owner.CurrentLocation;
             Destination = target;
-            Direction = MapControl.Direction16(Source, Destination);
+            Direction = direction16 ? MapControl.Direction16(Source, Destination) : (int)Functions.DirectionFromPoint(Source, Destination);
         }
 
         public Missile(MLibrary library, int baseIndex, int count, int duration, Point source, Point target)

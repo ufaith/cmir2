@@ -15,7 +15,6 @@ C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.exe
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.pdb
 C:\Users\Dan\Documents\C# MIR Source\Release\Server\Server.exe
 C:\Users\Dan\Documents\C# MIR Source\Release\Server\Server.pdb
-C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.csprojResolveAssemblyReference.cache
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.AccountInfoForm.resources
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.ConfigForm.resources
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.ItemInfoForm.resources
@@ -24,3 +23,4 @@ C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.MonsterInf
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.SMain.resources
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.Properties.Resources.resources
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.csproj.GenerateResource.Cache
+C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.csprojResolveAssemblyReference.cache

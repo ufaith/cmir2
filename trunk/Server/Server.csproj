@@ -106,6 +106,15 @@
     <Compile Include="MirObjects\Monsters\BugBagMaggot.cs" />
     <Compile Include="MirObjects\Monsters\CannibalPlant.cs" />
     <Compile Include="MirObjects\Monsters\CaveMaggot.cs" />
+    <Compile Include="MirObjects\Monsters\BoneSpearman.cs" />
+    <Compile Include="MirObjects\Monsters\BoneLord.cs" />
+    <Compile Include="MirObjects\Monsters\MinotaurKing.cs" />
+    <Compile Include="MirObjects\Monsters\LeftGuard.cs" />
+    <Compile Include="MirObjects\Monsters\RightGuard.cs" />
+    <Compile Include="MirObjects\Monsters\ToxicGhoul.cs" />
+    <Compile Include="MirObjects\Monsters\Khazard.cs" />
+    <Compile Include="MirObjects\Monsters\ShamanZombie.cs" />
+    <Compile Include="MirObjects\Monsters\RevivingZombie.cs" />
     <Compile Include="MirObjects\Monsters\DigOutZombie.cs" />
     <Compile Include="MirObjects\Monsters\DarkDevil.cs" />
     <Compile Include="MirObjects\Monsters\Deer.cs" />

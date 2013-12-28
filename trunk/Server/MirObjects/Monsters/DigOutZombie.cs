@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Server.MirDatabase;
-using Server.MirEnvir;
+﻿using Server.MirDatabase;
+using System.Drawing;
 using S = ServerPackets;
 
 namespace Server.MirObjects.Monsters
 {
     class DigOutZombie : MonsterObject
     {
-        public bool Visible;
-        public long VisibleTime;
+        public bool Visible, DoneDigOut;
+        public long VisibleTime, DigOutTime;
+        public Point DigOutLocation;
+        public MirDirection DigOutDirection;
 
         protected override bool CanAttack
         {
@@ -48,7 +46,7 @@ namespace Server.MirObjects.Monsters
             {
                 VisibleTime = Envir.Time + 2000;
 
-                bool visible = FindNearby(7);
+                bool visible = FindNearby(3);
 
                 if (!Visible && visible)
                 {
@@ -57,8 +55,28 @@ namespace Server.MirObjects.Monsters
                     Broadcast(GetInfo());
                     Broadcast(new S.ObjectShow { ObjectID = ObjectID });
                     ActionTime = Envir.Time + 2000;
-
+                    DigOutTime = Envir.Time;
+                    DigOutLocation = CurrentLocation;
+                    DigOutDirection = Direction;
                 }
+            }
+
+            if (Visible && Envir.Time > DigOutTime + 1000 && !DoneDigOut)
+            {
+                SpellObject ob = new SpellObject
+                    {
+                        Spell = Spell.DigOutZombie,
+                        Value = 1,
+                        ExpireTime = Envir.Time + (5 * 60 * 1000),
+                        TickSpeed = 2000,
+                        Caster = null,
+                        CurrentLocation = DigOutLocation,
+                        CurrentMap = this.CurrentMap,
+                        Direction = DigOutDirection
+                    };
+                CurrentMap.AddObject(ob);
+                ob.Spawned();
+                DoneDigOut = true;                    
             }
 
             base.ProcessAI();

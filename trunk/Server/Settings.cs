@@ -62,7 +62,12 @@ namespace Server
                              Zuma4 = "Wedge Moth",
                              Zuma5 = "Zuma Archer3",
                              Zuma6 = "Zuma Statue3",
-                             Zuma7 = "Zuma Guardian3";
+                             Zuma7 = "Zuma Guardian3",
+                             BoneMonster1 = "Bone Spearman",
+                             BoneMonster2 = "Bone Blademan",
+                             BoneMonster3 = "Bone Archer",
+                             BoneMonster4 = "Bone Captain";
+                            
 
 
         public static void Load()
@@ -104,6 +109,10 @@ namespace Server
             Zuma5 = Reader.ReadString("Game", "Zuma5", Zuma5);
             Zuma6 = Reader.ReadString("Game", "Zuma6", Zuma6);
             Zuma7 = Reader.ReadString("Game", "Zuma7", Zuma7);
+            BoneMonster1 = Reader.ReadString("Game", "BoneMonster1", BoneMonster1);
+            BoneMonster2 = Reader.ReadString("Game", "BoneMonster2", BoneMonster2);
+            BoneMonster3 = Reader.ReadString("Game", "BoneMonster3", BoneMonster3);
+            BoneMonster4 = Reader.ReadString("Game", "BoneMonster4", BoneMonster4);
 
 
             if (!Directory.Exists(MapPath))
@@ -173,6 +182,10 @@ namespace Server
             Reader.Write("Game", "Zuma6", Zuma6);
             Reader.Write("Game", "Zuma7", Zuma7);
 
+            Reader.Write("Game", "BoneMonster1", BoneMonster1);
+            Reader.Write("Game", "BoneMonster2", BoneMonster2);
+            Reader.Write("Game", "BoneMonster3", BoneMonster3);
+            Reader.Write("Game", "BoneMonster4", BoneMonster4);
         }
 
         public static void LoadEXP()

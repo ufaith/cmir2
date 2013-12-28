@@ -82,7 +82,7 @@ public enum Monster : ushort
     Zombie1 = 70,
     Zombie2 = 71,
     Zombie3 = 72,
-    Zombie4 = 73,
+    ShamanZombie = 73,
     Ghoul = 74,
     KingScorpion = 75,
     KingHog = 76,
@@ -90,6 +90,27 @@ public enum Monster : ushort
     BoneFamiliar = 78,
     Shinsu = 79,
     Shinsu1 = 80,
+    SpiderFrog = 81,
+    HoroBlaster = 82,
+    BlueHoroBlaster = 83,
+    KekTal = 84,
+    VioletKekTal = 85,
+    Khazard = 86,
+    RoninGhoul = 87,
+    ToxicGhoul = 88,
+    BoneCaptain = 89,
+    BoneSpearman = 90,
+    BoneBlademan = 91,
+    BoneArcher = 92,
+    BoneLord = 93,
+    Minotaur = 94,
+    IceMinotaur = 95,
+    ElectricMinotaur = 96,
+    WindMinotaur = 97,
+    FireMinotaur = 98,
+    RightGuard = 99,
+    LeftGuard = 100,
+    MinotaurKing = 101,
 }
 
 public enum MirAction : byte
@@ -118,6 +139,7 @@ public enum MirAction : byte
     Hide,
     Stoned,
     Appear,
+    Revive,
 }
 
 public enum CellAttribute : byte
@@ -291,6 +313,7 @@ public enum RequiredType : byte
 }
 
 [Obfuscation(Feature = "renaming", Exclude = true)]
+
 public enum Spell : byte
 {
     None = 0,
@@ -377,7 +400,10 @@ public enum Spell : byte
     SwiftFeet = 102,
     DarkBody = 103,
     Hemorrhage = 104,
-    CresentSlash = 105
+    CresentSlash = 105,
+
+    //Map Events
+    DigOutZombie = 200
 }
 
 public enum SpellEffect : byte
@@ -1934,6 +1960,8 @@ public abstract class Packet
                 return new S.MarketFail();
             case 116:
                 return new S.MarketSuccess();
+            case 117:
+                return new S.ObjectSecondAttack();
             default:
                 throw new NotImplementedException();
         }

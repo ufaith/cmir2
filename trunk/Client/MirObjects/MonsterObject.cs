@@ -130,6 +130,22 @@ namespace Client.MirObjects
                 case Monster.Ghoul:
                 case Monster.KingHog:
                 case Monster.Shinsu1:
+                case Monster.SpiderFrog:
+                case Monster.HoroBlaster:
+                case Monster.BlueHoroBlaster:
+                case Monster.KekTal:
+                case Monster.VioletKekTal:
+                case Monster.RoninGhoul:
+                case Monster.ToxicGhoul:
+                case Monster.BoneCaptain:
+                case Monster.BoneSpearman:
+                case Monster.BoneBlademan:
+                case Monster.BoneArcher:
+                case Monster.Minotaur:
+                case Monster.IceMinotaur:
+                case Monster.ElectricMinotaur:
+                case Monster.WindMinotaur:
+                case Monster.FireMinotaur:
                     Frames = FrameSet.Monsters[2];
                     break;
                 case Monster.CannibalPlant:
@@ -181,6 +197,9 @@ namespace Client.MirObjects
                     break;
                 case Monster.KingScorpion:
                 case Monster.DarkDevil:
+                case Monster.RightGuard:
+                case Monster.LeftGuard:
+                case Monster.MinotaurKing:
                     Frames = FrameSet.Monsters[14];
                     break;
                 case Monster.BoneFamiliar:
@@ -193,6 +212,20 @@ namespace Client.MirObjects
                     break;
                 case Monster.DigOutZombie:
                     Frames = FrameSet.Monsters[17];
+                    break;
+                case Monster.Zombie1:
+                case Monster.Zombie2:
+                case Monster.Zombie3:
+                    Frames = FrameSet.Monsters[18];
+                    break;
+                case Monster.ShamanZombie:
+                    Frames = FrameSet.Monsters[19];
+                    break;
+                case Monster.Khazard:
+                    Frames = FrameSet.Monsters[20];
+                    break;
+                case Monster.BoneLord:
+                    Frames = FrameSet.Monsters[21];
                     break;
                 default:
                     Frames = FrameSet.Monsters[0];
@@ -486,7 +519,13 @@ namespace Client.MirObjects
                                 if (CurrentAction == MirAction.Attack1)
                                     Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.ZumaTaurus], 244 + (int)Direction * 8, 8, 8 * FrameInterval, this));
                                 break;
+                            case Monster.MinotaurKing:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.MinotaurKing], 272 + (int)Direction * 6, 6, Frame.Count * Frame.Interval, this));
+                                break;
                         }
+                        break;
+                    case MirAction.Attack2:
+                        PlaySecondAttackSound();
                         break;
                     case MirAction.AttackRange:
                         PlayRangeSound();
@@ -500,6 +539,10 @@ namespace Client.MirObjects
                                 break;
                             case Monster.DarkDevil:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.DarkDevil], 272 + (int)Direction * 8, 8, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.ShamanZombie:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.ShamanZombie], 232 + (int)Direction * 12, 6, Frame.Count * Frame.Interval, this));
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.ShamanZombie], 328, 12, Frame.Count * Frame.Interval, this));
                                 break;
                         }
                         TargetID = (uint)action.Params[0];
@@ -527,6 +570,21 @@ namespace Client.MirObjects
                         {
                             case Monster.DarkDevil:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.DarkDevil], 336, 6, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.ShamanZombie:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.ShamanZombie], 224, 8, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.RoninGhoul:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.RoninGhoul], 224, 10, Frame.Count * FrameInterval, this));
+                                break;
+                            case Monster.BoneCaptain:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.BoneCaptain], 224 + (int)Direction * 10, 10, Frame.Count * FrameInterval, this));
+                                break;
+                            case Monster.RightGuard:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.RightGuard], 296, 5, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.LeftGuard:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.LeftGuard], 296 + (int)Direction * 5, 5, 5 * Frame.Interval, this));
                                 break;
                         }
                         PlayDieSound();
@@ -690,9 +748,47 @@ namespace Client.MirObjects
                                    case Monster.EvilCentipede:
                                        Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.EvilCentipede], 42, 10, 600, this));
                                        break;
+                                   case Monster.ToxicGhoul:
+                                       Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.ToxicGhoul], 224 + (int)Direction * 6, 6, 600, this));
+                                       break;
                                }
 
                            }
+                        }
+                        else
+                        {
+                            switch (FrameIndex)
+                            {
+                                case 3:
+                                    {
+                                        PlaySwingSound();
+                                        switch (BaseImage)
+                                        {
+                                            case Monster.RightGuard:
+                                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.RightGuard], 272 + (int)Direction * 3, 3, 3 * Frame.Interval, this));
+                                                break;
+                                            case Monster.LeftGuard:
+                                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.LeftGuard], 272 + (int)Direction * 3, 3, 3 * Frame.Interval, this));
+                                                break;
+                                        }
+                                        break;
+                                    }
+                            }
+                            NextMotion += FrameInterval;
+                        }
+                    }
+                    break;
+                case MirAction.Attack2:
+                    if (CMain.Time >= NextMotion)
+                    {
+                        GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame();
+
+                        if (UpdateFrame() >= Frame.Count)
+                        {
+                            FrameIndex = Frame.Count - 1;
+                            SetAction();
                         }
                         else
                         {
@@ -717,31 +813,71 @@ namespace Client.MirObjects
                         {
                             if (FrameIndex == 2) PlaySwingSound();
 
-                            if (FrameIndex == 4)
+                            switch (FrameIndex)
                             {
-                                switch (BaseImage)
-                                {
-                                    case Monster.AxeSkeleton:
-                                        if (MapControl.GetObject(TargetID) != null)
-                                            CreateProjectile(224, Libraries.Monsters[(ushort)Monster.AxeSkeleton], false, 3, 30, 0);
-                                        break;
-                                    case Monster.Dark:
-                                        if (MapControl.GetObject(TargetID) != null)
-                                            CreateProjectile(224, Libraries.Monsters[(ushort)Monster.Dark], false, 3, 30, 0);
-                                        break;
-                                    case Monster.ZumaArcher:
-                                        if (MapControl.GetObject(TargetID) != null)
-                                            CreateProjectile(224, Libraries.Monsters[(ushort)Monster.ZumaArcher], false, 1, 30, 0);
-                                        break;
-                                    case Monster.RedThunderZuma:
-                                        MapObject ob = MapControl.GetObject(TargetID);
-                                        if (ob != null)
+                                case 2:
+                                    {
+                                        switch (BaseImage)
                                         {
-                                            ob.Effects.Add(new Effect(Libraries.Dragon, 400 + CMain.Random.Next(3) * 10, 5, 300, ob));
-                                            SoundManager.PlaySound(BaseSound + 6);
+                                            case Monster.LeftGuard:
+                                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.LeftGuard], 336 + (int)Direction * 3, 3, 3 * Frame.Interval, this));
+                                                break;
                                         }
                                         break;
-                                }
+                                    }
+                                case 4:
+                                    {
+                                        MapObject ob = null;
+                                        switch (BaseImage)
+                                        {
+                                            case Monster.AxeSkeleton:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(224, Libraries.Monsters[(ushort)Monster.AxeSkeleton], false, 3, 30, 0);
+                                                break;
+                                            case Monster.Dark:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(224, Libraries.Monsters[(ushort)Monster.Dark], false, 3, 30, 0);
+                                                break;
+                                            case Monster.ZumaArcher:
+                                            case Monster.BoneArcher:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(224, Libraries.Monsters[(ushort)Monster.ZumaArcher], false, 1, 30, 0);
+                                                break;
+                                            case Monster.RedThunderZuma:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Dragon, 400 + CMain.Random.Next(3) * 10, 5, 300, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                            case Monster.BoneLord:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(784, Libraries.Monsters[(ushort)Monster.BoneLord], true, 6, 30, 0, false);
+                                                break;
+                                            case Monster.RightGuard:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Magic2, 10, 5, 300, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                            case Monster.LeftGuard:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(10, Libraries.Magic, true, 6, 30, 4);
+                                                break;
+                                            case Monster.MinotaurKing:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.MinotaurKing], 320, 20, 1000, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                            }
+                                        break;
+                                    }
                             }
                             NextMotion += FrameInterval;
                         }
@@ -782,8 +918,41 @@ namespace Client.MirObjects
                         }
                         else
                         {
-                            if (FrameIndex == 3) 
+                            if (FrameIndex == 3)
+                            {
                                 PlayDeadSound();
+
+                                switch (BaseImage)
+                                {
+                                    case Monster.BoneSpearman:
+                                    case Monster.BoneBlademan:
+                                    case Monster.BoneArcher:
+                                        Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.BoneSpearman], 224, 8, Frame.Count * FrameInterval, this));
+                                        break;
+                                }
+                            }
+                            NextMotion += FrameInterval;
+                        }
+                    }
+                    break;
+                case MirAction.Revive:
+                    if (CMain.Time >= NextMotion)
+                    {
+                        GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame();
+
+                        if (UpdateFrame() >= Frame.Count)
+                        {
+                            FrameIndex = Frame.Count - 1;
+                            ActionFeed.Clear();
+                            ActionFeed.Add(new QueuedAction { Action = MirAction.Standing, Direction = Direction, Location = CurrentLocation });
+                            SetAction();
+                        }
+                        else
+                        {
+                            if (FrameIndex == 3)
+                                PlayReviveSound();
                             NextMotion += FrameInterval;
                         }
                     }
@@ -795,7 +964,7 @@ namespace Client.MirObjects
 
             if (CurrentAction == MirAction.Standing && NextAction != null)
                 SetAction();
-            else if (CurrentAction == MirAction.Dead && NextAction != null && NextAction.Action == MirAction.Skeleton)
+            else if (CurrentAction == MirAction.Dead && NextAction != null && (NextAction.Action == MirAction.Skeleton || NextAction.Action == MirAction.Revive))
                 SetAction();
         }
         public int UpdateFrame()
@@ -808,7 +977,7 @@ namespace Client.MirObjects
         }
 
 
-        private Missile CreateProjectile(int baseIndex, MLibrary library, bool blend, int count, int interval, int skip)
+        private Missile CreateProjectile(int baseIndex, MLibrary library, bool blend, int count, int interval, int skip, bool direction16 = true)
         {
             MapObject ob = MapControl.GetObject(TargetID);
 
@@ -817,7 +986,7 @@ namespace Client.MirObjects
             int duration = Functions.MaxDistance(CurrentLocation, TargetPoint) * 50;
 
 
-            Missile missile = new Missile(library, baseIndex, duration / interval, duration, this, TargetPoint)
+            Missile missile = new Missile(library, baseIndex, duration / interval, duration, this, TargetPoint, direction16)
             {
                 Target = ob,
                 Interval = interval,
@@ -942,6 +1111,10 @@ namespace Client.MirObjects
         {
             SoundManager.PlaySound(BaseSound + 1);
         }
+        public void PlaySecondAttackSound()
+        {
+            SoundManager.PlaySound(BaseSound + 6);
+        }
         public void PlaySwingSound()
         {
             SoundManager.PlaySound(BaseSound + 4);
@@ -959,15 +1132,30 @@ namespace Client.MirObjects
                     break;
             }
         }
+        public void PlayReviveSound()
+        {
+            switch (BaseImage)
+            {
+                case Monster.Zombie1:
+                case Monster.Zombie2:
+                case Monster.Zombie3:
+                    SoundManager.PlaySound(SoundList.ZombieRevive);
+                    break;
+            }
+        }
         public void PlayRangeSound()
         {
             switch (BaseImage)
             {
                 case Monster.CrystalSpider:
+                case Monster.MinotaurKing:
                     break;
                 case Monster.RedThunderZuma:
                 case Monster.KingScorpion:
                 case Monster.DarkDevil:
+                case Monster.Khazard:
+                case Monster.BoneLord:
+                case Monster.LeftGuard:
                     SoundManager.PlaySound(BaseSound + 5);
                     break;
                 default :
@@ -1093,6 +1281,33 @@ namespace Client.MirObjects
                     {
                         case MirAction.Attack1:
                             Libraries.Monsters[(ushort)Monster.DarkDevil].DrawBlend(342 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.BoneLord:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(400 + FrameIndex + (int)Direction * 4, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Walking:
+                        case MirAction.Pushed:
+                            Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(432 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Attack1:
+                            Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(480 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Attack2:
+                            Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(528 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.AttackRange:
+                            Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(576 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Struck:
+                            Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(624 + FrameIndex + (int)Direction * 2, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Die:
+                            Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(640 + FrameIndex + (int)Direction * 20, DrawLocation, Color.White, true);
                             break;
                     }
                     break;
