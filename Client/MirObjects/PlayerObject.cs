@@ -361,6 +361,7 @@ namespace Client.MirObjects
                     case MirAction.DashR:
                         int i = CurrentAction == MirAction.Running ? 2 : 1;
                         temp = Functions.PointMove(CurrentLocation, Direction, CurrentAction == MirAction.Pushed ? 0 : -i);
+                     
                         break;
                     default:
                         temp = CurrentLocation;

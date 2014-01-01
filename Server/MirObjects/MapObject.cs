@@ -356,12 +356,12 @@ namespace Server.MirObjects
         }
 
 
-        public virtual bool Teleport(Map temp, Point location, bool effects = true)
+        public virtual bool Teleport(Map temp, Point location, bool effects = true, byte effectnumber = 0)
         {
             if (temp == null || !temp.ValidPoint(location)) return false;
 
             CurrentMap.RemoveObject(this);
-            if (effects) Broadcast(new S.ObjectTeleportOut {ObjectID = ObjectID});
+            if (effects) Broadcast(new S.ObjectTeleportOut {ObjectID = ObjectID, Type = effectnumber});
             else Broadcast(new S.ObjectRemove {ObjectID = ObjectID});
 
             CurrentMap = temp;
@@ -371,13 +371,13 @@ namespace Server.MirObjects
 
             Broadcast(GetInfo());
 
-            if (effects) Broadcast(new S.ObjectTeleportIn { ObjectID = ObjectID });
+            if (effects) Broadcast(new S.ObjectTeleportIn { ObjectID = ObjectID, Type = effectnumber });
             
             BroadcastHealthChange();
             
             return true;
         }
-        public bool TeleportRandom(int attempts, int distance)
+        public virtual bool TeleportRandom(int attempts, int distance)
         {
             for (int i = 0; i < attempts; i++)
             {

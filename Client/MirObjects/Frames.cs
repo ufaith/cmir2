@@ -292,6 +292,31 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Die, new Frame(240, 20, 0, 150));
             frame.Frames.Add(MirAction.Dead, new Frame(259, 1, 19, 1000));
             frame.Frames.Add(MirAction.Revive, new Frame(240, 20, 0, 150) { Reverse = true });
+
+            //22
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
+            frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(80, 6, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(128, 2, 0, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(144, 10, 0, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(153, 1, 9, 1000));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(224, 6, 0, 100));
+            frame.Frames.Add(MirAction.Revive, new Frame(144, 10, 0, 100) { Reverse = true });
+            frame.Frames.Add(MirAction.SitDown, new Frame(272, 4, 0, 500));
+
+            //23
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
+            frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(80, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack2, new Frame(224, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack3, new Frame(224, 6, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(128, 2, 0, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(144, 10, 0, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(153, 1, 9, 1000));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(224, 6, 0, 100));
+            frame.Frames.Add(MirAction.Revive, new Frame(144, 10, 0, 100) { Reverse = true });
         }
     }
 

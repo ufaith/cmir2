@@ -29,14 +29,6 @@
         private void InitializeComponent()
         {
             this.CreateButton = new System.Windows.Forms.Button();
-            this.AccountInfoListView = new Server.ListViewNF();
-            this.indexHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.accountIDHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.passwordHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.userNameHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.bannedHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.banReasonHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.expiryDateHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label1 = new System.Windows.Forms.Label();
             this.FilterTextBox = new System.Windows.Forms.TextBox();
             this.RefreshButton = new System.Windows.Forms.Button();
@@ -71,6 +63,16 @@
             this.label3 = new System.Windows.Forms.Label();
             this.AccountIDTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.AdminCheckBox = new System.Windows.Forms.CheckBox();
+            this.AccountInfoListView = new Server.ListViewNF();
+            this.indexHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.accountIDHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.passwordHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.userNameHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.bannedHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.banReasonHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.expiryDateHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.adminHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.AccountInfoPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -83,65 +85,6 @@
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
-            // 
-            // AccountInfoListView
-            // 
-            this.AccountInfoListView.AllowColumnReorder = true;
-            this.AccountInfoListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.AccountInfoListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.indexHeader,
-            this.accountIDHeader,
-            this.passwordHeader,
-            this.userNameHeader,
-            this.bannedHeader,
-            this.banReasonHeader,
-            this.expiryDateHeader});
-            this.AccountInfoListView.FullRowSelect = true;
-            this.AccountInfoListView.GridLines = true;
-            this.AccountInfoListView.HideSelection = false;
-            this.AccountInfoListView.Location = new System.Drawing.Point(10, 65);
-            this.AccountInfoListView.Name = "AccountInfoListView";
-            this.AccountInfoListView.Size = new System.Drawing.Size(618, 169);
-            this.AccountInfoListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.AccountInfoListView.TabIndex = 8;
-            this.AccountInfoListView.UseCompatibleStateImageBehavior = false;
-            this.AccountInfoListView.View = System.Windows.Forms.View.Details;
-            this.AccountInfoListView.SelectedIndexChanged += new System.EventHandler(this.AccountInfoListView_SelectedIndexChanged);
-            // 
-            // indexHeader
-            // 
-            this.indexHeader.Text = "Index";
-            // 
-            // accountIDHeader
-            // 
-            this.accountIDHeader.Text = "Account ID";
-            this.accountIDHeader.Width = 92;
-            // 
-            // passwordHeader
-            // 
-            this.passwordHeader.Text = "Password";
-            // 
-            // userNameHeader
-            // 
-            this.userNameHeader.Text = "User Name";
-            this.userNameHeader.Width = 75;
-            // 
-            // bannedHeader
-            // 
-            this.bannedHeader.Text = "Banned";
-            this.bannedHeader.Width = 54;
-            // 
-            // banReasonHeader
-            // 
-            this.banReasonHeader.Text = "Ban Reason";
-            this.banReasonHeader.Width = 74;
-            // 
-            // expiryDateHeader
-            // 
-            this.expiryDateHeader.Text = "Expiry Date";
-            this.expiryDateHeader.Width = 81;
             // 
             // label1
             // 
@@ -173,6 +116,7 @@
             // 
             this.AccountInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.AccountInfoPanel.Controls.Add(this.AdminCheckBox);
             this.AccountInfoPanel.Controls.Add(this.PermBanButton);
             this.AccountInfoPanel.Controls.Add(this.WeekBanButton);
             this.AccountInfoPanel.Controls.Add(this.DayBanButton);
@@ -470,6 +414,82 @@
             this.label2.TabIndex = 2;
             this.label2.Text = "Account ID:";
             // 
+            // AdminCheckBox
+            // 
+            this.AdminCheckBox.AutoSize = true;
+            this.AdminCheckBox.Location = new System.Drawing.Point(207, 17);
+            this.AdminCheckBox.Name = "AdminCheckBox";
+            this.AdminCheckBox.Size = new System.Drawing.Size(86, 17);
+            this.AdminCheckBox.TabIndex = 32;
+            this.AdminCheckBox.Text = "Administrator";
+            this.AdminCheckBox.UseVisualStyleBackColor = true;
+            this.AdminCheckBox.CheckedChanged += new System.EventHandler(this.AdminCheckBox_CheckedChanged);
+            // 
+            // AccountInfoListView
+            // 
+            this.AccountInfoListView.AllowColumnReorder = true;
+            this.AccountInfoListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.AccountInfoListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.indexHeader,
+            this.accountIDHeader,
+            this.passwordHeader,
+            this.userNameHeader,
+            this.adminHeader,
+            this.bannedHeader,
+            this.banReasonHeader,
+            this.expiryDateHeader});
+            this.AccountInfoListView.FullRowSelect = true;
+            this.AccountInfoListView.GridLines = true;
+            this.AccountInfoListView.HideSelection = false;
+            this.AccountInfoListView.Location = new System.Drawing.Point(10, 65);
+            this.AccountInfoListView.Name = "AccountInfoListView";
+            this.AccountInfoListView.Size = new System.Drawing.Size(618, 169);
+            this.AccountInfoListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
+            this.AccountInfoListView.TabIndex = 8;
+            this.AccountInfoListView.UseCompatibleStateImageBehavior = false;
+            this.AccountInfoListView.View = System.Windows.Forms.View.Details;
+            this.AccountInfoListView.SelectedIndexChanged += new System.EventHandler(this.AccountInfoListView_SelectedIndexChanged);
+            // 
+            // indexHeader
+            // 
+            this.indexHeader.Text = "Index";
+            // 
+            // accountIDHeader
+            // 
+            this.accountIDHeader.Text = "Account ID";
+            this.accountIDHeader.Width = 92;
+            // 
+            // passwordHeader
+            // 
+            this.passwordHeader.Text = "Password";
+            // 
+            // userNameHeader
+            // 
+            this.userNameHeader.Text = "User Name";
+            this.userNameHeader.Width = 75;
+            // 
+            // bannedHeader
+            // 
+            this.bannedHeader.Text = "Banned";
+            this.bannedHeader.Width = 54;
+            // 
+            // banReasonHeader
+            // 
+            this.banReasonHeader.Text = "Ban Reason";
+            this.banReasonHeader.Width = 74;
+            // 
+            // expiryDateHeader
+            // 
+            this.expiryDateHeader.Text = "Expiry Date";
+            this.expiryDateHeader.Width = 81;
+            // 
+            // adminHeader
+            // 
+            this.adminHeader.Text = "Administrator";
+            this.adminHeader.Width = 73;
+            // 
             // AccountInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -536,5 +556,7 @@
         private System.Windows.Forms.Button PermBanButton;
         private System.Windows.Forms.Button WeekBanButton;
         private System.Windows.Forms.Button DayBanButton;
+        private System.Windows.Forms.CheckBox AdminCheckBox;
+        private System.Windows.Forms.ColumnHeader adminHeader;
     }
 }

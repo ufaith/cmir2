@@ -39,7 +39,7 @@ namespace Server.MirObjects.Monsters
 
             Range = (x > 1 || y > 1) ? true : false;
 
-            return (!Range || (Range && CanPull)) ? true : false;
+            return (!Range || CanPull) ? true : false;
         }
 
         protected override void Attack()
