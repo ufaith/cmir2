@@ -813,7 +813,7 @@ namespace Client.MirScenes
                     MarketSuccess((S.MarketSuccess)p);
                     break;
                 case 117:
-                    ObjectSecondAttack((S.ObjectSecondAttack)p);
+                    ObjectSitDown((S.ObjectSitDown)p);
                     break;
                 default:
                     base.ProcessPacket(p);
@@ -1427,27 +1427,37 @@ namespace Client.MirScenes
         private void ObjectAttack(S.ObjectAttack p)
         {
             if (p.ObjectID == User.ObjectID) return;
+            QueuedAction action = null;
 
             for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                QueuedAction action = new QueuedAction { Action = MirAction.Attack1, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
-                action.Params.Add(p.Spell);
-                action.Params.Add(p.Level);
-                ob.ActionFeed.Add(action);
-                return;
-            }
-        }
-        private void ObjectSecondAttack(S.ObjectSecondAttack p)
-        {
-            if (p.ObjectID == User.ObjectID) return;
-
-            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
-            {
-                MapObject ob = MapControl.Objects[i];
-                if (ob.ObjectID != p.ObjectID) continue;
-                QueuedAction action = new QueuedAction { Action = MirAction.Attack2, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                if (ob.Race == ObjectType.Player)
+                {
+                    action = new QueuedAction { Action = MirAction.Attack1, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                }
+                else
+                {
+                    switch(p.Type)
+                    {
+                        case 1: 
+                            {
+                                action = new QueuedAction { Action = MirAction.Attack2, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                                break;
+                            }
+                        case 2:
+                            {
+                                action = new QueuedAction { Action = MirAction.Attack3, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                                break;
+                            }
+                        default:
+                            {
+                                action = new QueuedAction { Action = MirAction.Attack1, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                                break;
+                            }
+                    }
+                }
                 action.Params.Add(p.Spell);
                 action.Params.Add(p.Level);
                 ob.ActionFeed.Add(action);
@@ -1733,10 +1743,26 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                Effect effect = new Effect(Libraries.Magic, 250, 10, 500, ob);
+                Effect effect = null;
+                switch (p.Type)
+                {
+                    case 1:
+                        {
+                            effect = new Effect(Libraries.Magic2, 1300, 10, 500, ob);
+                            break;
+                        }
+                    default:
+                        {
+                            effect = new Effect(Libraries.Magic, 250, 10, 500, ob);
+                            break;
+                        }
+                }
 
-                effect.Complete += (o, e) => ob.Remove();
-                ob.Effects.Add(effect);
+                if (effect != null)
+                {
+                    effect.Complete += (o, e) => ob.Remove();
+                    ob.Effects.Add(effect);
+                }
 
                 SoundManager.PlaySound(SoundList.Teleport);
                 return;
@@ -1748,7 +1774,19 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                ob.Effects.Add(new Effect(Libraries.Magic, 260, 10, 500, ob));
+                switch (p.Type)
+                {
+                    case 1:
+                        {
+                            ob.Effects.Add(new Effect(Libraries.Magic2, 1310, 10, 500, ob));
+                            break;
+                        }
+                    default:
+                        {
+                            ob.Effects.Add(new Effect(Libraries.Magic, 260, 10, 500, ob));
+                            break;
+                        }
+                }
                 SoundManager.PlaySound(SoundList.Teleport);
                 return;
             }
@@ -2101,7 +2139,27 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                QueuedAction action = new QueuedAction { Action = MirAction.AttackRange, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                QueuedAction action = null;
+                if (ob.Race == ObjectType.Player)
+                {
+                    action = new QueuedAction { Action = MirAction.AttackRange, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                }
+                else
+                {
+                    switch (p.Type)
+                    {
+                        case 1:
+                            {
+                                action = new QueuedAction { Action = MirAction.AttackRange, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                                break;
+                            }
+                        default:
+                            {
+                                action = new QueuedAction { Action = MirAction.AttackRange, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                                break;
+                            }
+                    }
+                }
                 action.Params.Add(p.TargetID);
                 ob.ActionFeed.Add(action);
                 return;
@@ -2325,6 +2383,20 @@ namespace Client.MirScenes
         {
             TrustMerchantDialog.MarketTime = 0;
             MirMessageBox.Show(p.Message);
+        }
+        private void ObjectSitDown(S.ObjectSitDown p)
+        {
+            if (p.ObjectID == User.ObjectID) return;
+
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID) continue;
+                if (ob.Race != ObjectType.Monster) continue;
+                ob.SitDown = p.Sitting;
+                ob.ActionFeed.Add(new QueuedAction { Action = MirAction.SitDown, Direction = p.Direction, Location = p.Location });
+                return;
+            }
         }
 
 

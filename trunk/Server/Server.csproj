@@ -108,6 +108,9 @@
     <Compile Include="MirObjects\Monsters\CaveMaggot.cs" />
     <Compile Include="MirObjects\Monsters\BoneSpearman.cs" />
     <Compile Include="MirObjects\Monsters\BoneLord.cs" />
+    <Compile Include="MirObjects\Monsters\Yimoogi.cs" />
+    <Compile Include="MirObjects\Monsters\SandWorm.cs" />
+    <Compile Include="MirObjects\Monsters\FrostTiger.cs" />
     <Compile Include="MirObjects\Monsters\MinotaurKing.cs" />
     <Compile Include="MirObjects\Monsters\LeftGuard.cs" />
     <Compile Include="MirObjects\Monsters\RightGuard.cs" />

@@ -1389,6 +1389,7 @@ namespace ServerPackets
         public MirDirection Direction;
         public Spell Spell;
         public byte Level;
+        public byte Type;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -1397,6 +1398,7 @@ namespace ServerPackets
             Direction = (MirDirection)reader.ReadByte();
             Spell = (Spell)reader.ReadByte();
             Level = reader.ReadByte();
+            Type = reader.ReadByte();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -1407,38 +1409,7 @@ namespace ServerPackets
             writer.Write((byte)Direction);
             writer.Write((byte)Spell);
             writer.Write(Level);
-        }
-    }
-    public sealed class ObjectSecondAttack : Packet
-    {
-        public override short Index
-        {
-            get { return 117; }
-        }
-
-        public uint ObjectID;
-        public Point Location;
-        public MirDirection Direction;
-        public Spell Spell;
-        public byte Level;
-
-        protected override void ReadPacket(BinaryReader reader)
-        {
-            ObjectID = reader.ReadUInt32();
-            Location = new Point(reader.ReadInt32(), reader.ReadInt32());
-            Direction = (MirDirection)reader.ReadByte();
-            Spell = (Spell)reader.ReadByte();
-            Level = reader.ReadByte();
-        }
-
-        protected override void WritePacket(BinaryWriter writer)
-        {
-            writer.Write(ObjectID);
-            writer.Write(Location.X);
-            writer.Write(Location.Y);
-            writer.Write((byte)Direction);
-            writer.Write((byte)Spell);
-            writer.Write(Level);
+            writer.Write(Type);
         }
     }
     public sealed class Struck : Packet
@@ -1921,14 +1892,17 @@ namespace ServerPackets
         public override short Index { get { return 71; } }
 
         public uint ObjectID;
+        public byte Type;
 
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
+            Type = reader.ReadByte();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(ObjectID);
+            writer.Write(Type);
         }
     }
     public sealed class ObjectTeleportIn : Packet
@@ -1936,14 +1910,17 @@ namespace ServerPackets
         public override short Index { get { return 72; } }
 
         public uint ObjectID;
+        public byte Type;
 
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
+            Type = reader.ReadByte();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(ObjectID);
+            writer.Write(Type);
         }
     }
     public sealed class TeleportIn : Packet
@@ -2482,6 +2459,7 @@ namespace ServerPackets
         public Point Location;
         public MirDirection Direction;
         public uint TargetID;
+        public byte Type;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -2489,6 +2467,7 @@ namespace ServerPackets
             Location = new Point(reader.ReadInt32(), reader.ReadInt32());
             Direction = (MirDirection)reader.ReadByte();
             TargetID = reader.ReadUInt32();
+            Type = reader.ReadByte();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -2498,6 +2477,7 @@ namespace ServerPackets
             writer.Write(Location.Y);
             writer.Write((byte)Direction);
             writer.Write(TargetID);
+            writer.Write(Type);
         }
     }
     public sealed class AddBuff : Packet
@@ -2820,6 +2800,30 @@ namespace ServerPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(Message);
+        }
+    }
+    public sealed class ObjectSitDown : Packet
+    {
+        public override short Index { get { return 117; } }
+        public uint ObjectID;
+        public Point Location;
+        public MirDirection Direction;
+        public bool Sitting;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Location = new Point(reader.ReadInt32(), reader.ReadInt32());
+            Direction = (MirDirection)reader.ReadByte();
+            Sitting = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Location.X);
+            writer.Write(Location.Y);
+            writer.Write((byte)Direction);
+            writer.Write(Sitting);
         }
     }
 }

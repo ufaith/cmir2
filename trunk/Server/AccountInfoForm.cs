@@ -112,6 +112,7 @@ namespace Server
             BanReasonTextBox.Text = info.BanReason;
             BannedCheckBox.CheckState = info.Banned ? CheckState.Checked : CheckState.Unchecked;
             ExpiryDateTextBox.Text = info.ExpiryDate.ToString();
+            AdminCheckBox.CheckState = info.AdminAccount ? CheckState.Checked : CheckState.Unchecked;
 
             for (int i = 0; i < _selectedAccountInfos.Count; i++)
             {
@@ -136,6 +137,7 @@ namespace Server
                 if (BanReasonTextBox.Text != info.BanReason) BanReasonTextBox.Text = string.Empty;
                 if (BannedCheckBox.Checked != info.Banned) BannedCheckBox.CheckState = CheckState.Indeterminate;
                 if (ExpiryDateTextBox.Text != info.ExpiryDate.ToString()) ExpiryDateTextBox.Text = string.Empty;
+                if (AdminCheckBox.Checked != info.AdminAccount) AdminCheckBox.CheckState = CheckState.Indeterminate;
             }
         }
 
@@ -367,6 +369,20 @@ namespace Server
             if (SMain.Envir.Running) return;
 
             SMain.Envir.SaveAccounts();
+        }
+
+        private void AdminCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            AccountInfoListView.BeginUpdate();
+            for (int i = 0; i < _selectedAccountInfos.Count; i++)
+            {
+                _selectedAccountInfos[i].AdminAccount = AdminCheckBox.CheckState == CheckState.Checked ? true : false;
+                _selectedAccountInfos[i].Update();
+            }
+            AutoResize();
+            AccountInfoListView.EndUpdate();
         }
     }
 }

@@ -188,7 +188,7 @@ namespace Server.MirObjects
             Info = info;
             Account = Connection.Account;
 
-            if (Level == 255)
+            if (Level == 255 || Account.AdminAccount)
             {
                 IsGM = true;
                 SMain.Enqueue(string.Format("{0} is now a GM", Name));
@@ -3599,7 +3599,7 @@ namespace Server.MirObjects
 
             return false;
         }
-        public override bool Teleport(Map temp, Point location, bool effects = true)
+        public override bool Teleport(Map temp, Point location, bool effects = true, byte effectnumber = 0)
         {
             if (!base.Teleport(temp, location, effects)) return false;
             
@@ -3689,7 +3689,7 @@ namespace Server.MirObjects
         public override bool IsAttackTarget(PlayerObject attacker)
         {
             if (attacker == null || attacker.Node == null) return false;
-            if (Dead || InSafeZone || attacker.InSafeZone || attacker == this) return false;
+            if (Dead || InSafeZone || attacker.InSafeZone || attacker == this || GMGameMaster) return false;
 
             switch (attacker.AMode)
             {
@@ -3710,7 +3710,7 @@ namespace Server.MirObjects
         public override bool IsAttackTarget(MonsterObject attacker)
         {
             if (attacker == null || attacker.Node == null) return false;
-            if (Dead || attacker.Master == this) return false;
+            if (Dead || attacker.Master == this || GMGameMaster) return false;
             if (attacker.Info.AI == 6) return PKPoints >= 200;
             if (attacker.Master == null) return true;
             if (InSafeZone || attacker.Master.InSafeZone) return false;

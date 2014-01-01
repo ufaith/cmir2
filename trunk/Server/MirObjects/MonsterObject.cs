@@ -81,6 +81,12 @@ namespace Server.MirObjects
                     return new LeftGuard(info);
                 case 33:
                     return new MinotaurKing(info);
+                case 34:
+                    return new FrostTiger(info);
+                case 35:
+                    return new SandWorm(info);
+                case 36:
+                    return new Yimoogi(info);
                 default:
                     return new MonsterObject(info);
             }
@@ -924,9 +930,14 @@ namespace Server.MirObjects
                             switch (ob.Race)
                             {
                                 case ObjectType.Monster:
-                                case ObjectType.Player:
                                     if (!ob.IsAttackTarget(this)) continue;
                                     if (ob.Hidden && (!CoolEye || Level < ob.Level)) continue;
+                                    Target = ob;
+                                    return;
+                                case ObjectType.Player:
+                                    PlayerObject playerob = (PlayerObject)ob;
+                                    if (!ob.IsAttackTarget(this)) continue;
+                                    if (playerob.GMGameMaster || ob.Hidden && (!CoolEye || Level < ob.Level)) continue;
                                     Target = ob;
                                     return;
                                 default:

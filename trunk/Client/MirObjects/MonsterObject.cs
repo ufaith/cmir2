@@ -79,6 +79,8 @@ namespace Client.MirObjects
                     break;
                 case Monster.Hen: 
                 case Monster.Deer: 
+                case Monster.Sheep:
+                case Monster.Wolf:
                     Frames = FrameSet.Monsters[1];
                     break;
                 case Monster.Scarecrow:
@@ -146,6 +148,17 @@ namespace Client.MirObjects
                 case Monster.ElectricMinotaur:
                 case Monster.WindMinotaur:
                 case Monster.FireMinotaur:
+                case Monster.ShellNipper:
+                case Monster.Keratoid:
+                case Monster.GiantKeratoid:
+                case Monster.SkyStinger:
+                case Monster.SandWorm:
+                case Monster.VisceralWorm:
+                case Monster.RedSnake:
+                case Monster.TigerSnake:
+                case Monster.WhiteSerpent:
+                case Monster.BlueViper:
+                case Monster.YellowViper:
                     Frames = FrameSet.Monsters[2];
                     break;
                 case Monster.CannibalPlant:
@@ -227,6 +240,13 @@ namespace Client.MirObjects
                 case Monster.BoneLord:
                     Frames = FrameSet.Monsters[21];
                     break;
+                case Monster.FrostTiger:
+                    SitDown = info.Extra;
+                    Frames = FrameSet.Monsters[22];
+                    break;
+                case Monster.Yimoogi:
+                    Frames = FrameSet.Monsters[23];
+                    break;
                 default:
                     Frames = FrameSet.Monsters[0];
                     break;
@@ -256,7 +276,8 @@ namespace Client.MirObjects
             if (Frame == null)
                 DrawFrame = 0;
             else
-                DrawFrame = Frame.Start + (Frame.OffSet * (byte)Direction) + FrameIndex;
+                DrawFrame = (BaseImage == Monster.Wolf && CurrentAction == MirAction.Skeleton) ? 
+                    Frame.Start + FrameIndex : Frame.Start + (Frame.OffSet * (byte)Direction) + FrameIndex;
 
 
             #region Moving OffSet
@@ -387,6 +408,7 @@ namespace Client.MirObjects
             if (ActionFeed.Count == 0)
             {
                 CurrentAction = Stoned ? MirAction.Stoned : MirAction.Standing;
+                CurrentAction = SitDown ? MirAction.SitDown : MirAction.Standing;
 
                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
 
@@ -526,6 +548,22 @@ namespace Client.MirObjects
                         break;
                     case MirAction.Attack2:
                         PlaySecondAttackSound();
+                        switch (BaseImage)
+                        {
+                            case Monster.Yimoogi:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.Yimoogi], 304, 6, Frame.Count * Frame.Interval, this));
+                                Effects.Add(new Effect(Libraries.Magic2, 1280, 10, Frame.Count * Frame.Interval, this));
+                                break;
+                        }
+                        break;
+                    case MirAction.Attack3:
+                        //PlaySecondAttackSound();
+                        switch (BaseImage)
+                        {
+                            case Monster.Yimoogi:
+                                Effects.Add(new Effect(Libraries.Magic2, 1330, 10, Frame.Count * Frame.Interval, this));
+                                break;
+                        }
                         break;
                     case MirAction.AttackRange:
                         PlayRangeSound();
@@ -585,6 +623,12 @@ namespace Client.MirObjects
                                 break;
                             case Monster.LeftGuard:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.LeftGuard], 296 + (int)Direction * 5, 5, 5 * Frame.Interval, this));
+                                break;
+                            case Monster.FrostTiger:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.FrostTiger], 304, 10, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.Yimoogi:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.Yimoogi], 352, 10, Frame.Count * Frame.Interval, this));
                                 break;
                         }
                         PlayDieSound();
@@ -778,6 +822,24 @@ namespace Client.MirObjects
                         }
                     }
                     break;
+                case MirAction.SitDown:
+                    if (CMain.Time >= NextMotion)
+                    {
+                        GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame();
+
+                        if (UpdateFrame() >= Frame.Count)
+                        {                     
+                            FrameIndex = Frame.Count - 1;
+                            SetAction();
+                        }
+                        else
+                        {
+                            NextMotion += FrameInterval;
+                        }
+                    }
+                    break;
                 case MirAction.Attack2:
                     if (CMain.Time >= NextMotion)
                     {
@@ -793,6 +855,24 @@ namespace Client.MirObjects
                         else
                         {
                             if (FrameIndex == 3) PlaySwingSound();
+                            NextMotion += FrameInterval;
+                        }
+                    }
+                    break;
+                case MirAction.Attack3:
+                    if (CMain.Time >= NextMotion)
+                    {
+                        GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame();
+
+                        if (UpdateFrame() >= Frame.Count)
+                        {
+                            FrameIndex = Frame.Count - 1;
+                            SetAction();
+                        }
+                        else
+                        {
                             NextMotion += FrameInterval;
                         }
                     }
@@ -872,6 +952,18 @@ namespace Client.MirObjects
                                                 if (ob != null)
                                                 {
                                                     ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.MinotaurKing], 320, 20, 1000, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                            case Monster.FrostTiger:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(410, Libraries.Magic2, true, 4, 30, 6);
+                                                break;
+                                            case Monster.Yimoogi:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Magic2, 1250, 15, 1000, ob));
                                                     SoundManager.PlaySound(BaseSound + 6);
                                                 }
                                                 break;
@@ -962,7 +1054,7 @@ namespace Client.MirObjects
 
             }
 
-            if (CurrentAction == MirAction.Standing && NextAction != null)
+            if ((CurrentAction == MirAction.Standing || CurrentAction == MirAction.SitDown) && NextAction != null)
                 SetAction();
             else if (CurrentAction == MirAction.Dead && NextAction != null && (NextAction.Action == MirAction.Skeleton || NextAction.Action == MirAction.Revive))
                 SetAction();

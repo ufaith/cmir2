@@ -111,6 +111,21 @@ public enum Monster : ushort
     RightGuard = 99,
     LeftGuard = 100,
     MinotaurKing = 101,
+    FrostTiger = 102,
+    Sheep = 103,
+    Wolf = 104,
+    ShellNipper = 105,
+    Keratoid = 106,
+    GiantKeratoid = 107,
+    SkyStinger = 108,
+    SandWorm = 109,
+    VisceralWorm = 110,
+    RedSnake = 111,
+    TigerSnake = 112,
+    Yimoogi = 113,
+    WhiteSerpent = 114,
+    BlueViper = 115,
+    YellowViper = 116,
 }
 
 public enum MirAction : byte
@@ -140,6 +155,7 @@ public enum MirAction : byte
     Stoned,
     Appear,
     Revive,
+    SitDown,
 }
 
 public enum CellAttribute : byte
@@ -1961,7 +1977,7 @@ public abstract class Packet
             case 116:
                 return new S.MarketSuccess();
             case 117:
-                return new S.ObjectSecondAttack();
+                return new S.ObjectSitDown();
             default:
                 throw new NotImplementedException();
         }
