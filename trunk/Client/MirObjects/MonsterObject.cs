@@ -408,7 +408,7 @@ namespace Client.MirObjects
             if (ActionFeed.Count == 0)
             {
                 CurrentAction = Stoned ? MirAction.Stoned : MirAction.Standing;
-                CurrentAction = SitDown ? MirAction.SitDown : MirAction.Standing;
+                if (CurrentAction == MirAction.Standing) CurrentAction = SitDown ? MirAction.SitDown : MirAction.Standing;
 
                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
 
