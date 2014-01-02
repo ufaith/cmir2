@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.ItemInfoPanel = new System.Windows.Forms.Panel();
+            this.EffectTextBox = new System.Windows.Forms.TextBox();
+            this.label34 = new System.Windows.Forms.Label();
             this.RGenderComboBox = new System.Windows.Forms.ComboBox();
             this.label33 = new System.Windows.Forms.Label();
             this.WWeightTextBox = new System.Windows.Forms.TextBox();
@@ -101,8 +103,7 @@
             this.ItemInfoListBox = new System.Windows.Forms.ListBox();
             this.PasteButton = new System.Windows.Forms.Button();
             this.CopyMButton = new System.Windows.Forms.Button();
-            this.label34 = new System.Windows.Forms.Label();
-            this.EffectTextBox = new System.Windows.Forms.TextBox();
+            this.ITypeFilterComboBox = new System.Windows.Forms.ComboBox();
             this.ItemInfoPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -185,6 +186,23 @@
             this.ItemInfoPanel.Name = "ItemInfoPanel";
             this.ItemInfoPanel.Size = new System.Drawing.Size(625, 303);
             this.ItemInfoPanel.TabIndex = 11;
+            // 
+            // EffectTextBox
+            // 
+            this.EffectTextBox.Location = new System.Drawing.Point(296, 136);
+            this.EffectTextBox.Name = "EffectTextBox";
+            this.EffectTextBox.Size = new System.Drawing.Size(30, 20);
+            this.EffectTextBox.TabIndex = 73;
+            this.EffectTextBox.TextChanged += new System.EventHandler(this.EffectTextBox_TextChanged);
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(252, 139);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(38, 13);
+            this.label34.TabIndex = 72;
+            this.label34.Text = "Effect:";
             // 
             // RGenderComboBox
             // 
@@ -796,7 +814,7 @@
             // 
             // RemoveButton
             // 
-            this.RemoveButton.Location = new System.Drawing.Point(93, 12);
+            this.RemoveButton.Location = new System.Drawing.Point(255, 12);
             this.RemoveButton.Name = "RemoveButton";
             this.RemoveButton.Size = new System.Drawing.Size(75, 23);
             this.RemoveButton.TabIndex = 9;
@@ -806,7 +824,7 @@
             // 
             // AddButton
             // 
-            this.AddButton.Location = new System.Drawing.Point(12, 12);
+            this.AddButton.Location = new System.Drawing.Point(174, 12);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(75, 23);
             this.AddButton.TabIndex = 8;
@@ -828,7 +846,7 @@
             // 
             // PasteButton
             // 
-            this.PasteButton.Location = new System.Drawing.Point(255, 12);
+            this.PasteButton.Location = new System.Drawing.Point(417, 12);
             this.PasteButton.Name = "PasteButton";
             this.PasteButton.Size = new System.Drawing.Size(75, 23);
             this.PasteButton.TabIndex = 24;
@@ -838,35 +856,29 @@
             // 
             // CopyMButton
             // 
-            this.CopyMButton.Location = new System.Drawing.Point(174, 12);
+            this.CopyMButton.Location = new System.Drawing.Point(336, 12);
             this.CopyMButton.Name = "CopyMButton";
             this.CopyMButton.Size = new System.Drawing.Size(75, 23);
             this.CopyMButton.TabIndex = 23;
             this.CopyMButton.Text = "Copy";
             this.CopyMButton.UseVisualStyleBackColor = true;
             // 
-            // label34
+            // ITypeFilterComboBox
             // 
-            this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(252, 139);
-            this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(38, 13);
-            this.label34.TabIndex = 72;
-            this.label34.Text = "Effect:";
-            // 
-            // EffectTextBox
-            // 
-            this.EffectTextBox.Location = new System.Drawing.Point(296, 136);
-            this.EffectTextBox.Name = "EffectTextBox";
-            this.EffectTextBox.Size = new System.Drawing.Size(30, 20);
-            this.EffectTextBox.TabIndex = 73;
-            this.EffectTextBox.TextChanged += new System.EventHandler(this.EffectTextBox_TextChanged);
+            this.ITypeFilterComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ITypeFilterComboBox.FormattingEnabled = true;
+            this.ITypeFilterComboBox.Location = new System.Drawing.Point(12, 12);
+            this.ITypeFilterComboBox.Name = "ITypeFilterComboBox";
+            this.ITypeFilterComboBox.Size = new System.Drawing.Size(121, 21);
+            this.ITypeFilterComboBox.TabIndex = 25;
+            this.ITypeFilterComboBox.SelectedIndexChanged += new System.EventHandler(this.ITypeFilterComboBox_SelectedIndexChanged);
             // 
             // ItemInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(811, 351);
+            this.Controls.Add(this.ITypeFilterComboBox);
             this.Controls.Add(this.PasteButton);
             this.Controls.Add(this.CopyMButton);
             this.Controls.Add(this.ItemInfoPanel);
@@ -959,6 +971,7 @@
         private System.Windows.Forms.Button CopyMButton;
         private System.Windows.Forms.TextBox EffectTextBox;
         private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.ComboBox ITypeFilterComboBox;
 
     }
 }

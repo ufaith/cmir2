@@ -819,10 +819,12 @@ namespace Server.MirEnvir
         {
             MapInfoList.Add(new MapInfo {Index = ++MapIndex});
         }
-        public void CreateItemInfo()
+
+        public void CreateItemInfo(ItemType type = ItemType.Nothing)
         {
-            ItemInfoList.Add(new ItemInfo { Index = ++ItemIndex });
+            ItemInfoList.Add(new ItemInfo { Index = ++ItemIndex, Type = type });
         }
+
         public void CreateMonsterInfo()
         {
             MonsterInfoList.Add(new MonsterInfo {Index = ++MonsterIndex});
