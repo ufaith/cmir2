@@ -18,6 +18,17 @@ namespace Server
         }
         private List<ItemInfo> _selectedItemInfos;
 
+        public class ComboBoxItem
+        {
+            public string Text { get; set; }
+            public object Value { get; set; }
+
+            public override string ToString()
+            {
+                return Text;
+            }
+        }
+
         public ItemInfoForm()
         {
             InitializeComponent();
@@ -27,17 +38,26 @@ namespace Server
             RClassComboBox.Items.AddRange(Enum.GetValues(typeof (RequiredClass)).Cast<object>().ToArray());
             RGenderComboBox.Items.AddRange(Enum.GetValues(typeof (RequiredGender)).Cast<object>().ToArray());
 
+            ITypeFilterComboBox.Items.AddRange(Enum.GetValues(typeof(ItemType)).Cast<object>().ToArray());
+            ITypeFilterComboBox.Items.Add(new ComboBoxItem { Text = "All" });
+            ITypeFilterComboBox.SelectedIndex = ITypeFilterComboBox.Items.Count - 1;
+
             UpdateInterface();
         }
 
-        public void UpdateInterface()
+        public void UpdateInterface(bool refreshList = false)
         {
-            if (ItemInfoListBox.Items.Count != Envir.ItemInfoList.Count)
+            if (refreshList)
             {
                 ItemInfoListBox.Items.Clear();
 
                 for (int i = 0; i < Envir.ItemInfoList.Count; i++)
-                    ItemInfoListBox.Items.Add(Envir.ItemInfoList[i]);
+                {
+                    if (ITypeFilterComboBox.SelectedItem == null ||
+                        ITypeFilterComboBox.SelectedIndex == ITypeFilterComboBox.Items.Count - 1 ||
+                        Envir.ItemInfoList[i].Type == (ItemType)ITypeFilterComboBox.SelectedItem)
+                        ItemInfoListBox.Items.Add(Envir.ItemInfoList[i]);
+                }
             }
 
             _selectedItemInfos = ItemInfoListBox.SelectedItems.Cast<ItemInfo>().ToList();
@@ -191,14 +211,29 @@ namespace Server
         }
         private void AddButton_Click(object sender, EventArgs e)
         {
-            Envir.CreateItemInfo();
+            if (ITypeFilterComboBox.SelectedIndex == ITypeFilterComboBox.Items.Count - 1)
+            {
+                Envir.CreateItemInfo();
+                ITypeFilterComboBox.SelectedIndex = ITypeFilterComboBox.Items.Count - 1;
+            }
+            else
+            {
+                Envir.CreateItemInfo((ItemType)ITypeFilterComboBox.SelectedItem);
+            }
 
-            UpdateInterface();
+            UpdateInterface(true);
         }
+
         private void ItemInfoListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateInterface();
         }
+
+        private void ITypeFilterComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateInterface(true);
+        }
+
         private void RemoveButton_Click(object sender, EventArgs e)
         {
             if (_selectedItemInfos.Count == 0) return;
@@ -209,7 +244,7 @@ namespace Server
 
             if (Envir.ItemInfoList.Count == 0) Envir.ItemIndex = 0;
 
-            UpdateInterface();
+            UpdateInterface(true);
         }
         private void ItemNameTextBox_TextChanged(object sender, EventArgs e)
         {
