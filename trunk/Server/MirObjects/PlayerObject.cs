@@ -813,6 +813,7 @@ namespace Server.MirObjects
             }
 
             if (Experience < MaxExperience) return;
+
             Experience -= MaxExperience;
 
             if (Level >= byte.MaxValue) return;

@@ -197,7 +197,7 @@ namespace Server
             long exp = 100;
             InIReader reader = new InIReader(@".\ExpList.ini");
 
-            for (int i = 1; i <= 50; i++)
+            for (int i = 1; i <= byte.MaxValue; i++)
             {
                 exp = reader.ReadInt64("Exp", "Level" + i, exp);
                 ExperienceList.Add(exp);
