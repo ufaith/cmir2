@@ -17,3 +17,12 @@ C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.CMain.reso
 C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.Properties.Resources.resources
 C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.csproj.GenerateResource.Cache
 C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Release\Client.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\Release\Client\Client.exe.config
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\Release\Client\Client.exe
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\Release\Client\Client.pdb
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Client\obj\Release\Client.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Client\obj\Release\Client.CMain.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Client\obj\Release\Client.Properties.Resources.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Client\obj\Release\Client.csproj.GenerateResource.Cache
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Client\obj\Release\Client.exe
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Client\obj\Release\Client.pdb

@@ -111,7 +111,7 @@ namespace Client.MirObjects
                 case Monster.BlackMaggot:
                 case Monster.Tongs:
                 case Monster.EvilTongs:
-                case Monster.ButBat:
+                case Monster.BugBat:
                 case Monster.WedgeMoth:
                 case Monster.RedBoar:
                 case Monster.BlackBoar:
@@ -156,9 +156,9 @@ namespace Client.MirObjects
                 case Monster.VisceralWorm:
                 case Monster.RedSnake:
                 case Monster.TigerSnake:
-                case Monster.WhiteSerpent:
-                case Monster.BlueViper:
-                case Monster.YellowViper:
+                case Monster.GiantWhiteSnake:
+                case Monster.BlueSnake:
+                case Monster.YellowSnake:
                     Frames = FrameSet.Monsters[2];
                     break;
                 case Monster.CannibalPlant:
@@ -226,9 +226,9 @@ namespace Client.MirObjects
                 case Monster.DigOutZombie:
                     Frames = FrameSet.Monsters[17];
                     break;
-                case Monster.Zombie1:
-                case Monster.Zombie2:
-                case Monster.Zombie3:
+                case Monster.ClZombie:
+                case Monster.NdZombie:
+                case Monster.CrawlerZombie:
                     Frames = FrameSet.Monsters[18];
                     break;
                 case Monster.ShamanZombie:
@@ -1228,9 +1228,9 @@ namespace Client.MirObjects
         {
             switch (BaseImage)
             {
-                case Monster.Zombie1:
-                case Monster.Zombie2:
-                case Monster.Zombie3:
+                case Monster.ClZombie:
+                case Monster.NdZombie:
+                case Monster.CrawlerZombie:
                     SoundManager.PlaySound(SoundList.ZombieRevive);
                     break;
             }

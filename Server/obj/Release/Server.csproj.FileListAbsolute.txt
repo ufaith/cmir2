@@ -37,3 +37,16 @@ C:\Users\ANDYHOME\Desktop\Mir2 C\trunk\Server\obj\Release\Server.MonsterInfoForm
 C:\Users\ANDYHOME\Desktop\Mir2 C\trunk\Server\obj\Release\Server.SMain.resources
 C:\Users\ANDYHOME\Desktop\Mir2 C\trunk\Server\obj\Release\Server.Properties.Resources.resources
 C:\Users\ANDYHOME\Desktop\Mir2 C\trunk\Server\obj\Release\Server.csproj.GenerateResource.Cache
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.exe
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.pdb
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\Release\Server\Server.exe
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\Release\Server\Server.pdb
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.AccountInfoForm.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.ConfigForm.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.ItemInfoForm.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.MapInfoForm.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.MonsterInfoForm.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.SMain.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.Properties.Resources.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.csproj.GenerateResource.Cache
