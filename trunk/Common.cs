@@ -126,6 +126,16 @@ public enum Monster : ushort
     GiantWhiteSnake = 114,
     BlueSnake = 115,
     YellowSnake = 116,
+    HolyDeva = 117,
+    AxeOma = 118,
+    SwordOma = 119,
+    CrossbowOma = 120,
+    WingedOma = 121,
+    FlailOma = 122,
+    OmaGuard = 123,
+    YinDevilNode = 124,
+    YangDevilNode = 125,
+    OmaKing = 126,
 }
 
 public enum MirAction : byte
@@ -444,7 +454,8 @@ public enum BuffType : byte
     Haste,
     SoulShield,
     BlessedArmour,
-    LightBody
+    LightBody,
+    UltimateEnhancer,
 }
 
 public enum DefenceType : byte

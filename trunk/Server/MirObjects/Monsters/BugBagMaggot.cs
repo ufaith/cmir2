@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Server.MirDatabase;
+﻿using Server.MirDatabase;
 using S = ServerPackets;
 
 namespace Server.MirObjects.Monsters
@@ -10,8 +6,6 @@ namespace Server.MirObjects.Monsters
     class BugBagMaggot : MonsterObject
     {
         protected override bool CanMove { get { return false; } }
-
-        public long SpawnTime;
 
         protected internal BugBagMaggot(MonsterInfo info) : base(info)
         {
