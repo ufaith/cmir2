@@ -172,6 +172,10 @@ namespace Server.MirObjects
         {
             throw new NotSupportedException();
         }
+        public override bool IsFriendlyTarget(MonsterObject ally)
+        {
+            throw new NotSupportedException();
+        }
         public override void ReceiveChat(string text, ChatType type)
         {
             throw new NotSupportedException();

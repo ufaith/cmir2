@@ -87,6 +87,19 @@ namespace Server.MirObjects
                     return new SandWorm(info);
                 case 36:
                     return new Yimoogi(info);
+                case 37:
+                    return new CrystalSpider(info);
+                case 38:
+                    return new HolyDeva(info);
+                case 39:
+                    return new RootSpider(info);
+                case 40:
+                    return new BombSpider(info);
+                case 41:
+                case 42:
+                    return new YinDevilNode(info);
+                case 43:
+                    return new OmaKing(info);
                 default:
                     return new MonsterObject(info);
             }
@@ -289,7 +302,7 @@ namespace Server.MirObjects
                 MinDC = (byte)Math.Min(byte.MaxValue, MinDC + PetLevel);
                 MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + PetLevel);
 
-            if (Info.Name == Settings.SkeletonName ||Info.Name == Settings.ShinsuName) 
+            if (Info.Name == Settings.SkeletonName ||Info.Name == Settings.ShinsuName ||Info.Name == Settings.AngelName) 
             {
                 MoveSpeed = (ushort)(MoveSpeed - MaxPetLevel * 130);
                 AttackSpeed = (ushort)( AttackSpeed - MaxPetLevel * 70);
@@ -297,6 +310,35 @@ namespace Server.MirObjects
 
             if (MoveSpeed < 400) MoveSpeed = 400;
             if (AttackSpeed < 400) AttackSpeed = 400;
+
+            RefreshBuffs();
+        }
+        private void RefreshBuffs()
+        {
+            for (int i = 0; i < Buffs.Count; i++)
+            {
+                Buff buff = Buffs[i];
+
+                switch (buff.Type)
+                {
+                    case BuffType.Haste:
+                        ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + buff.Value)));
+                        break;
+                    case BuffType.LightBody:
+                        Agility = (byte)Math.Min(byte.MaxValue, Agility + buff.Value);
+                        break;
+                    case BuffType.SoulShield:
+                        MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + buff.Value);
+                        break;
+                    case BuffType.BlessedArmour:
+                        MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + buff.Value);
+                        break;
+                    case BuffType.UltimateEnhancer:
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
+                        break;
+                }
+
+            }
         }
         public void RefreshNameColour(bool send = true)
         {
@@ -1149,6 +1191,48 @@ namespace Server.MirObjects
 
             return false;
         }
+        public bool FindFriendsNearby(int distance)
+        {
+            for (int d = 0; d <= distance; d++)
+            {
+                for (int y = CurrentLocation.Y - d; y <= CurrentLocation.Y + d; y++)
+                {
+                    if (y < 0) continue;
+                    if (y >= CurrentMap.Height) break;
+
+                    for (int x = CurrentLocation.X - d; x <= CurrentLocation.X + d; x += Math.Abs(y - CurrentLocation.Y) == d ? 1 : d * 2)
+                    {
+                        if (x < 0) continue;
+                        if (x >= CurrentMap.Width) break;
+                        if (!CurrentMap.ValidPoint(x, y)) continue;
+                        Cell cell = CurrentMap.GetCell(x, y);
+                        if (cell.Objects == null) continue;
+
+                        for (int i = 0; i < cell.Objects.Count; i++)
+                        {
+                            MapObject ob = cell.Objects[i];
+                            switch (ob.Race)
+                            {
+                                case ObjectType.Monster:
+                                case ObjectType.Player:
+                                    if (ob == this || ob.Dead) continue;
+                                    if (ob.IsAttackTarget(this)) continue;
+                                    if (ob.Race == ObjectType.Player)
+                                    {
+                                        PlayerObject player = ((PlayerObject)ob);
+                                        if (player.GMGameMaster) continue;
+                                    }
+                                    return true;
+                                default:
+                                    continue;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
         protected List<MapObject> FindAllTargets(int dist, Point location)
         {
             List<MapObject> targets = new List<MapObject>();
@@ -1289,6 +1373,15 @@ namespace Server.MirObjects
                 case AttackMode.RedBrown:
                     return Master.PKPoints < 200 & Envir.Time > Master.BrownTime;
             }
+            return true;
+        }
+
+        public override bool IsFriendlyTarget(MonsterObject ally)
+        {
+            if (Master != null) return false;
+            if (ally.Race != ObjectType.Monster) return false;
+            if (ally.Master != null) return false;
+
             return true;
         }
 
@@ -2073,7 +2166,7 @@ namespace Server.MirObjects
         {
             if (PetLevel >= MaxPetLevel) return;
 
-            if (Info.Name == Settings.SkeletonName || Info.Name == Settings.ShinsuName)
+            if (Info.Name == Settings.SkeletonName || Info.Name == Settings.ShinsuName || Info.Name == Settings.AngelName)
                 amount *= 3;
 
             PetExperience += amount;

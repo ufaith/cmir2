@@ -159,6 +159,11 @@ namespace Client.MirObjects
                 case Monster.GiantWhiteSnake:
                 case Monster.BlueSnake:
                 case Monster.YellowSnake:
+                case Monster.AxeOma:
+                case Monster.SwordOma:
+                case Monster.WingedOma:
+                case Monster.FlailOma:
+                case Monster.OmaGuard:
                     Frames = FrameSet.Monsters[2];
                     break;
                 case Monster.CannibalPlant:
@@ -183,12 +188,6 @@ namespace Client.MirObjects
                 case Monster.BugBatMaggot:
                     Frames = FrameSet.Monsters[8];
                     break;
-               /* case Monster.BombSpider:
-                    Frames = FrameSet.Monsters[9];
-                    break;
-                case Monster.RootSpider:
-                    Frames = FrameSet.Monsters[8];
-                    break;*/
                 case Monster.CrystalSpider:
                     Frames = FrameSet.Monsters[9];
                     break;
@@ -247,6 +246,26 @@ namespace Client.MirObjects
                 case Monster.Yimoogi:
                     Frames = FrameSet.Monsters[23];
                     break;
+                case Monster.HolyDeva:
+                    Frames = FrameSet.Monsters[24];
+                    if (!info.Extra) ActionFeed.Add(new QueuedAction { Action = MirAction.Appear, Direction = Direction, Location = CurrentLocation });
+                    break;
+                case Monster.RootSpider:
+                    Frames = FrameSet.Monsters[25];
+                    break;
+                case Monster.BombSpider:
+                    Frames = FrameSet.Monsters[26];
+                    break;
+                case Monster.CrossbowOma:
+                    Frames = FrameSet.Monsters[27];
+                    break;
+                case Monster.YinDevilNode:
+                case Monster.YangDevilNode:
+                    Frames = FrameSet.Monsters[28];
+                    break;
+                case Monster.OmaKing:
+                    Frames = FrameSet.Monsters[29];
+                    break;
                 default:
                     Frames = FrameSet.Monsters[0];
                     break;
@@ -275,9 +294,7 @@ namespace Client.MirObjects
 
             if (Frame == null)
                 DrawFrame = 0;
-            else
-                DrawFrame = (BaseImage == Monster.Wolf && CurrentAction == MirAction.Skeleton) ? 
-                    Frame.Start + FrameIndex : Frame.Start + (Frame.OffSet * (byte)Direction) + FrameIndex;
+            else DrawFrame = Frame.Start + (Frame.OffSet * (byte)Direction) + FrameIndex;
 
 
             #region Moving OffSet
@@ -494,6 +511,7 @@ namespace Client.MirObjects
                         {
                             case Monster.Shinsu:
                             case Monster.Shinsu1:
+                            case Monster.HolyDeva:
                                 Remove();
                                 return false;
                             default:
@@ -544,12 +562,21 @@ namespace Client.MirObjects
                             case Monster.MinotaurKing:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.MinotaurKing], 272 + (int)Direction * 6, 6, Frame.Count * Frame.Interval, this));
                                 break;
+                            case Monster.YinDevilNode:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.YinDevilNode], 26, 26, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.YangDevilNode:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.YangDevilNode], 26, 26, Frame.Count * Frame.Interval, this));
+                                break;
                         }
                         break;
                     case MirAction.Attack2:
                         PlaySecondAttackSound();
                         switch (BaseImage)
                         {
+                            case Monster.CrystalSpider:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.CrystalSpider], 272 + (int)Direction * 10, 10, Frame.Count * Frame.Interval, this));
+                                break;
                             case Monster.Yimoogi:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.Yimoogi], 304, 6, Frame.Count * Frame.Interval, this));
                                 Effects.Add(new Effect(Libraries.Magic2, 1280, 10, Frame.Count * Frame.Interval, this));
@@ -569,9 +596,6 @@ namespace Client.MirObjects
                         PlayRangeSound();
                         switch (BaseImage)
                         {
-                            case Monster.CrystalSpider:
-                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.CrystalSpider], 272 + (int)Direction * 10, 10, Frame.Count * Frame.Interval, this));
-                                break;
                             case Monster.KingScorpion:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.KingScorpion], 272 + (int)Direction * 8, 8, Frame.Count * Frame.Interval, this));
                                 break;
@@ -629,6 +653,12 @@ namespace Client.MirObjects
                                 break;
                             case Monster.Yimoogi:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.Yimoogi], 352, 10, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.YinDevilNode:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.YinDevilNode], 52, 20, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.YangDevilNode:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.YangDevilNode], 52, 20, Frame.Count * Frame.Interval, this));
                                 break;
                         }
                         PlayDieSound();
@@ -966,6 +996,22 @@ namespace Client.MirObjects
                                                     ob.Effects.Add(new Effect(Libraries.Magic2, 1250, 15, 1000, ob));
                                                     SoundManager.PlaySound(BaseSound + 6);
                                                 }
+                                                break;
+                                            case Monster.HolyDeva:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Magic2, 10, 5, 300, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                            case Monster.CrossbowOma:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(38, Libraries.Monsters[(ushort)Monster.CrossbowOma], false, 1, 30, 6);
+                                                break;
+                                            case Monster.WingedOma:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(224, Libraries.Monsters[(ushort)Monster.WingedOma], false, 6, 30, 0, false);
                                                 break;
                                             }
                                         break;
@@ -1400,6 +1446,60 @@ namespace Client.MirObjects
                             break;
                         case MirAction.Die:
                             Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(640 + FrameIndex + (int)Direction * 20, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.HolyDeva:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            Libraries.Monsters[(ushort)Monster.HolyDeva].Draw(226 + FrameIndex + (int)Direction * 4, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Walking:
+                        case MirAction.Pushed:
+                            Libraries.Monsters[(ushort)Monster.HolyDeva].Draw(258 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.AttackRange:
+                            Libraries.Monsters[(ushort)Monster.HolyDeva].Draw(306 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Struck:
+                            Libraries.Monsters[(ushort)Monster.HolyDeva].Draw(354 + FrameIndex + (int)Direction * 2, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Die:
+                            if (FrameIndex <= 6) Libraries.Monsters[(ushort)Monster.HolyDeva].Draw(370 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Appear:
+                            if (FrameIndex >= 5) Libraries.Monsters[(ushort)Monster.HolyDeva].Draw(418 + FrameIndex - 5, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.YinDevilNode:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            Libraries.Monsters[(ushort)Monster.YinDevilNode].DrawBlend(22 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.YangDevilNode:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            Libraries.Monsters[(ushort)Monster.YangDevilNode].DrawBlend(22 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.OmaKing:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Attack1:
+                            if (FrameIndex >= 3) Libraries.Monsters[(ushort)Monster.OmaKing].DrawBlend((624 + FrameIndex + (int)Direction * 4) - 3, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Attack2:
+                            Libraries.Monsters[(ushort)Monster.OmaKing].DrawBlend(656 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Die:
+                            Libraries.Monsters[(ushort)Monster.OmaKing].DrawBlend(304 + FrameIndex + (int)Direction * 20, DrawLocation, Color.White, true);
                             break;
                     }
                     break;

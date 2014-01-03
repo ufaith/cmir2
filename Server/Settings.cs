@@ -67,7 +67,9 @@ namespace Server
                              BoneMonster2 = "Bone Blademan",
                              BoneMonster3 = "Bone Archer",
                              BoneMonster4 = "Bone Captain",
-                             WhiteSnake = "White Serpent";
+                             WhiteSnake = "White Serpent",
+                             AngelName = "Holy Deva",
+                             BombSpiderName = "Bomb Spider";
                             
 
 
@@ -115,6 +117,8 @@ namespace Server
             BoneMonster3 = Reader.ReadString("Game", "BoneMonster3", BoneMonster3);
             BoneMonster4 = Reader.ReadString("Game", "BoneMonster4", BoneMonster4);
             WhiteSnake = Reader.ReadString("Game", "WhiteSnake", WhiteSnake);
+            AngelName = Reader.ReadString("Game", "AngelName", AngelName);
+            BombSpiderName = Reader.ReadString("Game", "BombSpiderName", BombSpiderName);
 
 
             if (!Directory.Exists(MapPath))
@@ -190,6 +194,8 @@ namespace Server
             Reader.Write("Game", "BoneMonster4", BoneMonster4);
 
             Reader.Write("Game", "WhiteSnake", WhiteSnake);
+            Reader.Write("Game", "AngelName", AngelName);
+            Reader.Write("Game", "BombSpiderName", BombSpiderName);
         }
 
         public static void LoadEXP()

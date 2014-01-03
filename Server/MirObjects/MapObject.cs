@@ -285,6 +285,7 @@ namespace Server.MirObjects
         public abstract int Attacked(PlayerObject attacker, int damage, DefenceType type = DefenceType.ACAgility, bool damageWeapon = true);
         public abstract int Attacked(MonsterObject attacker, int damage, DefenceType type = DefenceType.ACAgility);
         public abstract bool IsFriendlyTarget(PlayerObject ally);
+        public abstract bool IsFriendlyTarget(MonsterObject ally);
 
         public abstract void ReceiveChat(string text, ChatType type);
 

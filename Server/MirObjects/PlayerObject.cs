@@ -1376,6 +1376,9 @@ namespace Server.MirObjects
                     case BuffType.BlessedArmour:
                         MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + buff.Value);
                         break;
+                    case BuffType.UltimateEnhancer:
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
+                        break;
                 }
 
             }
@@ -1758,6 +1761,31 @@ namespace Server.MirObjects
                             MonsterObject monster = MonsterObject.GetMonster(mInfo);
                             if (monster == null) return;
                             monster.Spawn(CurrentMap, Front);
+                        }
+                        break;
+                    case "RECALLMOB":
+                        if (!IsGM) return;
+                        if (parts.Length < 2) return;
+
+                        MonsterInfo mInfo2 = Envir.GetMonsterInfo(parts[1]);
+                        if (mInfo2 == null) return;
+
+                        count = 1;
+
+                        if (parts.Length >= 3)
+                            if (!uint.TryParse(parts[2], out count) || count > 50) count = 1;
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            MonsterObject monster = MonsterObject.GetMonster(mInfo2);
+                            if (monster == null) return;
+                            monster.PetLevel = 0;
+                            monster.Master = this;
+                            monster.MaxPetLevel = 7;
+                            monster.Direction = Direction;
+                            monster.ActionTime = Envir.Time + 1000;
+                            monster.Spawn(CurrentMap, Front);
+                            Pets.Add(monster);
                         }
                         break;
                     case "RELOADDROPS":
@@ -3006,7 +3034,8 @@ namespace Server.MirObjects
             for (int i = 0; i < Pets.Count; i++)
             {
                 monster = Pets[i];
-                if ((monster.Info.Name != Settings.SkeletonName && monster.Info.Name != Settings.ShinsuName) || monster.Dead) continue;
+                if ((monster.Info.Name != Settings.SkeletonName && monster.Info.Name != Settings.ShinsuName &&
+                    monster.Info.Name != Settings.AngelName) || monster.Dead) continue;
                 if (monster.Node == null) continue;
                 monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500));
                 return;
@@ -3049,7 +3078,8 @@ namespace Server.MirObjects
             for (int i = 0; i < Pets.Count; i++)
             {
                 monster = Pets[i];
-                if ((monster.Info.Name != Settings.SkeletonName && monster.Info.Name != Settings.ShinsuName) || monster.Dead) continue;
+                if ((monster.Info.Name != Settings.SkeletonName && monster.Info.Name != Settings.ShinsuName &&
+                    monster.Info.Name != Settings.AngelName) || monster.Dead) continue;
                 if (monster.Node == null) continue;
                 monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500));
                 return;
@@ -3761,6 +3791,22 @@ namespace Server.MirObjects
                 case AttackMode.Guild:
                     return false;
             }
+            return true;
+        }
+        public override bool IsFriendlyTarget(MonsterObject ally)
+        {
+            if (ally.Race != ObjectType.Monster) return false;
+            if (ally.Master == null) return false;
+
+            switch (ally.Master.Race)
+            {
+                case ObjectType.Player:
+                    if (!ally.Master.IsFriendlyTarget(this)) return false;
+                    break;
+                case ObjectType.Monster:
+                    return false;
+            }
+
             return true;
         }
         public override int Attacked(PlayerObject attacker, int damage, DefenceType type = DefenceType.ACAgility, bool damageWeapon = true)

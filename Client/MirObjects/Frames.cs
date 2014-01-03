@@ -155,7 +155,7 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Struck, new Frame(128, 2, 0, 200));
             frame.Frames.Add(MirAction.Die, new Frame(144, 10, 0, 100));
             frame.Frames.Add(MirAction.Dead, new Frame(153, 1, 9, 1000));
-            frame.Frames.Add(MirAction.AttackRange, new Frame(224, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack2, new Frame(224, 6, 0, 100));
             frame.Frames.Add(MirAction.Revive, new Frame(144, 10, 0, 100) { Reverse = true });
 
             //10
@@ -317,6 +317,64 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Dead, new Frame(153, 1, 9, 1000));
             frame.Frames.Add(MirAction.AttackRange, new Frame(224, 6, 0, 100));
             frame.Frames.Add(MirAction.Revive, new Frame(144, 10, 0, 100) { Reverse = true });
+
+            //24
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Appear, new Frame(216, 10, -10, 100) { Blend = true });
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500) { Blend = true });
+            frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 0, 100) { Blend = true });
+            frame.Frames.Add(MirAction.AttackRange, new Frame(80, 6, 0, 100) { Blend = true });
+            frame.Frames.Add(MirAction.Struck, new Frame(128, 2, 0, 200) { Blend = true });
+            frame.Frames.Add(MirAction.Die, new Frame(144, 9, 0, 100) { Blend = true });
+            frame.Frames.Add(MirAction.Revive, new Frame(144, 9, 0, 100) { Blend = true, Reverse = true });
+
+            //25
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 18, 1000));
+            frame.Frames.Add(MirAction.Attack1, new Frame(4, 6, 16, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(10, 2, 20, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(12, 10, 12, 150));
+            frame.Frames.Add(MirAction.Dead, new Frame(21, 1, 21, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(12, 10, 12, 150) { Reverse = true });
+
+            //26
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 1, 5, 1000));
+            frame.Frames.Add(MirAction.Walking, new Frame(0, 6, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(0, 1, 5, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(48, 10, 0, 150));
+            frame.Frames.Add(MirAction.Dead, new Frame(57, 1, 9, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(48, 10, 0, 150) { Reverse = true });
+
+            //27
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 1000));
+            frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 1, 100));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(88, 6, 1, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(144, 1, 0, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(160, 10, 0, 150));
+            frame.Frames.Add(MirAction.Dead, new Frame(169, 1, 9, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(160, 10, 0, 150) { Reverse = true });
+
+            //28
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, -4, 1000));
+            frame.Frames.Add(MirAction.Attack1, new Frame(4, 6, -6, 180));
+            frame.Frames.Add(MirAction.Struck, new Frame(10, 2, -2, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(12, 10, -10, 150));
+            frame.Frames.Add(MirAction.Dead, new Frame(21, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(12, 10, -10, 150) { Reverse = true });
+
+            //29
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 1000));
+            frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(80, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack2, new Frame(464, 20, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(128, 2, 0, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(144, 20, 0, 150));
+            frame.Frames.Add(MirAction.Dead, new Frame(163, 1, 19, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(144, 20, 0, 150) { Reverse = true });
         }
     }
 

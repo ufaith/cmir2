@@ -293,6 +293,9 @@ namespace Client.MirObjects
                     case BuffType.BlessedArmour:
                         MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + buff.Value);
                         break;
+                    case BuffType.UltimateEnhancer:
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
+                        break;
                 }
 
             }

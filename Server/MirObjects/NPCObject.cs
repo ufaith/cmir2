@@ -268,6 +268,10 @@ namespace Server.MirObjects
         {
             throw new NotSupportedException();
         }
+        public override bool IsFriendlyTarget(MonsterObject ally)
+        {
+            throw new NotSupportedException();
+        }
         public override bool IsAttackTarget(MonsterObject attacker)
         {
             throw new NotSupportedException();
