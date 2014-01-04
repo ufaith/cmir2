@@ -862,6 +862,7 @@
             this.CopyMButton.TabIndex = 23;
             this.CopyMButton.Text = "Copy";
             this.CopyMButton.UseVisualStyleBackColor = true;
+            this.CopyMButton.Click += new System.EventHandler(this.CopyMButton_Click);
             // 
             // ITypeFilterComboBox
             // 

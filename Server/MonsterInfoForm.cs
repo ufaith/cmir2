@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Server.MirDatabase;
@@ -10,6 +11,8 @@ namespace Server
 {
     public partial class MonsterInfoForm : Form
     {
+        public string MonsterListPath = Path.Combine(Settings.ExportPath, "MonsterList.txt");
+
         public Envir Envir
         {
             get { return SMain.EditEnvir; }
@@ -634,5 +637,49 @@ namespace Server
 
         }
 
+        private void ExportButton_Click(object sender, EventArgs e)
+        {
+            ExportMonsters(Envir.MonsterInfoList);
+        }
+
+        private void ExportSelected_Click(object sender, EventArgs e)
+        {
+            var list = MonsterInfoListBox.SelectedItems.Cast<MonsterInfo>().ToList();
+
+            ExportMonsters(list);
+        }
+
+        private void ImportButton_Click(object sender, EventArgs e)
+        {
+            string data;
+            using (var sr = new StreamReader(MonsterListPath))
+            {
+                data = sr.ReadToEnd();
+            }
+            data = data.Replace("\r\n", string.Empty);
+            var monsters = data.Split(new[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var m in monsters)
+                MonsterInfo.FromText(m);
+
+            UpdateInterface();
+        }
+
+
+        private void ExportMonsters(IEnumerable<MonsterInfo> monsters)
+        {
+            var list = new List<string>();
+
+            if (monsters != null)
+                list.AddRange(monsters.Select(monster => string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16}," +
+                                                                       "{17},{18},{19},{20},{21},{22},{23},{24}\t", 
+                                                                       monster.Name, (ushort) monster.Image, monster.AI, monster.Effect, monster.Level, 
+                                                                       monster.ViewRange, monster.HP, monster.MinAC, monster.MaxAC, monster.MinMAC, 
+                                                                       monster.MaxMAC, monster.MinDC, monster.MaxDC, monster.MinMC, monster.MaxMC, monster.MinSC, 
+                                                                       monster.MaxSC, monster.Accuracy, monster.Agility, monster.Light, monster.AttackSpeed, 
+                                                                       monster.MoveSpeed, monster.Experience, monster.CanTame, monster.CanPush)));
+
+            File.WriteAllLines(MonsterListPath, list);
+        }
     }
 }

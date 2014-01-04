@@ -798,7 +798,7 @@ namespace Server.MirObjects
                 GainExp(amount);
 
         }
-        private void GainExp(uint amount)
+        public void GainExp(uint amount)
         {
             Experience += amount;
 
@@ -820,6 +820,7 @@ namespace Server.MirObjects
             Level++;
             LevelUp();
         }
+
         private void LevelUp()
         {
             RefreshStats();

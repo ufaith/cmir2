@@ -33,7 +33,6 @@ namespace Server.MirObjects
 
         public static Regex Regex = new Regex(@"<.*?/(.*?)>");
 
-
         public NPCInfo Info;
         private const long TurnDelay = 10000;
         public long TurnTime;
@@ -561,6 +560,22 @@ namespace Server.MirObjects
                     if (parts.Length < 3 || !uint.TryParse(parts[1], out temp2)) temp2 = 1;
                     CheckList.Add(new NPCChecks(CheckType.CheckGold, info, temp2));
                     break;
+                case "CHECKGENDER":
+                    if (parts.Length < 2) return;
+                    if (!Enum.IsDefined(typeof(MirGender), parts[1])) return;
+
+                    temp2 = (byte) Enum.Parse(typeof (MirGender), parts[1]);
+
+                    CheckList.Add(new NPCChecks(CheckType.CheckGender, temp2));
+                    break;
+                case "CHECKCLASS":
+                    if (parts.Length < 2) return;
+                    if (!Enum.IsDefined(typeof(MirClass), parts[1])) return;
+
+                    temp2 = (byte)Enum.Parse(typeof(MirClass), parts[1]);
+
+                    CheckList.Add(new NPCChecks(CheckType.CheckClass, temp2));
+                    break;
             }
 
         }
@@ -619,6 +634,18 @@ namespace Server.MirObjects
 
                     if (parts.Length < 3 || !uint.TryParse(parts[2], out temp)) temp = 1;
                     acts.Add(new NPCActions(ActionType.TakeItem, info, temp));
+                    return;
+                case "GIVEEXP":
+                    if (parts.Length < 2) return;
+                    if (!uint.TryParse(parts[1], out temp)) return;
+
+                    acts.Add(new NPCActions(ActionType.GiveExp, temp));
+                    return;
+                case "GOTO":
+                    if (parts.Length < 2) return;
+                    if (!parts[1].StartsWith("@")) return;
+
+                    acts.Add(new NPCActions(ActionType.Goto, parts[1]));
                     return;
 
             }
@@ -687,6 +714,22 @@ namespace Server.MirObjects
                             return false;
                         }
 
+                        break;
+                    case CheckType.CheckGender:
+                        var failed = (byte) player.Gender != (int) check.Params[0];
+                        if (failed)
+                        {
+                            Failed(player);
+                            return false;
+                        }
+                        break;
+                    case CheckType.CheckClass:
+                        failed = (byte) player.Class != (int) check.Params[0];
+                        if (failed)
+                        {
+                            Failed(player);
+                            return false;
+                        }
                         break;
                 }
             }
@@ -797,6 +840,12 @@ namespace Server.MirObjects
                         player.RefreshStats();
 
                         break;
+                    case ActionType.GiveExp:
+                        player.GainExp((uint)act.Params[0]);
+                        break;
+                    case ActionType.Goto:
+                        //create new npcobject instance
+                        break;
                 }
             }
         }
@@ -835,7 +884,9 @@ namespace Server.MirObjects
         GiveGold,
         TakeGold,
         GiveItem,
-        TakeItem
+        TakeItem,
+        GiveExp,
+        Goto,
     }
 
     public enum CheckType
@@ -844,5 +895,8 @@ namespace Server.MirObjects
         MaxLevel,
         CheckItem,
         CheckGold,
+        CheckGender,
+        CheckClass,
+
     }
 }
