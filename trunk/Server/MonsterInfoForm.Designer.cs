@@ -31,6 +31,8 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.MonsterInfoPanel = new System.Windows.Forms.Panel();
+            this.ImageComboBox = new System.Windows.Forms.ComboBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.CoolEyeTextBox = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.CanTameCheckBox = new System.Windows.Forms.CheckBox();
@@ -86,8 +88,9 @@
             this.MonsterInfoListBox = new System.Windows.Forms.ListBox();
             this.PasteMButton = new System.Windows.Forms.Button();
             this.CopyMButton = new System.Windows.Forms.Button();
-            this.ImageComboBox = new System.Windows.Forms.ComboBox();
-            this.label10 = new System.Windows.Forms.Label();
+            this.ExportButton = new System.Windows.Forms.Button();
+            this.ImportButton = new System.Windows.Forms.Button();
+            this.ExportSelectedButton = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.MonsterInfoPanel.SuspendLayout();
@@ -178,6 +181,25 @@
             this.MonsterInfoPanel.Name = "MonsterInfoPanel";
             this.MonsterInfoPanel.Size = new System.Drawing.Size(585, 217);
             this.MonsterInfoPanel.TabIndex = 11;
+            // 
+            // ImageComboBox
+            // 
+            this.ImageComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ImageComboBox.FormattingEnabled = true;
+            this.ImageComboBox.Location = new System.Drawing.Point(271, 30);
+            this.ImageComboBox.Name = "ImageComboBox";
+            this.ImageComboBox.Size = new System.Drawing.Size(128, 21);
+            this.ImageComboBox.TabIndex = 85;
+            this.ImageComboBox.SelectedIndexChanged += new System.EventHandler(this.ImageComboBox_SelectedIndexChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(226, 34);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(39, 13);
+            this.label10.TabIndex = 86;
+            this.label10.Text = "Image:";
             // 
             // CoolEyeTextBox
             // 
@@ -682,30 +704,44 @@
             this.CopyMButton.Text = "Copy";
             this.CopyMButton.UseVisualStyleBackColor = true;
             // 
-            // ImageComboBox
+            // ExportButton
             // 
-            this.ImageComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ImageComboBox.FormattingEnabled = true;
-            this.ImageComboBox.Location = new System.Drawing.Point(271, 30);
-            this.ImageComboBox.Name = "ImageComboBox";
-            this.ImageComboBox.Size = new System.Drawing.Size(128, 21);
-            this.ImageComboBox.TabIndex = 85;
-            this.ImageComboBox.SelectedIndexChanged += new System.EventHandler(this.ImageComboBox_SelectedIndexChanged);
+            this.ExportButton.Location = new System.Drawing.Point(701, 12);
+            this.ExportButton.Name = "ExportButton";
+            this.ExportButton.Size = new System.Drawing.Size(75, 23);
+            this.ExportButton.TabIndex = 23;
+            this.ExportButton.Text = "Export All";
+            this.ExportButton.UseVisualStyleBackColor = true;
+            this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
             // 
-            // label10
+            // ImportButton
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(226, 34);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(39, 13);
-            this.label10.TabIndex = 86;
-            this.label10.Text = "Image:";
+            this.ImportButton.Location = new System.Drawing.Point(498, 12);
+            this.ImportButton.Name = "ImportButton";
+            this.ImportButton.Size = new System.Drawing.Size(75, 23);
+            this.ImportButton.TabIndex = 24;
+            this.ImportButton.Text = "Import";
+            this.ImportButton.UseVisualStyleBackColor = true;
+            this.ImportButton.Click += new System.EventHandler(this.ImportButton_Click);
+            // 
+            // ExportSelectedButton
+            // 
+            this.ExportSelectedButton.Location = new System.Drawing.Point(578, 12);
+            this.ExportSelectedButton.Name = "ExportSelectedButton";
+            this.ExportSelectedButton.Size = new System.Drawing.Size(117, 23);
+            this.ExportSelectedButton.TabIndex = 25;
+            this.ExportSelectedButton.Text = "Export Selected";
+            this.ExportSelectedButton.UseVisualStyleBackColor = true;
+            this.ExportSelectedButton.Click += new System.EventHandler(this.ExportSelected_Click);
             // 
             // MonsterInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(788, 308);
+            this.Controls.Add(this.ExportSelectedButton);
+            this.Controls.Add(this.ImportButton);
+            this.Controls.Add(this.ExportButton);
             this.Controls.Add(this.PasteMButton);
             this.Controls.Add(this.CopyMButton);
             this.Controls.Add(this.tabControl1);
@@ -785,5 +821,8 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.ComboBox ImageComboBox;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button ExportButton;
+        private System.Windows.Forms.Button ImportButton;
+        private System.Windows.Forms.Button ExportSelectedButton;
     }
 }

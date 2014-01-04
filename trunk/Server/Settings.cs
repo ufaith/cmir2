@@ -12,7 +12,8 @@ namespace Server
 
         public const string MapPath = @".\Maps\",
                             NPCPath = @".\NPCs\",
-                            DropPath = @".\Drops\";
+                            DropPath = @".\Drops\",
+                            ExportPath = @".\Exports\";
 
         private static readonly InIReader Reader = new InIReader(@".\Setup.ini");
 
@@ -127,7 +128,8 @@ namespace Server
                 Directory.CreateDirectory(NPCPath);
             if (!Directory.Exists(DropPath))
                 Directory.CreateDirectory(DropPath);
-
+            if (!Directory.Exists(ExportPath))
+                Directory.CreateDirectory(ExportPath);
             LoadVersion();
             LoadEXP();
         }

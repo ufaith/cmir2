@@ -172,7 +172,7 @@ namespace Server.MirDatabase
         {
             string[] data = text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (data.Length < 28) return;
+            if (data.Length < 25) return; //28
 
             MonsterInfo info = new MonsterInfo {Name = data[0]};
             ushort image;
@@ -210,9 +210,9 @@ namespace Server.MirDatabase
 
             int count;
 
-            if (!int.TryParse(data[27], out count)) return;
+            //if (!int.TryParse(data[27], out count)) return;
 
-            if (28 + count * 3 > data.Length) return;
+            //if (28 + count * 3 > data.Length) return;
 
             info.Index = ++SMain.EditEnvir.MonsterIndex;
             SMain.EditEnvir.MonsterInfoList.Add(info);

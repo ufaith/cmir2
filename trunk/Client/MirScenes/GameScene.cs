@@ -2130,6 +2130,7 @@ namespace Client.MirScenes
         }
         private void MapEffect(S.MapEffect p)
         {
+
         }
         private void ObjectRangeAttack(S.ObjectRangeAttack p)
         {
