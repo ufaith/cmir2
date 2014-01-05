@@ -104,6 +104,9 @@
             this.PasteButton = new System.Windows.Forms.Button();
             this.CopyMButton = new System.Windows.Forms.Button();
             this.ITypeFilterComboBox = new System.Windows.Forms.ComboBox();
+            this.ExportAllButton = new System.Windows.Forms.Button();
+            this.ExportSelectedButton = new System.Windows.Forms.Button();
+            this.ImportButton = new System.Windows.Forms.Button();
             this.ItemInfoPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -184,7 +187,7 @@
             this.ItemInfoPanel.Enabled = false;
             this.ItemInfoPanel.Location = new System.Drawing.Point(174, 41);
             this.ItemInfoPanel.Name = "ItemInfoPanel";
-            this.ItemInfoPanel.Size = new System.Drawing.Size(625, 303);
+            this.ItemInfoPanel.Size = new System.Drawing.Size(612, 306);
             this.ItemInfoPanel.TabIndex = 11;
             // 
             // EffectTextBox
@@ -776,7 +779,6 @@
             this.label2.Size = new System.Drawing.Size(57, 13);
             this.label2.TabIndex = 10;
             this.label2.Text = "Item Type:";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // ItemNameTextBox
             // 
@@ -837,7 +839,7 @@
             this.ItemInfoListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.ItemInfoListBox.FormattingEnabled = true;
-            this.ItemInfoListBox.Location = new System.Drawing.Point(12, 41);
+            this.ItemInfoListBox.Location = new System.Drawing.Point(12, 40);
             this.ItemInfoListBox.Name = "ItemInfoListBox";
             this.ItemInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.ItemInfoListBox.Size = new System.Drawing.Size(156, 303);
@@ -868,17 +870,50 @@
             // 
             this.ITypeFilterComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ITypeFilterComboBox.FormattingEnabled = true;
-            this.ITypeFilterComboBox.Location = new System.Drawing.Point(12, 12);
+            this.ITypeFilterComboBox.Location = new System.Drawing.Point(14, 14);
             this.ITypeFilterComboBox.Name = "ITypeFilterComboBox";
             this.ITypeFilterComboBox.Size = new System.Drawing.Size(121, 21);
             this.ITypeFilterComboBox.TabIndex = 25;
             this.ITypeFilterComboBox.SelectedIndexChanged += new System.EventHandler(this.ITypeFilterComboBox_SelectedIndexChanged);
             // 
+            // ExportAllButton
+            // 
+            this.ExportAllButton.Location = new System.Drawing.Point(710, 12);
+            this.ExportAllButton.Name = "ExportAllButton";
+            this.ExportAllButton.Size = new System.Drawing.Size(76, 23);
+            this.ExportAllButton.TabIndex = 26;
+            this.ExportAllButton.Text = "Export All";
+            this.ExportAllButton.UseVisualStyleBackColor = true;
+            this.ExportAllButton.Click += new System.EventHandler(this.ExportAllButton_Click);
+            // 
+            // ExportSelectedButton
+            // 
+            this.ExportSelectedButton.Location = new System.Drawing.Point(612, 12);
+            this.ExportSelectedButton.Name = "ExportSelectedButton";
+            this.ExportSelectedButton.Size = new System.Drawing.Size(94, 23);
+            this.ExportSelectedButton.TabIndex = 27;
+            this.ExportSelectedButton.Text = "Export Selected";
+            this.ExportSelectedButton.UseVisualStyleBackColor = true;
+            this.ExportSelectedButton.Click += new System.EventHandler(this.ExportSelectedButton_Click);
+            // 
+            // ImportButton
+            // 
+            this.ImportButton.Location = new System.Drawing.Point(531, 12);
+            this.ImportButton.Name = "ImportButton";
+            this.ImportButton.Size = new System.Drawing.Size(75, 23);
+            this.ImportButton.TabIndex = 28;
+            this.ImportButton.Text = "Import";
+            this.ImportButton.UseVisualStyleBackColor = true;
+            this.ImportButton.Click += new System.EventHandler(this.ImportButton_Click);
+            // 
             // ItemInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(811, 351);
+            this.ClientSize = new System.Drawing.Size(792, 359);
+            this.Controls.Add(this.ImportButton);
+            this.Controls.Add(this.ExportSelectedButton);
+            this.Controls.Add(this.ExportAllButton);
             this.Controls.Add(this.ITypeFilterComboBox);
             this.Controls.Add(this.PasteButton);
             this.Controls.Add(this.CopyMButton);
@@ -973,6 +1008,9 @@
         private System.Windows.Forms.TextBox EffectTextBox;
         private System.Windows.Forms.Label label34;
         private System.Windows.Forms.ComboBox ITypeFilterComboBox;
+        private System.Windows.Forms.Button ExportAllButton;
+        private System.Windows.Forms.Button ExportSelectedButton;
+        private System.Windows.Forms.Button ImportButton;
 
     }
 }

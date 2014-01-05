@@ -529,6 +529,8 @@ namespace Server.MirObjects
 
             int temp;
             uint temp2;
+            byte temp3;
+
             switch (parts[0].ToUpper())
             {
                 case "MINLEVEL":
@@ -564,17 +566,15 @@ namespace Server.MirObjects
                     if (parts.Length < 2) return;
                     if (!Enum.IsDefined(typeof(MirGender), parts[1])) return;
 
-                    temp2 = (byte) Enum.Parse(typeof (MirGender), parts[1]);
-
-                    CheckList.Add(new NPCChecks(CheckType.CheckGender, temp2));
+                    temp3 = (byte)Enum.Parse(typeof(MirGender), parts[1]);
+                    CheckList.Add(new NPCChecks(CheckType.CheckGender, temp3));
                     break;
                 case "CHECKCLASS":
                     if (parts.Length < 2) return;
                     if (!Enum.IsDefined(typeof(MirClass), parts[1])) return;
 
-                    temp2 = (byte)Enum.Parse(typeof(MirClass), parts[1]);
-
-                    CheckList.Add(new NPCChecks(CheckType.CheckClass, temp2));
+                    temp3 = (byte)Enum.Parse(typeof(MirClass), parts[1]);
+                    CheckList.Add(new NPCChecks(CheckType.CheckClass, temp3));
                     break;
             }
 
@@ -716,7 +716,7 @@ namespace Server.MirObjects
 
                         break;
                     case CheckType.CheckGender:
-                        var failed = (byte) player.Gender != (int) check.Params[0];
+                        var failed = (byte)player.Gender != (byte)check.Params[0];
                         if (failed)
                         {
                             Failed(player);
@@ -724,7 +724,7 @@ namespace Server.MirObjects
                         }
                         break;
                     case CheckType.CheckClass:
-                        failed = (byte) player.Class != (int) check.Params[0];
+                        failed = (byte)player.Class != (byte)check.Params[0];
                         if (failed)
                         {
                             Failed(player);

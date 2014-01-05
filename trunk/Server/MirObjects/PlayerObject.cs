@@ -819,6 +819,12 @@ namespace Server.MirObjects
             if (Level >= byte.MaxValue) return;
             Level++;
             LevelUp();
+
+            if (Experience < MaxExperience) return;
+
+            var rExperience = Experience;
+            Experience = 0;
+            GainExp((uint)rExperience);
         }
 
         private void LevelUp()

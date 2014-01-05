@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -12,6 +13,8 @@ namespace Server
 {
     public partial class ItemInfoForm : Form
     {
+        public string ItemListPath = Path.Combine(Settings.ExportPath, "ItemList.txt");
+
         public Envir Envir
         {
             get { return SMain.EditEnvir; }
@@ -815,14 +818,53 @@ namespace Server
             UpdateInterface();
         }
 
-        private void label2_Click(object sender, EventArgs e)
+        private void CopyMButton_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void CopyMButton_Click(object sender, EventArgs e)
+        private void ExportAllButton_Click(object sender, EventArgs e)
         {
+            ExportItems(Envir.ItemInfoList);
+        }
 
+        private void ExportSelectedButton_Click(object sender, EventArgs e)
+        {
+            var list = ItemInfoListBox.SelectedItems.Cast<ItemInfo>().ToList();
+
+            ExportItems(list);
+        }
+
+        private void ExportItems(IEnumerable<ItemInfo> items)
+        {
+            var itemInfos = items as ItemInfo[] ?? items.ToArray();
+            var list = itemInfos.Select(item => item.ToText() + "\t").ToList();
+
+            File.WriteAllLines(ItemListPath, list);
+
+            MessageBox.Show(itemInfos.Count() + " Items have been exported");
+        }
+
+        private void ImportButton_Click(object sender, EventArgs e)
+        {
+            string data;
+            using (var sr = new StreamReader(ItemListPath))
+            {
+                data = sr.ReadToEnd();
+            }
+            data = data.Replace("\r\n", string.Empty);
+            var items = data.Split(new[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+            var count = 0;
+            foreach (var info in items.Select(ItemInfo.FromText).Where(info => info != null))
+            {
+                count++;
+                info.Index = ++Envir.ItemIndex;
+                Envir.ItemInfoList.Add(info);
+            }
+
+            MessageBox.Show(count + " Items have been imported");
+            UpdateInterface(true);
         }
     }
 }

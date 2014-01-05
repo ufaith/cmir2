@@ -637,7 +637,7 @@ namespace Server
 
         }
 
-        private void ExportButton_Click(object sender, EventArgs e)
+        private void ExportAllButton_Click(object sender, EventArgs e)
         {
             ExportMonsters(Envir.MonsterInfoList);
         }
@@ -647,6 +647,13 @@ namespace Server
             var list = MonsterInfoListBox.SelectedItems.Cast<MonsterInfo>().ToList();
 
             ExportMonsters(list);
+        }
+
+        private void ExportMonsters(IEnumerable<MonsterInfo> monsters)
+        {
+            var list = monsters.Select(monster => monster.ToText() + "\t").ToList();
+
+            File.WriteAllLines(MonsterListPath, list);
         }
 
         private void ImportButton_Click(object sender, EventArgs e)
@@ -663,23 +670,6 @@ namespace Server
                 MonsterInfo.FromText(m);
 
             UpdateInterface();
-        }
-
-
-        private void ExportMonsters(IEnumerable<MonsterInfo> monsters)
-        {
-            var list = new List<string>();
-
-            if (monsters != null)
-                list.AddRange(monsters.Select(monster => string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16}," +
-                                                                       "{17},{18},{19},{20},{21},{22},{23},{24}\t", 
-                                                                       monster.Name, (ushort) monster.Image, monster.AI, monster.Effect, monster.Level, 
-                                                                       monster.ViewRange, monster.HP, monster.MinAC, monster.MaxAC, monster.MinMAC, 
-                                                                       monster.MaxMAC, monster.MinDC, monster.MaxDC, monster.MinMC, monster.MaxMC, monster.MinSC, 
-                                                                       monster.MaxSC, monster.Accuracy, monster.Agility, monster.Light, monster.AttackSpeed, 
-                                                                       monster.MoveSpeed, monster.Experience, monster.CanTame, monster.CanPush)));
-
-            File.WriteAllLines(MonsterListPath, list);
         }
     }
 }
