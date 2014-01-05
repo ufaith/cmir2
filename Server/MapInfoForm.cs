@@ -98,7 +98,7 @@ namespace Server
             if (_selectedMapInfos.Count != 1)
             {
                 SafeZoneInfoListBox.Items.Clear();
-                if (_selectedSafeZoneInfos.Count > 0)
+                if (_selectedSafeZoneInfos != null && _selectedSafeZoneInfos.Count > 0)
                     _selectedSafeZoneInfos.Clear();
                 _info = null;
 
@@ -157,7 +157,7 @@ namespace Server
             if (_selectedMapInfos.Count != 1)
             {
                 RespawnInfoListBox.Items.Clear();
-                if (_selectedRespawnInfos.Count > 0)
+                if (_selectedRespawnInfos != null && _selectedRespawnInfos.Count > 0)
                     _selectedRespawnInfos.Clear();
                 _info = null;
 
@@ -230,7 +230,7 @@ namespace Server
             if (_selectedMapInfos.Count != 1)
             {
                 NPCInfoListBox.Items.Clear();
-                if (_selectedNPCInfos.Count > 0)
+                if (_selectedNPCInfos != null && _selectedNPCInfos.Count > 0)
                     _selectedNPCInfos.Clear();
                 _info = null;
 
@@ -302,7 +302,7 @@ namespace Server
             if (_selectedMapInfos.Count != 1)
             {
                 MovementInfoListBox.Items.Clear();
-                if (_selectedMovementInfos.Count > 0)
+                if (_selectedMovementInfos != null && _selectedMovementInfos.Count > 0)
                     _selectedMovementInfos.Clear();
                 _info = null;
 
@@ -446,7 +446,7 @@ namespace Server
         }
         private void RemoveButton_Click(object sender, EventArgs e)
         {
-            if ( _selectedMapInfos.Count == 0) return;
+            if (_selectedMapInfos.Count == 0) return;
 
             if (MessageBox.Show("Are you sure you want to remove the selected maps?", "Remove Maps?", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
 
@@ -454,10 +454,16 @@ namespace Server
 
             if (Envir.MapInfoList.Count == 0) Envir.MapIndex = 0;
 
+            MapTabs.SelectTab(0);
+
             UpdateInterface();
         }
         private void MapInfoListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            SafeZoneInfoListBox.Items.Clear();
+            RespawnInfoListBox.Items.Clear();
+            MovementInfoListBox.Items.Clear();
+            NPCInfoListBox.Items.Clear();
             UpdateInterface();
         }
         private void FileNameTextBox_TextChanged(object sender, EventArgs e)

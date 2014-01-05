@@ -712,7 +712,7 @@
             this.ExportButton.TabIndex = 23;
             this.ExportButton.Text = "Export All";
             this.ExportButton.UseVisualStyleBackColor = true;
-            this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
+            this.ExportButton.Click += new System.EventHandler(this.ExportAllButton_Click);
             // 
             // ImportButton
             // 

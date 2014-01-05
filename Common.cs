@@ -1325,6 +1325,17 @@ public class ItemInfo
 
     }
 
+    public string ToText()
+    {
+        return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},{25},{26}," +
+                             "{27},{28},{29},{30},{31},{32},{33}",
+            Name, (byte)Type, (byte)RequiredType, (byte)RequiredClass, (byte)RequiredGender, Shape, Weight, Light, RequiredAmount, MinAC, MaxAC, MinMAC, MaxMAC, MinDC, MaxDC,
+            MinMC, MaxMC, MinSC, MaxSC, Accuracy, Agility, HP, MP, AttackSpeed, Luck, BagWeight, HandWeight, WearWeight, StartItem, Image, Durability, Price, 
+            StackSize, Effect);
+    }
+
+    
+
     public override string ToString()
     {
         return string.Format("{0}: {1}", Index, Name);
