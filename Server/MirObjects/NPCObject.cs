@@ -122,7 +122,6 @@ namespace Server.MirObjects
                 GoodsIndex.Add(Goods[i].Index);
         }
 
-
         private List<string> ParseSection(IList<string> lines, string sectionName)
         {
             List<string>
@@ -132,7 +131,8 @@ namespace Server.MirObjects
                 buttons = new List<string>(),
                 elseSay = new List<string>(),
                 elseActs = new List<string>(),
-                elseButtons = new List<string>();
+                elseButtons = new List<string>(),
+                gotoButton = new List<string>();
 
             List<string> currentSay = say, currentButtons = buttons;
 
@@ -580,7 +580,6 @@ namespace Server.MirObjects
 
         }
 
-
         public void ParseAct(List<NPCActions> acts, string line)
         {
             string[] parts = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
@@ -640,6 +639,23 @@ namespace Server.MirObjects
                     if (!uint.TryParse(parts[1], out temp)) return;
 
                     acts.Add(new NPCActions(ActionType.GiveExp, temp));
+                    return;
+                case "GIVEPET":
+                    uint petcount = 0;
+                    byte petlevel = 0;
+
+                    if (parts.Length < 2) return;
+
+                    MonsterInfo mInfo2 = SMain.Envir.GetMonsterInfo(parts[1]);
+                        if (mInfo2 == null) return;
+
+                    if (parts.Length > 2)
+                        if (!uint.TryParse(parts[2], out petcount) || petcount > 5) petcount = 5;
+
+                    if(parts.Length > 3)
+                        if (!byte.TryParse(parts[3], out petlevel) || petlevel > 7) petlevel = 7;
+
+                    acts.Add(new NPCActions(ActionType.GivePet, mInfo2, petcount, petlevel));
                     return;
                 case "GOTO":
                     if (parts.Length < 2) return;
@@ -846,6 +862,20 @@ namespace Server.MirObjects
                     case ActionType.Goto:
                         //create new npcobject instance
                         break;
+                    case ActionType.GivePet:
+                        for (int c = 0; c < (uint)act.Params[1]; c++)
+                        {
+                            MonsterObject monster = MonsterObject.GetMonster((MonsterInfo)act.Params[0]);
+                            if (monster == null) return;
+                            monster.PetLevel = (byte)act.Params[2];
+                            monster.Master = player;
+                            monster.MaxPetLevel = 7;
+                            monster.Direction = player.Direction;
+                            monster.ActionTime = SMain.Envir.Time + 1000;
+                            monster.Spawn(player.CurrentMap, player.Front);
+                            player.Pets.Add(monster);
+                        }
+                        break;
                 }
             }
         }
@@ -887,6 +917,7 @@ namespace Server.MirObjects
         TakeItem,
         GiveExp,
         Goto,
+        GivePet,
     }
 
     public enum CheckType
@@ -897,6 +928,5 @@ namespace Server.MirObjects
         CheckGold,
         CheckGender,
         CheckClass,
-
     }
 }

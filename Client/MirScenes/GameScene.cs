@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -7119,6 +7120,8 @@ namespace Client.MirScenes
                     continue;
                 }
 
+                lines[i] = ParseSay(lines[i]);
+
                 Match match = R.Match(lines[i]);
 
                 while (match.Success)
@@ -7137,6 +7140,53 @@ namespace Client.MirScenes
 
                 TextLabel[i].Text = lines[i];
             }
+        }
+
+
+        private static string ParseSay(string line)
+        {
+            var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var regex = new Regex(@"<\$(.*?)>");
+           
+            foreach (var part in parts)
+            {
+                var match = regex.Match(part);
+
+                if (!match.Success) continue;
+
+                switch (match.Groups[1].Captures[0].Value.ToUpper())
+                {
+                    case "USERNAME":
+                        line = line.Replace(part, MapObject.User.Name);
+                        break;
+                    case "LEVEL":
+                        line = line.Replace(part, MapObject.User.Level.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    case "HP":
+                        line = line.Replace(part, MapObject.User.HP.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    case "MAXHP":
+                        line = line.Replace(part, MapObject.User.MaxHP.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    case "MP":
+                        line = line.Replace(part, MapObject.User.MP.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    case "MAXMP":
+                        line = line.Replace(part, MapObject.User.MaxMP.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    case "WEAPON":
+                        if (MapObject.User.Equipment[(int) EquipmentSlot.Weapon] != null)
+                        {
+                            var weapon = MapObject.User.Equipment[(int) EquipmentSlot.Weapon].Info.Name;
+                            line = line.Replace(part, weapon);
+                            break;
+                        }
+                        line = line.Replace(part, "Nothing"); 
+                        break;
+                }
+            }
+
+            return line;
         }
 
         private void NewButton(string text, string key, Point p)

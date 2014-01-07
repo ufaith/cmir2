@@ -212,6 +212,7 @@ namespace Server
 
             ItemInfoListBox.SelectedIndexChanged += ItemInfoListBox_SelectedIndexChanged;
         }
+
         private void AddButton_Click(object sender, EventArgs e)
         {
             if (ITypeFilterComboBox.SelectedIndex == ITypeFilterComboBox.Items.Count - 1)
@@ -838,7 +839,7 @@ namespace Server
         private void ExportItems(IEnumerable<ItemInfo> items)
         {
             var itemInfos = items as ItemInfo[] ?? items.ToArray();
-            var list = itemInfos.Select(item => item.ToText() + "\t").ToList();
+            var list = itemInfos.Select(item => item.ToText()).ToList();
 
             File.WriteAllLines(ItemListPath, list);
 
@@ -852,8 +853,8 @@ namespace Server
             {
                 data = sr.ReadToEnd();
             }
-            data = data.Replace("\r\n", string.Empty);
-            var items = data.Split(new[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+            var items = data.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             var count = 0;
             foreach (var info in items.Select(ItemInfo.FromText).Where(info => info != null))
