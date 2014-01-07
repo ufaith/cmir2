@@ -547,8 +547,9 @@ namespace Server.MirObjects
         private void SetMP(ushort amount)
         {
             if (MP == amount) return;
-
-            Info.MP = amount <= MaxMP ? amount : MaxMP;
+            //was info.MP
+            MP = amount <= MaxMP ? amount : MaxMP;
+            MP = GMNeverDie ? MaxMP : MP;
 
             // HealthChanged = true;
             Enqueue(new S.HealthChanged { HP = HP, MP = MP });
@@ -579,6 +580,7 @@ namespace Server.MirObjects
             if (value == MP) return;
 
             MP = value;
+            MP = GMNeverDie ? MaxMP : MP;
 
             // HealthChanged = true;
             Enqueue(new S.HealthChanged { HP = HP, MP = MP });
@@ -813,18 +815,26 @@ namespace Server.MirObjects
             }
 
             if (Experience < MaxExperience) return;
-
-            Experience -= MaxExperience;
-
             if (Level >= byte.MaxValue) return;
-            Level++;
+
+            //Calculate increased levels
+            var level = Level;
+            var experience = Experience;
+
+            while (experience > MaxExperience)
+            {
+                level++;
+                experience -= MaxExperience;
+
+                if (level >= byte.MaxValue) break;
+            }
+
+            if (level == Level) return;
+
+            Level = level;
+            Experience = experience;
+
             LevelUp();
-
-            if (Experience < MaxExperience) return;
-
-            var rExperience = Experience;
-            Experience = 0;
-            GainExp((uint)rExperience);
         }
 
         private void LevelUp()
@@ -1603,7 +1613,7 @@ namespace Server.MirObjects
                         
                         break;
                     case "LEVEL":
-                        if (!IsGM) return;
+                        if (!IsGM || parts.Length < 2) return;
 
                         byte level;
                         byte old;
@@ -1778,15 +1788,19 @@ namespace Server.MirObjects
                         if (mInfo2 == null) return;
 
                         count = 1;
+                        byte petlevel = 0;
 
-                        if (parts.Length >= 3)
+                        if (parts.Length > 2)
                             if (!uint.TryParse(parts[2], out count) || count > 50) count = 1;
+
+                        if(parts.Length > 3)
+                            if (!byte.TryParse(parts[3], out petlevel) || petlevel > 7) petlevel = 7;
 
                         for (int i = 0; i < count; i++)
                         {
                             MonsterObject monster = MonsterObject.GetMonster(mInfo2);
                             if (monster == null) return;
-                            monster.PetLevel = 0;
+                            monster.PetLevel = petlevel;
                             monster.Master = this;
                             monster.MaxPetLevel = 7;
                             monster.Direction = Direction;
@@ -1796,10 +1810,23 @@ namespace Server.MirObjects
                         }
                         break;
                     case "RELOADDROPS":
-                        for (int i = 0; i < Envir.MonsterInfoList.Count; i++)
-                            Envir.MonsterInfoList[i].LoadDrops();
+                        if (!IsGM) return;
+                        foreach (var t in Envir.MonsterInfoList)
+                            t.LoadDrops();
                         ReceiveChat("Drops Reloaded.", ChatType.Hint);
                         break;
+                    case "GIVEGOLD":
+                        if (!IsGM) return;
+                        if (parts.Length < 2) return;
+                        if (!uint.TryParse(parts[1], out count)) return;
+
+                        if (count + Account.Gold >= uint.MaxValue)
+                            count = uint.MaxValue - Account.Gold;
+
+                        GainGold(count);
+                        SMain.Enqueue(string.Format("Player {0} has been given {1} gold", Name, count));
+                        break;
+
                 }
             }
             else

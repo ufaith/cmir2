@@ -651,9 +651,12 @@ namespace Server
 
         private void ExportMonsters(IEnumerable<MonsterInfo> monsters)
         {
-            var list = monsters.Select(monster => monster.ToText() + "\t").ToList();
+            var monsterInfos = monsters as MonsterInfo[] ?? monsters.ToArray();
+            var list = monsterInfos.Select(monster => monster.ToText()).ToList();
 
             File.WriteAllLines(MonsterListPath, list);
+
+            MessageBox.Show(monsterInfos.Count() + " Items have been exported");
         }
 
         private void ImportButton_Click(object sender, EventArgs e)
@@ -663,8 +666,8 @@ namespace Server
             {
                 data = sr.ReadToEnd();
             }
-            data = data.Replace("\r\n", string.Empty);
-            var monsters = data.Split(new[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+            var monsters = data.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var m in monsters)
                 MonsterInfo.FromText(m);

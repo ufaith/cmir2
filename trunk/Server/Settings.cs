@@ -130,6 +130,7 @@ namespace Server
                 Directory.CreateDirectory(DropPath);
             if (!Directory.Exists(ExportPath))
                 Directory.CreateDirectory(ExportPath);
+
             LoadVersion();
             LoadEXP();
         }
