@@ -33,6 +33,7 @@ namespace Client.MirObjects
         public Point TargetPoint;
 
         public bool Stoned;
+        public byte Stage;
         public int BaseSound;
 
         public MonsterObject(uint objectID) : base(objectID)
@@ -59,6 +60,7 @@ namespace Client.MirObjects
             Poison = info.Poison;
             Skeleton = info.Skeleton;
             Hidden = info.Hidden;
+            Stage = info.ExtraByte;
 
             if ((ushort)BaseImage < Libraries.Monsters.Length)
                 BodyLibrary = Libraries.Monsters[(ushort)BaseImage];
@@ -189,6 +191,7 @@ namespace Client.MirObjects
                     Frames = FrameSet.Monsters[8];
                     break;
                 case Monster.CrystalSpider:
+                case Monster.WhiteFoxman:
                     Frames = FrameSet.Monsters[9];
                     break;
                 case Monster.RedMoonEvil:
@@ -266,11 +269,31 @@ namespace Client.MirObjects
                 case Monster.OmaKing:
                     Frames = FrameSet.Monsters[29];
                     break;
+                case Monster.BlackFoxman:
+                case Monster.RedFoxman:
+                    Frames = FrameSet.Monsters[30];
+                    break;
+                case Monster.TrapRock:
+                    Frames = FrameSet.Monsters[31];
+                    break;
+                case Monster.GuardianRock:
+                    Frames = FrameSet.Monsters[32];
+                    break;
+                case Monster.ThunderElement:
+                case Monster.CloudElement:
+                    Frames = FrameSet.Monsters[33];
+                    break;
+                case Monster.GreatFoxSpirit:
+                    Frames = FrameSet.Monsters[34 + Stage];
+                    break;
+                case Monster.HedgeKekTal:
+                case Monster.BigHedgeKekTal:
+                    Frames = FrameSet.Monsters[39];
+                    break;
                 default:
                     Frames = FrameSet.Monsters[0];
                     break;
             }
-
 
             SetAction();
 
@@ -283,7 +306,50 @@ namespace Client.MirObjects
             NextMotion -= NextMotion % 100;
         }
 
+        public void Update(S.ObjectMonster info)
+        {
+            Name = info.Name;
+            NameColour = info.NameColour;
+            BaseImage = info.Image;
 
+            CurrentLocation = info.Location;
+            MapLocation = info.Location;
+
+            Effect = info.Effect;
+            AI = info.AI;
+            Light = info.Light;
+
+            Direction = info.Direction;
+            Dead = info.Dead;
+            Poison = info.Poison;
+            Skeleton = info.Skeleton;
+            Hidden = info.Hidden;
+            if (Stage != info.ExtraByte)
+            {
+                switch (BaseImage)
+                {
+                    case Monster.GreatFoxSpirit:
+                        Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 335, 20, 3000, this));
+                        break;
+                }
+            }
+            Stage = info.ExtraByte;
+
+
+            if (Skeleton)
+                ActionFeed.Add(new QueuedAction { Action = MirAction.Skeleton, Direction = Direction, Location = CurrentLocation });
+            else if (Dead)
+                ActionFeed.Add(new QueuedAction { Action = MirAction.Dead, Direction = Direction, Location = CurrentLocation });
+
+            switch (BaseImage)
+            {
+                case Monster.GreatFoxSpirit:
+                    Frames = FrameSet.Monsters[34 + Stage];
+                    break;
+            }
+
+            NextMotion -= NextMotion % 100;
+        }
 
         public override void Process()
         {
@@ -483,6 +549,10 @@ namespace Client.MirObjects
                         if (!Frames.Frames.TryGetValue(CurrentAction, out Frame))
                             Frames.Frames.TryGetValue(MirAction.Attack1, out Frame);
                         break;
+                    case MirAction.AttackRange2:
+                        if (!Frames.Frames.TryGetValue(CurrentAction, out Frame))
+                            Frames.Frames.TryGetValue(MirAction.Attack2, out Frame);
+                        break;
                     case MirAction.Special:
                         if (!Frames.Frames.TryGetValue(CurrentAction, out Frame))
                             Frames.Frames.TryGetValue(MirAction.Attack1, out Frame);
@@ -512,6 +582,7 @@ namespace Client.MirObjects
                             case Monster.Shinsu:
                             case Monster.Shinsu1:
                             case Monster.HolyDeva:
+                            case Monster.GuardianRock:
                                 Remove();
                                 return false;
                             default:
@@ -528,7 +599,6 @@ namespace Client.MirObjects
                 FrameIndex =  0;
 
                 if (Frame == null) return false;
-
 
                 FrameInterval = Frame.Interval;
                 
@@ -568,6 +638,9 @@ namespace Client.MirObjects
                             case Monster.YangDevilNode:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.YangDevilNode], 26, 26, Frame.Count * Frame.Interval, this));
                                 break;
+                            case Monster.GreatFoxSpirit:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 355, 20, Frame.Count * Frame.Interval, this));
+                                break;
                         }
                         break;
                     case MirAction.Attack2:
@@ -606,10 +679,29 @@ namespace Client.MirObjects
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.ShamanZombie], 232 + (int)Direction * 12, 6, Frame.Count * Frame.Interval, this));
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.ShamanZombie], 328, 12, Frame.Count * Frame.Interval, this));
                                 break;
+                            case Monster.GuardianRock:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GuardianRock], 12, 10, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.GreatFoxSpirit:
+                                byte random = (byte)CMain.Random.Next(4);
+                                for (int i = 0; i <= 4 + random; i++)
+                                {
+                                    Point source = new Point(User.CurrentLocation.X - 7 + CMain.Random.Next(14), User.CurrentLocation.Y - 7 + CMain.Random.Next(14));
+
+                                    MapControl.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 375 + (CMain.Random.Next(3) * 20), 20, 1400, source));
+                                }
+                                break;
                         }
                         TargetID = (uint)action.Params[0];
                         break;
-
+                    case MirAction.AttackRange2:
+                        //PlayRangeSound();
+                        switch (BaseImage)
+                        {
+                            //Empty
+                        }
+                        TargetID = (uint)action.Params[0];
+                        break;
                     case MirAction.Struck:
                         uint attackerID = (uint)action.Params[0];
                         StruckWeapon = -2;
@@ -659,6 +751,9 @@ namespace Client.MirObjects
                                 break;
                             case Monster.YangDevilNode:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.YangDevilNode], 52, 20, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.BlackFoxman:
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.BlackFoxman], 224, 10, Frame.Count * Frame.Interval, this));
                                 break;
                         }
                         PlayDieSound();
@@ -922,9 +1017,25 @@ namespace Client.MirObjects
                         else
                         {
                             if (FrameIndex == 2) PlaySwingSound();
-
+                            MapObject ob = null;
+                            Missile missile;
                             switch (FrameIndex)
                             {
+                                case 1:
+                                    {
+                                        switch (BaseImage)
+                                        {
+                                            case Monster.GuardianRock:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Magic2, 1410, 10, 400, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                        }
+                                        break;
+                                    }
                                 case 2:
                                     {
                                         switch (BaseImage)
@@ -937,7 +1048,6 @@ namespace Client.MirObjects
                                     }
                                 case 4:
                                     {
-                                        MapObject ob = null;
                                         switch (BaseImage)
                                         {
                                             case Monster.AxeSkeleton:
@@ -1010,10 +1120,105 @@ namespace Client.MirObjects
                                                     CreateProjectile(38, Libraries.Monsters[(ushort)Monster.CrossbowOma], false, 1, 30, 6);
                                                 break;
                                             case Monster.WingedOma:
+                                                missile = CreateProjectile(224, Libraries.Monsters[(ushort)Monster.WingedOma], false, 6, 30, 0, false);
+                                                
+                                                if (missile.Target != null)
+                                                {
+                                                    missile.Complete += (o, e) =>
+                                                    {
+                                                        if (missile.Target.CurrentAction == MirAction.Dead) return;
+                                                        missile.Target.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.WingedOma], 272, 2, 150, missile.Target) { Blend = false });
+                                                    };
+                                                }
+                                                break;
+                                            case Monster.RedFoxman:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.RedFoxman], 224, 9, 300, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                            case Monster.WhiteFoxman:
+                                                missile = CreateProjectile(1160, Libraries.Magic, true, 3, 30, 7);
+
+                                                if (missile.Target != null)
+                                                {
+                                                    missile.Complete += (o, e) =>
+                                                    {
+                                                        if (missile.Target.CurrentAction == MirAction.Dead) return;
+                                                        missile.Target.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.WhiteFoxman], 352, 10, 600, missile.Target));
+                                                    };
+                                                }
+                                                break;
+                                            case Monster.TrapRock:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.TrapRock], 26, 10, 600, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                            case Monster.HedgeKekTal:
                                                 if (MapControl.GetObject(TargetID) != null)
-                                                    CreateProjectile(224, Libraries.Monsters[(ushort)Monster.WingedOma], false, 6, 30, 0, false);
+                                                    CreateProjectile(38, Libraries.Monsters[(ushort)Monster.HedgeKekTal], false, 4, 30, 6);
+                                                break;
+                                            case Monster.BigHedgeKekTal:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(38, Libraries.Monsters[(ushort)Monster.BigHedgeKekTal], false, 4, 30, 6);
                                                 break;
                                             }
+                                        break;
+                                    }
+                            }
+                            NextMotion += FrameInterval;
+                        }
+                    }
+                    break;
+                case MirAction.AttackRange2:
+                    if (CMain.Time >= NextMotion)
+                    {
+                        GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame();
+
+                        if (UpdateFrame() >= Frame.Count)
+                        {
+                            FrameIndex = Frame.Count - 1;
+                            SetAction();
+                        }
+                        else
+                        {
+                            switch (FrameIndex)
+                            {
+                                case 4:
+                                    {
+                                        MapObject ob = null;
+                                        Missile missile;
+                                        switch (BaseImage)
+                                        {
+
+                                            case Monster.RedFoxman:
+                                                ob = MapControl.GetObject(TargetID);
+                                                if (ob != null)
+                                                {
+                                                    ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.RedFoxman], 233, 10, 400, ob));
+                                                    SoundManager.PlaySound(BaseSound + 6);
+                                                }
+                                                break;
+                                            case Monster.WhiteFoxman:
+                                                missile = CreateProjectile(1160, Libraries.Magic, true, 3, 30, 7);
+
+                                                if (missile.Target != null)
+                                                {
+                                                    missile.Complete += (o, e) =>
+                                                    {
+                                                        if (missile.Target.CurrentAction == MirAction.Dead) return;
+                                                        missile.Target.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.WhiteFoxman], 362, 15, 1000, missile.Target));
+                                                    };
+                                                }
+                                                break;
+                                        }
                                         break;
                                     }
                             }
@@ -1500,6 +1705,82 @@ namespace Client.MirObjects
                             break;
                         case MirAction.Die:
                             Libraries.Monsters[(ushort)Monster.OmaKing].DrawBlend(304 + FrameIndex + (int)Direction * 20, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.BlackFoxman:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Attack2:
+                            if (FrameIndex >= 3) Libraries.Monsters[(ushort)Monster.BlackFoxman].DrawBlend((234 + FrameIndex + (int)Direction * 4) - 3, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.GuardianRock:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.AttackRange:
+                            Libraries.Monsters[(ushort)Monster.GuardianRock].DrawBlend(8 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.ThunderElement:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            Libraries.Monsters[(ushort)Monster.ThunderElement].DrawBlend(44 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Walking:
+                        case MirAction.Pushed:
+                            Libraries.Monsters[(ushort)Monster.ThunderElement].DrawBlend(54 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Attack1:
+                            Libraries.Monsters[(ushort)Monster.ThunderElement].DrawBlend(64 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Struck:
+                            Libraries.Monsters[(ushort)Monster.ThunderElement].DrawBlend(74 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Die:
+                            Libraries.Monsters[(ushort)Monster.ThunderElement].DrawBlend(78 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.CloudElement:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            Libraries.Monsters[(ushort)Monster.CloudElement].DrawBlend(44 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Walking:
+                        case MirAction.Pushed:
+                            Libraries.Monsters[(ushort)Monster.CloudElement].DrawBlend(54 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Attack1:
+                            Libraries.Monsters[(ushort)Monster.CloudElement].DrawBlend(64 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Struck:
+                            Libraries.Monsters[(ushort)Monster.CloudElement].DrawBlend(74 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Die:
+                            Libraries.Monsters[(ushort)Monster.CloudElement].DrawBlend(78 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.GreatFoxSpirit:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            Libraries.Monsters[(ushort)Monster.GreatFoxSpirit].DrawBlend(Frame.Start + 30 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Attack1:
+                        case MirAction.AttackRange:
+                            Libraries.Monsters[(ushort)Monster.GreatFoxSpirit].DrawBlend(Frame.Start + 30 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Struck:
+                            Libraries.Monsters[(ushort)Monster.GreatFoxSpirit].DrawBlend(Frame.Start + 30 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                        case MirAction.Die:
+                            Libraries.Monsters[(ushort)Monster.GreatFoxSpirit].DrawBlend(318 + FrameIndex, DrawLocation, Color.White, true);
                             break;
                     }
                     break;

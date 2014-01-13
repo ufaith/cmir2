@@ -109,6 +109,14 @@
     <Compile Include="MirObjects\Monsters\BoneSpearman.cs" />
     <Compile Include="MirObjects\Monsters\BoneLord.cs" />
     <Compile Include="MirObjects\Monsters\BombSpider.cs" />
+    <Compile Include="MirObjects\Monsters\BlackFoxman.cs" />
+    <Compile Include="MirObjects\Monsters\HedgeKekTal.cs" />
+    <Compile Include="MirObjects\Monsters\GreatFoxSpirit.cs" />
+    <Compile Include="MirObjects\Monsters\ThunderElement.cs" />
+    <Compile Include="MirObjects\Monsters\GuardianRock.cs" />
+    <Compile Include="MirObjects\Monsters\TrapRock.cs" />
+    <Compile Include="MirObjects\Monsters\WhiteFoxman.cs" />
+    <Compile Include="MirObjects\Monsters\RedFoxman.cs" />
     <Compile Include="MirObjects\Monsters\OmaKing.cs" />
     <Compile Include="MirObjects\Monsters\YinDevilNode.cs" />
     <Compile Include="MirObjects\Monsters\RootSpider.cs" />

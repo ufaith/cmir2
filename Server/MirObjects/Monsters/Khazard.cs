@@ -76,7 +76,7 @@ namespace Server.MirObjects.Monsters
                 if (target == Target.CurrentLocation)
                 {
                     MirDirection pushdir = Functions.DirectionFromPoint(Target.CurrentLocation, CurrentLocation);
-                    Target.Pushed(pushdir, i);
+                    Target.Pushed(this, pushdir, i);
                 }
             }
         }

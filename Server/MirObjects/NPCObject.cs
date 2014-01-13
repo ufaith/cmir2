@@ -296,7 +296,7 @@ namespace Server.MirObjects
             throw new NotSupportedException();
         }
 
-        public override int Pushed(MirDirection dir, int distance)
+        public override int Pushed(MapObject pusher, MirDirection dir, int distance)
         {
             throw new NotSupportedException();
         }
@@ -641,10 +641,10 @@ namespace Server.MirObjects
                     acts.Add(new NPCActions(ActionType.GiveExp, temp));
                     return;
                 case "GIVEPET":
-                    uint petcount = 0;
-                    byte petlevel = 0;
-
                     if (parts.Length < 2) return;
+
+                    uint petcount = (parts.Length > 2 && uint.TryParse(parts[2], out petcount)) ? Math.Max(5, petcount) : 0;
+                    byte petlevel = 0;
 
                     MonsterInfo mInfo2 = SMain.Envir.GetMonsterInfo(parts[1]);
                         if (mInfo2 == null) return;

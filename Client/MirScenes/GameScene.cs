@@ -816,6 +816,10 @@ namespace Client.MirScenes
                 case 117:
                     ObjectSitDown((S.ObjectSitDown)p);
                     break;
+                case 118:
+                    S.InTrapRock packetdata = (S.InTrapRock)p;
+                    User.InTrapRock = packetdata.Trapped;
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1422,8 +1426,19 @@ namespace Client.MirScenes
         }
         private void ObjectMonster(S.ObjectMonster p)
         {
-            MonsterObject ob = new MonsterObject(p.ObjectID);
-            ob.Load(p);
+            MonsterObject mob;
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID == p.ObjectID)
+                {
+                    mob = (MonsterObject)ob;
+                    mob.Update(p);
+                    return;
+                }
+            }
+            mob = new MonsterObject(p.ObjectID);
+            mob.Load(p);
         }
         private void ObjectAttack(S.ObjectAttack p)
         {
@@ -1747,9 +1762,14 @@ namespace Client.MirScenes
                 Effect effect = null;
                 switch (p.Type)
                 {
-                    case 1:
+                    case 1: //Yimoogi
                         {
                             effect = new Effect(Libraries.Magic2, 1300, 10, 500, ob);
+                            break;
+                        }
+                    case 2: //RedFoxman
+                        {
+                            effect = new Effect(Libraries.Monsters[(ushort)Monster.RedFoxman], 243, 10, 500, ob);
                             break;
                         }
                     default:
@@ -1777,9 +1797,14 @@ namespace Client.MirScenes
                 if (ob.ObjectID != p.ObjectID) continue;
                 switch (p.Type)
                 {
-                    case 1:
+                    case 1: //Yimoogi
                         {
                             ob.Effects.Add(new Effect(Libraries.Magic2, 1310, 10, 500, ob));
+                            break;
+                        }
+                    case 2: //RedFoxman
+                        {
+                            ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.RedFoxman], 253, 10, 500, ob));
                             break;
                         }
                     default:
@@ -1997,6 +2022,9 @@ namespace Client.MirScenes
                         player.ShieldEffect = null;
                         player.MagicShield = false;
                         break;
+                    case SpellEffect.GreatFoxSpirit:
+                        ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 375 + (CMain.Random.Next(3) * 20), 20, 1400, ob));
+                        break;
                 }
                 return;
             }
@@ -2152,7 +2180,7 @@ namespace Client.MirScenes
                     {
                         case 1:
                             {
-                                action = new QueuedAction { Action = MirAction.AttackRange, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                                action = new QueuedAction { Action = MirAction.AttackRange2, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
                                 break;
                             }
                         default:
@@ -4153,12 +4181,12 @@ namespace Client.MirScenes
 
         private bool CanWalk(MirDirection dir)
         {
-            return EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 1));
+            return EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 1)) && !User.InTrapRock;
         }
 
         private bool CanRun(MirDirection dir)
         {
-            return CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 2));
+            return CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 2)) && !User.InTrapRock;
         }
 
         public bool ValidPoint(Point p)

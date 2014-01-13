@@ -219,7 +219,7 @@ namespace Server.MirObjects
         {
             throw new NotSupportedException();
         }
-        public override int Pushed(MirDirection dir, int distance)
+        public override int Pushed(MapObject pusher, MirDirection dir, int distance)
         {
             throw new NotSupportedException();
         }

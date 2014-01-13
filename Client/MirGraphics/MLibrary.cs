@@ -47,7 +47,7 @@ namespace Client.MirGraphics
                                           AWeaponsL = new MLibrary[11],
                                           AWeaponsR = new MLibrary[11],
                                           AHair = new MLibrary[9],
-                                          Monsters = new MLibrary[127],
+                                          Monsters = new MLibrary[137],
                                           NPCs = new MLibrary[42],
                                           CHumEffect = new MLibrary[2];
 

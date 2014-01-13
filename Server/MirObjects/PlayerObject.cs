@@ -119,6 +119,10 @@ namespace Server.MirObjects
         {
             get { return !Dead && Envir.Time >= ActionTime; }
         }
+        public bool CanWalk
+        {
+            get { return !Dead && Envir.Time >= ActionTime && !InTrapRock; }
+        }
         public bool CanAttack
         {
             get
@@ -613,6 +617,7 @@ namespace Server.MirObjects
             Broadcast(new S.ObjectDied { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
 
             PoisonList.Clear();
+            InTrapRock = false;
         }
 
         private void DeathDrop(MapObject killer)
@@ -1934,7 +1939,8 @@ namespace Server.MirObjects
 
         public void Walk(MirDirection dir)
         {
-            if (!CanMove)
+
+            if (!CanMove || !CanWalk)
             {
                 Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
                 return;
@@ -2017,7 +2023,7 @@ namespace Server.MirObjects
         }
         public void Run(MirDirection dir)
         {
-            if (!CanMove)
+            if (!CanMove || !CanWalk)
             {
                 Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
                 return;
@@ -2125,7 +2131,7 @@ namespace Server.MirObjects
 
 
         }
-        public override int Pushed(MirDirection dir, int distance)
+        public override int Pushed(MapObject pusher, MirDirection dir, int distance)
         {
             int result = 0;
             MirDirection reverse = Functions.ReverseDirection(dir);
@@ -2703,7 +2709,7 @@ namespace Server.MirObjects
                         if (target == null && ob.Race == ObjectType.Player)
                             target = ob;
 
-                        if (Envir.Random.Next(20) >= 6 + magic.Level*3 + Level - ob.Level || !ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(Direction, 1) == 0)
+                        if (Envir.Random.Next(20) >= 6 + magic.Level*3 + Level - ob.Level || !ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
                         {
                             if (target == ob)
                                 target = null;
@@ -2739,7 +2745,7 @@ namespace Server.MirObjects
                                 break;
                             }
 
-                            if (!ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(Direction, 1) == 0)
+                            if (!ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
                             {
                                 blocking = true;
                                 break;
@@ -2765,7 +2771,7 @@ namespace Server.MirObjects
                                 break;
                             }
 
-                            if (Envir.Random.Next(20) >= 6 + magic.Level * 3 + Level - ob.Level || !ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(Direction, 1) == 0)
+                            if (Envir.Random.Next(20) >= 6 + magic.Level * 3 + Level - ob.Level || !ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
                             {
                                 blocking = true;
                                 break;
@@ -2875,7 +2881,7 @@ namespace Server.MirObjects
                             int distance = 1 + Math.Max(0, magic.Level - 1) + Envir.Random.Next(2);
                             MirDirection dir = Functions.DirectionFromPoint(CurrentLocation, ob.CurrentLocation);
 
-                            if (ob.Pushed(dir, distance) == 0) continue;
+                            if (ob.Pushed(this, dir, distance) == 0) continue;
 
                             if (ob.Race == ObjectType.Player)
                                 ob.Attacked(this, magic.Level + 1, DefenceType.None, false);
