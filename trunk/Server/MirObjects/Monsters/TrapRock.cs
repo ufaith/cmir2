@@ -169,6 +169,7 @@ namespace Server.MirObjects.Monsters
 
         public void Show()
         {
+            TargetLocation = Target.CurrentLocation;
             Visible = true;
             CellTime = ChildRock ? ParentRock.CellTime : Envir.Time + 500;
 
@@ -177,7 +178,6 @@ namespace Server.MirObjects.Monsters
 
             if (!ChildRock)
             {
-                TargetLocation = Target.CurrentLocation;
                 Target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 3, TickSpeed = 1000 });
                 Target.InTrapRock = true;
 
