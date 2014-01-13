@@ -35,9 +35,9 @@ namespace Server.MirObjects.Monsters
         {
         }
 
-        public override int Pushed(MirDirection dir, int distance)
+        public override int Pushed(MapObject pusher, MirDirection dir, int distance)
         {
-            return Stoned ? 0 : base.Pushed(dir, distance);
+            return Stoned ? 0 : base.Pushed(pusher, dir, distance);
         }
 
         public override void ApplyPoison(Poison p)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Server.MirEnvir;
+using Server.MirObjects.Monsters;
 using S = ServerPackets;
 
 namespace Server.MirObjects
@@ -83,7 +84,19 @@ namespace Server.MirObjects
 
         }
 
-        public MapObject Master, LastHitter, EXPOwner, Target, Owner;
+        public MapObject _target;
+        public virtual MapObject Target
+        {
+            get { return _target; }
+            set
+            {
+                if (_target == value) return;
+                _target = value;
+            }
+
+        }
+
+        public MapObject Master, LastHitter, EXPOwner, Owner;
         public long ExpireTime, OwnerTime, OperateTime;
         public int OperateDelay = 100;
 
@@ -368,6 +381,8 @@ namespace Server.MirObjects
             CurrentMap = temp;
             CurrentLocation = location;
 
+            InTrapRock = false;
+
             CurrentMap.AddObject(this);
 
             Broadcast(GetInfo());
@@ -470,7 +485,7 @@ namespace Server.MirObjects
         }
 
         public abstract void Die();
-        public abstract int Pushed(MirDirection dir, int distance);
+        public abstract int Pushed(MapObject pusher, MirDirection dir, int distance);
 
         public bool IsMember(MapObject member)
         {
@@ -484,6 +499,55 @@ namespace Server.MirObjects
         }
 
         public abstract void SendHealth(PlayerObject player);
+
+        public bool InTrapRock
+        {
+            set
+            {
+                if (this is PlayerObject)
+                {
+                    PlayerObject player = (PlayerObject)this;
+                    player.Enqueue(new S.InTrapRock { Trapped = value });
+                }
+            }
+            get
+            {
+                Point checklocation;
+
+                for (int i = 0; i <= 6; i += 2)
+                {
+                    checklocation = Functions.PointMove(CurrentLocation, (MirDirection)i, 1);
+
+                    if (checklocation.X < 0) continue;
+                    if (checklocation.X >= CurrentMap.Width) continue;
+
+                    Cell cell = CurrentMap.GetCell(checklocation.X, checklocation.Y);
+                    if (!cell.Valid || cell.Objects == null) continue;
+
+                    for (int j = 0; j < cell.Objects.Count; j++)
+                    {
+                        MapObject ob = cell.Objects[j];
+                        switch (ob.Race)
+                        {
+                            case ObjectType.Monster:
+                                if (ob is TrapRock)
+                                {
+                                    TrapRock rock = (TrapRock)ob;
+                                    if (rock.Dead) continue;
+                                    if (rock.Target != this) continue;
+                                    if (!rock.Visible) continue;
+                                }
+                                else continue;
+
+                                return true;
+                            default:
+                                continue;
+                        }
+                    }
+                }
+                return false;
+            }
+        }
     }
 
     public class Poison

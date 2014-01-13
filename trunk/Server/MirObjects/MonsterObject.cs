@@ -100,6 +100,22 @@ namespace Server.MirObjects
                     return new YinDevilNode(info);
                 case 43:
                     return new OmaKing(info);
+                case 44:
+                    return new BlackFoxman(info);
+                case 45:
+                    return new RedFoxman(info);
+                case 46:
+                    return new WhiteFoxman(info);
+                case 47:
+                    return new TrapRock(info);
+                case 48:
+                    return new GuardianRock(info);
+                case 49:
+                    return new ThunderElement(info);
+                case 50:
+                    return new GreatFoxSpirit(info);
+                case 51:
+                    return new HedgeKekTal(info);
                 default:
                     return new MonsterObject(info);
             }
@@ -393,7 +409,7 @@ namespace Server.MirObjects
             //  HealthChanged = true;
             BroadcastHealthChange();
         }
-        public void ChangeHP(int amount)
+        public virtual void ChangeHP(int amount)
         {
             uint value = (uint)Math.Max(uint.MinValue, Math.Min(MaxHP, HP + amount));
 
@@ -448,7 +464,7 @@ namespace Server.MirObjects
 
         }
 
-        public override int Pushed(MirDirection dir, int distance)
+        public override int Pushed(MapObject pusher, MirDirection dir, int distance)
         {
             if (!Info.CanPush) return 0;
 
@@ -974,6 +990,7 @@ namespace Server.MirObjects
                                 case ObjectType.Monster:
                                     if (!ob.IsAttackTarget(this)) continue;
                                     if (ob.Hidden && (!CoolEye || Level < ob.Level)) continue;
+                                    if (this is TrapRock && ob.InTrapRock) continue;
                                     Target = ob;
                                     return;
                                 case ObjectType.Player:

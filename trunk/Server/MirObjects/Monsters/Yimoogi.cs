@@ -10,29 +10,33 @@ namespace Server.MirObjects.Monsters
         protected byte AttackRange = 7;
         protected byte PoisonAttackRange = 4;
         public bool NoAttack, ChildSpawned, IsChild, FinalTeleport;
-        protected Yimoogi MasterMob, ChildMob;
+        protected Yimoogi SisterMob;
         public long SpawnTime;
         public int WhiteSnakeCount = 2;
+        public override MapObject Target
+        {
+            get { return _target; }
+            set
+            {
+                if (_target == value) return;
+                _target = value;
+                if (SisterMobReady()) SisterMob.Target = value;
+
+                NoAttack = value == null ? true : false;
+            }
+        }
 
         protected internal Yimoogi(MonsterInfo info)
             : base(info)
         {
             SpawnTime = Envir.Time + 4000;
+            NoAttack = true;
         }
 
-        protected bool ChildMobReady()
+        protected bool SisterMobReady()
         {
-            if (ChildMob == null) return false;
-            if (ChildMob.Dead) return false;
-
-            return true;
-        }
-
-        protected bool MasterMobReady()
-        {
-            
-            if (MasterMob == null) return false;
-            if (MasterMob.Dead) return false;
+            if (SisterMob == null) return false;
+            if (SisterMob.Dead) return false;
 
             return true;
         }
@@ -117,13 +121,6 @@ namespace Server.MirObjects.Monsters
 
         }
 
-        public override void Process()
-        {
-            base.Process();
-
-            if (Target == null) NoAttack = true;
-        }
-
         protected override void ProcessAI()
         {
             if (Dead) return;
@@ -157,12 +154,12 @@ namespace Server.MirObjects.Monsters
                 return;
             }
 
-            if (IsChild && MasterMobReady())
+            if (IsChild && SisterMobReady())
             {
-                if (Functions.InRange(CurrentLocation, MasterMob.CurrentLocation, 2) && Target == null && 
-                Functions.MaxDistance(CurrentLocation, MasterMob.CurrentLocation) < 10)
+                if (Functions.InRange(CurrentLocation, SisterMob.CurrentLocation, 2) && Target == null && 
+                Functions.MaxDistance(CurrentLocation, SisterMob.CurrentLocation) < 10)
                 {
-                    MoveTo(MasterMob.CurrentLocation);
+                    MoveTo(SisterMob.CurrentLocation);
                     return;
                 }
             }
@@ -174,17 +171,6 @@ namespace Server.MirObjects.Monsters
         {
             if (Target == null) return;
             if (InAttackRange() && !CanAttack) return;
-
-            NoAttack = false;
-
-            if (!IsChild && ChildMobReady())
-            {
-                if (ChildMob.Target == null) ChildMob.Target = Target;
-            }
-            if (IsChild && MasterMobReady())
-            {
-                if (MasterMob.Target == null) MasterMob.Target = Target;
-            }
 
             if (InRangedAttackRange(AttackRange) && CanAttack)
             {
@@ -221,9 +207,9 @@ namespace Server.MirObjects.Monsters
             }
 
             childmob.IsChild = true;
-            childmob.MasterMob = this;
+            childmob.SisterMob = this;
             childmob.ActionTime = Envir.Time + 2000;
-            ChildMob = childmob;
+            SisterMob = childmob;
             ChildSpawned = true;
         }
 
@@ -247,7 +233,7 @@ namespace Server.MirObjects.Monsters
 
         protected override void Drop()
         {
-            if (!ChildMobReady() && !MasterMobReady())
+            if (!SisterMobReady())
                 base.Drop();
         }
     }

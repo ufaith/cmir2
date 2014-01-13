@@ -29,6 +29,7 @@ namespace Client.MirObjects
         public PoisonType Poison;
         public long DeadTime;
         public byte AI;
+        public bool InTrapRock;
 
         public byte PercentHealth;
         public long HealthTime;

@@ -15,7 +15,6 @@ C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Release\AutoPat
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csproj.GenerateResource.Cache
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.exe
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.pdb
-C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csprojResolveAssemblyReference.cache
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.exe.config
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.exe
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.pdb

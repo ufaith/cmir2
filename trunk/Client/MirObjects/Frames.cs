@@ -375,6 +375,98 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Die, new Frame(144, 20, 0, 150));
             frame.Frames.Add(MirAction.Dead, new Frame(163, 1, 19, 1000));
             frame.Frames.Add(MirAction.Revive, new Frame(144, 20, 0, 150) { Reverse = true });
+
+            //30
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
+            frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(80, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack2, new Frame(80, 6, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(128, 2, 0, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(144, 10, 0, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(153, 1, 9, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(144, 10, 0, 100) { Reverse = true });
+
+            //31
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, -4, 500));
+            frame.Frames.Add(MirAction.Show, new Frame(4, 5, -5, 200));
+            frame.Frames.Add(MirAction.Attack1, new Frame(9, 5, -5, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(14, 2, -2, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(16, 10, -10, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(25, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(16, 10, -10, 100) { Reverse = true });
+
+            //32
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, -4, 500));
+            frame.Frames.Add(MirAction.Attack1, new Frame(4, 4, -4, 200));
+
+            //33
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 10, -10, 800));
+            frame.Frames.Add(MirAction.Walking, new Frame(10, 10, -10, 80));
+            frame.Frames.Add(MirAction.Attack1, new Frame(20, 10, -10, 80));
+            frame.Frames.Add(MirAction.Struck, new Frame(30, 4, -4, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(34, 10, -10, 120));
+            frame.Frames.Add(MirAction.Dead, new Frame(43, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(34, 10, -10, 150) { Reverse = true });
+
+            //34 - GreatFoxSpirit level 0
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 20, -20, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(22, 8, -8, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(20, 2, -2, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(300, 18, -18, 120));
+            frame.Frames.Add(MirAction.Dead, new Frame(317, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(300, 18, -18, 150) { Reverse = true });
+
+            //35 - GreatFoxSpirit level 1
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(60, 20, -20, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(82, 8, -8, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(80, 2, -2, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(300, 18, -18, 120));
+            frame.Frames.Add(MirAction.Dead, new Frame(317, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(300, 18, -18, 150) { Reverse = true });
+
+            //36 - GreatFoxSpirit level 2
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(120, 20, -20, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(142, 8, -8, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(140, 2, -2, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(300, 18, -18, 120));
+            frame.Frames.Add(MirAction.Dead, new Frame(317, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(300, 18, -18, 150) { Reverse = true });
+
+            //37 - GreatFoxSpirit level 3
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(180, 20, -20, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(202, 8, -8, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(200, 2, -2, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(300, 18, -18, 120));
+            frame.Frames.Add(MirAction.Dead, new Frame(317, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(300, 18, -18, 150) { Reverse = true });
+
+            //38 - GreatFoxSpirit level 4
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(240, 20, -20, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(262, 8, -8, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(260, 2, -2, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(300, 18, -18, 120));
+            frame.Frames.Add(MirAction.Dead, new Frame(317, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(300, 18, -18, 150) { Reverse = true });
+
+            //39
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
+            frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 4, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(112, 6, 4, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(192, 2, 0, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(208, 10, 0, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(217, 1, 9, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(208, 10, 0, 100) { Reverse = true });
+            frame.Frames.Add(MirAction.AttackRange, new Frame(288, 6, 0, 100));
         }
     }
 

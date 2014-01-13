@@ -1337,6 +1337,7 @@ namespace ServerPackets
         public bool Dead, Skeleton;
         public PoisonType Poison;
         public bool Hidden, Extra;
+        public byte ExtraByte;
 
 
         protected override void ReadPacket(BinaryReader reader)
@@ -1355,6 +1356,7 @@ namespace ServerPackets
             Poison = (PoisonType)reader.ReadByte();
             Hidden = reader.ReadBoolean();
             Extra = reader.ReadBoolean();
+            ExtraByte = reader.ReadByte();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -1374,6 +1376,7 @@ namespace ServerPackets
             writer.Write((byte)Poison);
             writer.Write(Hidden);
             writer.Write(Extra);
+            writer.Write((byte)ExtraByte);
         }
 
     }
@@ -2824,6 +2827,20 @@ namespace ServerPackets
             writer.Write(Location.Y);
             writer.Write((byte)Direction);
             writer.Write(Sitting);
+        }
+    }
+    public sealed class InTrapRock : Packet
+    {
+        public override short Index { get { return 118; } }
+        public bool Trapped;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Trapped = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Trapped);
         }
     }
 }

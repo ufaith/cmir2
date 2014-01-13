@@ -136,6 +136,16 @@ public enum Monster : ushort
     YinDevilNode = 124,
     YangDevilNode = 125,
     OmaKing = 126,
+    BlackFoxman = 127,
+    RedFoxman = 128,
+    WhiteFoxman = 129,
+    TrapRock = 130,
+    GuardianRock = 131,
+    ThunderElement = 132,
+    CloudElement = 133,
+    GreatFoxSpirit = 134,
+    HedgeKekTal = 135,
+    BigHedgeKekTal = 136,
 }
 
 public enum MirAction : byte
@@ -153,6 +163,7 @@ public enum MirAction : byte
     Attack3,
     Attack4,
     AttackRange,
+    AttackRange2,
     Special,
     Struck,
     Harvest,
@@ -444,6 +455,7 @@ public enum SpellEffect : byte
     MagicShieldUp,
     MagicShieldDown,
     FlameSwordCharge,
+    GreatFoxSpirit,
 }
 
 public enum BuffType : byte
@@ -465,6 +477,7 @@ public enum DefenceType : byte
     MACAgility,
     MAC,
     Agility,
+    Repulsion,
     None
 }
 
@@ -2000,6 +2013,8 @@ public abstract class Packet
                 return new S.MarketSuccess();
             case 117:
                 return new S.ObjectSitDown();
+            case 118:
+                return new S.InTrapRock();
             default:
                 throw new NotImplementedException();
         }

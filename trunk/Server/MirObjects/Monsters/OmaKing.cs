@@ -91,7 +91,7 @@ namespace Server.MirObjects.Monsters
                         levelgap = 60 - targets[i].Level;
                         if (Envir.Random.Next(20) < 4 + levelgap)
                         {
-                            if (targets[i].Pushed(Functions.DirectionFromPoint(CurrentLocation, targets[i].CurrentLocation), 3 + Envir.Random.Next(3)) > 0
+                            if (targets[i].Pushed(this, Functions.DirectionFromPoint(CurrentLocation, targets[i].CurrentLocation), 3 + Envir.Random.Next(3)) > 0
                             && Envir.Random.Next(8) == 0)
                             {
                                 targets[i].ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 });
