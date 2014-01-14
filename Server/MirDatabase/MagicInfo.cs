@@ -270,7 +270,7 @@ namespace Server.MirDatabase
                     Level = Level,
                     Key = Key,
                     Experience = Experience,
-                    IsTempSpell = false,
+                    IsTempSpell = IsTempSpell,
                 };
         }
 

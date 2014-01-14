@@ -1068,9 +1068,9 @@ namespace Server.MirEnvir
             return null;
         }
 
-        public Map GetMapByNumber(string number)
+        public Map GetMapByName(string name)
         {
-            return MapList.FirstOrDefault(t => String.Equals(t.Info.FileName, number, StringComparison.CurrentCultureIgnoreCase));
+            return MapList.FirstOrDefault(t => String.Equals(t.Info.FileName, name, StringComparison.CurrentCultureIgnoreCase));
         }
 
         public MonsterInfo GetMonsterInfo(int index)

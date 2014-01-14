@@ -221,6 +221,14 @@ namespace Client.MirObjects
             HasFireRing = false;
             HasHealRing = false;
 
+            for (var i = Magics.Count - 1; i >= 0; i--)
+            {
+                if (Magics[i].IsTempSpell)
+                {
+                    Magics.RemoveAt(i);
+                }
+            }
+
             for (int i = 0; i < Equipment.Length; i++)
             {
                 UserItem temp = Equipment[i];
@@ -297,7 +305,11 @@ namespace Client.MirObjects
             }
 
             if (HasMuscleRing)
+            {
                 MaxBagWeight = (ushort)(MaxBagWeight * 2);
+                MaxWearWeight = Math.Min(byte.MaxValue, (byte)(MaxWearWeight * 2));
+                MaxHandWeight = Math.Min(byte.MaxValue, (byte)(MaxHandWeight * 2));
+            }
         }
 
         private void RefreshSkills()

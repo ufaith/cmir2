@@ -1501,6 +1501,8 @@ namespace Server.MirObjects
 
             if (attacker.Info.AI == 6)
                 EXPOwner = null;
+            else if (!Functions.InRange(attacker.CurrentLocation, attacker.Master.CurrentLocation, Globals.DataRange))
+                EXPOwner = null;
             else if (attacker.Master != null)
             {
                 if (EXPOwner == null || EXPOwner.Dead)

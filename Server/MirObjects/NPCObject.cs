@@ -43,7 +43,7 @@ namespace Server.MirObjects
         public List<int> GoodsIndex = new List<int>();
         public List<ItemType> Types = new List<ItemType>();
         public List<NPCPage> NPCSections = new List<NPCPage>();
-        public List<NPCPage> NPCSections1 = new List<NPCPage>();
+
         public override string Name
         {
             get { return Info.Name; }
@@ -218,7 +218,6 @@ namespace Server.MirObjects
                 page.ParseAct(page.ElseActList, elseActs[i]);
 
             NPCSections.Add(page);
-            NPCSections1.Add(page);
             currentButtons = new List<string>();
             currentButtons.AddRange(buttons);
             currentButtons.AddRange(elseButtons);
@@ -663,12 +662,10 @@ namespace Server.MirObjects
                     int x, y;
                     if (parts.Length < 4) return;
 
-                    var map = SMain.Envir.GetMapByNumber(parts[1]);
-                    if (map == null) return;
                     if (!int.TryParse(parts[2], out x)) return;
                     if (!int.TryParse(parts[3], out y)) return;
 
-                    acts.Add(new NPCActions(ActionType.Teleport, map, new Point(x, y)));
+                    acts.Add(new NPCActions(ActionType.Teleport, parts[1], new Point(x, y)));
                     break;
 
                 case "GIVEGOLD":
@@ -1015,7 +1012,9 @@ namespace Server.MirObjects
                 switch (act.Type)
                 {
                     case ActionType.Teleport:
-                        player.Teleport((Map)act.Params[0], (Point)act.Params[1]);
+                        var map = SMain.Envir.GetMapByName((string)act.Params[0]);
+                        if (map == null) return;
+                        player.Teleport(map, (Point)act.Params[1]);
                         break;
 
                     case ActionType.GiveGold:

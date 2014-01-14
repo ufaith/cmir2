@@ -14,6 +14,7 @@ namespace Server
             Packet.IsServer = true;
 
             Settings.Load();
+            //Resource.Load();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
