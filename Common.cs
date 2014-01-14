@@ -1527,6 +1527,8 @@ public class ClientMagic
     public byte Level, Key;
     public ushort Experience;
 
+    public bool IsTempSpell;
+
     public ClientMagic()
     {
     }

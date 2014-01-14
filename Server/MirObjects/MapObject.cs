@@ -74,7 +74,10 @@ namespace Server.MirObjects
         private bool _hidden;
         public bool Hidden
         {
-            get { return _hidden; }
+            get
+            {
+                return _hidden;
+            }
             set
             {
                 if (_hidden == value) return;

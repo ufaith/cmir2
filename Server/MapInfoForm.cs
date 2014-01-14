@@ -38,17 +38,20 @@ namespace Server
 
         private void UpdateInterface()
         {
+            //List<MapInfo> orderedMapInfoList = Envir.MapInfoList.OrderBy(m => m.Title).ToList();
+
             if (MapInfoListBox.Items.Count != Envir.MapInfoList.Count)
             {
                 MapInfoListBox.Items.Clear();
                 DestMapComboBox.Items.Clear();
+
                 for (int i = 0; i < Envir.MapInfoList.Count; i++)
                 {
                     MapInfoListBox.Items.Add(Envir.MapInfoList[i]);
                     DestMapComboBox.Items.Add(Envir.MapInfoList[i]);
                 }
             }
-
+            
             _selectedMapInfos = MapInfoListBox.SelectedItems.Cast<MapInfo>().ToList();
 
             if (_selectedMapInfos == null || _selectedMapInfos.Count == 0)

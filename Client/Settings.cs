@@ -6,7 +6,7 @@ namespace Client
     class Settings
     {
         public const long CleanDelay = 600000;
-        public const int ScreenWidth = 800, ScreenHeight = 600;
+        public static int ScreenWidth = 800, ScreenHeight = 600;
         private static readonly InIReader Reader = new InIReader(@".\Mir2Config.ini");
 
         public const string DataPath = @".\Data\",
@@ -32,6 +32,7 @@ namespace Client
         public static string FontName = "MS Sans Serif";
         public static bool FPSCap = false;
         public static int MaxFPS = 100;
+        public static bool HighResolution = false;
 
         //Network
         public static bool UseConfig = false;
@@ -81,6 +82,7 @@ namespace Client
             TopMost = Reader.ReadBoolean("Graphics", "AlwaysOnTop", TopMost);
             FontName = Reader.ReadString("Graphics", "FontName", FontName);
             FPSCap = Reader.ReadBoolean("Graphics", "FPSCap", FPSCap);
+            HighResolution = Reader.ReadBoolean("Graphics", "HighResolution", HighResolution);
 
             //Network
             UseConfig = Reader.ReadBoolean("Network", "UseConfig", UseConfig);
@@ -108,7 +110,6 @@ namespace Client
             DropView = Reader.ReadBoolean("Game", "DropView", DropView);
             NameView = Reader.ReadBoolean("Game", "NameView", NameView);
             HPView = Reader.ReadBoolean("Game", "HPMPView", HPView);
-            FontName = Reader.ReadString("Game", "FontName", FontName);
         }
 
         public static void Save()
@@ -118,7 +119,8 @@ namespace Client
             Reader.Write("Graphics", "AlwaysOnTop", TopMost);
             Reader.Write("Graphics", "FontName", FontName);
             Reader.Write("Graphics", "FPSCap", FPSCap);
-            
+            Reader.Write("Graphics", "HighResolution", HighResolution);
+
             //Sound
             Reader.Write("Sound", "Volume", Volume);
 
@@ -130,6 +132,7 @@ namespace Client
             Reader.Write("Game", "NameView", NameView);
             Reader.Write("Game", "HPMPView", HPView);
             Reader.Write("Game", "FontName", FontName);
+            
         }
     }
 }
