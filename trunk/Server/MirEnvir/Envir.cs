@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -45,6 +46,12 @@ namespace Server.MirEnvir
             get { return ++_objectID; }
         }
 
+        public static int _playerCount;
+        public int PlayerCount
+        {
+            get { return Players.Count; }
+        }
+
 
         public Random Random = new Random();
         private Thread _thread;
@@ -71,7 +78,7 @@ namespace Server.MirEnvir
         public List<Map> MapList = new List<Map>();
         public List<SafeZoneInfo> StartPoints = new List<SafeZoneInfo>(); 
         public List<ItemInfo> StartItems = new List<ItemInfo>(); 
-        public List<PlayerObject> Players = new List<PlayerObject>();
+        public List<PlayerObject> Players = new List<PlayerObject>();//farril
         public bool Saving = false;
         public LightSetting Lights;
         public LinkedList<MapObject> Objects = new LinkedList<MapObject>();
@@ -1060,6 +1067,12 @@ namespace Server.MirEnvir
 
             return null;
         }
+
+        public Map GetMapByNumber(string number)
+        {
+            return MapList.FirstOrDefault(t => String.Equals(t.Info.FileName, number, StringComparison.CurrentCultureIgnoreCase));
+        }
+
         public MonsterInfo GetMonsterInfo(int index)
         {
             for (int i = 0; i < MonsterInfoList.Count; i++)

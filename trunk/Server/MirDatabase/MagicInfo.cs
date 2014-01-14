@@ -220,6 +220,7 @@ namespace Server.MirDatabase
 
         public byte Level, Key;
         public ushort Experience;
+        public bool IsTempSpell;
 
         public UserMagic(Spell spell)
         {
@@ -269,6 +270,7 @@ namespace Server.MirDatabase
                     Level = Level,
                     Key = Key,
                     Experience = Experience,
+                    IsTempSpell = false,
                 };
         }
 

@@ -10,10 +10,14 @@ namespace Server
     {
         public const int Day = 24 * Hour, Hour = 60 * Minute, Minute = 60 * Second, Second = 1000;
 
-        public const string MapPath = @".\Maps\",
-                            NPCPath = @".\NPCs\",
-                            DropPath = @".\Drops\",
-                            ExportPath = @".\Exports\";
+        public const string EnvirPath = @".\Envir\",
+                            MapPath = @".\Maps\",
+                            ExportPath = @".\Exports\",
+                            NPCPath = EnvirPath + @".\NPCs\",
+                            QuestPath = EnvirPath + @".\Quests\",
+                            DropPath = EnvirPath + @".\Drops\";
+
+        public const string NameListPath = QuestPath + @"\NameLists\";
 
         private static readonly InIReader Reader = new InIReader(@".\Setup.ini");
 
@@ -71,6 +75,10 @@ namespace Server
                              WhiteSnake = "White Serpent",
                              AngelName = "Holy Deva",
                              BombSpiderName = "Bomb Spider";
+
+        public static string HealRing = "Healing",
+                             FireRing = "FireBall",
+                             ParalysisRing = "Paralysis";
                             
 
 
@@ -121,15 +129,34 @@ namespace Server
             AngelName = Reader.ReadString("Game", "AngelName", AngelName);
             BombSpiderName = Reader.ReadString("Game", "BombSpiderName", BombSpiderName);
 
+            //Items
+            HealRing = Reader.ReadString("Items", "HealRing", HealRing);
+            FireRing = Reader.ReadString("Items", "FireRing", FireRing);
+
+            if (!Directory.Exists(EnvirPath))
+                Directory.CreateDirectory(EnvirPath);
+
+            //Temp code to move old revision folders
+            if (Directory.Exists(@".\NPCs\") && !Directory.Exists(NPCPath))
+                Directory.Move(@".\NPCs\", NPCPath);
+            if (Directory.Exists(@".\Drops\") && !Directory.Exists(DropPath))
+                Directory.Move(@".\Drops\", DropPath);
+            if (Directory.Exists(@".\Quests\") && !Directory.Exists(QuestPath))
+                Directory.Move(@".\Quests\", QuestPath);
 
             if (!Directory.Exists(MapPath))
                 Directory.CreateDirectory(MapPath);
             if (!Directory.Exists(NPCPath))
                 Directory.CreateDirectory(NPCPath);
+            if (!Directory.Exists(QuestPath))
+                Directory.CreateDirectory(QuestPath);
             if (!Directory.Exists(DropPath))
                 Directory.CreateDirectory(DropPath);
             if (!Directory.Exists(ExportPath))
                 Directory.CreateDirectory(ExportPath);
+            
+            if (!Directory.Exists(NameListPath))
+                Directory.CreateDirectory(NameListPath);
 
             LoadVersion();
             LoadEXP();
@@ -161,7 +188,6 @@ namespace Server
             Reader.Write("Network", "Port", Port);
             Reader.Write("Network", "TimeOut", TimeOut);
             Reader.Write("Network", "MaxUser", MaxUser);
-
 
             //Permission
             Reader.Write("Permission", "AllowNewAccount", AllowNewAccount);
@@ -199,6 +225,9 @@ namespace Server
             Reader.Write("Game", "WhiteSnake", WhiteSnake);
             Reader.Write("Game", "AngelName", AngelName);
             Reader.Write("Game", "BombSpiderName", BombSpiderName);
+
+            Reader.Write("Items", "HealRing", HealRing);
+            Reader.Write("Items", "FireRing", FireRing);
         }
 
         public static void LoadEXP()
@@ -206,7 +235,7 @@ namespace Server
             long exp = 100;
             InIReader reader = new InIReader(@".\ExpList.ini");
 
-            for (int i = 1; i <= byte.MaxValue; i++)
+            for (int i = 1; i <= byte.MaxValue - 1; i++)
             {
                 exp = reader.ReadInt64("Exp", "Level" + i, exp);
                 ExperienceList.Add(exp);

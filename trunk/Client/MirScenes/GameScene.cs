@@ -1326,6 +1326,8 @@ namespace Client.MirScenes
         private void LogOutSuccess(S.LogOutSuccess p)
         {
             User = null;
+            if (Settings.HighResolution)
+                CMain.SetResolution(800, 600);
             ActiveScene = new SelectScene(p.Characters);
 
             Dispose();
@@ -3147,11 +3149,11 @@ namespace Client.MirScenes
         public const int CellWidth = 48;
         public const int CellHeight = 32;
 
-        public const int OffSetX = Settings.ScreenWidth/2/CellWidth;
-        public const int OffSetY = Settings.ScreenHeight/2/CellHeight - 2;
+        public static int OffSetX = Settings.ScreenWidth/2/CellWidth;
+        public static int OffSetY = Settings.ScreenHeight / 2 / CellHeight - 2;
 
-        public const int ViewRangeX = OffSetX + 4;
-        public const int ViewRangeY = OffSetY + 4;
+        public int ViewRangeX = OffSetX + 4;
+        public int ViewRangeY = OffSetY + 4;
 
 
         public static Point MapLocation
@@ -4357,7 +4359,7 @@ namespace Client.MirScenes
         public MirControl HealthOrb;
         public MirLabel HealthLabel, ManaLabel, LevelLabel, CharacterName, ExperienceLabel, GoldLabel, WeightLabel, AModeLabel, PModeLabel;
 
-        public MainDialog()
+        public void MainDialogNormalSize()
         {
             Index = 1;
             Library = Libraries.Prguse;
@@ -4366,200 +4368,200 @@ namespace Client.MirScenes
 
 
             InventoryButton = new MirButton
-                {
-                    HoverIndex = 1904,
-                    Index = 1903,
-                    Library = Libraries.Prguse,
-                    Location = new Point(704, 76),
-                    Parent = this,
-                    PressedIndex = 1905,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 1904,
+                Index = 1903,
+                Library = Libraries.Prguse,
+                Location = new Point(704, 76),
+                Parent = this,
+                PressedIndex = 1905,
+                Sound = SoundList.ButtonA,
+            };
             InventoryButton.Click += (o, e) =>
-                {
-                    if (GameScene.Scene.InventoryDialog.Visible)
-                        GameScene.Scene.InventoryDialog.Hide();
-                    else
-                        GameScene.Scene.InventoryDialog.Show();
-                };
+            {
+                if (GameScene.Scene.InventoryDialog.Visible)
+                    GameScene.Scene.InventoryDialog.Hide();
+                else
+                    GameScene.Scene.InventoryDialog.Show();
+            };
 
             CharacterButton = new MirButton
-                {
-                    HoverIndex = 1901,
-                    Index = 1900,
-                    Library = Libraries.Prguse,
-                    Location = new Point(681, 76),
-                    Parent = this,
-                    PressedIndex = 1902,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 1901,
+                Index = 1900,
+                Library = Libraries.Prguse,
+                Location = new Point(681, 76),
+                Parent = this,
+                PressedIndex = 1902,
+                Sound = SoundList.ButtonA,
+            };
             CharacterButton.Click += (o, e) =>
+            {
+                if (GameScene.Scene.CharacterDialog.Visible && GameScene.Scene.CharacterDialog.CharacterPage.Visible)
+                    GameScene.Scene.CharacterDialog.Hide();
+                else
                 {
-                    if (GameScene.Scene.CharacterDialog.Visible && GameScene.Scene.CharacterDialog.CharacterPage.Visible)
-                        GameScene.Scene.CharacterDialog.Hide();
-                    else
-                    {
-                        GameScene.Scene.CharacterDialog.Show();
-                        GameScene.Scene.CharacterDialog.ShowCharacterPage();
-                    }
-                };
+                    GameScene.Scene.CharacterDialog.Show();
+                    GameScene.Scene.CharacterDialog.ShowCharacterPage();
+                }
+            };
 
             SkillButton = new MirButton
-                {
-                    HoverIndex = 1907,
-                    Index = 1906,
-                    Library = Libraries.Prguse,
-                    Location = new Point(727, 76),
-                    Parent = this,
-                    PressedIndex = 1908,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 1907,
+                Index = 1906,
+                Library = Libraries.Prguse,
+                Location = new Point(727, 76),
+                Parent = this,
+                PressedIndex = 1908,
+                Sound = SoundList.ButtonA,
+            };
             SkillButton.Click += (o, e) =>
+            {
+                if (GameScene.Scene.CharacterDialog.Visible && GameScene.Scene.CharacterDialog.SkillPage.Visible)
+                    GameScene.Scene.CharacterDialog.Hide();
+                else
                 {
-                    if (GameScene.Scene.CharacterDialog.Visible && GameScene.Scene.CharacterDialog.SkillPage.Visible)
-                        GameScene.Scene.CharacterDialog.Hide();
-                    else
-                    {
-                        GameScene.Scene.CharacterDialog.Show();
-                        GameScene.Scene.CharacterDialog.ShowSkillPage();
-                    }
-                };
+                    GameScene.Scene.CharacterDialog.Show();
+                    GameScene.Scene.CharacterDialog.ShowSkillPage();
+                }
+            };
 
             QuestButton = new MirButton
-                {
-                    HoverIndex = 1910,
-                    Index = 1909,
-                    Library = Libraries.Prguse,
-                    Location = new Point(750, 76),
-                    Parent = this,
-                    PressedIndex = 1911,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 1910,
+                Index = 1909,
+                Library = Libraries.Prguse,
+                Location = new Point(750, 76),
+                Parent = this,
+                PressedIndex = 1911,
+                Sound = SoundList.ButtonA,
+            };
 
             OptionButton = new MirButton
-                {
-                    HoverIndex = 1913,
-                    Index = 1912,
-                    Library = Libraries.Prguse,
-                    Location = new Point(773, 76),
-                    Parent = this,
-                    PressedIndex = 1914,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 1913,
+                Index = 1912,
+                Library = Libraries.Prguse,
+                Location = new Point(773, 76),
+                Parent = this,
+                PressedIndex = 1914,
+                Sound = SoundList.ButtonA,
+            };
             OptionButton.Click += (o, e) =>
-                {
-                    if (!GameScene.Scene.OptionDialog.Visible)
-                        GameScene.Scene.OptionDialog.Show();
-                    else GameScene.Scene.OptionDialog.Hide();
-                };
+            {
+                if (!GameScene.Scene.OptionDialog.Visible)
+                    GameScene.Scene.OptionDialog.Show();
+                else GameScene.Scene.OptionDialog.Hide();
+            };
 
             MenuButton = new MirButton
-                {
-                    HoverIndex = 1961,
-                    Index = 1960,
-                    Library = Libraries.Prguse,
-                    Location = new Point(745, 35),
-                    Parent = this,
-                    PressedIndex = 1962,
-                    Sound = SoundList.ButtonC,
-                };
+            {
+                HoverIndex = 1961,
+                Index = 1960,
+                Library = Libraries.Prguse,
+                Location = new Point(745, 35),
+                Parent = this,
+                PressedIndex = 1962,
+                Sound = SoundList.ButtonC,
+            };
             MenuButton.Click += (o, e) =>
-                {
-                    if (!GameScene.Scene.MenuDialog.Visible) GameScene.Scene.MenuDialog.Show();
-                    else GameScene.Scene.MenuDialog.Hide();
-                };
+            {
+                if (!GameScene.Scene.MenuDialog.Visible) GameScene.Scene.MenuDialog.Show();
+                else GameScene.Scene.MenuDialog.Hide();
+            };
 
             HealthOrb = new MirControl
-                {
-                    Parent = this,
-                    Location = new Point(0, 30),
-                    NotControl = true,
-                };
+            {
+                Parent = this,
+                Location = new Point(0, 30),
+                NotControl = true,
+            };
             HealthOrb.BeforeDraw += HealthOrb_BeforeDraw;
 
             HealthLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Location = new Point(0, 32),
-                    Parent = HealthOrb,
-                };
+            {
+                AutoSize = true,
+                Location = new Point(0, 32),
+                Parent = HealthOrb,
+            };
             HealthLabel.SizeChanged += Label_SizeChanged;
 
             ManaLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Location = new Point(0, 50),
-                    Parent = HealthOrb,
-                };
+            {
+                AutoSize = true,
+                Location = new Point(0, 50),
+                Parent = HealthOrb,
+            };
             ManaLabel.SizeChanged += Label_SizeChanged;
 
             LevelLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = this,
-                    Location = new Point(5, 108),
-                };
+            {
+                AutoSize = true,
+                Parent = this,
+                Location = new Point(5, 108),
+            };
             CharacterName = new MirLabel
-                {
-                    DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
-                    Parent = this,
-                    Location = new Point(6, 122),
-                    Size = new Size(90, 16)
-                };
+            {
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                Parent = this,
+                Location = new Point(6, 122),
+                Size = new Size(90, 16)
+            };
 
 
             ExperienceBar = new MirImageControl
-                {
-                    Index = 7,
-                    Library = Libraries.Prguse,
-                    Location = new Point(9, 143),
-                    Parent = this,
-                    DrawImage = false,
-                    NotControl = true,
-                };
+            {
+                Index = 7,
+                Library = Libraries.Prguse,
+                Location = new Point(9, 143),
+                Parent = this,
+                DrawImage = false,
+                NotControl = true,
+            };
             ExperienceBar.BeforeDraw += ExperienceBar_BeforeDraw;
 
             ExperienceLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = ExperienceBar,
-                    NotControl = true,
-                };
+            {
+                AutoSize = true,
+                Parent = ExperienceBar,
+                NotControl = true,
+            };
 
             GoldLabel = new MirLabel
-                {
-                    DrawFormat = TextFormatFlags.VerticalCenter,
-                    Font = new Font(Settings.FontName, 8F),
-                    Location = new Point(695, 119),
-                    Parent = this,
-                    Size = new Size(99, 13),
-                    Sound = SoundList.Gold,
-                };
+            {
+                DrawFormat = TextFormatFlags.VerticalCenter,
+                Font = new Font(Settings.FontName, 8F),
+                Location = new Point(695, 119),
+                Parent = this,
+                Size = new Size(99, 13),
+                Sound = SoundList.Gold,
+            };
             GoldLabel.Click += (o, e) =>
-                {
-                    if (GameScene.SelectedCell == null)
-                        GameScene.PickedUpGold = !GameScene.PickedUpGold && GameScene.Gold > 0;
-                };
+            {
+                if (GameScene.SelectedCell == null)
+                    GameScene.PickedUpGold = !GameScene.PickedUpGold && GameScene.Gold > 0;
+            };
 
 
 
             WeightBar = new MirImageControl
-                {
-                    Index = 76,
-                    Library = Libraries.Prguse,
-                    Location = new Point(695, 103),
-                    Parent = this,
-                    DrawImage = false,
-                    NotControl = true,
-                };
+            {
+                Index = 76,
+                Library = Libraries.Prguse,
+                Location = new Point(695, 103),
+                Parent = this,
+                DrawImage = false,
+                NotControl = true,
+            };
             WeightBar.BeforeDraw += WeightBar_BeforeDraw;
 
             WeightLabel = new MirLabel
-                {
-                    Parent = this,
-                    Location = new Point(770, 101),
-                    Size = new Size(26, 14),
-                };
+            {
+                Parent = this,
+                Location = new Point(770, 101),
+                Size = new Size(26, 14),
+            };
 
             AModeLabel = new MirLabel
             {
@@ -4579,6 +4581,22 @@ namespace Client.MirScenes
                 Location = new Point(230, 125),
                 Visible = false
             };
+        }
+
+        public void MainDialogLargeSize()
+        {
+        }
+
+        public MainDialog()
+        {
+            if (Settings.HighResolution)
+            {
+                MainDialogNormalSize();
+            }
+            else
+            {
+                MainDialogNormalSize();
+            }      
         }
 
         public void Process()
@@ -7148,8 +7166,6 @@ namespace Client.MirScenes
                     continue;
                 }
 
-                lines[i] = ParseSay(lines[i]);
-
                 Match match = R.Match(lines[i]);
 
                 while (match.Success)
@@ -7168,53 +7184,6 @@ namespace Client.MirScenes
 
                 TextLabel[i].Text = lines[i];
             }
-        }
-
-
-        private static string ParseSay(string line)
-        {
-            var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            var regex = new Regex(@"<\$(.*?)>");
-           
-            foreach (var part in parts)
-            {
-                var match = regex.Match(part);
-
-                if (!match.Success) continue;
-
-                switch (match.Groups[1].Captures[0].Value.ToUpper())
-                {
-                    case "USERNAME":
-                        line = line.Replace(part, MapObject.User.Name);
-                        break;
-                    case "LEVEL":
-                        line = line.Replace(part, MapObject.User.Level.ToString(CultureInfo.InvariantCulture));
-                        break;
-                    case "HP":
-                        line = line.Replace(part, MapObject.User.HP.ToString(CultureInfo.InvariantCulture));
-                        break;
-                    case "MAXHP":
-                        line = line.Replace(part, MapObject.User.MaxHP.ToString(CultureInfo.InvariantCulture));
-                        break;
-                    case "MP":
-                        line = line.Replace(part, MapObject.User.MP.ToString(CultureInfo.InvariantCulture));
-                        break;
-                    case "MAXMP":
-                        line = line.Replace(part, MapObject.User.MaxMP.ToString(CultureInfo.InvariantCulture));
-                        break;
-                    case "WEAPON":
-                        if (MapObject.User.Equipment[(int) EquipmentSlot.Weapon] != null)
-                        {
-                            var weapon = MapObject.User.Equipment[(int) EquipmentSlot.Weapon].Info.Name;
-                            line = line.Replace(part, weapon);
-                            break;
-                        }
-                        line = line.Replace(part, "Nothing"); 
-                        break;
-                }
-            }
-
-            return line;
         }
 
         private void NewButton(string text, string key, Point p)

@@ -65,6 +65,7 @@ namespace Client.MirGraphics
             Device.DeviceLost += (o, e) => DeviceLost = true;
             Device.DeviceResizing += (o, e) => e.Cancel = true;
             Device.DeviceReset += (o, e) => LoadTextures();
+            Device.Disposing += (o, e) => Clean();
 
             Device.SetDialogBoxesEnabled(true);
             LoadTextures();
@@ -272,6 +273,31 @@ namespace Client.MirGraphics
 
                 c.DisposeTexture();
             }
+        }
+
+        private static void CleanUp()
+        {
+            for (int i = TextureList.Count - 1; i >= 0; i--)
+            {
+                MImage m = TextureList[i];
+
+                if (m == null) continue;
+
+                if (m.Image != null && !m.Image.Disposed)
+                    m.Image.Dispose();
+            }
+            TextureList.Clear();
+
+
+            for (int i = ControlList.Count - 1; i >= 0; i--)
+            {
+                MirControl c = ControlList[i];
+
+                if (c == null) continue;
+
+                c.DisposeTexture();
+            }
+            ControlList.Clear();
         }
     }
 }

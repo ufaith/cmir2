@@ -30,6 +30,9 @@ namespace Client.MirObjects
         public long Experience, MaxExperience;
         public byte LifeOnHit;
 
+        public bool HasTeleportRing, HasProtectionRing, HasRevivalRing, HasClearRing,
+            HasMuscleRing, HasParalysisRing, HasFireRing, HasHealRing;
+
         public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14];
         public List<ClientMagic> Magics = new List<ClientMagic>();
 
@@ -209,6 +212,15 @@ namespace Client.MirObjects
             CurrentWearWeight = 0;
             CurrentHandWeight = 0;
 
+            HasTeleportRing = false;
+            HasProtectionRing = false;
+            HasRevivalRing = false;
+            //HasClearRing = false;
+            HasMuscleRing = false;
+            HasParalysisRing = false;
+            HasFireRing = false;
+            HasHealRing = false;
+
             for (int i = 0; i < Equipment.Length; i++)
             {
                 UserItem temp = Equipment[i];
@@ -249,9 +261,45 @@ namespace Client.MirObjects
                 MaxHandWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxHandWeight + temp.Info.HandWeight)));
 
                 if (temp.Info.Light > Light) Light = temp.Info.Light;
+
+                switch (temp.Info.Type)
+                {
+                    case ItemType.Ring:
+                        switch (temp.Info.Shape)
+                        {
+                            case 1:
+                                HasParalysisRing = true;
+                                break;
+                            case 2:
+                                HasTeleportRing = true;
+                                break;
+                            case 3:
+                                //HasClearRing = true;
+                                break;
+                            case 4:
+                                HasProtectionRing = true;
+                                break;
+                            case 5:
+                                HasRevivalRing = true;
+                                break;
+                            case 6:
+                                HasMuscleRing = true;
+                                break;
+                            case 7:
+                                HasFireRing = true;
+                                break;
+                            case 8:
+                                HasHealRing = true;
+                                break;
+                        }
+                        break;
+                }
             }
 
+            if (HasMuscleRing)
+                MaxBagWeight = (ushort)(MaxBagWeight * 2);
         }
+
         private void RefreshSkills()
         {
             for (int i = 0; i < Magics.Count; i++)

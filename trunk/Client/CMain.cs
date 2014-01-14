@@ -72,6 +72,7 @@ namespace Client
 
         private void CMain_Load(object sender, EventArgs e)
         {
+
             try
             {
                 ClientSize = new Size(Settings.ScreenWidth, Settings.ScreenHeight);
@@ -490,7 +491,21 @@ namespace Client
             }
         }
 
+        public static void SetResolution(int width, int height)
+        {
+            if (Settings.ScreenWidth == width && Settings.ScreenHeight == height) return;
 
+            DXManager.Device.Clear(ClearFlags.Target, Color.Black, 0, 0);
+            DXManager.Device.Present();
+
+            DXManager.Device.Dispose();
+
+            Settings.ScreenWidth = width;
+            Settings.ScreenHeight = height;
+            Program.Form.ClientSize = new Size(width, height);
+
+            DXManager.Create();
+        }
             
 
         #region ScreenCapture

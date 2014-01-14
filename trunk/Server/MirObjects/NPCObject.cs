@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Server.MirDatabase;
@@ -41,7 +43,7 @@ namespace Server.MirObjects
         public List<int> GoodsIndex = new List<int>();
         public List<ItemType> Types = new List<ItemType>();
         public List<NPCPage> NPCSections = new List<NPCPage>();
-
+        public List<NPCPage> NPCSections1 = new List<NPCPage>();
         public override string Name
         {
             get { return Info.Name; }
@@ -132,7 +134,7 @@ namespace Server.MirObjects
                 elseSay = new List<string>(),
                 elseActs = new List<string>(),
                 elseButtons = new List<string>(),
-                gotoButton = new List<string>();
+                gotoButtons = new List<string>();
 
             List<string> currentSay = say, currentButtons = buttons;
 
@@ -158,7 +160,7 @@ namespace Server.MirObjects
                                 continue;
                             case "ACT":
                                 currentSay = acts;
-                                currentButtons = null;
+                                currentButtons = gotoButtons;
                                 continue;
                             case "ELSESAY":
                                 currentSay = elseSay;
@@ -183,6 +185,17 @@ namespace Server.MirObjects
                             currentButtons.Add(string.Format("[{0}]", match.Groups[1].Captures[0].Value));
                             match = match.NextMatch();
                         }
+
+                        //Check if line has a goto command
+                        var parts = lines[x].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (parts[0] == "GOTO")
+                        {
+                            if (parts.Count() < 2)
+                                break;
+
+                            currentButtons.Add(string.Format("[{0}]", parts[1]));
+                        }
                     }
 
 
@@ -193,7 +206,7 @@ namespace Server.MirObjects
             }
 
 
-            NPCPage page = new NPCPage(sectionName, say, buttons, elseSay, elseButtons);
+            NPCPage page = new NPCPage(sectionName, say, buttons, elseSay, elseButtons, gotoButtons);
 
             for (int i = 0; i < checks.Count; i++)
                 page.ParseCheck(checks[i]);
@@ -205,10 +218,11 @@ namespace Server.MirObjects
                 page.ParseAct(page.ElseActList, elseActs[i]);
 
             NPCSections.Add(page);
-
+            NPCSections1.Add(page);
             currentButtons = new List<string>();
             currentButtons.AddRange(buttons);
             currentButtons.AddRange(elseButtons);
+            currentButtons.AddRange(gotoButtons);
 
             return currentButtons;
         }
@@ -413,13 +427,12 @@ namespace Server.MirObjects
 
             for (int i = 0; i < NPCSections.Count; i++)
             {
+
                 NPCPage page = NPCSections[i];
                 if (page.Key != key) continue;
 
                 ProcessPage(player, page);
             }
-
-
         }
 
         public void Buy(PlayerObject player, int index, uint count)
@@ -459,9 +472,10 @@ namespace Server.MirObjects
         private void ProcessPage(PlayerObject player, NPCPage page)
         {
             player.NPCID = ObjectID;
-            player.NPCPage = page;
             player.NPCSuccess = page.Check(player);
+            player.NPCPage = page;
 
+            //page.ParseSay(player);
 
             switch (page.Key)
             {
@@ -506,10 +520,11 @@ namespace Server.MirObjects
     {
         public readonly string Key;
         public List<NPCChecks> CheckList = new List<NPCChecks>();
-        public List<NPCActions> ActList = new List<NPCActions>(), ElseActList = new List<NPCActions>();
-        public readonly List<string> Say, ElseSay, Buttons, ElseButtons;
 
-        public NPCPage(string key, List<string> say, List<string> buttons, List<string> elseSay, List<string> elseButtons)
+        public List<NPCActions> ActList = new List<NPCActions>(), ElseActList = new List<NPCActions>();
+        public List<string> Say, ElseSay, Buttons, ElseButtons, GotoButtons;
+
+        public NPCPage(string key, List<string> say, List<string> buttons, List<string> elseSay, List<string> elseButtons, List<string> gotoButtons)
         {
             Key = key;
 
@@ -519,11 +534,20 @@ namespace Server.MirObjects
             ElseSay = elseSay;
             ElseButtons = elseButtons;
 
+            GotoButtons = gotoButtons;
+        }
+
+        private bool _sayCommandFound;
+        private string _sayCommandValue;
+        public string SayCommandCheck
+        {
+            get { return _sayCommandValue; }
+            set { _sayCommandValue = value; _sayCommandFound = true; }
         }
 
         public void ParseCheck(string line)
         {
-            string[] parts = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+            var parts = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 0) return;
 
@@ -536,22 +560,27 @@ namespace Server.MirObjects
                 case "MINLEVEL":
                     if (parts.Length < 2) return;
                     if (!int.TryParse(parts[1], out temp)) return;
+
                     CheckList.Add(new NPCChecks(CheckType.MinLevel, temp));
                     break;
+
                 case "MAXLEVEL":
                     if (parts.Length < 2) return;
                     if (!int.TryParse(parts[1], out temp)) return;
+
                     CheckList.Add(new NPCChecks(CheckType.MaxLevel, temp));
                     break;
+
                 case "CHECKGOLD":
                     if (parts.Length < 2) return;
-
                     if (!uint.TryParse(parts[1], out temp2)) return;
+
                     CheckList.Add(new NPCChecks(CheckType.CheckGold, temp2));
                     break;
+
                 case "CHECKITEM":
                     if (parts.Length < 2) return;
-                    ItemInfo info = SMain.Envir.GetItemInfo(parts[1]);
+                    var info = SMain.Envir.GetItemInfo(parts[1]);
 
                     if (info == null)
                     {
@@ -562,6 +591,7 @@ namespace Server.MirObjects
                     if (parts.Length < 3 || !uint.TryParse(parts[1], out temp2)) temp2 = 1;
                     CheckList.Add(new NPCChecks(CheckType.CheckGold, info, temp2));
                     break;
+
                 case "CHECKGENDER":
                     if (parts.Length < 2) return;
                     if (!Enum.IsDefined(typeof(MirGender), parts[1])) return;
@@ -569,6 +599,7 @@ namespace Server.MirObjects
                     temp3 = (byte)Enum.Parse(typeof(MirGender), parts[1]);
                     CheckList.Add(new NPCChecks(CheckType.CheckGender, temp3));
                     break;
+
                 case "CHECKCLASS":
                     if (parts.Length < 2) return;
                     if (!Enum.IsDefined(typeof(MirClass), parts[1])) return;
@@ -576,40 +607,87 @@ namespace Server.MirObjects
                     temp3 = (byte)Enum.Parse(typeof(MirClass), parts[1]);
                     CheckList.Add(new NPCChecks(CheckType.CheckClass, temp3));
                     break;
+
+                case "DAYOFWEEK":
+                    if (parts.Length < 2) return;
+                    CheckList.Add(new NPCChecks(CheckType.CheckDay, parts[1]));
+                    break;
+
+                case "HOUR":
+                    if (parts.Length < 2 || !uint.TryParse(parts[1], out temp2)) return;
+
+                    CheckList.Add(new NPCChecks(CheckType.CheckHour, temp2));
+                    break;
+
+                case "MIN":
+                    if (parts.Length < 2 || !uint.TryParse(parts[1], out temp2)) return;
+
+                    CheckList.Add(new NPCChecks(CheckType.CheckMinute, temp2));
+                    break;
+
+                case "CHECKNAMELIST":
+                    if (parts.Length < 2) return;
+
+                    var fileName = Path.Combine(Settings.NameListPath, parts[1] + ".txt");
+                    if (File.Exists(fileName))
+                        CheckList.Add(new NPCChecks(CheckType.CheckNameList, fileName));
+                    break;
+
+                case "ISADMIN":
+                    CheckList.Add(new NPCChecks(CheckType.IsAdmin));
+                    break;
+
+                case "CHECKPKPOINT":
+                    if (parts.Length < 2) return;
+                    if (!uint.TryParse(parts[1], out temp2)) return;
+
+                    CheckList.Add(new NPCChecks(CheckType.CheckPkPoint));
+                    break;
             }
 
         }
-
         public void ParseAct(List<NPCActions> acts, string line)
         {
-            string[] parts = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+            var parts = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 0) return;
 
             ItemInfo info;
             uint temp;
+            int temp1;
+            string fileName;
+
             switch (parts[0].ToUpper())
             {
                 case "MOVE":
-                    int map, x, y;
+                    int x, y;
                     if (parts.Length < 4) return;
-                    if (!int.TryParse(parts[1], out map)) return;
+
+                    var map = SMain.Envir.GetMapByNumber(parts[1]);
+                    if (map == null) return;
                     if (!int.TryParse(parts[2], out x)) return;
                     if (!int.TryParse(parts[3], out y)) return;
+
                     acts.Add(new NPCActions(ActionType.Teleport, map, new Point(x, y)));
-                    return;
+                    break;
+
                 case "GIVEGOLD":
                     if (parts.Length < 2) return;
                     if (!uint.TryParse(parts[1], out temp)) return;
+
                     acts.Add(new NPCActions(ActionType.GiveGold, temp));
-                    return;
+                    break;
+
                 case "TAKEGOLD":
                     if (parts.Length < 2) return;
                     if (!uint.TryParse(parts[1], out temp)) return;
+
                     acts.Add(new NPCActions(ActionType.TakeGold, temp));
-                    return;
+                    break;
+
                 case "GIVEITEM":
                     if (parts.Length < 2) return;
+
                     info = SMain.Envir.GetItemInfo(parts[1]);
 
                     if (info == null)
@@ -620,9 +698,11 @@ namespace Server.MirObjects
 
                     if (parts.Length < 3 || !uint.TryParse(parts[2], out temp)) temp = 1;
                     acts.Add(new NPCActions(ActionType.GiveItem, info, temp));
-                    return;
+                    break;
+
                 case "TAKEITEM":
                     if (parts.Length < 3) return;
+
                     info = SMain.Envir.GetItemInfo(parts[1]);
 
                     if (info == null)
@@ -633,86 +713,230 @@ namespace Server.MirObjects
 
                     if (parts.Length < 3 || !uint.TryParse(parts[2], out temp)) temp = 1;
                     acts.Add(new NPCActions(ActionType.TakeItem, info, temp));
-                    return;
+                    break;
+
                 case "GIVEEXP":
                     if (parts.Length < 2) return;
                     if (!uint.TryParse(parts[1], out temp)) return;
 
                     acts.Add(new NPCActions(ActionType.GiveExp, temp));
-                    return;
+                    break;
+
                 case "GIVEPET":
                     if (parts.Length < 2) return;
 
-                    uint petcount = (parts.Length > 2 && uint.TryParse(parts[2], out petcount)) ? Math.Max(5, petcount) : 0;
+                    byte petcount = 0;
                     byte petlevel = 0;
 
                     MonsterInfo mInfo2 = SMain.Envir.GetMonsterInfo(parts[1]);
-                        if (mInfo2 == null) return;
+                    if (mInfo2 == null) return;
 
                     if (parts.Length > 2)
-                        if (!uint.TryParse(parts[2], out petcount) || petcount > 5) petcount = 5;
+                       petcount = byte.TryParse(parts[2], out petcount) ? Math.Min((byte)5, petcount) : (byte)1;
 
                     if(parts.Length > 3)
-                        if (!byte.TryParse(parts[3], out petlevel) || petlevel > 7) petlevel = 7;
+                       petlevel = byte.TryParse(parts[3], out petlevel) ? Math.Min((byte)7, petlevel) : (byte)0;
 
                     acts.Add(new NPCActions(ActionType.GivePet, mInfo2, petcount, petlevel));
-                    return;
+                    break;
+
                 case "GOTO":
                     if (parts.Length < 2) return;
-                    if (!parts[1].StartsWith("@")) return;
 
                     acts.Add(new NPCActions(ActionType.Goto, parts[1]));
-                    return;
+                    break;
 
+                case "ADDNAMELIST":
+                    if (parts.Length < 2) return;
+
+                    fileName = Path.Combine(Settings.NameListPath, parts[1] + ".txt");
+                    if (File.Exists(fileName))
+                        acts.Add(new NPCActions(ActionType.AddNameList, fileName));
+                    break;
+
+                case "DELNAMELIST":
+                    if (parts.Length < 2) return;
+
+                    fileName = Path.Combine(Settings.NameListPath, parts[1] + ".txt");
+                    if (File.Exists(fileName))
+                        acts.Add(new NPCActions(ActionType.DelNameList, fileName));
+                    break;
+
+                case "CLEARNAMELIST":
+                    if (parts.Length < 2) return;
+
+                    fileName = Path.Combine(Settings.NameListPath, parts[1] + ".txt");
+                    if (File.Exists(fileName))
+                        acts.Add(new NPCActions(ActionType.ClearNameList, fileName));
+                    break;
+
+                case "GIVEHP":
+                    if (parts.Length < 2) return;
+                    if (!int.TryParse(parts[1], out temp1)) return;
+                    acts.Add(new NPCActions(ActionType.GiveHP, temp1));
+                    break;
+
+                case "GIVEMP":
+                    if (parts.Length < 2) return;
+                    if (!int.TryParse(parts[1], out temp1)) return;
+                    acts.Add(new NPCActions(ActionType.GiveMP, temp1));
+                    break;
             }
 
         }
+        public List<string> ParseSay(PlayerObject player, List<string> speech)
+        {
+            for (var i = 0; i < speech.Count; i++)
+            {
+                var parts = speech[i].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
+                if (parts.Length == 0) continue;
+
+                var regex = new Regex(@"<\$(.*?)>");
+
+                foreach (var part in parts)
+                {
+                    var match = regex.Match(part);
+
+                    if (!match.Success) continue;
+
+                    switch (match.Groups[1].Captures[0].Value.ToUpper())
+                    {
+                        case "USERNAME":
+                            SayCommandCheck = player.Name;
+                            break;
+                        case "LEVEL":
+                            SayCommandCheck = player.Level.ToString(CultureInfo.InvariantCulture);
+                            break;
+                        case "HP":
+                            SayCommandCheck = player.HP.ToString(CultureInfo.InvariantCulture);
+                            break;
+                        case "MAXHP":
+                            SayCommandCheck = player.MaxHP.ToString(CultureInfo.InvariantCulture);
+                            break;
+                        case "MP":
+                            SayCommandCheck = player.MP.ToString(CultureInfo.InvariantCulture);
+                            break;
+                        case "MAXMP":
+                            SayCommandCheck = player.MaxMP.ToString(CultureInfo.InvariantCulture);
+                            break;
+                        case "GAMEGOLD":
+                            SayCommandCheck = player.Account.Gold.ToString(CultureInfo.InvariantCulture);
+                            break;
+                        case "ARMOUR":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Armour] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Armour].Info.Name : "No Armour";
+                            break;
+                        case "WEAPON":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Weapon] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Weapon].Info.Name : "No Weapon";
+                            break;
+                        case "RING_L":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.RingL] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.RingL].Info.Name : "No Ring";
+                            break;
+                        case "RING_R":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.RingR] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.RingR].Info.Name : "No Ring";
+                            break;
+                        case "BRACELET_L":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.BraceletL] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.BraceletL].Info.Name : "No Bracelet";
+                            break;
+                        case "BRACELET_R":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.BraceletR] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.BraceletR].Info.Name : "No Bracelet";
+                            break;
+                        case "NECKLACE":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Necklace] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Necklace].Info.Name : "No Necklace";
+                            break;
+                        case "BELT":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Belt] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Belt].Info.Name : "No Belt";
+                            break;
+                        case "BOOTS":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Boots] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Boots].Info.Name : "No Boots";
+                            break;
+                        case "HELMET":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Helmet] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Helmet].Info.Name : "No Helmet";
+                            break;
+                        case "AMULET":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Amulet] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Amulet].Info.Name : "No Amulet";
+                            break;
+                        case "STONE":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Stone] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Stone].Info.Name : "No Stone";
+                            break;
+                        case "TORCH":
+                            SayCommandCheck = player.Info.Equipment[(int)EquipmentSlot.Torch] != null ?
+                                player.Info.Equipment[(int)EquipmentSlot.Torch].Info.Name : "No Torch";
+                            break;
+
+                        case "DATE":
+                            SayCommandCheck = DateTime.Now.ToShortDateString();
+                            break;
+                        case "USERCOUNT":
+                            //SayCommandCheck = Envir.PlayerCount.ToString(CultureInfo.InvariantCulture);
+                            break;
+                        case "PKPOINT":
+                            SayCommandCheck = player.PKPoints.ToString();
+                            break;
+
+                        default:
+                            SayCommandCheck = string.Empty;
+                            break;
+                    }
+
+                    if (!_sayCommandFound) continue;
+
+                    _sayCommandFound = false;
+                    speech[i] = speech[i].Replace(part, _sayCommandValue);
+                }
+            }
+            return speech;
+        }
 
         public bool Check(PlayerObject player)
         {
-            for (int i = 0; i < CheckList.Count; i++)
+            var failed = false;
+
+            foreach (NPCChecks check in CheckList)
             {
-                NPCChecks check = CheckList[i];
                 switch (check.Type)
                 {
                     case CheckType.MaxLevel:
                         if (player.Level > (byte) check.Params[0])
-                        {
-                            Failed(player);
-                            return false;
-                        }
+                            failed = true;
                         break;
+
                     case CheckType.MinLevel:
                         if (player.Level < (byte) check.Params[0])
-                        {
-                            Failed(player);
-                            return false;
-                        }
+                            failed = true;
                         break;
+
                     case CheckType.CheckGold:
                         if (player.Account.Gold < (uint) check.Params[0])
-                        {
-                            Failed(player);
-                            return false;
-                        }
+                            failed = true;
                         break;
-                    case CheckType.CheckItem:
 
-                        ItemInfo info = SMain.Envir.GetItemInfo((string) check.Params[0]);
+                    case CheckType.CheckItem:
+                        var info = SMain.Envir.GetItemInfo((string) check.Params[0]);
 
                         if (info == null)
                         {
                             SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", check.Params[0], Key));
-                            Failed(player);
-                            return false;
+                            failed = true;
                         }
 
-                        uint count = (uint) check.Params[1];
+                        var count = (uint) check.Params[1];
 
                         for (int o = 0; o < player.Info.Inventory.Length; o++)
                         {
-                            UserItem item = player.Info.Inventory[o];
+                            var item = player.Info.Inventory[o];
                             if (item.Info != info) continue;
 
                             if (count > item.Count)
@@ -724,79 +948,94 @@ namespace Server.MirObjects
                             break;
                         }
                         if (count > 0)
-                        {
-
-                            Failed(player);
-                            return false;
-                        }
-
+                            failed = true;
                         break;
+
                     case CheckType.CheckGender:
-                        var failed = (byte)player.Gender != (byte)check.Params[0];
-                        if (failed)
-                        {
-                            Failed(player);
-                            return false;
-                        }
+                        failed = (byte)player.Gender != (byte)check.Params[0];
                         break;
+
                     case CheckType.CheckClass:
                         failed = (byte)player.Class != (byte)check.Params[0];
-                        if (failed)
-                        {
-                            Failed(player);
-                            return false;
-                        }
+                        break;
+
+                    case CheckType.CheckDay:
+                        var day = DateTime.Now.DayOfWeek.ToString().ToUpper();
+                        var dayToCheck = check.Params[0].ToString().ToUpper();
+
+                        failed = day != dayToCheck;
+                        break;
+
+                    case CheckType.CheckHour:
+                        var hour = DateTime.Now.Hour;
+                        var hourToCheck = (uint)check.Params[0];
+
+                        failed = hour != hourToCheck;
+                        break;
+
+                    case CheckType.CheckMinute:
+                        var minute = DateTime.Now.Minute;
+                        var minuteToCheck = (uint)check.Params[0];
+
+                        failed = minute != minuteToCheck;
+                        break;
+
+                    case CheckType.CheckNameList:
+                        failed = !File.ReadAllLines((string)check.Params[0]).Contains(player.Name);
+                        break;
+
+                    case CheckType.IsAdmin:
+                        failed = !player.IsGM;
+                        break;
+
+                    case CheckType.CheckPkPoint:
+                        failed = player.PKPoints < (int) check.Params[0];      
                         break;
                 }
+
+                if (!failed) continue;
+
+                Failed(player);
+                return false;
             }
 
             Success(player);
             return true;
 
         }
-
-        private void Success(PlayerObject player)
+        private void Act(IList<NPCActions> acts, PlayerObject player)
         {
-            Act(ActList, player);
-            player.Enqueue(new S.NPCResponse {Page = Say});
-        }
-
-        private void Failed(PlayerObject player)
-        {
-            Act(ElseActList, player);
-            player.Enqueue(new S.NPCResponse {Page = ElseSay});
-        }
-
-        private void Act(List<NPCActions> acts, PlayerObject player)
-        {
-            for (int i = 0; i < acts.Count; i++)
+            for (var i = 0; i < acts.Count; i++)
             {
                 NPCActions act = acts[i];
                 uint gold;
                 uint count;
+                string path;
+
                 switch (act.Type)
                 {
                     case ActionType.Teleport:
-                        Map temp = SMain.Envir.GetMap((int) act.Params[0]);
-                        if (temp == null) return;
-                        player.Teleport(temp, (Point) act.Params[1]);
+                        player.Teleport((Map)act.Params[0], (Point)act.Params[1]);
                         break;
+
                     case ActionType.GiveGold:
                         gold = (uint)act.Params[0];
 
                         if (gold + player.Account.Gold >= uint.MaxValue)
                             gold = uint.MaxValue - player.Account.Gold;
 
-                            player.GainGold(gold);
+                        player.GainGold(gold);
                         break;
+
                     case ActionType.TakeGold:
-                        gold = (uint) act.Params[0];
+                        gold = (uint)act.Params[0];
 
                         if (gold >= player.Account.Gold) gold = player.Account.Gold;
 
                         player.Account.Gold -= gold;
                         player.Enqueue(new S.LoseGold { Gold = gold });
                         break;
+
                     case ActionType.GiveItem:
                         count = (uint)act.Params[1];
 
@@ -809,7 +1048,7 @@ namespace Server.MirObjects
                                 SMain.Enqueue(string.Format("Failed to create UserItem: {0}, Page: {1}", act.Params[0], Key));
                                 return;
                             }
-                            
+
                             if (item.Info.StackSize > count)
                             {
                                 item.Count = count;
@@ -823,23 +1062,23 @@ namespace Server.MirObjects
 
                             if (player.CanGainItem(item, false))
                                 player.GainItem(item);
-                        } 
-
+                        }
                         break;
+
                     case ActionType.TakeItem:
-                        ItemInfo info = (ItemInfo) act.Params[0];
+                        ItemInfo info = (ItemInfo)act.Params[0];
 
 
-                        count = (uint) act.Params[1];
+                        count = (uint)act.Params[1];
 
                         for (int o = 0; o < player.Info.Inventory.Length; o++)
                         {
                             UserItem item = player.Info.Inventory[o];
                             if (item.Info != info) continue;
-                            
+
                             if (count > item.Count)
                             {
-                                player.Enqueue(new S.DeleteItem {UniqueID = item.UniqueID, Count = item.Count});
+                                player.Enqueue(new S.DeleteItem { UniqueID = item.UniqueID, Count = item.Count });
                                 player.Info.Inventory[o] = null;
 
                                 count -= item.Count;
@@ -854,16 +1093,19 @@ namespace Server.MirObjects
                             break;
                         }
                         player.RefreshStats();
-
                         break;
+
                     case ActionType.GiveExp:
                         player.GainExp((uint)act.Params[0]);
                         break;
+
                     case ActionType.Goto:
-                        //create new npcobject instance
+                        var redirect = "[" + act.Params[0] + "]";
+                        player.CallNPC(player.NPCID, redirect);
                         break;
+
                     case ActionType.GivePet:
-                        for (int c = 0; c < (uint)act.Params[1]; c++)
+                        for (var c = 0; c < (byte)act.Params[1]; c++)
                         {
                             MonsterObject monster = MonsterObject.GetMonster((MonsterInfo)act.Params[0]);
                             if (monster == null) return;
@@ -872,13 +1114,62 @@ namespace Server.MirObjects
                             monster.MaxPetLevel = 7;
                             monster.Direction = player.Direction;
                             monster.ActionTime = SMain.Envir.Time + 1000;
-                            monster.Spawn(player.CurrentMap, player.Front);
+                            monster.Spawn(player.CurrentMap, player.CurrentLocation);
                             player.Pets.Add(monster);
                         }
+                        break;
+
+                    case ActionType.AddNameList:
+                        path = (string)act.Params[0];
+                        if (File.ReadAllLines(path).All(t => player.Name != t))
+                            {
+                                using (var line = File.AppendText(path))
+                                {
+                                    line.WriteLine(player.Name);
+                                }
+                            }
+                        break;
+
+                    case ActionType.DelNameList:
+                        path = (string)act.Params[0];
+                        File.WriteAllLines(path, File.ReadLines(path).Where(l => l != player.Name).ToList());
+                        break;
+
+                    case ActionType.ClearNameList:
+                        path = (string)act.Params[0];
+                        File.WriteAllLines(path, new string[] { });
+                        break;
+
+                    case ActionType.GiveHP:
+                        player.ChangeHP((int)act.Params[0]);
+                        break;
+
+                    case ActionType.GiveMP:
+                        player.ChangeMP((int)act.Params[0]);
                         break;
                 }
             }
         }
+
+        private void Success(PlayerObject player)
+        {
+            Act(ActList, player);
+
+            var parseSay = new List<String>(Say);
+            parseSay = ParseSay(player, parseSay);
+
+            player.Enqueue(new S.NPCResponse { Page = parseSay });
+        }
+        private void Failed(PlayerObject player)
+        {
+            Act(ElseActList, player);
+
+            var parseElseSay = new List<String>(ElseSay);
+            parseElseSay = ParseSay(player, parseElseSay);
+
+            player.Enqueue(new S.NPCResponse { Page = parseElseSay });
+        }
+        
     }
 
     public class NPCChecks
@@ -894,7 +1185,6 @@ namespace Server.MirObjects
                 Params.Add(p[i]);
         }
     }
-
     public class NPCActions
     {
         public ActionType Type;
@@ -918,8 +1208,12 @@ namespace Server.MirObjects
         GiveExp,
         Goto,
         GivePet,
+        AddNameList,
+        DelNameList,
+        ClearNameList,
+        GiveHP,
+        GiveMP,
     }
-
     public enum CheckType
     {
         MinLevel,
@@ -928,5 +1222,11 @@ namespace Server.MirObjects
         CheckGold,
         CheckGender,
         CheckClass,
+        CheckDay,
+        CheckHour,
+        CheckMinute,
+        CheckNameList,
+        IsAdmin,
+        CheckPkPoint,
     }
 }
