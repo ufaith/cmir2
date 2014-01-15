@@ -159,7 +159,6 @@
     <Compile Include="MonsterInfoForm.Designer.cs">
       <DependentUpon>MonsterInfoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Resource.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SMain.cs">
       <SubType>Form</SubType>
