@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using Server.MirDatabase;
+using Server.MirEnvir;
 using S = ServerPackets;
 
 namespace Server.MirObjects.Monsters
@@ -112,7 +113,7 @@ namespace Server.MirObjects.Monsters
             }
         }
 
-        public override bool TeleportRandom(int attempts, int distance)
+        public override bool TeleportRandom(int attempts, int distance, Map temp = null)
         {
             for (int i = 0; i < attempts; i++)
             {

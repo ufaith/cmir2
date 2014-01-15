@@ -1501,15 +1501,20 @@ namespace Server.MirObjects
 
             if (attacker.Info.AI == 6)
                 EXPOwner = null;
-            else if (!Functions.InRange(attacker.CurrentLocation, attacker.Master.CurrentLocation, Globals.DataRange))
-                EXPOwner = null;
+
             else if (attacker.Master != null)
             {
-                if (EXPOwner == null || EXPOwner.Dead)
-                    EXPOwner = attacker.Master;
+                if (!Functions.InRange(attacker.CurrentLocation, attacker.Master.CurrentLocation, Globals.DataRange))
+                    EXPOwner = null;
+                else
+                {
 
-                if (EXPOwner == attacker.Master)
-                    EXPOwnerTime = Envir.Time + EXPOwnerDelay;
+                    if (EXPOwner == null || EXPOwner.Dead)
+                        EXPOwner = attacker.Master;
+
+                    if (EXPOwner == attacker.Master)
+                        EXPOwnerTime = Envir.Time + EXPOwnerDelay;
+                }
 
             }
 

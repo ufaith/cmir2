@@ -3149,11 +3149,12 @@ namespace Client.MirScenes
         public const int CellWidth = 48;
         public const int CellHeight = 32;
 
-        public static int OffSetX = Settings.ScreenWidth/2/CellWidth;
-        public static int OffSetY = Settings.ScreenHeight / 2 / CellHeight - 2;
+        public static int OffSetX;
+        public static int OffSetY;
 
-        public int ViewRangeX = OffSetX + 4;
-        public int ViewRangeY = OffSetY + 4;
+        public static int ViewRangeX;
+        public static int ViewRangeY;
+
 
 
         public static Point MapLocation
@@ -3201,6 +3202,12 @@ namespace Client.MirScenes
         public MapControl()
         {
             MapButtons = MouseButtons.None;
+
+            OffSetX = Settings.ScreenWidth / 2 / CellWidth;
+            OffSetY = Settings.ScreenHeight / 2 / CellHeight - 1;
+
+            ViewRangeX = OffSetX + 4;
+            ViewRangeY = OffSetY + 4;
 
             Size = new Size(Settings.ScreenWidth, Settings.ScreenHeight);
             DrawControlTexture = true;

@@ -1727,6 +1727,7 @@ namespace Server.MirObjects
 
                                 ReceiveChat(string.Format("Player {0} has been Leveled {1} -> {2}.", player.Name, old, player.Level), ChatType.Hint);
                                 SMain.Enqueue(string.Format("Player {0} has been Leveled {1} -> {2} by {3}", player.Name, old, player.Level, Name));
+                                return;
                             }
                         }
                         else
@@ -1738,10 +1739,13 @@ namespace Server.MirObjects
                                 Level = level;
                                 LevelUp();
 
-                                ReceiveChat(string.Format("Leveled yourself {0} -> {1}.", old, Level), ChatType.Hint);
+                                ReceiveChat(string.Format("Leveled {0} -> {1}.", old, Level), ChatType.Hint);
                                 SMain.Enqueue(string.Format("Player {0} has been Leveled {1} -> {2} by {3}", Name, old, Level, Name));
+                                return;
                             }
                         }
+
+                        ReceiveChat("Could not level player", ChatType.System);
                         return;
 
                     case "MAKE":
@@ -1775,8 +1779,8 @@ namespace Server.MirObjects
                             GainItem(item);
                         }
 
-                        SMain.Enqueue(string.Format("Player {0} has attempted to Create {1} x{2}", Name, iInfo.Name, tempCount));
                         ReceiveChat(string.Format("{0} x{1} has been created.", iInfo.Name, tempCount), ChatType.Hint);
+                        SMain.Enqueue(string.Format("Player {0} has attempted to Create {1} x{2}", Name, iInfo.Name, tempCount));
                         break;
 
                     case "CLEARBAG":
@@ -1867,23 +1871,37 @@ namespace Server.MirObjects
 
                     case "MAPMOVE":
                         if (!IsGM) return;
-                        if (parts.Length < 4)
+                        if (parts.Length >= 4)
                         {
-                            ReceiveChat("Not enough parameters to teleport", ChatType.System);
+                            if (!int.TryParse(parts[2], out x) || !int.TryParse(parts[3], out y)) return;
+
+                            var map = SMain.Envir.GetMapByName(parts[1]);
+                            if (map == null)
+                            {
+                                ReceiveChat((string.Format("Map {0} could not be found", parts[1])), ChatType.System);
+                                return;
+                            }
+
+                            Teleport(map, new Point(x, y));
+                            ReceiveChat((string.Format("Moved to Map {0} at {1}:{2}", map.Info.FileName, x, y)), ChatType.Hint);
                             return;
                         }
 
-                        if (!int.TryParse(parts[2], out x) || !int.TryParse(parts[3], out y)) return;
-
-                        var map = SMain.Envir.GetMapByName(parts[1]);
-                        if (map == null)
+                        if (parts.Length > 1)
                         {
-                            ReceiveChat((string.Format("Map {0} could not be found", parts[1])), ChatType.System);
+                            var map = SMain.Envir.GetMapByName(parts[1]);
+                            if (map == null)
+                            {
+                                ReceiveChat((string.Format("Map {0} could not be found", parts[1])), ChatType.System);
+                                return;
+                            }
+
+                            TeleportRandom(40, 0, map);
+                            ReceiveChat((string.Format("Moved to Map {0}", map.Info.FileName)), ChatType.Hint);
                             return;
                         }
 
-                        ReceiveChat((string.Format("Moved to Map {0} at {1}:{2}", map.Info.FileName, x, y)), ChatType.Hint);
-                        Teleport(map, new Point(x, y));
+                        ReceiveChat("Not enough parameters to teleport", ChatType.System);             
                         break;
 
                     case "GOTO":
@@ -1974,7 +1992,6 @@ namespace Server.MirObjects
                             count = uint.MaxValue - Account.Gold;
 
                         GainGold(count);
-                        ReceiveChat((string.Format("{0} gold recieved.", count)), ChatType.Hint);
                         SMain.Enqueue(string.Format("Player {0} has been given {1} gold", Name, count));
                         break;
 
@@ -2526,7 +2543,7 @@ namespace Server.MirObjects
                         break;
                     case Spell.TwinDrakeBlade:
                         magic = GetMagic(Spell.TwinDrakeBlade);
-                        damage = damage*(magic.Level + 7)/10; // 110% Damage level 3
+                        damage = damage*(magic.Level + 8)/10; // 110% Damage level 3
                         TwinDrakeBlade = false;
                         action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
                         ActionList.Add(action);

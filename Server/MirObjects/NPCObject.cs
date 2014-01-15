@@ -747,7 +747,9 @@ namespace Server.MirObjects
                     if (parts.Length < 2) return;
 
                     fileName = Path.Combine(Settings.NameListPath, parts[1] + ".txt");
-                    if (File.Exists(fileName))
+                    if (!File.Exists(fileName))
+                        File.Create(fileName);
+
                         acts.Add(new NPCActions(ActionType.AddNameList, fileName));
                     break;
 
@@ -978,7 +980,8 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.CheckNameList:
-                        failed = !File.ReadAllLines((string)check.Params[0]).Contains(player.Name);
+                        var read = File.ReadAllLines((string) check.Params[0]);
+                        failed = !read.Contains(player.Name);
                         break;
 
                     case CheckType.IsAdmin:
@@ -1205,13 +1208,16 @@ namespace Server.MirObjects
         GiveItem,
         TakeItem,
         GiveExp,
-        Goto,
         GivePet,
         AddNameList,
         DelNameList,
         ClearNameList,
         GiveHP,
         GiveMP,
+
+        Goto,
+        ChangeLevel,
+        SetPkPoints,
     }
     public enum CheckType
     {

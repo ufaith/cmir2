@@ -396,7 +396,7 @@ namespace Server.MirObjects
             
             return true;
         }
-        public virtual bool TeleportRandom(int attempts, int distance)
+        public virtual bool TeleportRandom(int attempts, int distance, Map temp = null)
         {
             for (int i = 0; i < attempts; i++)
             {
@@ -408,7 +408,14 @@ namespace Server.MirObjects
                     location = new Point(CurrentLocation.X + Envir.Random.Next(-distance, distance + 1),
                                          CurrentLocation.Y + Envir.Random.Next(-distance, distance + 1));
 
-                if (Teleport(CurrentMap, location)) return true;
+                if (temp != null)
+                {
+                    if (Teleport(temp, location)) return true;
+                }
+                else
+                {
+                    if (Teleport(CurrentMap, location)) return true;  
+                }
             }
 
             return false;
