@@ -642,6 +642,15 @@ namespace Server.MirObjects
 
                     CheckList.Add(new NPCChecks(CheckType.CheckPkPoint));
                     break;
+
+                case "CHECKRANGE":
+                    if (parts.Length < 4) return;
+
+                    int x, y, distance;
+                    if (!int.TryParse(parts[1], out x) || !int.TryParse(parts[2], out y) || !int.TryParse(parts[3], out distance)) return;
+                    CheckList.Add(new NPCChecks(CheckType.CheckRange, x, y, distance));
+                    break;
+                    
             }
 
         }
@@ -655,6 +664,7 @@ namespace Server.MirObjects
             uint temp;
             int temp1;
             string fileName;
+            var regexMessage = new Regex("\"([^\"]*)\"");
 
             switch (parts[0].ToUpper())
             {
@@ -779,6 +789,55 @@ namespace Server.MirObjects
                     if (parts.Length < 2) return;
                     if (!int.TryParse(parts[1], out temp1)) return;
                     acts.Add(new NPCActions(ActionType.GiveMP, temp1));
+                    break;
+
+                case "CHANGELEVEL":
+                    if (parts.Length < 2) return;
+                    byte temp2;
+                    if (!byte.TryParse(parts[1], out temp2)) return;
+
+                    temp2 = Math.Min(byte.MaxValue, temp2);
+                    acts.Add(new NPCActions(ActionType.ChangeLevel, temp2));
+                    break;
+
+                case "SETPKPOINT":
+                    if (parts.Length < 2) return;
+                    if (!int.TryParse(parts[1], out temp1)) return;
+                    acts.Add(new NPCActions(ActionType.SetPkPoint, temp1));
+                    break;
+
+                case "CHANGEGENDER":
+                    acts.Add(new NPCActions(ActionType.ChangeGender));
+                    break;
+
+                case "CHANGECLASS":
+                    if (!Enum.IsDefined(typeof(MirClass), parts[1])) return;
+
+                    var type = (byte)Enum.Parse(typeof(MirClass), parts[1]);
+                    acts.Add(new NPCActions(ActionType.ChangeClass, type));
+                    break;
+
+                case "LINEMESSAGE":
+                    var match = regexMessage.Match(line);
+                    if (match.Success)
+                    {
+                        var message = match.Groups[1].Captures[0].Value;
+
+                        var last = parts.Count() - 1;
+                        if (!Enum.IsDefined(typeof(ChatType), parts[last])) return;
+
+                        var chatType = (byte)Enum.Parse(typeof(ChatType), parts[last]);
+                        acts.Add(new NPCActions(ActionType.LineMessage, message, chatType));
+                    }
+                    break;
+
+                case "GIVESKILL":
+                    if (parts.Length < 3) return;
+                    if (!Enum.IsDefined(typeof(Spell), parts[1])) return;
+                    if (!byte.TryParse(parts[2], out temp2)) return;
+
+                    var spell = (byte)Enum.Parse(typeof(Spell), parts[1]);
+                    acts.Add(new NPCActions(ActionType.GiveSkill, spell, Math.Min(temp2, (byte)3)));
                     break;
             }
 
@@ -991,6 +1050,12 @@ namespace Server.MirObjects
                     case CheckType.CheckPkPoint:
                         failed = player.PKPoints < (int) check.Params[0];      
                         break;
+
+                    case CheckType.CheckRange:
+                        var target = new Point {X = (int) check.Params[0], Y = (int) check.Params[1]};
+
+                        failed = !Functions.InRange(player.CurrentLocation, target, (int)check.Params[2]);
+                        break;
                 }
 
                 if (!failed) continue;
@@ -1070,7 +1135,6 @@ namespace Server.MirObjects
                     case ActionType.TakeItem:
                         ItemInfo info = (ItemInfo)act.Params[0];
 
-
                         count = (uint)act.Params[1];
 
                         for (int o = 0; o < player.Info.Inventory.Length; o++)
@@ -1149,6 +1213,57 @@ namespace Server.MirObjects
                     case ActionType.GiveMP:
                         player.ChangeMP((int)act.Params[0]);
                         break;
+
+                    case ActionType.ChangeLevel:
+                        player.Level = (byte) act.Params[0];
+                        player.LevelUp();
+                        break;
+
+                    case ActionType.SetPkPoint:
+                        player.PKPoints = (int) act.Params[0];
+                        break;
+
+                    case ActionType.ChangeGender:
+                        switch (player.Info.Gender)
+                        {
+                            case MirGender.Male:
+                                player.Info.Gender = MirGender.Female;
+                                break;
+                            case MirGender.Female:
+                                player.Info.Gender = MirGender.Male;
+                                break;
+                        }
+                        break;
+
+                    case ActionType.ChangeClass:
+                        var data = (MirClass)act.Params[0];
+                        switch (data)
+                        {
+                            case MirClass.Warrior:
+                                player.Info.Class = MirClass.Warrior;
+                                break;
+                            case MirClass.Taoist:
+                                player.Info.Class = MirClass.Taoist;
+                                break;
+                            case MirClass.Wizard:
+                                player.Info.Class = MirClass.Wizard;
+                                break;
+                            case MirClass.Assassin:
+                                player.Info.Class = MirClass.Assassin;
+                                break;
+                        }
+                        break;
+
+                    case ActionType.LineMessage:
+                        player.ReceiveChat((string)act.Params[0], (ChatType)act.Params[1]);
+                        break;
+
+                    case ActionType.GiveSkill:
+                        var magic = new UserMagic((Spell)act.Params[0]) { Level = (byte)act.Params[1] };
+
+                        player.Info.Magics.Add(magic);
+                        player.Enqueue(magic.GetInfo());
+                        break;
                 }
             }
         }
@@ -1214,13 +1329,18 @@ namespace Server.MirObjects
         ClearNameList,
         GiveHP,
         GiveMP,
+        ChangeLevel,
+        SetPkPoint,
+        ChangeGender,
+        ChangeClass,
+        LineMessage,
 
         Goto,
-        ChangeLevel,
-        SetPkPoints,
+        GiveSkill,
     }
     public enum CheckType
     {
+        IsAdmin,
         MinLevel,
         MaxLevel,
         CheckItem,
@@ -1231,7 +1351,7 @@ namespace Server.MirObjects
         CheckHour,
         CheckMinute,
         CheckNameList,
-        IsAdmin,
         CheckPkPoint,
+        CheckRange,
     }
 }

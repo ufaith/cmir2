@@ -865,7 +865,7 @@ namespace Server.MirObjects
             LevelUp();
         }
 
-        private void LevelUp()
+        public void LevelUp()
         {
             RefreshStats();
             SetHP(MaxHP);
