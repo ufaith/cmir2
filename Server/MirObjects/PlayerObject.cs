@@ -1881,10 +1881,12 @@ namespace Server.MirObjects
                     case "MAPMOVE":
                         if (!IsGM) return;
                         if (parts.Length < 2) return;
-                        var instanceID = 0; x = 0; y = 0;
+                        var instanceID = 1; x = 0; y = 0;
 
                         if (parts.Length == 3 || parts.Length == 5)
                             int.TryParse(parts[2], out instanceID);
+
+                        if (instanceID < 1) instanceID = 1;
 
                         var map = SMain.Envir.GetMapByNameAndInstance(parts[1], instanceID);
                         if (map == null)

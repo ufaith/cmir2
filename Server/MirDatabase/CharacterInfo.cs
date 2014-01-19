@@ -158,8 +158,9 @@ namespace Server.MirDatabase
 
             if (Envir.LoadVersion < 12) return;
 
-            count = reader.ReadInt32();
-            for (int i = 0; i < count; i++)
+            if (Envir.LoadVersion == 12) count = reader.ReadInt32();
+
+            for (int i = 0; i < Globals.FlagIndexCount; i++)
                 Flags[i] = reader.ReadBoolean();
         }
 
@@ -237,7 +238,6 @@ namespace Server.MirDatabase
 
             writer.Write(AllowGroup);
 
-            writer.Write(Flags.Length);
             for (int i = 0; i < Flags.Length; i++)
                 writer.Write(Flags[i]);
         }
