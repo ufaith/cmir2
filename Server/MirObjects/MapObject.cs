@@ -379,7 +379,7 @@ namespace Server.MirObjects
 
             CurrentMap.RemoveObject(this);
             if (effects) Broadcast(new S.ObjectTeleportOut {ObjectID = ObjectID, Type = effectnumber});
-            else Broadcast(new S.ObjectRemove {ObjectID = ObjectID});
+            Broadcast(new S.ObjectRemove {ObjectID = ObjectID});
 
             CurrentMap = temp;
             CurrentLocation = location;

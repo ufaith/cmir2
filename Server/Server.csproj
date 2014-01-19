@@ -57,6 +57,12 @@
     <Compile Include="..\ServerPackets.cs">
       <Link>MirNetwork\ServerPackets.cs</Link>
     </Compile>
+    <Compile Include="DragonInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DragonInfoForm.Designer.cs">
+      <DependentUpon>DragonInfoForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ItemInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -72,12 +78,14 @@
     </Compile>
     <Compile Include="MirDatabase\AuctionInfo.cs" />
     <Compile Include="MirDatabase\CharacterInfo.cs" />
+    <Compile Include="MirDatabase\DragonInfo.cs" />
     <Compile Include="MirDatabase\MagicInfo.cs" />
     <Compile Include="MirDatabase\MonsterInfo.cs" />
     <Compile Include="MirDatabase\MovementInfo.cs" />
     <Compile Include="MirDatabase\NPCInfo.cs" />
     <Compile Include="MirDatabase\RespawnInfo.cs" />
     <Compile Include="MirDatabase\SafeZoneInfo.cs" />
+    <Compile Include="MirEnvir\Dragon.cs" />
     <Compile Include="MirEnvir\Map.cs" />
     <Compile Include="MirDatabase\MapInfo.cs" />
     <Compile Include="ListViewNF.cs">
@@ -110,6 +118,9 @@
     <Compile Include="MirObjects\Monsters\BoneLord.cs" />
     <Compile Include="MirObjects\Monsters\BombSpider.cs" />
     <Compile Include="MirObjects\Monsters\BlackFoxman.cs" />
+    <Compile Include="MirObjects\Monsters\DragonStatue.cs" />
+    <Compile Include="MirObjects\Monsters\EvilMirBody.cs" />
+    <Compile Include="MirObjects\Monsters\EvilMir.cs" />
     <Compile Include="MirObjects\Monsters\HedgeKekTal.cs" />
     <Compile Include="MirObjects\Monsters\GreatFoxSpirit.cs" />
     <Compile Include="MirObjects\Monsters\ThunderElement.cs" />
@@ -173,6 +184,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DragonInfoForm.resx">
+      <DependentUpon>DragonInfoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ItemInfoForm.resx">
       <DependentUpon>ItemInfoForm.cs</DependentUpon>

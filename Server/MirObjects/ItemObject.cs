@@ -65,6 +65,17 @@ namespace Server.MirObjects
             CurrentMap = dropper.CurrentMap;
             CurrentLocation = dropper.CurrentLocation;
         }
+        public ItemObject(MapObject dropper, UserItem item, Point manualpoint)
+        {
+            ExpireTime = Envir.Time + Settings.ItemTimeOut * Settings.Minute;
+
+            Item = item;
+            if (Item.IsAdded)
+                NameColour = Color.Cyan;
+
+            CurrentMap = dropper.CurrentMap;
+            CurrentLocation = manualpoint;
+        }
         public ItemObject(MapObject dropper, uint gold)
         {
             ExpireTime = Envir.Time + Settings.ItemTimeOut * Settings.Minute;
@@ -73,6 +84,15 @@ namespace Server.MirObjects
 
             CurrentMap = dropper.CurrentMap;
             CurrentLocation = dropper.CurrentLocation;
+        }
+        public ItemObject(MapObject dropper, uint gold, Point manuallocation)
+        {
+            ExpireTime = Envir.Time + Settings.ItemTimeOut * Settings.Minute;
+
+            Gold = gold;
+
+            CurrentMap = dropper.CurrentMap;
+            CurrentLocation = manuallocation;
         }
          
         public override void Process()
@@ -162,6 +182,93 @@ namespace Server.MirObjects
                         {
                             MovementInfo info = CurrentMap.Info.Movements[i];
                             if (info.Source != new Point(x,y)) continue;
+                            movement = true;
+                            break;
+                        }
+
+                        if (movement) continue;
+
+                        Cell cell = CurrentMap.GetCell(x, y);
+
+                        if (cell.Objects == null)
+                        {
+                            CurrentLocation = new Point(x, y);
+                            CurrentMap.AddObject(this);
+                            Spawned();
+                            return true;
+                        }
+
+                        int count = 0;
+                        bool blocking = false;
+
+                        for (int i = 0; i < cell.Objects.Count; i++)
+                        {
+                            MapObject ob = cell.Objects[i];
+                            if (ob.Blocking)
+                            {
+                                blocking = true;
+                                break;
+                            }
+                            if (ob.Race == ObjectType.Item)
+                                count++;
+                        }
+
+                        if (blocking || count >= Settings.DropStackSize) continue;
+
+                        if (count == 0)
+                        {
+                            CurrentLocation = new Point(x, y);
+                            CurrentMap.AddObject(this);
+                            Spawned();
+                            return true;
+                        }
+
+                        if (best == null || count < bestCount)
+                        {
+                            best = cell;
+                            bestCount = count;
+                            bestLocation = new Point(x, y);
+                        }
+                    }
+                }
+            }
+
+            if (best == null)
+
+                return false;
+
+            CurrentLocation = bestLocation;
+            CurrentMap.AddObject(this);
+            Spawned();
+            return true;
+        }
+
+        public bool DragonDrop(int distance)
+        {
+            if (CurrentMap == null) return false;
+
+            Cell best = null;
+            int bestCount = 0;
+            Point bestLocation = Point.Empty;
+
+            for (int d = 0; d <= distance; d++)
+            {
+                for (int y = CurrentLocation.Y + 3; y <= CurrentLocation.Y + (d * 2); y++)
+                {
+                    if (y < 0) continue;
+                    if (y >= CurrentMap.Height) break;
+
+                    for (int x = CurrentLocation.X - d; x <= CurrentLocation.X + d; x += Math.Abs(y - CurrentLocation.Y) == d ? 1 : d * 2)
+                    {
+                        if (x < 0) continue;
+                        if (x >= CurrentMap.Width) break;
+                        if (!CurrentMap.ValidPoint(x, y)) continue;
+
+                        bool movement = false;
+                        for (int i = 0; i < CurrentMap.Info.Movements.Count; i++)
+                        {
+                            MovementInfo info = CurrentMap.Info.Movements[i];
+                            if (info.Source != new Point(x, y)) continue;
                             movement = true;
                             break;
                         }

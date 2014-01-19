@@ -116,6 +116,12 @@ namespace Server.MirObjects
                     return new GreatFoxSpirit(info);
                 case 51:
                     return new HedgeKekTal(info);
+                case 52:
+                    return new EvilMir(info);
+                case 53:
+                    return new EvilMirBody(info);
+                case 54:
+                    return new DragonStatue(info);
                 default:
                     return new MonsterObject(info);
             }

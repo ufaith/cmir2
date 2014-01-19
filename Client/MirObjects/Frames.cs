@@ -467,6 +467,52 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Dead, new Frame(217, 1, 9, 1000));
             frame.Frames.Add(MirAction.Revive, new Frame(208, 10, 0, 100) { Reverse = true });
             frame.Frames.Add(MirAction.AttackRange, new Frame(288, 6, 0, 100));
+
+            //40
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 10, -10, 1000));
+            frame.Frames.Add(MirAction.Attack1, new Frame(42, 8, -8, 120));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(10, 6, 4, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(40, 2, -2, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(42, 7, -7, 120));
+            frame.Frames.Add(MirAction.Dead, new Frame(48, 1, -1, 1000));
+            frame.Frames.Add(MirAction.Revive, new Frame(42, 7, -7, 120) { Reverse = true });
+
+            //41 - Dragon Statue 1
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(300, 1, -1, 1000));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(300, 1, -1, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(300, 1, -1, 200));
+
+            //42 - Dragon Statue 2
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(301, 1, -1, 1000));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(301, 1, -1, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(301, 1, -1, 200));
+
+            //43 - Dragon Statue 3
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(302, 1, -1, 1000));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(302, 1, -1, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(302, 1, -1, 200));
+
+            //44 - Dragon Statue 4
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(320, 1, -1, 1000));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(320, 1, -1, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(320, 1, -1, 200));
+
+            //45 - Dragon Statue 5
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(321, 1, -1, 1000));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(321, 1, -1, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(321, 1, -1, 200));
+
+            //46 - Dragon Statue 6
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(322, 1, -1, 1000));
+            frame.Frames.Add(MirAction.AttackRange, new Frame(322, 1, -1, 120));
+            frame.Frames.Add(MirAction.Struck, new Frame(322, 1, -1, 200));
         }
     }
 
