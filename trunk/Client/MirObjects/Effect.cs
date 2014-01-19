@@ -29,25 +29,25 @@ namespace Client.MirObjects
         
         public event EventHandler Complete;
 
-        public Effect(MLibrary library, int baseIndex, int count, int duration, MapObject owner)
+        public Effect(MLibrary library, int baseIndex, int count, int duration, MapObject owner, long starttime = 0)
         {
             Library = library;
             BaseIndex = baseIndex;
             Count = count == 0 ? 1 : count;
             Duration = duration;
-            Start = CMain.Time;
+            Start = starttime == 0 ? CMain.Time : starttime;
 
             NextFrame = Start + (Duration / Count) * (CurrentFrame + 1);
             Owner = owner;
             Source = Owner.CurrentLocation;
         }
-        public Effect(MLibrary library, int baseIndex, int count, int duration, Point source)
+        public Effect(MLibrary library, int baseIndex, int count, int duration, Point source, long starttime = 0)
         {
             Library = library;
             BaseIndex = baseIndex;
             Count = count == 0 ? 1 : count;
             Duration = duration;
-            Start = CMain.Time;
+            Start = starttime == 0 ? CMain.Time : starttime;
 
             NextFrame = Start + (Duration / Count) * (CurrentFrame + 1);
             Source = source;

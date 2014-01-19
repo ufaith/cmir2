@@ -1746,7 +1746,7 @@ namespace Client.MirObjects
             int x = CurrentLocation.X - CurrentLocation.X % 2;
             int y = CurrentLocation.Y - CurrentLocation.Y % 2;
 
-            int index = (GameScene.Scene.MapControl.M2CellInfo[x, y].BackImage & 0x7FFF) - 1;
+            int index = (GameScene.Scene.MapControl.M2CellInfo[x, y].BackImage & 0xFFFF) - 1;
             index = GameScene.Scene.MapControl.M2CellInfo[x, y].FileIndex * 10000 + index;
             int moveSound;
 

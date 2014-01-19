@@ -137,5 +137,12 @@ namespace Server
 
             form.ShowDialog();
         }
+
+        private void dragonInfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DragonInfoForm form = new DragonInfoForm();
+
+            form.ShowDialog();
+        }
     }
 }

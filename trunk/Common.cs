@@ -146,6 +146,9 @@ public enum Monster : ushort
     GreatFoxSpirit = 134,
     HedgeKekTal = 135,
     BigHedgeKekTal = 136,
+    EvilMir = 137,
+    EvilMirBody = 138,
+    DragonStatue = 139,
 }
 
 public enum MirAction : byte
@@ -916,6 +919,8 @@ public static class Globals
         MaxChatLength = 80,
 
         MaxGroup = 15,
+
+        MaxDragonLevel = 13,
 
         DataRange = 14;
 

@@ -20,6 +20,19 @@ namespace Client.MirObjects
         {
             get { return !Dead; }
         }
+        public Point ManualLocationOffset
+        {
+            get 
+            {
+                switch (BaseImage)
+                {
+                    case Monster.EvilMir:
+                        return new Point(-21, -15);
+                    default:
+                        return new Point(0, 0);
+                }
+            }
+        }
 
         public Monster BaseImage;
         public byte Effect;
@@ -39,7 +52,7 @@ namespace Client.MirObjects
         public MonsterObject(uint objectID) : base(objectID)
         {
         }
-        public void Load(S.ObjectMonster info)
+        public void Load(S.ObjectMonster info, bool update = false)
         {
             Name = info.Name;
             NameColour = info.NameColour;
@@ -47,7 +60,7 @@ namespace Client.MirObjects
 
             CurrentLocation = info.Location;
             MapLocation = info.Location;
-            GameScene.Scene.MapControl.AddObject(this);
+            if (!update) GameScene.Scene.MapControl.AddObject(this);
 
 
 
@@ -60,10 +73,27 @@ namespace Client.MirObjects
             Poison = info.Poison;
             Skeleton = info.Skeleton;
             Hidden = info.Hidden;
+            if (Stage != info.ExtraByte)
+            {
+                switch (BaseImage)
+                {
+                    case Monster.GreatFoxSpirit:
+                        if (update) Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 335, 20, 3000, this));
+                        break;
+                }
+            }
             Stage = info.ExtraByte;
 
-            if ((ushort)BaseImage < Libraries.Monsters.Length)
-                BodyLibrary = Libraries.Monsters[(ushort)BaseImage];
+            switch (BaseImage)
+            {
+                case Monster.EvilMir:
+                case Monster.DragonStatue:
+                    BodyLibrary = Libraries.Dragon;
+                    break;
+                default:
+                    BodyLibrary = Libraries.Monsters[(ushort)BaseImage];
+                    break;
+            }
             
             if (Skeleton)
                 ActionFeed.Add(new QueuedAction { Action = MirAction.Skeleton, Direction = Direction, Location = CurrentLocation });
@@ -290,6 +320,12 @@ namespace Client.MirObjects
                 case Monster.BigHedgeKekTal:
                     Frames = FrameSet.Monsters[39];
                     break;
+                case Monster.EvilMir:
+                    Frames = FrameSet.Monsters[40];
+                    break;
+                case Monster.DragonStatue:
+                    Frames = FrameSet.Monsters[41 + (byte)Direction];
+                    break;
                 default:
                     Frames = FrameSet.Monsters[0];
                     break;
@@ -301,51 +337,6 @@ namespace Client.MirObjects
             {
                 PlayAppearSound();
                 FrameIndex = CMain.Random.Next(Frame.Count);
-            }
-
-            NextMotion -= NextMotion % 100;
-        }
-
-        public void Update(S.ObjectMonster info)
-        {
-            Name = info.Name;
-            NameColour = info.NameColour;
-            BaseImage = info.Image;
-
-            CurrentLocation = info.Location;
-            MapLocation = info.Location;
-
-            Effect = info.Effect;
-            AI = info.AI;
-            Light = info.Light;
-
-            Direction = info.Direction;
-            Dead = info.Dead;
-            Poison = info.Poison;
-            Skeleton = info.Skeleton;
-            Hidden = info.Hidden;
-            if (Stage != info.ExtraByte)
-            {
-                switch (BaseImage)
-                {
-                    case Monster.GreatFoxSpirit:
-                        Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 335, 20, 3000, this));
-                        break;
-                }
-            }
-            Stage = info.ExtraByte;
-
-
-            if (Skeleton)
-                ActionFeed.Add(new QueuedAction { Action = MirAction.Skeleton, Direction = Direction, Location = CurrentLocation });
-            else if (Dead)
-                ActionFeed.Add(new QueuedAction { Action = MirAction.Dead, Direction = Direction, Location = CurrentLocation });
-
-            switch (BaseImage)
-            {
-                case Monster.GreatFoxSpirit:
-                    Frames = FrameSet.Monsters[34 + Stage];
-                    break;
             }
 
             NextMotion -= NextMotion % 100;
@@ -435,6 +426,7 @@ namespace Client.MirObjects
             DrawLocation = new Point((Movement.X - User.Movement.X + MapControl.OffSetX) * MapControl.CellWidth, (Movement.Y - User.Movement.Y + MapControl.OffSetY) * MapControl.CellHeight);
             DrawLocation.Offset(-OffSetMove.X, -OffSetMove.Y);
             DrawLocation.Offset(User.OffSetMove);
+            DrawLocation = DrawLocation.Add(ManualLocationOffset);
 
             if (BodyLibrary != null && update)
             {
@@ -641,6 +633,17 @@ namespace Client.MirObjects
                             case Monster.GreatFoxSpirit:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 355, 20, Frame.Count * Frame.Interval, this));
                                 break;
+                            case Monster.EvilMir:
+                                Effects.Add(new Effect(Libraries.Dragon, 60, 8, 8 * Frame.Interval, this));
+                                Effects.Add(new Effect(Libraries.Dragon, 68, 14, 14 * Frame.Interval, this));
+                                byte random = (byte)CMain.Random.Next(7);
+                                for (int i = 0; i <= 7 + random; i++)
+                                {
+                                    Point source = new Point(User.CurrentLocation.X + CMain.Random.Next(-7, 7), User.CurrentLocation.Y + CMain.Random.Next(-7, 7));
+
+                                    MapControl.Effects.Add(new Effect(Libraries.Dragon, 230 + (CMain.Random.Next(5) * 10), 5, 400, source, CMain.Time + CMain.Random.Next(1000)));
+                                }
+                                break;
                         }
                         break;
                     case MirAction.Attack2:
@@ -686,10 +689,16 @@ namespace Client.MirObjects
                                 byte random = (byte)CMain.Random.Next(4);
                                 for (int i = 0; i <= 4 + random; i++)
                                 {
-                                    Point source = new Point(User.CurrentLocation.X - 7 + CMain.Random.Next(14), User.CurrentLocation.Y - 7 + CMain.Random.Next(14));
+                                    Point source = new Point(User.CurrentLocation.X + CMain.Random.Next(-7, 7), User.CurrentLocation.Y + CMain.Random.Next(-7, 7));
 
-                                    MapControl.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 375 + (CMain.Random.Next(3) * 20), 20, 1400, source));
+                                    MapControl.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 375 + (CMain.Random.Next(3) * 20), 20, 1400, source, CMain.Time + CMain.Random.Next(600)));
                                 }
+                                break;
+                            case Monster.EvilMir:
+                                Effects.Add(new Effect(Libraries.Dragon, 90 + (int)Direction * 10, 10, 10 * Frame.Interval, this));
+                                break;
+                            case Monster.DragonStatue:
+                                Effects.Add(new Effect(Libraries.Dragon, 310 + ((int)Direction / 3) * 20, 10, 10 * Frame.Interval, this));
                                 break;
                         }
                         TargetID = (uint)action.Params[0];
@@ -1011,6 +1020,17 @@ namespace Client.MirObjects
 
                         if (UpdateFrame() >= Frame.Count)
                         {
+                            switch (BaseImage)
+                            {
+                                case Monster.DragonStatue:
+                                    MapObject ob = MapControl.GetObject(TargetID);
+                                    if (ob != null)
+                                    {
+                                        ob.Effects.Add(new Effect(Libraries.Dragon, 350, 35, 1200, ob));
+                                        SoundManager.PlaySound(BaseSound + 6);
+                                    }
+                                    break;
+                            }
                             FrameIndex = Frame.Count - 1;
                             SetAction();
                         }
@@ -1166,6 +1186,18 @@ namespace Client.MirObjects
                                             case Monster.BigHedgeKekTal:
                                                 if (MapControl.GetObject(TargetID) != null)
                                                     CreateProjectile(38, Libraries.Monsters[(ushort)Monster.BigHedgeKekTal], false, 4, 30, 6);
+                                                break;
+                                            case Monster.EvilMir:
+                                                missile = CreateProjectile(60, Libraries.Dragon, true, 10, 10, 0);
+
+                                                if (missile.Target != null)
+                                                {
+                                                    missile.Complete += (o, e) =>
+                                                    {
+                                                        if (missile.Target.CurrentAction == MirAction.Dead) return;
+                                                        missile.Target.Effects.Add(new Effect(Libraries.Dragon, 200, 20, 600, missile.Target));
+                                                    };
+                                                }
                                                 break;
                                             }
                                         break;

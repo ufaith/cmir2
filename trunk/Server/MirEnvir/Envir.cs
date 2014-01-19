@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 10;
+        public const int Version = 11;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -65,6 +65,7 @@ namespace Server.MirEnvir
         public List<MapInfo> MapInfoList = new List<MapInfo>();
         public List<ItemInfo> ItemInfoList = new List<ItemInfo>();
         public List<MonsterInfo> MonsterInfoList = new List<MonsterInfo>();
+        public DragonInfo DragonInfo;
 
         //User DB
         public int NextAccountID, NextCharacterID;
@@ -72,7 +73,6 @@ namespace Server.MirEnvir
         public List<AccountInfo> AccountList = new List<AccountInfo>();
         public List<CharacterInfo> CharacterList = new List<CharacterInfo>(); 
         public LinkedList<AuctionInfo> Auctions = new LinkedList<AuctionInfo>();
-
 
         //Live Info
         public List<Map> MapList = new List<Map>();
@@ -82,6 +82,7 @@ namespace Server.MirEnvir
         public bool Saving = false;
         public LightSetting Lights;
         public LinkedList<MapObject> Objects = new LinkedList<MapObject>();
+        public Dragon DragonSystem;
 
 
         static Envir()
@@ -166,6 +167,8 @@ namespace Server.MirEnvir
 
                     for (int i = 0; i < MapList.Count; i++)
                         MapList[i].Process();
+
+                    if (DragonSystem != null) DragonSystem.Process();
 
                     if (Time >= saveTime)
                     {
@@ -252,6 +255,8 @@ namespace Server.MirEnvir
                 writer.Write(MonsterInfoList.Count);
                 for (int i = 0; i < MonsterInfoList.Count; i++)
                     MonsterInfoList[i].Save(writer);
+
+                DragonInfo.Save(writer);
             }
         }
         public void SaveAccounts()
@@ -357,6 +362,8 @@ namespace Server.MirEnvir
                     for (int i = 0; i < count; i++)
                         MonsterInfoList.Add(new MonsterInfo(reader));
 
+                    if (LoadVersion >= 11) DragonInfo = new DragonInfo(reader);
+                    else DragonInfo = new DragonInfo();
                 }
 
             }
@@ -466,6 +473,15 @@ namespace Server.MirEnvir
 
             for (int i = 0; i < MonsterInfoList.Count; i++)
                 MonsterInfoList[i].LoadDrops();
+
+            if (DragonInfo.Enabled)
+            {
+                DragonSystem = new Dragon(DragonInfo);
+                if (DragonSystem != null)
+                {
+                    if (DragonSystem.Load()) DragonSystem.Info.LoadDrops();
+                }
+            }
 
             SMain.Enqueue("Envir Started.");
         }

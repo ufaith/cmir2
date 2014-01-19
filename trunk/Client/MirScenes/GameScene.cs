@@ -1435,7 +1435,7 @@ namespace Client.MirScenes
                 if (ob.ObjectID == p.ObjectID)
                 {
                     mob = (MonsterObject)ob;
-                    mob.Update(p);
+                    mob.Load(p, true);
                     return;
                 }
             }
@@ -3478,7 +3478,7 @@ namespace Client.MirScenes
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
 
                     if (M2CellInfo[x, y].BackImage == 0) continue;
-                    index = (M2CellInfo[x, y].BackImage & 0x7FFF) - 1;
+                    index = (M2CellInfo[x, y].BackImage & 0xFFFF) - 1;
                     Libraries.Tiles.Draw(index, drawX, drawY);
                 }
             }

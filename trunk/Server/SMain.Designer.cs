@@ -39,6 +39,8 @@ namespace Server
             this.LogTextBox = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.DebugLogTextBox = new System.Windows.Forms.TextBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.ChatLogTextBox = new System.Windows.Forms.TextBox();
             this.StatusBar = new System.Windows.Forms.StatusStrip();
             this.PlayersLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.MonsterLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -57,14 +59,13 @@ namespace Server
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.configToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.InterfaceTimer = new System.Windows.Forms.Timer(this.components);
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.ChatLogTextBox = new System.Windows.Forms.TextBox();
+            this.dragonInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.StatusBar.SuspendLayout();
             this.MainMenu.SuspendLayout();
-            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainTabs
@@ -122,6 +123,28 @@ namespace Server
             this.DebugLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.DebugLogTextBox.Size = new System.Drawing.Size(529, 341);
             this.DebugLogTextBox.TabIndex = 3;
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.ChatLogTextBox);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(535, 347);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Chat Logs";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // ChatLogTextBox
+            // 
+            this.ChatLogTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ChatLogTextBox.Location = new System.Drawing.Point(3, 3);
+            this.ChatLogTextBox.Multiline = true;
+            this.ChatLogTextBox.Name = "ChatLogTextBox";
+            this.ChatLogTextBox.ReadOnly = true;
+            this.ChatLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.ChatLogTextBox.Size = new System.Drawing.Size(529, 341);
+            this.ChatLogTextBox.TabIndex = 4;
             // 
             // StatusBar
             // 
@@ -216,6 +239,7 @@ namespace Server
             this.mapInfoToolStripMenuItem,
             this.itemInfoToolStripMenuItem,
             this.monsterInfoToolStripMenuItem,
+            this.dragonInfoToolStripMenuItem,
             this.accountsToolStripMenuItem,
             this.toolStripMenuItem2,
             this.configToolStripMenuItem});
@@ -226,40 +250,40 @@ namespace Server
             // mapInfoToolStripMenuItem
             // 
             this.mapInfoToolStripMenuItem.Name = "mapInfoToolStripMenuItem";
-            this.mapInfoToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.mapInfoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.mapInfoToolStripMenuItem.Text = "Map Info";
             this.mapInfoToolStripMenuItem.Click += new System.EventHandler(this.gameToolStripMenuItem_Click);
             // 
             // itemInfoToolStripMenuItem
             // 
             this.itemInfoToolStripMenuItem.Name = "itemInfoToolStripMenuItem";
-            this.itemInfoToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.itemInfoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.itemInfoToolStripMenuItem.Text = "Item Info";
             this.itemInfoToolStripMenuItem.Click += new System.EventHandler(this.itemInfoToolStripMenuItem_Click);
             // 
             // monsterInfoToolStripMenuItem
             // 
             this.monsterInfoToolStripMenuItem.Name = "monsterInfoToolStripMenuItem";
-            this.monsterInfoToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.monsterInfoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.monsterInfoToolStripMenuItem.Text = "Monster Info";
             this.monsterInfoToolStripMenuItem.Click += new System.EventHandler(this.monsterInfoToolStripMenuItem_Click);
             // 
             // accountsToolStripMenuItem
             // 
             this.accountsToolStripMenuItem.Name = "accountsToolStripMenuItem";
-            this.accountsToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.accountsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.accountsToolStripMenuItem.Text = "Accounts";
             this.accountsToolStripMenuItem.Click += new System.EventHandler(this.accountsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(139, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
             // 
             // configToolStripMenuItem
             // 
             this.configToolStripMenuItem.Name = "configToolStripMenuItem";
-            this.configToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.configToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.configToolStripMenuItem.Text = "Config";
             this.configToolStripMenuItem.Click += new System.EventHandler(this.configToolStripMenuItem_Click);
             // 
@@ -268,27 +292,12 @@ namespace Server
             this.InterfaceTimer.Enabled = true;
             this.InterfaceTimer.Tick += new System.EventHandler(this.InterfaceTimer_Tick);
             // 
-            // tabPage3
+            // dragonInfoToolStripMenuItem
             // 
-            this.tabPage3.Controls.Add(this.ChatLogTextBox);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(535, 347);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Chat Logs";
-            this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // ChatLogTextBox
-            // 
-            this.ChatLogTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ChatLogTextBox.Location = new System.Drawing.Point(3, 3);
-            this.ChatLogTextBox.Multiline = true;
-            this.ChatLogTextBox.Name = "ChatLogTextBox";
-            this.ChatLogTextBox.ReadOnly = true;
-            this.ChatLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ChatLogTextBox.Size = new System.Drawing.Size(529, 341);
-            this.ChatLogTextBox.TabIndex = 4;
+            this.dragonInfoToolStripMenuItem.Name = "dragonInfoToolStripMenuItem";
+            this.dragonInfoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dragonInfoToolStripMenuItem.Text = "Dragon Info";
+            this.dragonInfoToolStripMenuItem.Click += new System.EventHandler(this.dragonInfoToolStripMenuItem_Click);
             // 
             // SMain
             // 
@@ -306,12 +315,12 @@ namespace Server
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.StatusBar.ResumeLayout(false);
             this.StatusBar.PerformLayout();
             this.MainMenu.ResumeLayout(false);
             this.MainMenu.PerformLayout();
-            this.tabPage3.ResumeLayout(false);
-            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -344,6 +353,7 @@ namespace Server
         private TextBox DebugLogTextBox;
         private TabPage tabPage3;
         private TextBox ChatLogTextBox;
+        private ToolStripMenuItem dragonInfoToolStripMenuItem;
     }
 }
 
