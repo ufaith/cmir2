@@ -157,6 +157,9 @@ namespace Server.MirObjects
         public NPCPage NPCPage;
         public bool NPCSuccess;
 
+        public bool NPCGoto;
+        public string NPCGotoPage;
+
         public bool UserMatch;
         public string MatchName;
         public ItemType MatchType;
@@ -1612,8 +1615,7 @@ namespace Server.MirObjects
 
                 PlayerObject player;
                 CharacterInfo data;
-                String hintstring;
-                
+                String hintstring;              
                 UserItem item;
 
                 switch (parts[0].ToUpper())
@@ -1679,7 +1681,7 @@ namespace Server.MirObjects
                         if (!data.Deleted) return;
                         data.Deleted = false;
 
-                        ReceiveChat(string.Format("Player {0} has been restored by", data.Name), ChatType.Hint);
+                        ReceiveChat(string.Format("Player {0} has been restored by", data.Name), ChatType.System);
                         SMain.Enqueue(string.Format("Player {0} has been restored by {1}", data.Name, Name));
                         
                         break;
@@ -1701,7 +1703,7 @@ namespace Server.MirObjects
                                 break;
                         }
 
-                        ReceiveChat(string.Format("Player {0} has been changed to {1}", data.Name, data.Gender), ChatType.Hint);
+                        ReceiveChat(string.Format("Player {0} has been changed to {1}", data.Name, data.Gender), ChatType.System);
                         SMain.Enqueue(string.Format("Player {0} has been changed to {1} by {2}", data.Name, data.Gender, Name));
 
                         if (data.Player != null)
@@ -1725,7 +1727,7 @@ namespace Server.MirObjects
                                 player.Level = level;
                                 player.LevelUp();
 
-                                ReceiveChat(string.Format("Player {0} has been Leveled {1} -> {2}.", player.Name, old, player.Level), ChatType.Hint);
+                                ReceiveChat(string.Format("Player {0} has been Leveled {1} -> {2}.", player.Name, old, player.Level), ChatType.System);
                                 SMain.Enqueue(string.Format("Player {0} has been Leveled {1} -> {2} by {3}", player.Name, old, player.Level, Name));
                                 return;
                             }
@@ -1739,7 +1741,7 @@ namespace Server.MirObjects
                                 Level = level;
                                 LevelUp();
 
-                                ReceiveChat(string.Format("Leveled {0} -> {1}.", old, Level), ChatType.Hint);
+                                ReceiveChat(string.Format("Leveled {0} -> {1}.", old, Level), ChatType.System);
                                 SMain.Enqueue(string.Format("Player {0} has been Leveled {1} -> {2} by {3}", Name, old, Level, Name));
                                 return;
                             }
@@ -1779,7 +1781,7 @@ namespace Server.MirObjects
                             GainItem(item);
                         }
 
-                        ReceiveChat(string.Format("{0} x{1} has been created.", iInfo.Name, tempCount), ChatType.Hint);
+                        ReceiveChat(string.Format("{0} x{1} has been created.", iInfo.Name, tempCount), ChatType.System);
                         SMain.Enqueue(string.Format("Player {0} has attempted to Create {1} x{2}", Name, iInfo.Name, tempCount));
                         break;
 
@@ -1856,6 +1858,12 @@ namespace Server.MirObjects
                             player.Teleport(CurrentMap, CurrentLocation);
                         break;
 
+                    case "MAP":
+                        var mapName = CurrentMap.Info.FileName;
+                        var mapTitle = CurrentMap.Info.Title;
+                        ReceiveChat((string.Format("You are currently in {0}. Map ID: {1}", mapTitle, mapName)), ChatType.System);
+                        break;
+
                     case "MOVE":
                         if (!IsGM && !HasTeleportRing) return;
 
@@ -1863,45 +1871,53 @@ namespace Server.MirObjects
 
                         if (parts.Length <= 2 || !int.TryParse(parts[1], out x) || !int.TryParse(parts[2], out y))
                         {
-                            TeleportRandom(40, 0);
+                            TeleportRandom(80, 0);
                             return;
                         }
+
                         Teleport(CurrentMap, new Point(x, y));
                         break;
 
                     case "MAPMOVE":
                         if (!IsGM) return;
-                        if (parts.Length >= 4)
+                        if (parts.Length < 2) return;
+                        var instanceID = 0; x = 0; y = 0;
+
+                        if (parts.Length == 3 || parts.Length == 5)
+                            int.TryParse(parts[2], out instanceID);
+
+                        var map = SMain.Envir.GetMapByNameAndInstance(parts[1], instanceID);
+                        if (map == null)
                         {
-                            if (!int.TryParse(parts[2], out x) || !int.TryParse(parts[3], out y)) return;
-
-                            var map = SMain.Envir.GetMapByName(parts[1]);
-                            if (map == null)
-                            {
-                                ReceiveChat((string.Format("Map {0} could not be found", parts[1])), ChatType.System);
-                                return;
-                            }
-
-                            Teleport(map, new Point(x, y));
-                            ReceiveChat((string.Format("Moved to Map {0} at {1}:{2}", map.Info.FileName, x, y)), ChatType.Hint);
+                            ReceiveChat((string.Format("Map {0}:[{1}] could not be found", parts[1], instanceID)), ChatType.System);
                             return;
                         }
 
-                        if (parts.Length > 1)
+                        if (parts.Length == 4 || parts.Length == 5)
                         {
-                            var map = SMain.Envir.GetMapByName(parts[1]);
-                            if (map == null)
-                            {
-                                ReceiveChat((string.Format("Map {0} could not be found", parts[1])), ChatType.System);
-                                return;
-                            }
-
-                            TeleportRandom(40, 0, map);
-                            ReceiveChat((string.Format("Moved to Map {0}", map.Info.FileName)), ChatType.Hint);
-                            return;
+                            int.TryParse(parts[parts.Length - 2], out x);
+                            int.TryParse(parts[parts.Length - 1], out y);
                         }
 
-                        ReceiveChat("Not enough parameters to teleport", ChatType.System);             
+                        switch (parts.Length)
+                        {
+                            case 2:
+                                ReceiveChat(TeleportRandom(80, 0, map) ? (string.Format("Moved to Map {0}", map.Info.FileName)) :
+                                    (string.Format("Failed movement to Map {0}", map.Info.FileName)), ChatType.System);   
+                                break;
+                            case 3:
+                                ReceiveChat(TeleportRandom(80, 0, map) ? (string.Format("Moved to Map {0}:[{1}]", map.Info.FileName, instanceID)) :
+                                    (string.Format("Failed movement to Map {0}:[{1}]", map.Info.FileName, instanceID)), ChatType.System); 
+                                break;
+                            case 4:
+                                ReceiveChat(Teleport(map, new Point(x, y)) ? (string.Format("Moved to Map {0} at {1}:{2}", map.Info.FileName, x, y)): 
+                                    (string.Format("Failed movement to Map {0} at {1}:{2}", map.Info.FileName, x, y)), ChatType.System);
+                                break;
+                            case 5:
+                                ReceiveChat(Teleport(map, new Point(x, y)) ? (string.Format("Moved to Map {0}:[{1}] at {2}:{3}", map.Info.FileName, instanceID, x, y)) :
+                                    (string.Format("Failed movement to Map {0}:[{1}] at {2}:{3}", map.Info.FileName, instanceID, x, y)), ChatType.System);
+                                break;
+                        }
                         break;
 
                     case "GOTO":
@@ -1941,7 +1957,7 @@ namespace Server.MirObjects
                             monster.Spawn(CurrentMap, Front);
                         }
 
-                        ReceiveChat((string.Format("Monster {0} x{1} has been spawned.", mInfo.Name, count)), ChatType.Hint);
+                        ReceiveChat((string.Format("Monster {0} x{1} has been spawned.", mInfo.Name, count)), ChatType.System);
                         break;
 
                     case "RECALLMOB":
@@ -1973,7 +1989,7 @@ namespace Server.MirObjects
                             Pets.Add(monster);
                         }
 
-                        ReceiveChat((string.Format("Pet {0} x{1} has been recalled.", mInfo2.Name, count)), ChatType.Hint);
+                        ReceiveChat((string.Format("Pet {0} x{1} has been recalled.", mInfo2.Name, count)), ChatType.System);
                         break;
 
                     case "RELOADDROPS":
@@ -5328,9 +5344,13 @@ namespace Server.MirObjects
             {
                 NPCObject ob = CurrentMap.NPCs[i];
                 if (ob.ObjectID != objectID) continue;
-                ob.Call(this, key);
+                ob.Call(this, NPCGoto ? NPCGotoPage : key);
+
+                if(NPCGoto) i--;
+                else break;
             }
         }
+
         public void BuyItem(int index, uint count)
         {
             if (Dead) return;

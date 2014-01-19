@@ -164,7 +164,7 @@ namespace Server.MirDatabase
             Purification = new MagicInfo { Spell = Spell.Purification, Icon = 39, Level1 = 30, Level2 = 32, Level3 = 35, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 14, LevelCost = 2 };
             MassHealing = new MagicInfo { Spell = Spell.MassHealing, Icon = 28, Level1 = 31, Level2 = 33, Level3 = 36, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 28, LevelCost = 3 };
             Hallucination = new MagicInfo { Spell = Spell.Hallucination, Icon = 48, Level1 = 32, Level2 = 34, Level3 = 36, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 22, LevelCost = 10 };
-            UltimateEnchancer = new MagicInfo { Spell = Spell.UltimateEnchancer, Icon = 35, Level1 = 33, Level2 = 35, Level3 = 38, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 28, LevelCost = 4 };
+            UltimateEnchancer = new MagicInfo { Spell = Spell.UltimateEnhancer, Icon = 35, Level1 = 33, Level2 = 35, Level3 = 38, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 28, LevelCost = 4 };
             SummonShinsu = new MagicInfo { Spell = Spell.SummonShinsu, Icon = 29, Level1 = 35, Level2 = 37, Level3 = 40, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 28, LevelCost = 4 };
             Reincarnation = new MagicInfo { Spell = Spell.Reincarnation, Icon = 53, Level1 = 37, Level2 = 39, Level3 = 41, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 125, LevelCost = 17 };
             SummonHolyDeva = new MagicInfo { Spell = Spell.SummonHolyDeva, Icon = 40, Level1 = 38, Level2 = 41, Level3 = 43, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 28, LevelCost = 4 };
@@ -191,7 +191,7 @@ namespace Server.MirDatabase
             SwiftFeet = new MagicInfo { Spell = Spell.SwiftFeet, Icon = 67, Level1 = 40, Level2 = 43, Level3 = 46, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 17, LevelCost = 5 };
             DarkBody = new MagicInfo { Spell = Spell.DarkBody, Icon = 70, Level1 = 46, Level2 = 49, Level3 = 52, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 40, LevelCost = 7 };
             Hemorrhage = new MagicInfo { Spell = Spell.Hemorrhage, Icon = 75, Level1 = 47, Level2 = 50, Level3 = 53, Need1 = 100, Need2 = 200, Need3 = 300 };
-            CresentSlash = new MagicInfo { Spell = Spell.CresentSlash, Icon = 71, Level1 = 50, Level2 = 53, Level3 = 56, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 19, LevelCost = 5 };
+            CresentSlash = new MagicInfo { Spell = Spell.CrescentSlash, Icon = 71, Level1 = 50, Level2 = 53, Level3 = 56, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 19, LevelCost = 5 };
 
         }
 

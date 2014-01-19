@@ -4632,7 +4632,7 @@ namespace Client.MirScenes
             ManaLabel.Text = string.Format("MP {0}/{1} ", User.MP, User.MaxMP);
             LevelLabel.Text = User.Level.ToString();
             ExperienceLabel.Text = string.Format("{0:#0.##%}", User.Experience/(double) User.MaxExperience);
-            ExperienceLabel.Location = new Point(10 + (ExperienceBar.Size.Width/2), -10);
+            ExperienceLabel.Location = new Point((ExperienceBar.Size.Width/2) - 20, -10);
             GoldLabel.Text = GameScene.Gold.ToString("###,###,##0");
             CharacterName.Text = User.Name;
             WeightLabel.Text = (User.MaxBagWeight - User.CurrentBagWeight).ToString();

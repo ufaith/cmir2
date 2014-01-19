@@ -15,9 +15,8 @@ namespace Server
                             ExportPath = @".\Exports\",
                             NPCPath = EnvirPath + @".\NPCs\",
                             QuestPath = EnvirPath + @".\Quests\",
-                            DropPath = EnvirPath + @".\Drops\";
-
-        public const string NameListPath = QuestPath + @"\NameLists\";
+                            DropPath = EnvirPath + @".\Drops\",
+                            NameListPath = EnvirPath + @"\NameLists\";
 
         private static readonly InIReader Reader = new InIReader(@".\Setup.ini");
 
