@@ -51,7 +51,6 @@ namespace LibraryEditor
         private void LoadImageInfo()
         {
             _fStream.Seek(48, SeekOrigin.Begin);
-
             _palette = new int[_bReader.ReadInt32()];
             _fStream.Seek(4, SeekOrigin.Current);
             _version = _bReader.ReadInt32();
@@ -139,6 +138,30 @@ namespace LibraryEditor
             public Rectangle TrueSize;
             public Bitmap Image;
             public long CleanTime;
+            
+            private int convert16bitTo32bit(int color)
+            {
+                int red = (color & 0xf800) >> 8;
+                int green = (color & 0x07e0) >> 3;
+                int blue = (color & 0x001f) << 3;
+
+                if (red < 0)
+                    red = 0;
+                else if (red > 0xFF)
+                    red = 0xFF;
+
+                if (green < 0)
+                    green = 0;
+                else if (green > 0xFF)
+                    green = 255;
+
+                if (blue < 0)
+                    blue = 0;
+                else if (blue > 0xFF)
+                    blue = 0xFF;
+
+                return ((red << 0x10) | (green << 0x8) | blue) | (255 << 24);//the final or is setting alpha to max so it'll display (since mir2 images have no alpha layer)
+    }
 
             public WeMadeImage(BinaryReader reader)
             {
@@ -151,14 +174,15 @@ namespace LibraryEditor
             public unsafe void CreateTexture(BinaryReader reader, int[] palette)
             {
                 if (Width == 0 || Height == 0) return;
-
+                int imagesize;
                 Image = new Bitmap(Width, Height);
 
                 BitmapData data = Image.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
 
-
-                byte[] bytes = reader.ReadBytes(Width * Height);
-
+                imagesize = Width * Height;
+                if (palette.Length > 256)
+                  imagesize = imagesize * 2; 
+                byte[] bytes = reader.ReadBytes(imagesize);
                 int index = 0;
 
                 int* scan0 = (int*) data.Scan0;
@@ -167,7 +191,10 @@ namespace LibraryEditor
                     {
                         for (int x = 0; x < Width; x++)
                         {
-                            scan0[y*Width + x] = palette[bytes[index++]];
+                            if (palette.Length > 256) 
+                                scan0[y * Width + x] = convert16bitTo32bit(bytes[index++] + (bytes[index++] << 8));
+                            else
+                                scan0[y*Width + x] = palette[bytes[index++]];
                         }
                     }
                 }
