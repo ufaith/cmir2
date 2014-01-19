@@ -53,7 +53,7 @@ namespace Server.MirDatabase
         public List<UserMagic> Magics = new List<UserMagic>();
         public List<PetInfo> Pets = new List<PetInfo>();
 
-
+        public bool[] Flags = new bool[Globals.FlagIndexCount];
 
         public AccountInfo AccountInfo;
         public PlayerObject Player;
@@ -155,6 +155,12 @@ namespace Server.MirDatabase
             if (Envir.LoadVersion < 5) return;
 
             AllowGroup = reader.ReadBoolean();
+
+            if (Envir.LoadVersion < 12) return;
+
+            count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+                Flags[i] = reader.ReadBoolean();
         }
 
 
@@ -230,6 +236,10 @@ namespace Server.MirDatabase
                 Pets[i].Save(writer);
 
             writer.Write(AllowGroup);
+
+            writer.Write(Flags.Length);
+            for (int i = 0; i < Flags.Length; i++)
+                writer.Write(Flags[i]);
         }
 
         public SelectInfo ToSelectInfo()
@@ -280,4 +290,22 @@ namespace Server.MirDatabase
 
         }
     }
+
+    //public class FlagInfo
+    //{
+    //    public uint FlagIndex;
+    //    public bool FlagCheck;
+
+    //    public FlagInfo(BinaryReader reader)
+    //    {
+    //        FlagIndex = reader.ReadUInt32();
+    //        FlagCheck = reader.ReadBoolean();
+    //    }
+
+    //    public void Save(BinaryWriter writer)
+    //    {
+    //        writer.Write(FlagIndex);
+    //        writer.Write(FlagCheck);
+    //    }
+    //}
 }

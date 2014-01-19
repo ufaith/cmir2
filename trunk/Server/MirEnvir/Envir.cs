@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 11;
+        public const int Version = 12;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -1084,9 +1084,15 @@ namespace Server.MirEnvir
             return null;
         }
 
-        public Map GetMapByName(string name)
+        //public Map GetMapByName(string name)
+        //{
+        //    return MapList.FirstOrDefault(t => String.Equals(t.Info.FileName, name, StringComparison.CurrentCultureIgnoreCase));
+        //}
+
+        public Map GetMapByNameAndInstance(string name, int instanceValue = 0)
         {
-            return MapList.FirstOrDefault(t => String.Equals(t.Info.FileName, name, StringComparison.CurrentCultureIgnoreCase));
+            var instanceMapList = MapList.Where(t => t.Info.FileName == name).ToList();
+            return instanceValue < instanceMapList.Count() ? instanceMapList[instanceValue] : null;
         }
 
         public MonsterInfo GetMonsterInfo(int index)
@@ -1145,13 +1151,15 @@ namespace Server.MirEnvir
 
         public void MessageAccount(AccountInfo account, string message, ChatType type)
         {
+            if (account == null) return;
+            if (account.Characters == null) return;
+
             for (int i = 0; i < account.Characters.Count; i++)
             {
                 if (account.Characters[i].Player == null) continue;
                 account.Characters[i].Player.ReceiveChat(message, type);
                 return;
             }
-
         }
     }
 }

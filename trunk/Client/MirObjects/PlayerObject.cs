@@ -835,7 +835,7 @@ namespace Client.MirObjects
 
                             #region UltimateEnchancer
 
-                            case Spell.UltimateEnchancer:
+                            case Spell.UltimateEnhancer:
                                 Effects.Add(new Effect(Libraries.Magic2, 160, 15, 1000, this));
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
                                 break;

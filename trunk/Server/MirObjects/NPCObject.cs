@@ -168,7 +168,7 @@ namespace Server.MirObjects
                                 continue;
                             case "ELSEACT":
                                 currentSay = elseActs;
-                                currentButtons = null;
+                                currentButtons = gotoButtons;
                                 continue;
                             default:
                                 throw new NotImplementedException();
@@ -188,16 +188,9 @@ namespace Server.MirObjects
 
                         //Check if line has a goto command
                         var parts = lines[x].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                        if (parts[0] == "GOTO")
-                        {
-                            if (parts.Count() < 2)
-                                break;
-
-                            currentButtons.Add(string.Format("[{0}]", parts[1]));
-                        }
+                        if (parts.Count() > 1 && parts[0].ToLower() == "goto")
+                            gotoButtons.Add(string.Format("[{0}]", parts[1]));
                     }
-
 
                     currentSay.Add(lines[x].TrimEnd());
                 }
@@ -265,12 +258,10 @@ namespace Server.MirObjects
             }
         }
 
-
         public override void Process(DelayedAction action)
         {
             throw new NotSupportedException();
         }
-
 
         public override bool IsAttackTarget(PlayerObject attacker)
         {
@@ -414,14 +405,19 @@ namespace Server.MirObjects
             {
                 if (player.NPCID != ObjectID) return;
 
-                if (player.NPCSuccess)
+                if (!player.NPCGoto)
                 {
-                    if (!player.NPCPage.Buttons.Contains(key)) return;
+                    if (player.NPCSuccess)
+                    {
+                        if (!player.NPCPage.Buttons.Contains(key)) return;
+                    }
+                    else
+                    {
+                        if (!player.NPCPage.ElseButtons.Contains(key)) return;
+                    }
                 }
-                else
-                {
-                    if (!player.NPCPage.ElseButtons.Contains(key)) return;
-                }
+
+                player.NPCGoto = false;
             }
 
             for (int i = 0; i < NPCSections.Count; i++)
@@ -473,8 +469,6 @@ namespace Server.MirObjects
             player.NPCID = ObjectID;
             player.NPCSuccess = page.Check(player);
             player.NPCPage = page;
-
-            //page.ParseSay(player);
 
             switch (page.Key)
             {
@@ -553,6 +547,7 @@ namespace Server.MirObjects
             int temp;
             uint temp2;
             byte temp3;
+            var regexFlag = new Regex(@"\[(.*?)\]");
 
             switch (parts[0].ToUpper())
             {
@@ -650,7 +645,22 @@ namespace Server.MirObjects
                     if (!int.TryParse(parts[1], out x) || !int.TryParse(parts[2], out y) || !int.TryParse(parts[3], out distance)) return;
                     CheckList.Add(new NPCChecks(CheckType.CheckRange, x, y, distance));
                     break;
-                    
+
+                case "CHECK":
+                    if (parts.Length < 3) return;
+                    var match = regexFlag.Match(parts[1]);
+                    if (match.Success)
+                    {
+                        uint flagIndex;
+                        uint onCheck;
+                        if (!uint.TryParse(match.Groups[1].Captures[0].Value, out flagIndex)) return;
+                        if (!uint.TryParse(parts[2], out onCheck)) return;
+                        if (flagIndex > Globals.FlagIndexCount) return;
+                        var flagIsOn = Convert.ToBoolean(onCheck);
+                        CheckList.Add(new NPCChecks(CheckType.Check, flagIndex, flagIsOn));
+                    }   
+                    break;
+
             }
 
         }
@@ -665,6 +675,7 @@ namespace Server.MirObjects
             int temp1;
             string fileName;
             var regexMessage = new Regex("\"([^\"]*)\"");
+            var regexFlag = new Regex(@"\[(.*?)\]");
 
             switch (parts[0].ToUpper())
             {
@@ -676,6 +687,16 @@ namespace Server.MirObjects
                     if (!int.TryParse(parts[3], out y)) return;
 
                     acts.Add(new NPCActions(ActionType.Teleport, parts[1], new Point(x, y)));
+                    break;
+
+                case "INSTANCEMOVE":
+                    int instanceId;
+                    if (parts.Length < 5) return;
+                    if (!int.TryParse(parts[2], out instanceId)) return;
+                    if (!int.TryParse(parts[3], out x)) return;
+                    if (!int.TryParse(parts[4], out y)) return;
+
+                    acts.Add(new NPCActions(ActionType.InstanceTeleport, parts[1], instanceId, new Point(x, y)));
                     break;
 
                 case "GIVEGOLD":
@@ -838,6 +859,21 @@ namespace Server.MirObjects
 
                     var spell = (byte)Enum.Parse(typeof(Spell), parts[1]);
                     acts.Add(new NPCActions(ActionType.GiveSkill, spell, Math.Min(temp2, (byte)3)));
+                    break;
+
+                case "SET":
+                    if (parts.Length < 3) return;
+                    match = regexFlag.Match(parts[1]);
+                    if (match.Success)
+                    {
+                        uint flagIndex;
+                        uint onCheck;
+                        if (!uint.TryParse(match.Groups[1].Captures[0].Value, out flagIndex)) return;
+                        if (!uint.TryParse(parts[2], out onCheck)) return;
+                        if (flagIndex > Globals.FlagIndexCount) return;
+                        var flagIsOn = Convert.ToBoolean(onCheck);
+                        acts.Add(new NPCActions(ActionType.Set, flagIndex, flagIsOn));
+                    }   
                     break;
             }
 
@@ -1056,6 +1092,12 @@ namespace Server.MirObjects
 
                         failed = !Functions.InRange(player.CurrentLocation, target, (int)check.Params[2]);
                         break;
+
+                    case CheckType.Check:
+                        var flag = player.Info.Flags[(uint)check.Params[0]];
+
+                        failed = flag != (bool) check.Params[1];
+                        break;
                 }
 
                 if (!failed) continue;
@@ -1080,9 +1122,15 @@ namespace Server.MirObjects
                 switch (act.Type)
                 {
                     case ActionType.Teleport:
-                        var map = SMain.Envir.GetMapByName((string)act.Params[0]);
+                        var map = SMain.Envir.GetMapByNameAndInstance((string)act.Params[0]);
                         if (map == null) return;
                         player.Teleport(map, (Point)act.Params[1]);
+                        break;
+
+                    case ActionType.InstanceTeleport:
+                        map = SMain.Envir.GetMapByNameAndInstance((string)act.Params[0], (int)act.Params[1]);
+                        if (map == null) return;
+                        player.Teleport(map, (Point)act.Params[2]);
                         break;
 
                     case ActionType.GiveGold:
@@ -1163,11 +1211,6 @@ namespace Server.MirObjects
 
                     case ActionType.GiveExp:
                         player.GainExp((uint)act.Params[0]);
-                        break;
-
-                    case ActionType.Goto:
-                        var redirect = "[" + act.Params[0] + "]";
-                        player.CallNPC(player.NPCID, redirect);
                         break;
 
                     case ActionType.GivePet:
@@ -1264,6 +1307,15 @@ namespace Server.MirObjects
                         player.Info.Magics.Add(magic);
                         player.Enqueue(magic.GetInfo());
                         break;
+
+                    case ActionType.Goto:
+                        player.NPCGoto = true;
+                        player.NPCGotoPage = "[" + act.Params[0] + "]";
+                        break;
+
+                    case ActionType.Set:
+                        player.Info.Flags[(uint) act.Params[0]] = (bool) act.Params[1];
+                        break;
                 }
             }
         }
@@ -1318,6 +1370,7 @@ namespace Server.MirObjects
     public enum ActionType
     {
         Teleport,
+        InstanceTeleport,
         GiveGold,
         TakeGold,
         GiveItem,
@@ -1334,9 +1387,9 @@ namespace Server.MirObjects
         ChangeGender,
         ChangeClass,
         LineMessage,
-
         Goto,
         GiveSkill,
+        Set,
     }
     public enum CheckType
     {
@@ -1353,5 +1406,6 @@ namespace Server.MirObjects
         CheckNameList,
         CheckPkPoint,
         CheckRange,
+        Check,
     }
 }

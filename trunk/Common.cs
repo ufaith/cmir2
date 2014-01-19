@@ -416,7 +416,7 @@ public enum Spell : byte
     Purification = 74,
     MassHealing = 75,
     Hallucination = 76,
-    UltimateEnchancer = 77,
+    UltimateEnhancer = 77,
     SummonShinsu = 78,
     Reincarnation = 79,
     SummonHolyDeva = 80,
@@ -440,7 +440,7 @@ public enum Spell : byte
     SwiftFeet = 102,
     DarkBody = 103,
     Hemorrhage = 104,
-    CresentSlash = 105,
+    CrescentSlash = 105,
 
     //Map Events
     DigOutZombie = 200
@@ -921,6 +921,8 @@ public static class Globals
         MaxGroup = 15,
 
         MaxDragonLevel = 13,
+
+        FlagIndexCount = 999,
 
         DataRange = 14;
 
