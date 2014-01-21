@@ -10,7 +10,8 @@ namespace Server.MirObjects
         Magic,
         Damage,
         Spawn,
-        Recall
+        Recall,
+        MapMovement
     }
 
     public class DelayedAction

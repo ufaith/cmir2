@@ -48,6 +48,8 @@ namespace Client.MirObjects
         public bool MagicShield;
         public Effect ShieldEffect;
         public byte WingEffect;
+        private short StanceDelay = 2500;
+        public long StanceTime;
         
         public PlayerObject(uint objectID) : base(objectID)
         {
@@ -324,7 +326,7 @@ namespace Client.MirObjects
 
             if (ActionFeed.Count == 0)
             {
-                CurrentAction = MirAction.Standing;
+                CurrentAction = CMain.Time > StanceTime ? MirAction.Standing : MirAction.Stance;
 
                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
                 FrameIndex = 0;
@@ -1188,9 +1190,10 @@ namespace Client.MirObjects
                         
                         if (UpdateFrame() >= Frame.Count)
                         {
-                            if (ActionFeed.Count == 0)
-                                ActionFeed.Add(new QueuedAction { Action = MirAction.Stance, Direction = Direction, Location = CurrentLocation });
+                            //if (ActionFeed.Count == 0)
+                            //    ActionFeed.Add(new QueuedAction { Action = MirAction.Stance, Direction = Direction, Location = CurrentLocation });
 
+                            StanceTime = CMain.Time + StanceDelay;
                             FrameIndex = Frame.Count - 1;
                             SetAction();
                         }
@@ -1627,9 +1630,10 @@ namespace Client.MirObjects
 
                                 Cast = false;
                             }
-                            if (ActionFeed.Count == 0)
-                                ActionFeed.Add(new QueuedAction { Action = MirAction.Stance, Direction = Direction, Location = CurrentLocation });
+                            //if (ActionFeed.Count == 0)
+                            //    ActionFeed.Add(new QueuedAction { Action = MirAction.Stance, Direction = Direction, Location = CurrentLocation });
 
+                            StanceTime = CMain.Time + StanceDelay;
                             FrameIndex = Frame.Count - 1;
                             SetAction();
 
@@ -1687,6 +1691,26 @@ namespace Client.MirObjects
                     }
                     break;
                 case MirAction.Dead:
+                    break;
+                case MirAction.Revive:
+                    if (CMain.Time >= NextMotion)
+                    {
+                        GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame();
+
+                        if (UpdateFrame() >= Frame.Count)
+                        {
+                            FrameIndex = Frame.Count - 1;
+                            ActionFeed.Clear();
+                            ActionFeed.Add(new QueuedAction { Action = MirAction.Standing, Direction = Direction, Location = CurrentLocation });
+                            SetAction();
+                        }
+                        else
+                        {
+                            NextMotion += FrameInterval;
+                        }
+                    }
                     break;
 
             }
@@ -1746,7 +1770,7 @@ namespace Client.MirObjects
             int x = CurrentLocation.X - CurrentLocation.X % 2;
             int y = CurrentLocation.Y - CurrentLocation.Y % 2;
 
-            int index = (GameScene.Scene.MapControl.M2CellInfo[x, y].BackImage & 0xFFFF) - 1;
+            int index = (GameScene.Scene.MapControl.M2CellInfo[x, y].BackImage & 0x1FFFF) - 1;
             index = GameScene.Scene.MapControl.M2CellInfo[x, y].FileIndex * 10000 + index;
             int moveSound;
 

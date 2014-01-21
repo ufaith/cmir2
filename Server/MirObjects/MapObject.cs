@@ -398,24 +398,28 @@ namespace Server.MirObjects
         }
         public virtual bool TeleportRandom(int attempts, int distance, Map map = null)
         {
+            if (map == null) map = CurrentMap;
+            byte edgeoffset = 0;
+
+            if (map.Width < 150)
+            {
+                if (map.Height < 30) edgeoffset = 2;
+                else edgeoffset = 20;
+            }
+            else edgeoffset = 50;
+
             for (int i = 0; i < attempts; i++)
             {
                 Point location;
 
                 if (distance <= 0)
-                    location = new Point(Envir.Random.Next(CurrentMap.Width), Envir.Random.Next(CurrentMap.Height)); //Can adjust Random Range...
+                    location = new Point(edgeoffset + Envir.Random.Next(map.Width - edgeoffset), edgeoffset + Envir.Random.Next(map.Height - edgeoffset)); //Can adjust Random Range...
                 else
                     location = new Point(CurrentLocation.X + Envir.Random.Next(-distance, distance + 1),
                                          CurrentLocation.Y + Envir.Random.Next(-distance, distance + 1));
 
-                if (map != null)
-                {
-                    if (Teleport(map, location)) return true;
-                }
-                else
-                {
-                    if (Teleport(CurrentMap, location)) return true;  
-                }
+
+                if (Teleport(map, location)) return true;
             }
 
             return false;
