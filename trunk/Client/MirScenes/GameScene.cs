@@ -1485,6 +1485,7 @@ namespace Client.MirScenes
         private void Struck(S.Struck p)
         {
             NextRunTime = CMain.Time + 2500;
+            User.ClearMagic();
 
             if (User.CurrentAction == MirAction.Struck) return; 
             
@@ -1718,7 +1719,15 @@ namespace Client.MirScenes
         }
         private void Poisoned(S.Poisoned p)
         {
-            MapObject.User.Poison = p.Poison;
+            User.Poison = p.Poison;
+            switch (p.Poison)
+            {
+                case PoisonType.Frozen:
+                case PoisonType.Paralysis:
+                case PoisonType.Stun:
+                    User.ClearMagic();
+                    break;
+            }
         }
         private void ObjectPoisoned(S.ObjectPoisoned p)
         {
@@ -3305,7 +3314,7 @@ namespace Client.MirScenes
 
             CheckInput();
 
-
+            MapObject bestmouseobject = null;
             for (int y = MapLocation.Y + 2; y >= MapLocation.Y - 2; y--)
             {
                 if (y >= Height) continue;
@@ -3324,7 +3333,17 @@ namespace Client.MirScenes
 
                         if (MapObject.MouseObject != ob)
                         {
+                            if (ob.Dead)
+                            {
+                                bestmouseobject = ob;
+                                continue;
+                            }
                             MapObject.MouseObject = ob;
+                            Redraw();
+                        }
+                        if (bestmouseobject != null && MapObject.MouseObject == null)
+                        {
+                            MapObject.MouseObject = bestmouseobject;
                             Redraw();
                         }
                         return;
@@ -3467,31 +3486,31 @@ namespace Client.MirScenes
 
             for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY; y++)
             {
-                if (y < 0 || y%2 == 1) continue;
+                if (y <= 0 || y%2 == 1) continue;
                 if (y >= Height) break;
                 drawY = (y - User.Movement.Y + OffSetY) * CellHeight + User.OffSetMove.Y; //Moving OffSet
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x < 0 || x%2 == 1) continue;
+                    if (x <= 0 || x%2 == 1) continue;
                     if (x >= Width) break;
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
 
                     if (M2CellInfo[x, y].BackImage == 0) continue;
-                    index = (M2CellInfo[x, y].BackImage & 0xFFFF) - 1;
+                    index = (M2CellInfo[x, y].BackImage & 0x1FFFF) - 1;
                     Libraries.Tiles.Draw(index, drawX, drawY);
                 }
             }
 
             for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY; y++)
             {
-                if (y < 0) continue;
+                if (y <= 0) continue;
                 if (y >= Height) break;
                 drawY = (y - User.Movement.Y + OffSetY) * CellHeight+ User.OffSetMove.Y; //Moving OffSet
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x < 0) continue;
+                    if (x <= 0) continue;
                     if (x >= Width) break;
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
 
@@ -3504,13 +3523,13 @@ namespace Client.MirScenes
             }
             for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY; y++)
             {
-                if (y < 0) continue;
+                if (y <= 0) continue;
                 if (y >= Height) break;
                 drawY = (y - User.Movement.Y + OffSetY) * CellHeight+ User.OffSetMove.Y; //Moving OffSet
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x < 0) continue;
+                    if (x <= 0) continue;
                     if (x >= Width) break;
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
 
@@ -3533,13 +3552,13 @@ namespace Client.MirScenes
         {
             for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY + 25; y++)
             {
-                if (y < 0) continue;
+                if (y <= 0) continue;
                 if (y >= Height) break;
                 int drawY = (y - User.Movement.Y + OffSetY + 1) * CellHeight + User.OffSetMove.Y;
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x < 0) continue;
+                    if (x <= 0) continue;
                     if (x >= Width) break;
                     int drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X;
 
@@ -3578,7 +3597,7 @@ namespace Client.MirScenes
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x < 0) continue;
+                    if (x <= 0) continue;
                     if (x >= Width) break;
                     M2CellInfo[x, y].DrawObjects();
                 }
@@ -4200,6 +4219,7 @@ namespace Client.MirScenes
 
         public bool ValidPoint(Point p)
         {
+            //GameScene.Scene.ChatDialog.ReceiveChat(string.Format("cell: {0}", (M2CellInfo[p.X, p.Y].BackImage & 0x20000000)), ChatType.Hint);
             return (M2CellInfo[p.X, p.Y].BackImage & 0x20000000) == 0;
         }
         public bool HasTarget(Point p)

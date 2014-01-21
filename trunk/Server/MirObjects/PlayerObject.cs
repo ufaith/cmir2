@@ -536,6 +536,9 @@ namespace Server.MirObjects
                 case DelayedType.Damage:
                     CompleteAttack(action.Params);
                     break;
+                case DelayedType.MapMovement:
+                    CompleteMapMovement(/*action.Params*/);
+                    break;
             }
         }
 
@@ -1871,7 +1874,7 @@ namespace Server.MirObjects
 
                         if (parts.Length <= 2 || !int.TryParse(parts[1], out x) || !int.TryParse(parts[2], out y))
                         {
-                            TeleportRandom(80, 0);
+                            TeleportRandom(200, 0);
                             return;
                         }
 
@@ -1904,11 +1907,11 @@ namespace Server.MirObjects
                         switch (parts.Length)
                         {
                             case 2:
-                                ReceiveChat(TeleportRandom(80, 0, map) ? (string.Format("Moved to Map {0}", map.Info.FileName)) :
+                                ReceiveChat(TeleportRandom(200, 0, map) ? (string.Format("Moved to Map {0}", map.Info.FileName)) :
                                     (string.Format("Failed movement to Map {0}", map.Info.FileName)), ChatType.System);   
                                 break;
                             case 3:
-                                ReceiveChat(TeleportRandom(80, 0, map) ? (string.Format("Moved to Map {0}:[{1}]", map.Info.FileName, instanceID)) :
+                                ReceiveChat(TeleportRandom(200, 0, map) ? (string.Format("Moved to Map {0}:[{1}]", map.Info.FileName, instanceID)) :
                                     (string.Format("Failed movement to Map {0}:[{1}]", map.Info.FileName, instanceID)), ChatType.System); 
                                 break;
                             case 4:
@@ -2858,6 +2861,7 @@ namespace Server.MirObjects
 
         private void ShoulderDash(UserMagic magic)
         {
+            if (!CanWalk) return;
             int dist = Envir.Random.Next(2) + magic.Level + 2;
             int travel = 0;
             bool wall = true;
@@ -3819,36 +3823,42 @@ namespace Server.MirObjects
                 CurrentLocation = info.Destination;
 
                 CurrentMap.AddObject(this);
-
-                Enqueue(new S.MapChanged
-                    {
-                        FileName = CurrentMap.Info.FileName,
-                        Title = CurrentMap.Info.Title,
-                        MiniMap = CurrentMap.Info.MiniMap,
-                        BigMap = CurrentMap.Info.BigMap,
-                        Lights = CurrentMap.Info.Light,
-                        Location = CurrentLocation,
-                        Direction = Direction,
-                    });
-
-                GetObjects();
-
-                SafeZoneInfo szi = CurrentMap.GetSafeZone(CurrentLocation);
-
-                if (szi != null)
-                {
-                    BindLocation = szi.Location;
-                    BindMapIndex = CurrentMapIndex;
-                    InSafeZone = true;
-                }
-                else
-                    InSafeZone = false;
+                ActionList.Add(new DelayedAction(DelayedType.MapMovement, Envir.Time + 500));
 
                 return true;
             }
 
             return false;
         }
+        private void CompleteMapMovement(/*IList<object> data*/)
+        {
+            if (this == null) return;
+
+            Enqueue(new S.MapChanged
+            {
+                FileName = CurrentMap.Info.FileName,
+                Title = CurrentMap.Info.Title,
+                MiniMap = CurrentMap.Info.MiniMap,
+                BigMap = CurrentMap.Info.BigMap,
+                Lights = CurrentMap.Info.Light,
+                Location = CurrentLocation,
+                Direction = Direction,
+            });
+
+            GetObjects();
+
+            SafeZoneInfo szi = CurrentMap.GetSafeZone(CurrentLocation);
+
+            if (szi != null)
+            {
+                BindLocation = szi.Location;
+                BindMapIndex = CurrentMapIndex;
+                InSafeZone = true;
+            }
+            else
+                InSafeZone = false;
+        }
+
         public override bool Teleport(Map temp, Point location, bool effects = true, byte effectnumber = 0)
         {
             if (!base.Teleport(temp, location, effects)) return false;
@@ -4519,7 +4529,7 @@ namespace Server.MirObjects
                             }
                             break;
                         case 2: //RT
-                            if (!TeleportRandom(40, item.Info.Durability))
+                            if (!TeleportRandom(200, item.Info.Durability))
                             {
                                 Enqueue(p);
                                 return;
