@@ -13,7 +13,7 @@ namespace Server.MirObjects
 {
     public sealed class PlayerObject : MapObject
     {
-        public const string GMPassword = "C#Mir 4.0";
+        public string GMPassword = Settings.GMPassword;
         public bool IsGM, GMLogin, GMNeverDie, GMGameMaster;
 
         public override ObjectType Race
@@ -5115,6 +5115,24 @@ namespace Server.MirObjects
                     if (MaxSC < item.Info.RequiredAmount)
                     {
                         ReceiveChat("You do not have enough SC.", ChatType.System);
+                        return false;
+                    }
+                    break;
+            }
+
+            switch (item.Info.Shape)
+            {
+                case 0:
+                    if (CurrentMap.Info.NoEscape)
+                    {
+                        ReceiveChat("You cannot use Dungeon Escapes here", ChatType.System);
+                        return false;
+                    }
+                    break;
+                case 2:
+                    if (CurrentMap.Info.NoRandom)
+                    {
+                        ReceiveChat("You cannot use Random Teleports here", ChatType.System);
                         return false;
                     }
                     break;

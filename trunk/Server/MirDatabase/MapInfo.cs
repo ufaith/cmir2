@@ -14,6 +14,12 @@ namespace Server.MirDatabase
         public ushort MiniMap, BigMap;
         public LightSetting Light;
 
+        public bool NoTeleport, NoReconnect, NoRandom, NoEscape, NoRecall, NoDrug, NoPosition, 
+            NoThrowItem, NoDropPlayer, NoDropMonster, NoNames, Fight, NeedHole, Fire, Lightning;
+
+        public string NoReconnectMap = string.Empty;
+        public int FireDamage, LightningDamage;
+
         public List<SafeZoneInfo> SafeZones = new List<SafeZoneInfo>();
         public List<MovementInfo> Movements = new List<MovementInfo>();
         public List<RespawnInfo> Respawns = new List<RespawnInfo>();
@@ -49,7 +55,29 @@ namespace Server.MirDatabase
             count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
                 Movements.Add(new MovementInfo(reader));
+
+            if (Envir.LoadVersion < 14) return;
+
+            NoTeleport = reader.ReadBoolean();
+            NoReconnect = reader.ReadBoolean();
+            NoReconnectMap = reader.ReadString();
+            NoRandom = reader.ReadBoolean();
+            NoEscape = reader.ReadBoolean();
+            NoRecall = reader.ReadBoolean();
+            NoDrug = reader.ReadBoolean();
+            NoPosition = reader.ReadBoolean();
+            NoThrowItem = reader.ReadBoolean();
+            NoDropPlayer = reader.ReadBoolean();
+            NoDropMonster = reader.ReadBoolean();
+            NoNames = reader.ReadBoolean();
+            Fight = reader.ReadBoolean();
+            NeedHole = reader.ReadBoolean();
+            Fire = reader.ReadBoolean();
+            FireDamage = reader.ReadInt32();
+            Lightning = reader.ReadBoolean();
+            LightningDamage = reader.ReadInt32();
         }
+
         public void Save(BinaryWriter writer)
         {
             writer.Write(Index);
@@ -75,6 +103,24 @@ namespace Server.MirDatabase
             for (int i = 0; i < Movements.Count; i++)
                 Movements[i].Save(writer);
 
+            writer.Write(NoTeleport);
+            writer.Write(NoReconnect);
+            writer.Write(NoReconnectMap);
+            writer.Write(NoRandom);
+            writer.Write(NoEscape);
+            writer.Write(NoRecall);
+            writer.Write(NoDrug);
+            writer.Write(NoPosition);
+            writer.Write(NoThrowItem);
+            writer.Write(NoDropPlayer);
+            writer.Write(NoDropMonster);
+            writer.Write(NoNames);
+            writer.Write(Fight);
+            writer.Write(NeedHole);
+            writer.Write(Fire);
+            writer.Write(FireDamage);
+            writer.Write(Lightning);
+            writer.Write(LightningDamage);
         }
 
 

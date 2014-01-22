@@ -25,7 +25,7 @@ namespace Server
         public static string VersionPath = @".\Mir2.Exe";
         public static bool CheckVersion = true;
         public static byte[] VersionHash;
-
+        public static string GMPassword = "C#Mir 4.0";
 
         //Network
         public static string IPAddress = "127.0.0.1";
@@ -87,6 +87,7 @@ namespace Server
             VersionPath = Reader.ReadString("General", "VersionPath", VersionPath);
             CheckVersion = Reader.ReadBoolean("General", "CheckVersion", CheckVersion);
             RelogDelay = Reader.ReadUInt16("General", "RelogDelay", RelogDelay);
+            GMPassword = Reader.ReadString("General", "GMPassword", GMPassword);
 
             //Paths
             IPAddress = Reader.ReadString("Network", "IPAddress", IPAddress);

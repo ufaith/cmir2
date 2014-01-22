@@ -34,19 +34,6 @@ namespace Server
         private void InitializeComponent()
         {
             this.MapTabs = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.label15 = new System.Windows.Forms.Label();
-            this.BigMapTextBox = new System.Windows.Forms.TextBox();
-            this.LightsComboBox = new System.Windows.Forms.ComboBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.MapIndexTextBox = new System.Windows.Forms.TextBox();
-            this.MiniMapTextBox = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.MapNameTextBox = new System.Windows.Forms.TextBox();
-            this.FileNameTextBox = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.RemoveSZButton = new System.Windows.Forms.Button();
             this.AddSZButton = new System.Windows.Forms.Button();
@@ -118,8 +105,39 @@ namespace Server
             this.MapInfoListBox = new System.Windows.Forms.ListBox();
             this.PasteMapButton = new System.Windows.Forms.Button();
             this.CopyMapButton = new System.Windows.Forms.Button();
+            this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.label3 = new System.Windows.Forms.Label();
+            this.FileNameTextBox = new System.Windows.Forms.TextBox();
+            this.MapNameTextBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.MiniMapTextBox = new System.Windows.Forms.TextBox();
+            this.MapIndexTextBox = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.LightsComboBox = new System.Windows.Forms.ComboBox();
+            this.BigMapTextBox = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.LightningCheckbox = new System.Windows.Forms.CheckBox();
+            this.FireCheckbox = new System.Windows.Forms.CheckBox();
+            this.NeedHoleCheckbox = new System.Windows.Forms.CheckBox();
+            this.FightCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoReconnectCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoTeleportCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoReconnectTextbox = new System.Windows.Forms.TextBox();
+            this.FireTextbox = new System.Windows.Forms.TextBox();
+            this.LightningTextbox = new System.Windows.Forms.TextBox();
+            this.NoRandomCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoEscapeCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoRecallCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoDrugCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoPositionCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoThrowItemCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoDropPlayerCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoDropMonsterCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoNamesCheckbox = new System.Windows.Forms.CheckBox();
             this.MapTabs.SuspendLayout();
-            this.tabPage1.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.SafeZoneInfoPanel.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -128,6 +146,8 @@ namespace Server
             this.MovementInfoPanel.SuspendLayout();
             this.tabPage5.SuspendLayout();
             this.NPCInfoPanel.SuspendLayout();
+            this.tabPage6.SuspendLayout();
+            this.tabPage1.SuspendLayout();
             this.SuspendLayout();
             // 
             // MapTabs
@@ -136,6 +156,7 @@ namespace Server
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MapTabs.Controls.Add(this.tabPage1);
+            this.MapTabs.Controls.Add(this.tabPage6);
             this.MapTabs.Controls.Add(this.tabPage3);
             this.MapTabs.Controls.Add(this.tabPage2);
             this.MapTabs.Controls.Add(this.tabPage4);
@@ -143,136 +164,8 @@ namespace Server
             this.MapTabs.Location = new System.Drawing.Point(207, 41);
             this.MapTabs.Name = "MapTabs";
             this.MapTabs.SelectedIndex = 0;
-            this.MapTabs.Size = new System.Drawing.Size(524, 201);
+            this.MapTabs.Size = new System.Drawing.Size(527, 228);
             this.MapTabs.TabIndex = 8;
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.Controls.Add(this.label15);
-            this.tabPage1.Controls.Add(this.BigMapTextBox);
-            this.tabPage1.Controls.Add(this.LightsComboBox);
-            this.tabPage1.Controls.Add(this.label5);
-            this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.label4);
-            this.tabPage1.Controls.Add(this.MapIndexTextBox);
-            this.tabPage1.Controls.Add(this.MiniMapTextBox);
-            this.tabPage1.Controls.Add(this.label2);
-            this.tabPage1.Controls.Add(this.MapNameTextBox);
-            this.tabPage1.Controls.Add(this.FileNameTextBox);
-            this.tabPage1.Controls.Add(this.label3);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(516, 175);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Info";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(129, 99);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(49, 13);
-            this.label15.TabIndex = 14;
-            this.label15.Text = "Big Map:";
-            // 
-            // BigMapTextBox
-            // 
-            this.BigMapTextBox.Location = new System.Drawing.Point(184, 96);
-            this.BigMapTextBox.MaxLength = 5;
-            this.BigMapTextBox.Name = "BigMapTextBox";
-            this.BigMapTextBox.Size = new System.Drawing.Size(37, 20);
-            this.BigMapTextBox.TabIndex = 13;
-            this.BigMapTextBox.TextChanged += new System.EventHandler(this.BigMapTextBox_TextChanged);
-            // 
-            // LightsComboBox
-            // 
-            this.LightsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.LightsComboBox.FormattingEnabled = true;
-            this.LightsComboBox.Location = new System.Drawing.Point(82, 122);
-            this.LightsComboBox.Name = "LightsComboBox";
-            this.LightsComboBox.Size = new System.Drawing.Size(92, 21);
-            this.LightsComboBox.TabIndex = 11;
-            this.LightsComboBox.SelectedIndexChanged += new System.EventHandler(this.LightsComboBox_SelectedIndexChanged);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(38, 125);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(38, 13);
-            this.label5.TabIndex = 12;
-            this.label5.Text = "Lights:";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 18);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(60, 13);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Map Index:";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(23, 99);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(53, 13);
-            this.label4.TabIndex = 10;
-            this.label4.Text = "Mini Map:";
-            // 
-            // MapIndexTextBox
-            // 
-            this.MapIndexTextBox.Location = new System.Drawing.Point(82, 15);
-            this.MapIndexTextBox.Name = "MapIndexTextBox";
-            this.MapIndexTextBox.ReadOnly = true;
-            this.MapIndexTextBox.Size = new System.Drawing.Size(47, 20);
-            this.MapIndexTextBox.TabIndex = 0;
-            // 
-            // MiniMapTextBox
-            // 
-            this.MiniMapTextBox.Location = new System.Drawing.Point(82, 96);
-            this.MiniMapTextBox.MaxLength = 5;
-            this.MiniMapTextBox.Name = "MiniMapTextBox";
-            this.MiniMapTextBox.Size = new System.Drawing.Size(37, 20);
-            this.MiniMapTextBox.TabIndex = 9;
-            this.MiniMapTextBox.TextChanged += new System.EventHandler(this.MiniMapTextBox_TextChanged);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(19, 47);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(57, 13);
-            this.label2.TabIndex = 6;
-            this.label2.Text = "File Name:";
-            // 
-            // MapNameTextBox
-            // 
-            this.MapNameTextBox.Location = new System.Drawing.Point(82, 70);
-            this.MapNameTextBox.Name = "MapNameTextBox";
-            this.MapNameTextBox.Size = new System.Drawing.Size(92, 20);
-            this.MapNameTextBox.TabIndex = 2;
-            this.MapNameTextBox.TextChanged += new System.EventHandler(this.MapNameTextBox_TextChanged);
-            // 
-            // FileNameTextBox
-            // 
-            this.FileNameTextBox.Location = new System.Drawing.Point(82, 44);
-            this.FileNameTextBox.Name = "FileNameTextBox";
-            this.FileNameTextBox.Size = new System.Drawing.Size(47, 20);
-            this.FileNameTextBox.TabIndex = 1;
-            this.FileNameTextBox.TextChanged += new System.EventHandler(this.FileNameTextBox_TextChanged);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 73);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(62, 13);
-            this.label3.TabIndex = 8;
-            this.label3.Text = "Map Name:";
             // 
             // tabPage3
             // 
@@ -282,7 +175,7 @@ namespace Server
             this.tabPage3.Controls.Add(this.SafeZoneInfoListBox);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(516, 175);
+            this.tabPage3.Size = new System.Drawing.Size(501, 202);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Safe Zones";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -323,7 +216,7 @@ namespace Server
             this.SafeZoneInfoPanel.Enabled = false;
             this.SafeZoneInfoPanel.Location = new System.Drawing.Point(189, 35);
             this.SafeZoneInfoPanel.Name = "SafeZoneInfoPanel";
-            this.SafeZoneInfoPanel.Size = new System.Drawing.Size(212, 134);
+            this.SafeZoneInfoPanel.Size = new System.Drawing.Size(197, 149);
             this.SafeZoneInfoPanel.TabIndex = 10;
             // 
             // label12
@@ -399,7 +292,7 @@ namespace Server
             this.SafeZoneInfoListBox.Location = new System.Drawing.Point(6, 35);
             this.SafeZoneInfoListBox.Name = "SafeZoneInfoListBox";
             this.SafeZoneInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.SafeZoneInfoListBox.Size = new System.Drawing.Size(177, 134);
+            this.SafeZoneInfoListBox.Size = new System.Drawing.Size(177, 147);
             this.SafeZoneInfoListBox.TabIndex = 9;
             this.SafeZoneInfoListBox.SelectedIndexChanged += new System.EventHandler(this.SafeZoneInfoListBox_SelectedIndexChanged);
             // 
@@ -414,7 +307,7 @@ namespace Server
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(516, 175);
+            this.tabPage2.Size = new System.Drawing.Size(501, 202);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Respawns";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -466,7 +359,7 @@ namespace Server
             this.RespawnInfoListBox.Location = new System.Drawing.Point(6, 35);
             this.RespawnInfoListBox.Name = "RespawnInfoListBox";
             this.RespawnInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.RespawnInfoListBox.Size = new System.Drawing.Size(260, 134);
+            this.RespawnInfoListBox.Size = new System.Drawing.Size(260, 147);
             this.RespawnInfoListBox.TabIndex = 14;
             this.RespawnInfoListBox.SelectedIndexChanged += new System.EventHandler(this.RespawnInfoListBox_SelectedIndexChanged);
             // 
@@ -492,7 +385,7 @@ namespace Server
             this.RespawnInfoPanel.Enabled = false;
             this.RespawnInfoPanel.Location = new System.Drawing.Point(272, 35);
             this.RespawnInfoPanel.Name = "RespawnInfoPanel";
-            this.RespawnInfoPanel.Size = new System.Drawing.Size(238, 134);
+            this.RespawnInfoPanel.Size = new System.Drawing.Size(223, 149);
             this.RespawnInfoPanel.TabIndex = 11;
             // 
             // label24
@@ -632,7 +525,7 @@ namespace Server
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(516, 175);
+            this.tabPage4.Size = new System.Drawing.Size(501, 202);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Movements";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -676,7 +569,7 @@ namespace Server
             this.MovementInfoPanel.Enabled = false;
             this.MovementInfoPanel.Location = new System.Drawing.Point(239, 35);
             this.MovementInfoPanel.Name = "MovementInfoPanel";
-            this.MovementInfoPanel.Size = new System.Drawing.Size(271, 134);
+            this.MovementInfoPanel.Size = new System.Drawing.Size(256, 149);
             this.MovementInfoPanel.TabIndex = 14;
             // 
             // label22
@@ -779,7 +672,7 @@ namespace Server
             this.MovementInfoListBox.Location = new System.Drawing.Point(6, 35);
             this.MovementInfoListBox.Name = "MovementInfoListBox";
             this.MovementInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.MovementInfoListBox.Size = new System.Drawing.Size(227, 134);
+            this.MovementInfoListBox.Size = new System.Drawing.Size(227, 147);
             this.MovementInfoListBox.TabIndex = 13;
             this.MovementInfoListBox.SelectedIndexChanged += new System.EventHandler(this.MovementInfoListBox_SelectedIndexChanged);
             // 
@@ -792,7 +685,7 @@ namespace Server
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage5.Size = new System.Drawing.Size(516, 175);
+            this.tabPage5.Size = new System.Drawing.Size(501, 202);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "NPCs";
             this.tabPage5.UseVisualStyleBackColor = true;
@@ -839,7 +732,7 @@ namespace Server
             this.NPCInfoPanel.Enabled = false;
             this.NPCInfoPanel.Location = new System.Drawing.Point(239, 35);
             this.NPCInfoPanel.Name = "NPCInfoPanel";
-            this.NPCInfoPanel.Size = new System.Drawing.Size(223, 134);
+            this.NPCInfoPanel.Size = new System.Drawing.Size(256, 149);
             this.NPCInfoPanel.TabIndex = 18;
             // 
             // label11
@@ -968,7 +861,7 @@ namespace Server
             this.NPCInfoListBox.Location = new System.Drawing.Point(6, 35);
             this.NPCInfoListBox.Name = "NPCInfoListBox";
             this.NPCInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.NPCInfoListBox.Size = new System.Drawing.Size(227, 134);
+            this.NPCInfoListBox.Size = new System.Drawing.Size(227, 147);
             this.NPCInfoListBox.TabIndex = 17;
             this.NPCInfoListBox.SelectedIndexChanged += new System.EventHandler(this.NPCInfoListBox_SelectedIndexChanged);
             // 
@@ -1000,7 +893,7 @@ namespace Server
             this.MapInfoListBox.Location = new System.Drawing.Point(12, 41);
             this.MapInfoListBox.Name = "MapInfoListBox";
             this.MapInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.MapInfoListBox.Size = new System.Drawing.Size(189, 199);
+            this.MapInfoListBox.Size = new System.Drawing.Size(189, 212);
             this.MapInfoListBox.TabIndex = 7;
             this.MapInfoListBox.SelectedIndexChanged += new System.EventHandler(this.MapInfoListBox_SelectedIndexChanged);
             // 
@@ -1023,11 +916,356 @@ namespace Server
             this.CopyMapButton.Text = "Copy";
             this.CopyMapButton.UseVisualStyleBackColor = true;
             // 
+            // tabPage6
+            // 
+            this.tabPage6.Controls.Add(this.NoNamesCheckbox);
+            this.tabPage6.Controls.Add(this.NoDropMonsterCheckbox);
+            this.tabPage6.Controls.Add(this.NoDropPlayerCheckbox);
+            this.tabPage6.Controls.Add(this.NoThrowItemCheckbox);
+            this.tabPage6.Controls.Add(this.NoPositionCheckbox);
+            this.tabPage6.Controls.Add(this.NoDrugCheckbox);
+            this.tabPage6.Controls.Add(this.NoRecallCheckbox);
+            this.tabPage6.Controls.Add(this.NoEscapeCheckbox);
+            this.tabPage6.Controls.Add(this.NoRandomCheckbox);
+            this.tabPage6.Controls.Add(this.LightningTextbox);
+            this.tabPage6.Controls.Add(this.FireTextbox);
+            this.tabPage6.Controls.Add(this.NoReconnectTextbox);
+            this.tabPage6.Controls.Add(this.LightningCheckbox);
+            this.tabPage6.Controls.Add(this.FireCheckbox);
+            this.tabPage6.Controls.Add(this.NeedHoleCheckbox);
+            this.tabPage6.Controls.Add(this.FightCheckbox);
+            this.tabPage6.Controls.Add(this.NoReconnectCheckbox);
+            this.tabPage6.Controls.Add(this.NoTeleportCheckbox);
+            this.tabPage6.Location = new System.Drawing.Point(4, 22);
+            this.tabPage6.Name = "tabPage6";
+            this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage6.Size = new System.Drawing.Size(519, 202);
+            this.tabPage6.TabIndex = 5;
+            this.tabPage6.Text = "Attributes";
+            this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(14, 73);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(62, 13);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "Map Name:";
+            // 
+            // FileNameTextBox
+            // 
+            this.FileNameTextBox.Location = new System.Drawing.Point(82, 44);
+            this.FileNameTextBox.Name = "FileNameTextBox";
+            this.FileNameTextBox.Size = new System.Drawing.Size(47, 20);
+            this.FileNameTextBox.TabIndex = 1;
+            this.FileNameTextBox.TextChanged += new System.EventHandler(this.FileNameTextBox_TextChanged);
+            // 
+            // MapNameTextBox
+            // 
+            this.MapNameTextBox.Location = new System.Drawing.Point(82, 70);
+            this.MapNameTextBox.Name = "MapNameTextBox";
+            this.MapNameTextBox.Size = new System.Drawing.Size(92, 20);
+            this.MapNameTextBox.TabIndex = 2;
+            this.MapNameTextBox.TextChanged += new System.EventHandler(this.MapNameTextBox_TextChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(19, 47);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(57, 13);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "File Name:";
+            // 
+            // MiniMapTextBox
+            // 
+            this.MiniMapTextBox.Location = new System.Drawing.Point(82, 96);
+            this.MiniMapTextBox.MaxLength = 5;
+            this.MiniMapTextBox.Name = "MiniMapTextBox";
+            this.MiniMapTextBox.Size = new System.Drawing.Size(37, 20);
+            this.MiniMapTextBox.TabIndex = 9;
+            this.MiniMapTextBox.TextChanged += new System.EventHandler(this.MiniMapTextBox_TextChanged);
+            // 
+            // MapIndexTextBox
+            // 
+            this.MapIndexTextBox.Location = new System.Drawing.Point(82, 15);
+            this.MapIndexTextBox.Name = "MapIndexTextBox";
+            this.MapIndexTextBox.ReadOnly = true;
+            this.MapIndexTextBox.Size = new System.Drawing.Size(47, 20);
+            this.MapIndexTextBox.TabIndex = 0;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(23, 99);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(53, 13);
+            this.label4.TabIndex = 10;
+            this.label4.Text = "Mini Map:";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(16, 18);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(60, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Map Index:";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(38, 125);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(38, 13);
+            this.label5.TabIndex = 12;
+            this.label5.Text = "Lights:";
+            // 
+            // LightsComboBox
+            // 
+            this.LightsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.LightsComboBox.FormattingEnabled = true;
+            this.LightsComboBox.Location = new System.Drawing.Point(82, 122);
+            this.LightsComboBox.Name = "LightsComboBox";
+            this.LightsComboBox.Size = new System.Drawing.Size(92, 21);
+            this.LightsComboBox.TabIndex = 11;
+            this.LightsComboBox.SelectedIndexChanged += new System.EventHandler(this.LightsComboBox_SelectedIndexChanged);
+            // 
+            // BigMapTextBox
+            // 
+            this.BigMapTextBox.Location = new System.Drawing.Point(184, 96);
+            this.BigMapTextBox.MaxLength = 5;
+            this.BigMapTextBox.Name = "BigMapTextBox";
+            this.BigMapTextBox.Size = new System.Drawing.Size(37, 20);
+            this.BigMapTextBox.TabIndex = 13;
+            this.BigMapTextBox.TextChanged += new System.EventHandler(this.BigMapTextBox_TextChanged);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(129, 99);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(49, 13);
+            this.label15.TabIndex = 14;
+            this.label15.Text = "Big Map:";
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.label15);
+            this.tabPage1.Controls.Add(this.BigMapTextBox);
+            this.tabPage1.Controls.Add(this.LightsComboBox);
+            this.tabPage1.Controls.Add(this.label5);
+            this.tabPage1.Controls.Add(this.label1);
+            this.tabPage1.Controls.Add(this.label4);
+            this.tabPage1.Controls.Add(this.MapIndexTextBox);
+            this.tabPage1.Controls.Add(this.MiniMapTextBox);
+            this.tabPage1.Controls.Add(this.label2);
+            this.tabPage1.Controls.Add(this.MapNameTextBox);
+            this.tabPage1.Controls.Add(this.FileNameTextBox);
+            this.tabPage1.Controls.Add(this.label3);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(501, 202);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "Info";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // LightningCheckbox
+            // 
+            this.LightningCheckbox.AutoSize = true;
+            this.LightningCheckbox.Location = new System.Drawing.Point(341, 88);
+            this.LightningCheckbox.Name = "LightningCheckbox";
+            this.LightningCheckbox.Size = new System.Drawing.Size(69, 17);
+            this.LightningCheckbox.TabIndex = 26;
+            this.LightningCheckbox.Text = "Lightning";
+            this.LightningCheckbox.UseVisualStyleBackColor = true;
+            this.LightningCheckbox.CheckedChanged += new System.EventHandler(this.LightningCheckbox_CheckedChanged);
+            // 
+            // FireCheckbox
+            // 
+            this.FireCheckbox.AutoSize = true;
+            this.FireCheckbox.Location = new System.Drawing.Point(341, 64);
+            this.FireCheckbox.Name = "FireCheckbox";
+            this.FireCheckbox.Size = new System.Drawing.Size(43, 17);
+            this.FireCheckbox.TabIndex = 25;
+            this.FireCheckbox.Text = "Fire";
+            this.FireCheckbox.UseVisualStyleBackColor = true;
+            this.FireCheckbox.CheckStateChanged += new System.EventHandler(this.FireCheckbox_CheckStateChanged);
+            // 
+            // NeedHoleCheckbox
+            // 
+            this.NeedHoleCheckbox.AutoSize = true;
+            this.NeedHoleCheckbox.Location = new System.Drawing.Point(341, 40);
+            this.NeedHoleCheckbox.Name = "NeedHoleCheckbox";
+            this.NeedHoleCheckbox.Size = new System.Drawing.Size(77, 17);
+            this.NeedHoleCheckbox.TabIndex = 24;
+            this.NeedHoleCheckbox.Text = "Need Hole";
+            this.NeedHoleCheckbox.UseVisualStyleBackColor = true;
+            this.NeedHoleCheckbox.CheckedChanged += new System.EventHandler(this.NeedHoleCheckbox_CheckedChanged);
+            // 
+            // FightCheckbox
+            // 
+            this.FightCheckbox.AutoSize = true;
+            this.FightCheckbox.Location = new System.Drawing.Point(341, 16);
+            this.FightCheckbox.Name = "FightCheckbox";
+            this.FightCheckbox.Size = new System.Drawing.Size(49, 17);
+            this.FightCheckbox.TabIndex = 23;
+            this.FightCheckbox.Text = "Fight";
+            this.FightCheckbox.UseVisualStyleBackColor = true;
+            this.FightCheckbox.CheckedChanged += new System.EventHandler(this.FightCheckbox_CheckedChanged);
+            // 
+            // NoReconnectCheckbox
+            // 
+            this.NoReconnectCheckbox.AutoSize = true;
+            this.NoReconnectCheckbox.Location = new System.Drawing.Point(16, 41);
+            this.NoReconnectCheckbox.Name = "NoReconnectCheckbox";
+            this.NoReconnectCheckbox.Size = new System.Drawing.Size(96, 17);
+            this.NoReconnectCheckbox.TabIndex = 22;
+            this.NoReconnectCheckbox.Text = "No Reconnect";
+            this.NoReconnectCheckbox.UseVisualStyleBackColor = true;
+            this.NoReconnectCheckbox.CheckedChanged += new System.EventHandler(this.NoReconnectCheckbox_CheckedChanged);
+            // 
+            // NoTeleportCheckbox
+            // 
+            this.NoTeleportCheckbox.AutoSize = true;
+            this.NoTeleportCheckbox.Location = new System.Drawing.Point(16, 17);
+            this.NoTeleportCheckbox.Name = "NoTeleportCheckbox";
+            this.NoTeleportCheckbox.Size = new System.Drawing.Size(82, 17);
+            this.NoTeleportCheckbox.TabIndex = 21;
+            this.NoTeleportCheckbox.Text = "No Teleport";
+            this.NoTeleportCheckbox.UseVisualStyleBackColor = true;
+            this.NoTeleportCheckbox.CheckedChanged += new System.EventHandler(this.NoTeleportCheckbox_CheckedChanged);
+            // 
+            // NoReconnectTextbox
+            // 
+            this.NoReconnectTextbox.Location = new System.Drawing.Point(118, 39);
+            this.NoReconnectTextbox.Name = "NoReconnectTextbox";
+            this.NoReconnectTextbox.Size = new System.Drawing.Size(49, 20);
+            this.NoReconnectTextbox.TabIndex = 27;
+            this.NoReconnectTextbox.TextChanged += new System.EventHandler(this.NoReconnectTextbox_TextChanged);
+            // 
+            // FireTextbox
+            // 
+            this.FireTextbox.Location = new System.Drawing.Point(443, 64);
+            this.FireTextbox.Name = "FireTextbox";
+            this.FireTextbox.Size = new System.Drawing.Size(49, 20);
+            this.FireTextbox.TabIndex = 28;
+            this.FireTextbox.TextChanged += new System.EventHandler(this.FireTextbox_TextChanged);
+            // 
+            // LightningTextbox
+            // 
+            this.LightningTextbox.Location = new System.Drawing.Point(443, 88);
+            this.LightningTextbox.Name = "LightningTextbox";
+            this.LightningTextbox.Size = new System.Drawing.Size(49, 20);
+            this.LightningTextbox.TabIndex = 29;
+            this.LightningTextbox.TextChanged += new System.EventHandler(this.LightningTextbox_TextChanged);
+            // 
+            // NoRandomCheckbox
+            // 
+            this.NoRandomCheckbox.AutoSize = true;
+            this.NoRandomCheckbox.Location = new System.Drawing.Point(16, 65);
+            this.NoRandomCheckbox.Name = "NoRandomCheckbox";
+            this.NoRandomCheckbox.Size = new System.Drawing.Size(83, 17);
+            this.NoRandomCheckbox.TabIndex = 30;
+            this.NoRandomCheckbox.Text = "No Random";
+            this.NoRandomCheckbox.UseVisualStyleBackColor = true;
+            this.NoRandomCheckbox.CheckedChanged += new System.EventHandler(this.NoRandomCheckbox_CheckedChanged);
+            // 
+            // NoEscapeCheckbox
+            // 
+            this.NoEscapeCheckbox.AutoSize = true;
+            this.NoEscapeCheckbox.Location = new System.Drawing.Point(16, 89);
+            this.NoEscapeCheckbox.Name = "NoEscapeCheckbox";
+            this.NoEscapeCheckbox.Size = new System.Drawing.Size(79, 17);
+            this.NoEscapeCheckbox.TabIndex = 31;
+            this.NoEscapeCheckbox.Text = "No Escape";
+            this.NoEscapeCheckbox.UseVisualStyleBackColor = true;
+            this.NoEscapeCheckbox.CheckedChanged += new System.EventHandler(this.NoEscapeCheckbox_CheckedChanged);
+            // 
+            // NoRecallCheckbox
+            // 
+            this.NoRecallCheckbox.AutoSize = true;
+            this.NoRecallCheckbox.Location = new System.Drawing.Point(16, 113);
+            this.NoRecallCheckbox.Name = "NoRecallCheckbox";
+            this.NoRecallCheckbox.Size = new System.Drawing.Size(73, 17);
+            this.NoRecallCheckbox.TabIndex = 32;
+            this.NoRecallCheckbox.Text = "No Recall";
+            this.NoRecallCheckbox.UseVisualStyleBackColor = true;
+            this.NoRecallCheckbox.CheckedChanged += new System.EventHandler(this.NoRecallCheckbox_CheckedChanged);
+            // 
+            // NoDrugCheckbox
+            // 
+            this.NoDrugCheckbox.AutoSize = true;
+            this.NoDrugCheckbox.Location = new System.Drawing.Point(16, 137);
+            this.NoDrugCheckbox.Name = "NoDrugCheckbox";
+            this.NoDrugCheckbox.Size = new System.Drawing.Size(66, 17);
+            this.NoDrugCheckbox.TabIndex = 33;
+            this.NoDrugCheckbox.Text = "No Drug";
+            this.NoDrugCheckbox.UseVisualStyleBackColor = true;
+            this.NoDrugCheckbox.CheckedChanged += new System.EventHandler(this.NoDrugCheckbox_CheckedChanged);
+            // 
+            // NoPositionCheckbox
+            // 
+            this.NoPositionCheckbox.AutoSize = true;
+            this.NoPositionCheckbox.Location = new System.Drawing.Point(15, 160);
+            this.NoPositionCheckbox.Name = "NoPositionCheckbox";
+            this.NoPositionCheckbox.Size = new System.Drawing.Size(80, 17);
+            this.NoPositionCheckbox.TabIndex = 34;
+            this.NoPositionCheckbox.Text = "No Position";
+            this.NoPositionCheckbox.UseVisualStyleBackColor = true;
+            this.NoPositionCheckbox.CheckedChanged += new System.EventHandler(this.NoPositionCheckbox_CheckedChanged);
+            // 
+            // NoThrowItemCheckbox
+            // 
+            this.NoThrowItemCheckbox.AutoSize = true;
+            this.NoThrowItemCheckbox.Location = new System.Drawing.Point(174, 17);
+            this.NoThrowItemCheckbox.Name = "NoThrowItemCheckbox";
+            this.NoThrowItemCheckbox.Size = new System.Drawing.Size(96, 17);
+            this.NoThrowItemCheckbox.TabIndex = 35;
+            this.NoThrowItemCheckbox.Text = "No Throw Item";
+            this.NoThrowItemCheckbox.UseVisualStyleBackColor = true;
+            this.NoThrowItemCheckbox.CheckedChanged += new System.EventHandler(this.NoThrowItemCheckbox_CheckedChanged);
+            // 
+            // NoDropPlayerCheckbox
+            // 
+            this.NoDropPlayerCheckbox.AutoSize = true;
+            this.NoDropPlayerCheckbox.Location = new System.Drawing.Point(174, 41);
+            this.NoDropPlayerCheckbox.Name = "NoDropPlayerCheckbox";
+            this.NoDropPlayerCheckbox.Size = new System.Drawing.Size(104, 17);
+            this.NoDropPlayerCheckbox.TabIndex = 36;
+            this.NoDropPlayerCheckbox.Text = "No Drop (Player)";
+            this.NoDropPlayerCheckbox.UseVisualStyleBackColor = true;
+            this.NoDropPlayerCheckbox.CheckedChanged += new System.EventHandler(this.NoDropPlayerCheckbox_CheckedChanged);
+            // 
+            // NoDropMonsterCheckbox
+            // 
+            this.NoDropMonsterCheckbox.AutoSize = true;
+            this.NoDropMonsterCheckbox.Location = new System.Drawing.Point(174, 65);
+            this.NoDropMonsterCheckbox.Name = "NoDropMonsterCheckbox";
+            this.NoDropMonsterCheckbox.Size = new System.Drawing.Size(113, 17);
+            this.NoDropMonsterCheckbox.TabIndex = 37;
+            this.NoDropMonsterCheckbox.Text = "No Drop (Monster)";
+            this.NoDropMonsterCheckbox.UseVisualStyleBackColor = true;
+            this.NoDropMonsterCheckbox.CheckedChanged += new System.EventHandler(this.NoDropMonsterCheckbox_CheckedChanged);
+            // 
+            // NoNamesCheckbox
+            // 
+            this.NoNamesCheckbox.AutoSize = true;
+            this.NoNamesCheckbox.Location = new System.Drawing.Point(174, 89);
+            this.NoNamesCheckbox.Name = "NoNamesCheckbox";
+            this.NoNamesCheckbox.Size = new System.Drawing.Size(76, 17);
+            this.NoNamesCheckbox.TabIndex = 38;
+            this.NoNamesCheckbox.Text = "No Names";
+            this.NoNamesCheckbox.UseVisualStyleBackColor = true;
+            this.NoNamesCheckbox.CheckedChanged += new System.EventHandler(this.NoNamesCheckbox_CheckedChanged);
+            // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(743, 254);
+            this.ClientSize = new System.Drawing.Size(746, 281);
             this.Controls.Add(this.PasteMapButton);
             this.Controls.Add(this.CopyMapButton);
             this.Controls.Add(this.MapTabs);
@@ -1038,8 +1276,6 @@ namespace Server
             this.Text = "Map Info";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MapInfoForm_FormClosed);
             this.MapTabs.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.SafeZoneInfoPanel.ResumeLayout(false);
             this.SafeZoneInfoPanel.PerformLayout();
@@ -1052,6 +1288,10 @@ namespace Server
             this.tabPage5.ResumeLayout(false);
             this.NPCInfoPanel.ResumeLayout(false);
             this.NPCInfoPanel.PerformLayout();
+            this.tabPage6.ResumeLayout(false);
+            this.tabPage6.PerformLayout();
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1059,17 +1299,6 @@ namespace Server
         #endregion
 
         private TabControl MapTabs;
-        private TabPage tabPage1;
-        private ComboBox LightsComboBox;
-        private Label label5;
-        private Label label4;
-        private TextBox MiniMapTextBox;
-        private TextBox MapNameTextBox;
-        private Label label3;
-        private TextBox FileNameTextBox;
-        private Label label2;
-        private TextBox MapIndexTextBox;
-        private Label label1;
         private TabPage tabPage3;
         private Button RemoveSZButton;
         private Button AddSZButton;
@@ -1141,8 +1370,38 @@ namespace Server
         private TextBox NFileNameTextBox;
         private Button PasteMapButton;
         private Button CopyMapButton;
+        private TabPage tabPage1;
         private Label label15;
         private TextBox BigMapTextBox;
+        private ComboBox LightsComboBox;
+        private Label label5;
+        private Label label1;
+        private Label label4;
+        private TextBox MapIndexTextBox;
+        private TextBox MiniMapTextBox;
+        private Label label2;
+        private TextBox MapNameTextBox;
+        private TextBox FileNameTextBox;
+        private Label label3;
+        private TabPage tabPage6;
+        private CheckBox LightningCheckbox;
+        private CheckBox FireCheckbox;
+        private CheckBox NeedHoleCheckbox;
+        private CheckBox FightCheckbox;
+        private CheckBox NoReconnectCheckbox;
+        private CheckBox NoTeleportCheckbox;
+        private TextBox LightningTextbox;
+        private TextBox FireTextbox;
+        private TextBox NoReconnectTextbox;
+        private CheckBox NoNamesCheckbox;
+        private CheckBox NoDropMonsterCheckbox;
+        private CheckBox NoDropPlayerCheckbox;
+        private CheckBox NoThrowItemCheckbox;
+        private CheckBox NoPositionCheckbox;
+        private CheckBox NoDrugCheckbox;
+        private CheckBox NoRecallCheckbox;
+        private CheckBox NoEscapeCheckbox;
+        private CheckBox NoRandomCheckbox;
 
     }
 }

@@ -64,6 +64,27 @@ namespace Server
                 MiniMapTextBox.Text = string.Empty;
                 BigMapTextBox.Text = string.Empty;
                 LightsComboBox.SelectedItem = null;
+
+                NoTeleportCheckbox.Checked = false;
+                NoReconnectCheckbox.Checked = false;
+                NoRandomCheckbox.Checked = false;
+                NoEscapeCheckbox.Checked = false;
+                NoRecallCheckbox.Checked = false;
+                NoDrugCheckbox.Checked = false;
+
+                NoPositionCheckbox.Checked = false;
+                NoThrowItemCheckbox.Checked = false;
+                NoDropPlayerCheckbox.Checked = false;
+                NoDropMonsterCheckbox.Checked = false;
+                NoNamesCheckbox.Checked = false;
+
+                FightCheckbox.Checked = false;
+                NeedHoleCheckbox.Checked = false;
+                FireCheckbox.Checked = false;
+                LightningCheckbox.Checked = false;
+                NoReconnectTextbox.Text = string.Empty;
+                FireTextbox.Text = string.Empty;
+                LightningTextbox.Text = string.Empty;
                 return;
             }
 
@@ -79,6 +100,26 @@ namespace Server
             BigMapTextBox.Text = mi.BigMap.ToString();
             LightsComboBox.SelectedItem = mi.Light;
 
+            //map attributes
+            NoTeleportCheckbox.Checked = mi.NoTeleport;
+            NoReconnectCheckbox.Checked = mi.NoReconnect;
+            NoReconnectTextbox.Text = mi.NoReconnectMap;
+            NoRandomCheckbox.Checked = mi.NoRandom;
+            NoEscapeCheckbox.Checked = mi.NoEscape;
+            NoRecallCheckbox.Checked = mi.NoRecall;
+            NoDrugCheckbox.Checked = mi.NoDrug;
+            NoPositionCheckbox.Checked = mi.NoPosition;
+            NoThrowItemCheckbox.Checked = mi.NoThrowItem;
+            NoDropPlayerCheckbox.Checked = mi.NoDropPlayer;
+            NoDropMonsterCheckbox.Checked = mi.NoDropMonster;
+            NoNamesCheckbox.Checked = mi.NoNames;
+            FightCheckbox.Checked = mi.Fight;
+            NeedHoleCheckbox.Checked = mi.NeedHole;
+            FireCheckbox.Checked = mi.Fire;
+            FireTextbox.Text = mi.FireDamage.ToString();
+            LightningCheckbox.Checked = mi.Lightning;                      
+            LightningTextbox.Text = mi.LightningDamage.ToString();
+
             for (int i = 1; i < _selectedMapInfos.Count; i++)
             {
                 mi = _selectedMapInfos[i];
@@ -89,6 +130,26 @@ namespace Server
                 if (MiniMapTextBox.Text != mi.MiniMap.ToString()) MiniMapTextBox.Text = string.Empty;
                 if (BigMapTextBox.Text != mi.BigMap.ToString()) BigMapTextBox.Text = string.Empty;
                 if (LightsComboBox.SelectedItem == null || (LightSetting)LightsComboBox.SelectedItem != mi.Light) LightsComboBox.SelectedItem = null;
+
+                //map attributes
+                if (NoTeleportCheckbox.Checked != mi.NoTeleport) NoTeleportCheckbox.Checked = false;
+                if (NoReconnectCheckbox.Checked != mi.NoReconnect) NoReconnectCheckbox.Checked = false;
+                if (NoReconnectTextbox.Text != mi.NoReconnectMap) NoReconnectTextbox.Text = string.Empty;
+                if (NoRandomCheckbox.Checked != mi.NoRandom) NoRandomCheckbox.Checked = false;
+                if (NoEscapeCheckbox.Checked != mi.NoEscape) NoEscapeCheckbox.Checked = false;
+                if (NoRecallCheckbox.Checked != mi.NoRecall) NoRecallCheckbox.Checked = false;
+                if (NoDrugCheckbox.Checked != mi.NoDrug) NoDrugCheckbox.Checked = false;
+                if (NoPositionCheckbox.Checked != mi.NoPosition) NoPositionCheckbox.Checked = false;
+                if (NoThrowItemCheckbox.Checked != mi.NoThrowItem) NoThrowItemCheckbox.Checked = false;
+                if (NoDropPlayerCheckbox.Checked != mi.NoDropPlayer) NoDropPlayerCheckbox.Checked = false;
+                if (NoDropMonsterCheckbox.Checked != mi.NoDropMonster) NoDropMonsterCheckbox.Checked = false;
+                if (NoNamesCheckbox.Checked != mi.NoNames) NoNamesCheckbox.Checked = false;
+                if (FightCheckbox.Checked != mi.Fight) FightCheckbox.Checked = false;
+                if (NeedHoleCheckbox.Checked != mi.NeedHole) NeedHoleCheckbox.Checked = false;
+                if (FireCheckbox.Checked != mi.Fire) FireCheckbox.Checked = false;
+                if (FireTextbox.Text != mi.FireDamage.ToString()) FireTextbox.Text = string.Empty;
+                if (LightningCheckbox.Checked != mi.Lightning) LightningCheckbox.Checked = false;                             
+                if (LightningTextbox.Text != mi.LightningDamage.ToString()) LightningTextbox.Text = string.Empty;
             }
 
             UpdateSafeZoneInterface();
@@ -1041,6 +1102,155 @@ namespace Server
 
             for (int i = 0; i < _selectedMapInfos.Count; i++)
                 _selectedMapInfos[i].BigMap = temp;
+        }
+
+
+
+        private void NoTeleportCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoTeleport = NoTeleportCheckbox.Checked;
+        }
+        private void NoReconnectCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoReconnect = NoReconnectCheckbox.Checked;
+        }
+        private void NoReconnectTextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoReconnectMap = ActiveControl.Text;
+        }
+        private void NoRandomCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoRandom = NoRandomCheckbox.Checked;
+        }
+        private void NoEscapeCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoEscape = NoEscapeCheckbox.Checked;
+        }
+        private void NoRecallCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoRecall = NoRecallCheckbox.Checked;
+        }
+        private void NoDrugCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoDrug = NoDrugCheckbox.Checked;
+        }
+        private void NoPositionCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoPosition = NoPositionCheckbox.Checked;
+        }
+        private void NoThrowItemCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoThrowItem = NoThrowItemCheckbox.Checked;
+        }
+        private void NoDropPlayerCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoDropPlayer = NoDropPlayerCheckbox.Checked;
+        }
+        private void NoDropMonsterCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoDropMonster = NoDropMonsterCheckbox.Checked;
+        }
+        private void NoNamesCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoNames = NoNamesCheckbox.Checked;
+        }
+        private void FightCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].Fight = FightCheckbox.Checked;
+        }
+        private void NeedHoleCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NeedHole = NeedHoleCheckbox.Checked;
+        }
+        private void FireCheckbox_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].Fire = FireCheckbox.Checked;
+        }
+        private void FireTextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            int temp;
+
+            if (!int.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].FireDamage = temp;
+        }
+        private void LightningCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].Lightning = LightningCheckbox.Checked;
+        }
+        private void LightningTextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            int temp;
+
+            if (!int.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].LightningDamage = temp;
         }
 
     }
