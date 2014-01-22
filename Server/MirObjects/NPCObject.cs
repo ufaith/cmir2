@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -579,11 +580,11 @@ namespace Server.MirObjects
                     if (info == null)
                     {
                         SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", parts[1], Key));
-                        break;
+                        return;
                     }
 
-                    if (parts.Length < 3 || !uint.TryParse(parts[1], out temp2)) temp2 = 1;
-                    CheckList.Add(new NPCChecks(CheckType.CheckGold, info, temp2));
+                    if (parts.Length < 3 || !uint.TryParse(parts[2], out temp2)) temp2 = 1;
+                    CheckList.Add(new NPCChecks(CheckType.CheckItem, parts[1], temp2));
                     break;
 
                 case "CHECKGENDER":
@@ -1020,25 +1021,18 @@ namespace Server.MirObjects
                     case CheckType.CheckItem:
                         var info = SMain.Envir.GetItemInfo((string) check.Params[0]);
 
-                        if (info == null)
-                        {
-                            SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", check.Params[0], Key));
-                            failed = true;
-                        }
-
                         var count = (uint) check.Params[1];
 
-                        for (int o = 0; o < player.Info.Inventory.Length; o++)
+                        foreach (var item in player.Info.Inventory.Where(item => item != null && item.Info == info))
                         {
-                            var item = player.Info.Inventory[o];
-                            if (item.Info != info) continue;
-
                             if (count > item.Count)
                             {
                                 count -= item.Count;
                                 continue;
                             }
 
+                            if (count > item.Count) continue;
+                            count = 0;
                             break;
                         }
                         if (count > 0)
