@@ -35,6 +35,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zlib">
+      <HintPath>..\Components\dotnet zlib\Ionic.Zlib.dll</HintPath>
+    </Reference>
     <Reference Include="ManagedSquish">
       <HintPath>..\Components\Squish 2.0\ManagedSquish.dll</HintPath>
     </Reference>
