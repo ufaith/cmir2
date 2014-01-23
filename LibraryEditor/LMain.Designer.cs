@@ -362,7 +362,7 @@
             // 
             // OpenWeMadeDialog
             // 
-            this.OpenWeMadeDialog.Filter = "Library|*.Wil";
+            this.OpenWeMadeDialog.Filter = "Wemade|*.Wil|Shanda|*.Wzl";
             this.OpenWeMadeDialog.Multiselect = true;
             // 
             // InsertImageButton
