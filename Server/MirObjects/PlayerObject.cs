@@ -166,7 +166,8 @@ namespace Server.MirObjects
         public int PageSent;
         public List<AuctionInfo> Search = new List<AuctionInfo>();
 
-        public bool FatalSword, Slaying, TwinDrakeBlade;
+        public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
+        public long FlamingSwordTime;
         
         public override bool Blocking
         {
@@ -297,6 +298,11 @@ namespace Server.MirObjects
                 MagicShieldLv = 0;
                 MagicShieldTime = 0;
                 CurrentMap.Broadcast(new S.ObjectEffect {ObjectID = ObjectID, Effect = SpellEffect.MagicShieldDown}, CurrentLocation);
+            }
+            if (FlamingSword && Envir.Time >= FlamingSwordTime * 2)
+            {
+                FlamingSword = false;
+                Enqueue(new S.SpellToggle { Spell = Spell.FlamingSword, CanUse = false });
             }
 
             if (Envir.Time > RunTime && _runCounter > 0)
@@ -537,7 +543,7 @@ namespace Server.MirObjects
                     CompleteAttack(action.Params);
                     break;
                 case DelayedType.MapMovement:
-                    CompleteMapMovement(/*action.Params*/);
+                    CompleteMapMovement(action.Params);
                     break;
             }
         }
@@ -1490,6 +1496,12 @@ namespace Server.MirObjects
                     case BuffType.UltimateEnhancer:
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
                         break;
+                    case BuffType.ProtectionField:
+                        MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + buff.Value);
+                        break;
+                    case BuffType.Rage:
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
+                        break;
                 }
 
             }
@@ -2412,6 +2424,7 @@ namespace Server.MirObjects
                     ChangeMP(-(magic.Info.BaseCost + magic.Level*magic.Info.LevelCost));
                     break;
                 case Spell.Thrusting:
+                case Spell.FlamingSword:
                     magic = GetMagic(spell);
                     if (magic == null)
                     {
@@ -2575,6 +2588,15 @@ namespace Server.MirObjects
                             ob.ApplyPoison(new Poison {PType = PoisonType.Stun, Duration = ob.Race == ObjectType.Player ? 2 : 2 + magic.Level, TickSpeed = 1000});
                             ob.Broadcast(new S.ObjectEffect {ObjectID = ob.ObjectID, Effect = SpellEffect.TwinDrakeBlade});
                         }
+
+                        break;
+                    case Spell.FlamingSword:
+                        magic = GetMagic(Spell.FlamingSword);
+                        damage = damage + (damage / 100 * ((4 + magic.Level * 4) * 10));
+                        FlamingSword = false;
+                        action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
+                        ActionList.Add(action);
+                        LevelMagic(magic);
 
                         break;
                 }
@@ -2808,31 +2830,31 @@ namespace Server.MirObjects
                 case Spell.MassHealing:
                     MassHealing(magic, target == null ? location : target.CurrentLocation);
                     break;
-                    case Spell.ShoulderDash:
+                case Spell.ShoulderDash:
                     ShoulderDash(magic);
                     return;
-                    case Spell.ThunderStorm:
-                    case Spell.FlameField:
+                case Spell.ThunderStorm:
+                case Spell.FlameField:
                     ThunderStorm(magic);
                     if (spell == Spell.FlameField)
                         SpellTime = Envir.Time + 2500; //Spell Delay
                     break;
-                    case Spell.MagicShield:
+                case Spell.MagicShield:
                     ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, magic.GetPower(GetAttackPower(MinMC, MaxMC) + 15)));
                     break;
-                    case Spell.FlameDisruptor:
+                case Spell.FlameDisruptor:
                     FlameDisruptor(target, magic);
                     break;
-                    case Spell.TurnUndead:
+                case Spell.TurnUndead:
                     TurnUndead(target, magic);
                     break;
-                    case Spell.Vampirism:
+                case Spell.Vampirism:
                     Vampirism(target, magic);
                     break;
-                    case Spell.SummonShinsu:
+                case Spell.SummonShinsu:
                     SummonShinsu(magic);
                     break;
-                    case Spell.Purification:
+                case Spell.Purification:
                     if (target == null)
                     {
                         target = this;
@@ -2840,14 +2862,26 @@ namespace Server.MirObjects
                     }
                     Purification(target, magic);
                     break;
-                    case Spell.LionRoar:
+                case Spell.LionRoar:
                     CurrentMap.ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, CurrentLocation));
                     break;
-                    case Spell.Revelation:
+                case Spell.Revelation:
                     Revelation(target, magic);
                     break;
-                    case Spell.PoisonField:
+                case Spell.PoisonField:
                     PoisonField(magic, target == null ? location : target.CurrentLocation, out cast);
+                    break;
+                case Spell.Entrapment:
+                    Entrapment(target, magic);
+                    break;
+                case Spell.BladeAvalanche:
+                    BladeAvalanche(magic);
+                    break;
+                case Spell.ProtectionField:
+                    ProtectionField(magic);
+                    break;
+                case Spell.Rage:
+                    Rage(magic);
                     break;
                 default :
                     cast = false;
@@ -3457,8 +3491,55 @@ namespace Server.MirObjects
             CurrentMap.ActionList.Add(action);
             cast = true;
         }
+        private void Entrapment(MapObject target, UserMagic magic)
+        {
+            if (target == null || !target.IsAttackTarget(this)) return;
 
+            int damage = 0;
 
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, damage, target);
+
+            ActionList.Add(action);
+        }
+        private void BladeAvalanche(UserMagic magic)
+        {
+            int damage = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction, 4);
+            CurrentMap.ActionList.Add(action);
+
+            MirDirection dir = (MirDirection)(((int)Direction + 1) % 8);
+            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, dir, 4);
+            CurrentMap.ActionList.Add(action);
+
+            dir = (MirDirection)(((int)Direction - 1 + 8) % 8);
+            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, dir, 4);
+            CurrentMap.ActionList.Add(action);
+        }
+        private void ProtectionField(UserMagic magic)
+        {
+            int count = Buffs.Where(x => x.Type == BuffType.ProtectionField).ToList().Count();
+            if (count > 0) return;
+
+            int duration = 45 + (15 * magic.Level);
+            int value = (int)Math.Round(MaxAC * (0.2 + (0.03 * magic.Level)));
+
+            AddBuff(new Buff { Type = BuffType.ProtectionField, Caster = this, ExpireTime = Envir.Time + duration * 1000, Value = value });
+            OperateTime = 0;
+            LevelMagic(magic);
+        }
+        private void Rage(UserMagic magic)
+        {
+            int count = Buffs.Where(x => x.Type == BuffType.Rage).ToList().Count();
+            if (count > 0) return;
+
+            int duration = 48 + (6 * magic.Level);
+            int value = (int)Math.Round(MaxDC * (0.12 + (0.03 * magic.Level)));
+
+            AddBuff(new Buff { Type = BuffType.Rage, Caster = this, ExpireTime = Envir.Time + duration * 1000, Value = value });
+            OperateTime = 0;
+            LevelMagic(magic);
+        }
 
         private void CompleteMagic(IList<object> data)
         {
@@ -3695,6 +3776,33 @@ namespace Server.MirObjects
                     break;
 
                 #endregion
+
+                    #region Entrapment
+
+                case Spell.Entrapment:
+                    value = (int)data[1];
+                    target = (MapObject)data[2];
+
+                    if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null ||
+                        Functions.MaxDistance(CurrentLocation, target.CurrentLocation) > 7 || target.Level >= Level + 5 + Envir.Random.Next(8)) return;
+
+                    MirDirection pulldirection = (MirDirection)((byte)(Direction - 4) % 8);
+                    int pulldistance = 0;
+                    if ((byte)pulldirection % 2 > 0)
+                        pulldistance = Math.Max(0, Math.Min(Math.Abs(CurrentLocation.X - target.CurrentLocation.X), Math.Abs(CurrentLocation.Y - target.CurrentLocation.Y)));
+                    else
+                        pulldistance = pulldirection == MirDirection.Up || pulldirection == MirDirection.Down ? Math.Abs(CurrentLocation.Y - target.CurrentLocation.Y) - 2 : Math.Abs(CurrentLocation.X - target.CurrentLocation.X) - 2;
+                    
+                    int levelgap = target.Race == ObjectType.Player ? Level - target.Level + 4 : Level - target.Level + 9;
+                    if (Envir.Random.Next(30) >= ((magic.Level + 1) * 3) + levelgap) return;
+
+                    int duration = target.Race == ObjectType.Player ? (int)Math.Round((magic.Level + 1) * 1.6) : (int)Math.Round((magic.Level + 1) * 0.8);
+                    if (duration > 0) target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = duration, TickSpeed = 1000 });
+                    CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = target.ObjectID, Effect = SpellEffect.Entrapment }, target.CurrentLocation);
+                    if (target.Pushed(this, pulldirection, pulldistance) > 0) LevelMagic(magic);
+                    break;
+
+                #endregion
             }
 
 
@@ -3819,20 +3927,27 @@ namespace Server.MirObjects
                 CurrentMap.RemoveObject(this);
                 Broadcast(new S.ObjectRemove {ObjectID = ObjectID});
 
-                CurrentMap = temp;
-                CurrentLocation = info.Destination;
-
-                CurrentMap.AddObject(this);
-                ActionList.Add(new DelayedAction(DelayedType.MapMovement, Envir.Time + 500));
+                ActionList.Add(new DelayedAction(DelayedType.MapMovement, Envir.Time + 500, temp, info.Destination, CurrentMap, CurrentLocation));
 
                 return true;
             }
 
             return false;
         }
-        private void CompleteMapMovement(/*IList<object> data*/)
+        private void CompleteMapMovement(IList<object> data)
         {
             if (this == null) return;
+            Map temp = (Map)data[0];
+            Point destination = (Point)data[1];
+            Map checkmap = (Map)data[2];
+            Point checklocation = (Point)data[3];
+
+            if (CurrentMap != checkmap || CurrentLocation != checklocation) return;
+
+            CurrentMap = temp;
+            CurrentLocation = destination;
+
+            CurrentMap.AddObject(this);
 
             Enqueue(new S.MapChanged
             {
@@ -6692,7 +6807,8 @@ namespace Server.MirObjects
 
         public void SpellToggle(Spell spell, bool use)
         {
-
+            UserMagic magic;
+            int cost;
             switch (spell)
             {
                 case Spell.Thrusting:
@@ -6709,12 +6825,24 @@ namespace Server.MirObjects
                     break;
                 case Spell.TwinDrakeBlade:
                     if (TwinDrakeBlade) return;
-                    UserMagic magic = GetMagic(spell);
+                    magic = GetMagic(spell);
                     if (magic == null) return;
-                    int cost = magic.Info.BaseCost + magic.Level*magic.Info.LevelCost;
+                    cost = magic.Info.BaseCost + magic.Level*magic.Info.LevelCost;
                     if (cost >= MP) return;
 
                     TwinDrakeBlade = true;
+                    ChangeMP(-cost);
+                    break;
+                case Spell.FlamingSword:
+                    if (FlamingSword || Envir.Time < FlamingSwordTime) return;
+                    magic = GetMagic(spell);
+                    if (magic == null) return;
+                    cost = magic.Info.BaseCost + magic.Level * magic.Info.LevelCost;
+                    if (cost >= MP) return;
+
+                    FlamingSword = true;
+                    FlamingSwordTime = Envir.Time + 10000;
+                    Enqueue(new S.SpellToggle { Spell = Spell.FlamingSword, CanUse = true });
                     ChangeMP(-cost);
                     break;
             }

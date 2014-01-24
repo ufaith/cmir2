@@ -77,7 +77,7 @@ namespace Client.MirScenes
         public static float NPCRate;
 
         public long ToggleTime;
-        public static bool Slaying, Thrusting, HalfMoon, CrossHalfMoon, DoubleSlash, TwinDrakeBlade;
+        public static bool Slaying, Thrusting, HalfMoon, CrossHalfMoon, DoubleSlash, TwinDrakeBlade, FlamingSword;
         public static long SpellTime;
 
 
@@ -96,6 +96,7 @@ namespace Client.MirScenes
             CrossHalfMoon = false;
             DoubleSlash = false;
             TwinDrakeBlade = false;
+            FlamingSword = false;
 
             GroupDialog.GroupList.Clear();
 
@@ -349,7 +350,7 @@ namespace Client.MirScenes
 
             if (magic == null) return;
 
-
+            int cost;
             switch (magic.Spell)
             {
                 case Spell.Fencing:
@@ -385,11 +386,11 @@ namespace Client.MirScenes
                     ToggleTime = CMain.Time + 1000;
                     Network.Enqueue(new C.SpellToggle { Spell = magic.Spell, CanUse = DoubleSlash });
                     break;
-                    case Spell.TwinDrakeBlade:
+                case Spell.TwinDrakeBlade:
                     if (CMain.Time < ToggleTime) return;
                     ToggleTime = CMain.Time + 500;
                     
-                    int cost = magic.Level*magic.LevelCost + magic.BaseCost;
+                    cost = magic.Level*magic.LevelCost + magic.BaseCost;
                     if (cost > MapObject.User.MP)
                     {
                         Scene.OutputMessage("Not Enough Mana to cast.");
@@ -399,7 +400,19 @@ namespace Client.MirScenes
                     Network.Enqueue(new C.SpellToggle { Spell = magic.Spell, CanUse = true });
                     User.Effects.Add(new Effect(Libraries.Magic2, 210, 6, 500, User));
                     break;
-                    default:
+                case Spell.FlamingSword:
+                    if (CMain.Time < ToggleTime) return;
+                    ToggleTime = CMain.Time + 500;
+
+                    cost = magic.Level * magic.LevelCost + magic.BaseCost;
+                    if (cost > MapObject.User.MP)
+                    {
+                        Scene.OutputMessage("Not Enough Mana to cast.");
+                        return;
+                    }
+                    Network.Enqueue(new C.SpellToggle { Spell = magic.Spell, CanUse = true });
+                    break;
+                default:
                     User.NextMagic = magic;
                     User.NextMagicLocation = MapControl.MapLocation;
                     User.NextMagicObject = MapObject.MouseObject;
@@ -864,6 +877,12 @@ namespace Client.MirScenes
                     break;
                 case BuffType.BlessedArmour:
                     image.Index = 871;
+                    break;
+                case BuffType.ProtectionField:
+                    image.Index = 861;
+                    break;
+                case BuffType.Rage:
+                    image.Index = 860;
                     break;
             }
 
@@ -2036,6 +2055,16 @@ namespace Client.MirScenes
                     case SpellEffect.GreatFoxSpirit:
                         ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 375 + (CMain.Random.Next(3) * 20), 20, 1400, ob));
                         break;
+                    case SpellEffect.MapLightning:
+                        ob.Effects.Add(new Effect(Libraries.Dragon, 400, 5, 400, ob));
+                        break;
+                    case SpellEffect.MapFire:
+                        ob.Effects.Add(new Effect(Libraries.Dragon, 440, 20, 400, ob));
+                        break;
+                    case SpellEffect.Entrapment:
+                        ob.Effects.Add(new Effect(Libraries.Magic2, 1010, 10, 1500, ob));
+                        ob.Effects.Add(new Effect(Libraries.Magic2, 1020, 8, 1200, ob));
+                        break;
                 }
                 return;
             }
@@ -2154,6 +2183,13 @@ namespace Client.MirScenes
                 case Spell.DoubleSlash:
                     DoubleSlash = p.CanUse;
                     ChatDialog.ReceiveChat(DoubleSlash ? "Use DoubleSlash." : "Do not use DoubleSlash.", ChatType.Hint);
+                    break;
+                case Spell.FlamingSword:
+                    FlamingSword = p.CanUse;
+                    if (FlamingSword) 
+                        ChatDialog.ReceiveChat("Your weapon is glowed by spirit of fire.", ChatType.Hint);
+                    else
+                        ChatDialog.ReceiveChat("The spirits of fire disappeared.", ChatType.System);
                     break;
             }
         }
@@ -4064,6 +4100,7 @@ namespace Client.MirScenes
                 case Spell.FrostCrunch:
                 case Spell.Vampirism:
                 case Spell.Revelation:
+                case Spell.Entrapment:
                     if (User.NextMagicObject != null)
                     {
                         if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
@@ -9031,6 +9068,13 @@ namespace Client.MirScenes
                     break;
                 case BuffType.BlessedArmour:
                     text = string.Format("Blessed Armour\nIncreases AC by: 0-{0}.\n", Value);
+                    break;
+                case BuffType.ProtectionField:
+                    text = string.Format("Protection Field\nIncreases AC by: 0-{0}.\n", Value);
+                    break;
+                case BuffType.Rage:
+                    text = string.Format("Rage\nIncreases DC by: 0-{0}.\n", Value);
+                    break;
                     break;
             }
 

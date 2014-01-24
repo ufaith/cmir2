@@ -397,6 +397,10 @@ namespace Server.MirEnvir
 
                     if (LoadVersion < 7) return;
 
+                    foreach (AuctionInfo auction in Auctions)
+                        auction.CharacterInfo.AccountInfo.Auctions.Remove(auction);
+                    Auctions.Clear();
+
                     if (LoadVersion >= 8)
                         NextAuctionID = reader.ReadUInt64();
 

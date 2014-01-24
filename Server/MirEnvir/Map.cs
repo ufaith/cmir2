@@ -19,6 +19,7 @@ namespace Server.MirEnvir
 
         public int Width, Height;
         public Cell[,] Cells;
+        public long LightningTime, FireTime;
 
         public List<NPCObject> NPCs = new List<NPCObject>();
         public List<PlayerObject> Players = new List<PlayerObject>();
@@ -177,6 +178,27 @@ namespace Server.MirEnvir
         public void Process()
         {
             ProcessRespawns();
+
+            if ((Info.Lightning) && Envir.Time > LightningTime)
+            {
+                LightningTime = Envir.Time + Envir.Random.Next(5000, 60000);
+                for (int i = Players.Count - 1; i >= 0; i--)
+                {
+                    PlayerObject player = Players[i];
+
+                    Broadcast(new S.ObjectEffect { ObjectID = player.ObjectID, Effect = SpellEffect.MapLightning }, player.CurrentLocation);
+                }
+            }
+            if ((Info.Fire) && Envir.Time > FireTime)
+            {
+                FireTime = Envir.Time + Envir.Random.Next(5000, 60000);
+                for (int i = Players.Count - 1; i >= 0; i--)
+                {
+                    PlayerObject player = Players[i];
+
+                    Broadcast(new S.ObjectEffect { ObjectID = player.ObjectID, Effect = SpellEffect.MapFire }, player.CurrentLocation);
+                }
+            }
 
             for (int i = 0; i < ActionList.Count; i++)
             {
@@ -778,6 +800,48 @@ namespace Server.MirEnvir
                         }
                     } 
 
+                    break;
+
+                #endregion
+
+                #region BladeAvalanche
+
+                case Spell.BladeAvalanche:
+                    value = (int)data[2];
+                    dir = (MirDirection)data[4];
+                    location = Functions.PointMove((Point)data[3], dir, 1);
+                    count = (int)data[5] - 1;
+
+                    if (!ValidPoint(location)) return;
+
+                    if (count > 0)
+                    {
+                        DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 100, player, magic, value, location, dir, count);
+                        ActionList.Add(action);
+                    }
+
+                    cell = GetCell(location);
+
+                    if (cell.Objects == null) return;
+
+
+                    for (int i = 0; i < cell.Objects.Count; i++)
+                    {
+                        MapObject target = cell.Objects[i];
+                        switch (target.Race)
+                        {
+                            case ObjectType.Monster:
+                            case ObjectType.Player:
+                                //Only targets
+                                if (target.IsAttackTarget(player))
+                                {
+                                    if (target.Attacked(player, value, DefenceType.MAC, false) > 0)
+                                        player.LevelMagic(magic);
+                                    return;
+                                }
+                                break;
+                        }
+                    }
                     break;
 
                 #endregion
