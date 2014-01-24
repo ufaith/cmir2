@@ -149,6 +149,8 @@ public enum Monster : ushort
     EvilMir = 137,
     EvilMirBody = 138,
     DragonStatue = 139,
+    RedFrogSpider = 140,
+    BrownFrogSpider = 141,
 }
 
 public enum MirAction : byte
@@ -459,6 +461,9 @@ public enum SpellEffect : byte
     MagicShieldDown,
     FlameSwordCharge,
     GreatFoxSpirit,
+    MapLightning,
+    MapFire,
+    Entrapment,
 }
 
 public enum BuffType : byte
@@ -471,6 +476,8 @@ public enum BuffType : byte
     BlessedArmour,
     LightBody,
     UltimateEnhancer,
+    ProtectionField,
+    Rage,
 }
 
 public enum DefenceType : byte

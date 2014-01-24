@@ -356,6 +356,12 @@ namespace Client.MirObjects
                     case BuffType.UltimateEnhancer:
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
                         break;
+                    case BuffType.ProtectionField:
+                        MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + buff.Value);
+                        break;
+                    case BuffType.Rage:
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
+                        break;
                 }
 
             }

@@ -122,6 +122,8 @@ namespace Server.MirObjects
                     return new EvilMirBody(info);
                 case 54:
                     return new DragonStatue(info);
+                case 55:
+                    return new HumanWizard(info);
                 default:
                     return new MonsterObject(info);
             }

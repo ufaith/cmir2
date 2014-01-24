@@ -118,6 +118,7 @@
     <Compile Include="MirObjects\Monsters\BoneLord.cs" />
     <Compile Include="MirObjects\Monsters\BombSpider.cs" />
     <Compile Include="MirObjects\Monsters\BlackFoxman.cs" />
+    <Compile Include="MirObjects\Monsters\HumanWizard.cs" />
     <Compile Include="MirObjects\Monsters\DragonStatue.cs" />
     <Compile Include="MirObjects\Monsters\EvilMirBody.cs" />
     <Compile Include="MirObjects\Monsters\EvilMir.cs" />

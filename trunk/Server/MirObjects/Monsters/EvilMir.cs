@@ -62,6 +62,10 @@ namespace Server.MirObjects.Monsters
         {
             return !Sleeping && base.IsAttackTarget(attacker);
         }
+        protected override bool InAttackRange()
+        {
+            return CurrentMap == Target.CurrentMap && Functions.InRange(CurrentLocation, Target.CurrentLocation, Info.ViewRange);
+        }
 
         protected override void ProcessRoam() { }
 
@@ -99,8 +103,7 @@ namespace Server.MirObjects.Monsters
         protected override void ProcessTarget()
         {
             if (Target == null) return;
-            if (!CanAttack) return;
-            if (!FindNearby(Info.ViewRange)) return;
+            if (!CanAttack || !InAttackRange()) return;
 
             ShockTime = 0;
             if (DragonLink) Envir.DragonSystem.DeLevelTime = Envir.Time + Envir.DragonSystem.DeLevelDelay;
