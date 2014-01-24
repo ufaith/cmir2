@@ -28,7 +28,7 @@ namespace LibraryEditor
         private string _IndexExtention = WixExtention;
 
         private bool _initialized;
-        public byte _nType = 0; //0 = .wil, 1 = .wzl
+        public byte _nType = 0; //0 = .wil, 1 = .wzl//2 = .wil new wemade design
         public WeMadeLibrary(string name)
         {
             if (Path.GetExtension(name) == ".wzl")
@@ -60,13 +60,18 @@ namespace LibraryEditor
         {
             if (_nType == 0)
             {
-                _fStream.Seek(48, SeekOrigin.Begin);
+                _fStream.Seek(26, SeekOrigin.Begin);
+                _nType = (byte)(_bReader.ReadByte() == 64 ? 2 : 0);
+                _fStream.Seek(21, SeekOrigin.Current);
                 _palette = new int[_bReader.ReadInt32()];
                 _fStream.Seek(4, SeekOrigin.Current);
                 _version = _bReader.ReadInt32();
                 _fStream.Seek(_version == 0 ? 0 : 4, SeekOrigin.Current);
-                for (int i = 1; i < _palette.Length; i++)
-                    _palette[i] = _bReader.ReadInt32() + (255 << 24);
+                if (_nType == 0)
+                    for (int i = 1; i < _palette.Length; i++)
+                        _palette[i] = _bReader.ReadInt32() + (255 << 24);
+                else
+                    _palette = new int[256] { -16777216, -8388608, -16744448, -8355840, -16777088, -8388480, -16744320, -4144960, -11173737, -6440504, -8686733, -13817559, -10857902, -10266022, -12437191, -14870504, -15200240, -14084072, -15726584, -886415, -2005153, -42406, -52943, -2729390, -7073792, -7067368, -13039616, -9236480, -4909056, -4365486, -12445680, -21863, -10874880, -9225943, -5944783, -7046285, -4369871, -11394800, -8703720, -13821936, -7583183, -7067392, -4378368, -3771566, -9752296, -3773630, -3257856, -5938375, -10866408, -14020608, -15398912, -12969984, -16252928, -14090240, -11927552, -6488064, -2359296, -2228224, -327680, -6524078, -7050422, -9221591, -11390696, -7583208, -7846895, -11919104, -14608368, -2714534, -3773663, -1086720, -35072, -5925756, -12439263, -15200248, -14084088, -14610432, -13031144, -7576775, -12441328, -9747944, -8697320, -7058944, -7568261, -9739430, -11910599, -14081768, -12175063, -4872812, -8688806, -3231340, -5927821, -7572646, -4877197, -2710157, -1071798, -1063284, -8690878, -9742791, -4352934, -10274560, -2701651, -11386327, -7052520, -1059155, -5927837, -10266038, -4348549, -10862056, -4355023, -13291223, -7043997, -8688822, -5927846, -10859991, -6522055, -12439280, -1069791, -15200256, -14081792, -6526208, -7044006, -11386344, -9741783, -8690911, -6522079, -2185984, -10857927, -13555440, -3228293, -10266055, -7044022, -3758807, -15688680, -12415926, -13530046, -15690711, -16246768, -16246760, -16242416, -15187415, -5917267, -9735309, -15193815, -15187382, -13548982, -10238242, -12263937, -7547153, -9213127, -532935, -528500, -530688, -9737382, -10842971, -12995089, -11887410, -13531979, -13544853, -2171178, -4342347, -7566204, -526370, -16775144, -16246727, -16248791, -16246784, -16242432, -16756059, -16745506, -15718070, -15713941, -15707508, -14591323, -15716006, -15711612, -13544828, -15195855, -11904389, -11375707, -14075549, -15709474, -14079711, -11908551, -14079720, -11908567, -8684734, -6513590, -10855895, -12434924, -13027072, -10921728, -3525332, -9735391, -14077696, -13551344, -13551336, -12432896, -11377896, -10849495, -13546984, -15195904, -15191808, -15189744, -10255286, -9716406, -10242742, -10240694, -10838966, -11891655, -10238390, -10234294, -11369398, -13536471, -10238374, -11354806, -15663360, -15193832, -11892662, -11868342, -16754176, -16742400, -16739328, -16720384, -16716288, -16712960, -11904364, -10259531, -8680234, -9733162, -8943361, -3750194, -7039844, -6515514, -13553351, -14083964, -15204220, -11910574, -11386245, -10265997, -3230217, -7570532, -8969524, -2249985, -1002454, -2162529, -1894477, -1040, -6250332, -8355712, -65536, -16711936, -256, -16776961, -65281, -16711681, -1, };
             }
             else //wzl files dont have a build in palette, they technicaly request the palette your windows uses 
                 _palette = new int[256] { -16777216, -8388608, -16744448, -8355840, -16777088, -8388480, -16744320, -4144960, -11173737, -6440504, -8686733, -13817559, -10857902, -10266022, -12437191, -14870504, -15200240, -14084072, -15726584, -886415, -2005153, -42406, -52943, -2729390, -7073792, -7067368, -13039616, -9236480, -4909056, -4365486, -12445680, -21863, -10874880, -9225943, -5944783, -7046285, -4369871, -11394800, -8703720, -13821936, -7583183, -7067392, -4378368, -3771566, -9752296, -3773630, -3257856, -5938375, -10866408, -14020608, -15398912, -12969984, -16252928, -14090240, -11927552, -6488064, -2359296, -2228224, -327680, -6524078, -7050422, -9221591, -11390696, -7583208, -7846895, -11919104, -14608368, -2714534, -3773663, -1086720, -35072, -5925756, -12439263, -15200248, -14084088, -14610432, -13031144, -7576775, -12441328, -9747944, -8697320, -7058944, -7568261, -9739430, -11910599, -14081768, -12175063, -4872812, -8688806, -3231340, -5927821, -7572646, -4877197, -2710157, -1071798, -1063284, -8690878, -9742791, -4352934, -10274560, -2701651, -11386327, -7052520, -1059155, -5927837, -10266038, -4348549, -10862056, -4355023, -13291223, -7043997, -8688822, -5927846, -10859991, -6522055, -12439280, -1069791, -15200256, -14081792, -6526208, -7044006, -11386344, -9741783, -8690911, -6522079, -2185984, -10857927, -13555440, -3228293, -10266055, -7044022, -3758807, -15688680, -12415926, -13530046, -15690711, -16246768, -16246760, -16242416, -15187415, -5917267, -9735309, -15193815, -15187382, -13548982, -10238242, -12263937, -7547153, -9213127, -532935, -528500, -530688, -9737382, -10842971, -12995089, -11887410, -13531979, -13544853, -2171178, -4342347, -7566204, -526370, -16775144, -16246727, -16248791, -16246784, -16242432, -16756059, -16745506, -15718070, -15713941, -15707508, -14591323, -15716006, -15711612, -13544828, -15195855, -11904389, -11375707, -14075549, -15709474, -14079711, -11908551, -14079720, -11908567, -8684734, -6513590, -10855895, -12434924, -13027072, -10921728, -3525332, -9735391, -14077696, -13551344, -13551336, -12432896, -11377896, -10849495, -13546984, -15195904, -15191808, -15189744, -10255286, -9716406, -10242742, -10240694, -10838966, -11891655, -10238390, -10234294, -11369398, -13536471, -10238374, -11354806, -15663360, -15193832, -11892662, -11868342, -16754176, -16742400, -16739328, -16720384, -16716288, -16712960, -11904364, -10259531, -8680234, -9733162, -8943361, -3750194, -7039844, -6515514, -13553351, -14083964, -15204220, -11910574, -11386245, -10265997, -3230217, -7570532, -8969524, -2249985, -1002454, -2162529, -1894477, -1040, -6250332, -8355712, -65536, -16711936, -256, -16776961, -65281, -16711681, -1, };
@@ -103,7 +108,6 @@ namespace LibraryEditor
         {
             if (!_initialized) Initialize();
             if (Images == null || index < 0 || index >= Images.Length) return;
-
             if (Images[index] == null)
             {
                 _fStream.Position = _indexList[index];
@@ -112,7 +116,7 @@ namespace LibraryEditor
 
             if (Images[index].Image == null)
             {
-                _fStream.Seek(_indexList[index] + (_nType == 1? 16 : _version == 0 ? 8 : 12), SeekOrigin.Begin);
+                _fStream.Seek(_indexList[index] + (_nType > 0? 16 :  _version == 0 ? 8 : 12), SeekOrigin.Begin);
                 Images[index].CreateTexture(_bReader, _palette);
             }
 
@@ -165,6 +169,7 @@ namespace LibraryEditor
 
             public WeMadeImage(BinaryReader reader, byte nType)
             {
+                if (reader.BaseStream.Position == 0) return;
                 this.nType = nType;
                 if (nType == 1)
                 {
@@ -175,13 +180,21 @@ namespace LibraryEditor
                 Height = reader.ReadInt16();
                 X = reader.ReadInt16();
                 Y = reader.ReadInt16();
-                nSize = /*(nType == 1) ? reader.ReadInt32() :*/  Width * Height;
+                nSize = Width * Height;
                 
-                if (nType == 1)
+                switch (nType)
                 {
-                    nSize = reader.ReadInt32();
+                    case 1:
+                        nSize = reader.ReadInt32();
+                        break;
+                    case 2:
+                        bo16bit = true;
+                        reader.ReadInt16();
+                        reader.ReadInt16();
+                        nSize = reader.ReadInt32();
+                        Width = (nSize < 6) ? (short)0 : Width;
+                        break;
                 }
-                
                 Width = (nSize == 0) ? (short)0 : Width; //this makes sure blank images arent being processed
             }
 
@@ -191,26 +204,49 @@ namespace LibraryEditor
                 Image = new Bitmap(Width, Height);
 
                 BitmapData data = Image.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                byte[] bytes;
-                if (nType == 0) //wemade wil file uncompressed
+                byte[] bytes = new byte[0];
+                MemoryStream output;
+                switch (nType)
                 {
-                    if (palette.Length > 256)
-                    {
-                        bo16bit = true;
-                        nSize = nSize * 2;
-                    }
-                    bytes = reader.ReadBytes(nSize);
-                }
-                else
-                { //shanda wzl file compressed
-                    //byte[] input;
-                    //input = reader.ReadBytes(nSize);
-                    MemoryStream output = new MemoryStream();
-                    Ionic.Zlib.ZlibStream deflateStream = new Ionic.Zlib.ZlibStream(output,Ionic.Zlib.CompressionMode.Decompress);
-                    deflateStream.Write(reader.ReadBytes(nSize), 0, nSize);
-                    bytes = output.ToArray();
-                    deflateStream.Close();
-                    output.Close();
+                    case 0://wemade wil file uncompressed
+                        if (palette.Length > 256)
+                        {
+                            bo16bit = true;
+                            nSize = nSize * 2;
+                        }
+                        bytes = reader.ReadBytes(nSize);
+                        break;
+                    case 1://shanda wzl file compressed
+                        output = new MemoryStream();
+                        Ionic.Zlib.ZlibStream deflateStream = new Ionic.Zlib.ZlibStream(output,Ionic.Zlib.CompressionMode.Decompress);
+                        deflateStream.Write(reader.ReadBytes(nSize), 0, nSize);
+                        bytes = output.ToArray();
+                        deflateStream.Close();
+                        output.Close();
+                        break;
+                    case 2:
+                        byte Compressed = reader.ReadByte();
+                        reader.ReadBytes(5);
+                        if (Compressed != 8)
+                        {
+                            bytes = reader.ReadBytes(nSize - 6);
+                            break;
+                        }
+                        MemoryStream input = new MemoryStream(reader.ReadBytes(nSize-6));
+                        output = new MemoryStream();
+                        byte[] buffer = new byte[10];
+                        System.IO.Compression.DeflateStream decompress = new System.IO.Compression.DeflateStream(input, System.IO.Compression.CompressionMode.Decompress);
+                        int len;
+                       // int nBytes = 0;
+    		            while ((len = decompress.Read(buffer, 0, buffer.Length)) > 0)
+    		            {
+                            output.Write(buffer, 0, len);
+    			            //nBytes += len;
+    		            }
+                        bytes = output.ToArray();
+                        decompress.Close();
+                        output.Close();
+                        break;
                 }
                 int index = 0;
                 int* scan0 = (int*) data.Scan0;
@@ -224,7 +260,7 @@ namespace LibraryEditor
                             else
                                 scan0[y*Width + x] = palette[bytes[index++]];
                         }
-                        if (Width % 4 > 0)
+                        if ((nType > 0) & (Width % 4 > 0))
                             index += WidthBytes(bo16bit ? 16 : 8, Width) - (Width * (bo16bit ? 2 : 1));
                     }
                 }
