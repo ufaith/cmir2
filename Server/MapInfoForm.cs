@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Server.MirDatabase;
@@ -79,7 +81,6 @@ namespace Server
                 NoNamesCheckbox.Checked = false;
 
                 FightCheckbox.Checked = false;
-                NeedHoleCheckbox.Checked = false;
                 FireCheckbox.Checked = false;
                 LightningCheckbox.Checked = false;
                 NoReconnectTextbox.Text = string.Empty;
@@ -114,7 +115,6 @@ namespace Server
             NoDropMonsterCheckbox.Checked = mi.NoDropMonster;
             NoNamesCheckbox.Checked = mi.NoNames;
             FightCheckbox.Checked = mi.Fight;
-            NeedHoleCheckbox.Checked = mi.NeedHole;
             FireCheckbox.Checked = mi.Fire;
             FireTextbox.Text = mi.FireDamage.ToString();
             LightningCheckbox.Checked = mi.Lightning;                      
@@ -145,7 +145,6 @@ namespace Server
                 if (NoDropMonsterCheckbox.Checked != mi.NoDropMonster) NoDropMonsterCheckbox.Checked = false;
                 if (NoNamesCheckbox.Checked != mi.NoNames) NoNamesCheckbox.Checked = false;
                 if (FightCheckbox.Checked != mi.Fight) FightCheckbox.Checked = false;
-                if (NeedHoleCheckbox.Checked != mi.NeedHole) NeedHoleCheckbox.Checked = false;
                 if (FireCheckbox.Checked != mi.Fire) FireCheckbox.Checked = false;
                 if (FireTextbox.Text != mi.FireDamage.ToString()) FireTextbox.Text = string.Empty;
                 if (LightningCheckbox.Checked != mi.Lightning) LightningCheckbox.Checked = false;                             
@@ -399,6 +398,7 @@ namespace Server
 
                 SourceXTextBox.Text = string.Empty;
                 SourceYTextBox.Text = string.Empty;
+                NeedHoleMCheckBox.Checked = false;
                 DestMapComboBox.SelectedItem = null;
                 DestXTextBox.Text = string.Empty;
                 DestYTextBox.Text = string.Empty;
@@ -411,6 +411,7 @@ namespace Server
 
             SourceXTextBox.Text = info.Source.X.ToString();
             SourceYTextBox.Text = info.Destination.Y.ToString();
+            NeedHoleMCheckBox.Checked = info.NeedHole;
             DestMapComboBox.SelectedItem = Envir.MapInfoList.FirstOrDefault(x => x.Index == info.MapIndex);
             DestXTextBox.Text = info.Destination.X.ToString();
             DestYTextBox.Text = info.Destination.Y.ToString();
@@ -1061,6 +1062,13 @@ namespace Server
             RefreshMovementList();
 
         }
+        private void NeedHoleMCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMovementInfos.Count; i++)
+                _selectedMovementInfos[i].NeedHole = NeedHoleMCheckBox.Checked;
+        }
         private void MovementInfoListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateMovementInterface();
@@ -1197,13 +1205,6 @@ namespace Server
             for (int i = 0; i < _selectedMapInfos.Count; i++)
                 _selectedMapInfos[i].Fight = FightCheckbox.Checked;
         }
-        private void NeedHoleCheckbox_CheckedChanged(object sender, EventArgs e)
-        {
-            if (ActiveControl != sender) return;
-
-            for (int i = 0; i < _selectedMapInfos.Count; i++)
-                _selectedMapInfos[i].NeedHole = NeedHoleCheckbox.Checked;
-        }
         private void FireCheckbox_CheckStateChanged(object sender, EventArgs e)
         {
             if (ActiveControl != sender) return;
@@ -1253,5 +1254,15 @@ namespace Server
                 _selectedMapInfos[i].LightningDamage = temp;
         }
 
+        private void OpenNButton_Click(object sender, EventArgs e)
+        {
+            if (NFileNameTextBox.Text == string.Empty) return;
+
+            var scriptPath = Settings.NPCPath + NFileNameTextBox.Text + ".txt";
+            if (File.Exists(scriptPath))
+                Process.Start(scriptPath);
+            else
+                MessageBox.Show("Script file could not be found"); 
+        }
     }
 }

@@ -118,7 +118,6 @@ namespace Server.MirObjects
         public PoisonType CurrentPoison = PoisonType.None;
         public List<DelayedAction> ActionList = new List<DelayedAction>();
 
-
         public LinkedListNode<MapObject> Node;
         public long RevTime;
 
@@ -423,6 +422,33 @@ namespace Server.MirObjects
             }
 
             return false;
+        }
+
+        public Point GetRandomPoint(int attempts, int distance, Map map)
+        {
+            byte edgeoffset = 0;
+
+            if (map.Width < 150)
+            {
+                if (map.Height < 30) edgeoffset = 2;
+                else edgeoffset = 20;
+            }
+
+            for (int i = 0; i < attempts; i++)
+            {
+                Point location;
+
+                if (distance <= 0)
+                    location = new Point(edgeoffset + Envir.Random.Next(map.Width - edgeoffset), edgeoffset + Envir.Random.Next(map.Height - edgeoffset)); //Can adjust Random Range...
+                else
+                    location = new Point(CurrentLocation.X + Envir.Random.Next(-distance, distance + 1),
+                                         CurrentLocation.Y + Envir.Random.Next(-distance, distance + 1));
+
+
+                if (map.ValidPoint(location)) return location;
+            }
+
+            return new Point(0, 0);
         }
 
         public void BroadcastHealthChange()

@@ -198,6 +198,7 @@ namespace Server.MirObjects
 
 
         public List<MonsterObject> SlaveList = new List<MonsterObject>();
+        
 
         public override bool Blocking
         {
@@ -558,6 +559,8 @@ namespace Server.MirObjects
         }
         protected virtual bool DropItem(UserItem item)
         {
+            if (CurrentMap.Info.NoDropMonster) return false;
+
             ItemObject ob = new ItemObject(this, item)
             {
                 Owner = EXPOwner,
@@ -2216,6 +2219,11 @@ namespace Server.MirObjects
         {
             SlaveList.Clear();
             base.Despawn();
+        }
+
+        public void AddNeedHole()
+        {
+            
         }
     }
 }

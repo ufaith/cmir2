@@ -833,6 +833,9 @@ namespace Client.MirScenes
                     S.InTrapRock packetdata = (S.InTrapRock)p;
                     User.InTrapRock = packetdata.Trapped;
                     break;
+                case 119:
+                    RemoveMagic((S.RemoveMagic)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1944,6 +1947,13 @@ namespace Client.MirScenes
             User.Magics.Add(p.Magic);
             User.RefreshStats();
         }
+
+        private void RemoveMagic(S.RemoveMagic p)
+        {
+            User.Magics.RemoveAt(p.PlaceId);
+            User.RefreshStats();
+        }
+
         private void MagicLeveled(S.MagicLeveled p)
         {
             for (int i = 0; i < User.Magics.Count; i++)
@@ -2056,10 +2066,12 @@ namespace Client.MirScenes
                         ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 375 + (CMain.Random.Next(3) * 20), 20, 1400, ob));
                         break;
                     case SpellEffect.MapLightning:
-                        ob.Effects.Add(new Effect(Libraries.Dragon, 400, 5, 400, ob));
+                        ob.Effects.Add(new Effect(Libraries.Dragon, 400, 5, 600, ob));
+                        SoundManager.PlaySound(20000 + (ushort)Spell.ThunderBolt * 10);
                         break;
                     case SpellEffect.MapFire:
-                        ob.Effects.Add(new Effect(Libraries.Dragon, 440, 20, 400, ob));
+                        ob.Effects.Add(new Effect(Libraries.Dragon, 440, 20, 600, ob));
+                        SoundManager.PlaySound(20000 + (ushort)Spell.ThunderBolt * 10);
                         break;
                     case SpellEffect.Entrapment:
                         ob.Effects.Add(new Effect(Libraries.Magic2, 1010, 10, 1500, ob));

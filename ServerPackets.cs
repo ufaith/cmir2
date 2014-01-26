@@ -2089,6 +2089,25 @@ namespace ServerPackets
         }
 
     }
+    public sealed class RemoveMagic : Packet
+    {
+        public override short Index
+        {
+            get { return 119; }
+        }
+
+        public int PlaceId;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            PlaceId = reader.ReadInt32();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(PlaceId);
+        }
+
+    }
     public sealed class MagicLeveled : Packet
     {
         public override short Index
