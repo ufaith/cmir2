@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Server.MirEnvir;
 using S = ServerPackets;
 
 namespace Server.MirDatabase
@@ -235,6 +236,9 @@ namespace Server.MirDatabase
             Level = reader.ReadByte();
             Key = reader.ReadByte();
             Experience = reader.ReadUInt16();
+
+            if (Envir.LoadVersion < 15) return;
+            IsTempSpell = reader.ReadBoolean();
         }
         public void Save(BinaryWriter writer)
         {
@@ -243,6 +247,7 @@ namespace Server.MirDatabase
             writer.Write(Level);
             writer.Write(Key);
             writer.Write(Experience);
+            writer.Write(IsTempSpell);
         }
 
         public Packet GetInfo()

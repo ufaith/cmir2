@@ -71,7 +71,7 @@ namespace Server.MirDatabase
             NoDropMonster = reader.ReadBoolean();
             NoNames = reader.ReadBoolean();
             Fight = reader.ReadBoolean();
-            NeedHole = reader.ReadBoolean();
+            if (Envir.LoadVersion == 14) NeedHole = reader.ReadBoolean();
             Fire = reader.ReadBoolean();
             FireDamage = reader.ReadInt32();
             Lightning = reader.ReadBoolean();
@@ -116,7 +116,6 @@ namespace Server.MirDatabase
             writer.Write(NoDropMonster);
             writer.Write(NoNames);
             writer.Write(Fight);
-            writer.Write(NeedHole);
             writer.Write(Fire);
             writer.Write(FireDamage);
             writer.Write(Lightning);

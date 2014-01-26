@@ -182,9 +182,11 @@ namespace Server.MirObjects
             set { Info.AllowGroup = value; }
         }
 
+        public bool GameStarted { get; set; }
+
         public bool HasTeleportRing, HasProtectionRing, HasRevivalRing;
 
-        public bool HasMuscleRing, HasClearRing, HasParalysisRing, HasFireRing, HasHealRing;
+        public bool HasMuscleRing, HasClearRing, HasParalysisRing;
 
 
         public PlayerObject GroupInvitation;
@@ -629,7 +631,7 @@ namespace Server.MirObjects
                 }
             }
 
-            if (LastHitter != null && LastHitter.Race == ObjectType.Player)
+            if (LastHitter != null && LastHitter.Race == ObjectType.Player && !CurrentMap.Info.Fight)
             {
                 if (Envir.Time > BrownTime && PKPoints < 200)
                 {
@@ -659,6 +661,8 @@ namespace Server.MirObjects
 
         private void DeathDrop(MapObject killer)
         {
+            if (CurrentMap.Info.NoDropPlayer && Race == ObjectType.Player) return;
+
             if (killer == null || killer.Race != ObjectType.Player)
             {
                 UserItem temp = Info.Equipment[(int) EquipmentSlot.Stone];
@@ -984,6 +988,16 @@ namespace Server.MirObjects
         public void StartGame()
         {
             Map temp = Envir.GetMap(CurrentMapIndex);
+            
+            if (temp != null && temp.Info.NoReconnect)
+            {
+                Map temp1 = Envir.GetMapByNameAndInstance(temp.Info.NoReconnectMap);
+                if (temp1 != null)
+                {
+                    temp = temp1;
+                    CurrentLocation = GetRandomPoint(40, 0, temp);
+                }
+            }
 
             if (temp == null || !temp.ValidPoint(CurrentLocation))
             {
@@ -1157,7 +1171,7 @@ namespace Server.MirObjects
                     Title = CurrentMap.Info.Title,
                     MiniMap = CurrentMap.Info.MiniMap,
                     Lights = CurrentMap.Info.Light,
-                    BigMap = CurrentMap.Info.BigMap,
+                    BigMap = CurrentMap.Info.BigMap
                 });
         }
         private void GetObjects()
@@ -1341,16 +1355,9 @@ namespace Server.MirObjects
             HasClearRing = false;
             HasMuscleRing = false;
             HasParalysisRing = false;
-            HasFireRing = false;
-            HasHealRing = false;
 
-            for (var i = Info.Magics.Count - 1; i >= 0; i--)
-            {
-                if (Info.Magics[i].IsTempSpell)
-                {
-                    Info.Magics.RemoveAt(i);
-                }            
-            }
+            var skillsToAdd = new List<string>();
+            var skillsToRemove = new List<string> {Settings.HealRing, Settings.FireRing};
 
             for (int i = 0; i < Info.Equipment.Length; i++)
             {
@@ -1396,7 +1403,7 @@ namespace Server.MirObjects
                 switch (temp.Info.Type)
                 {
                         case ItemType.Ring:
-                        Spell spelltype;
+                        
                         switch (temp.Info.Shape)
                         {
                             case 1:
@@ -1420,35 +1427,63 @@ namespace Server.MirObjects
                                 HasMuscleRing = true;
                                 break;
                             case 7:
-                                HasFireRing = true;
-                                
-                                if (Enum.TryParse(Settings.FireRing, out spelltype))
-                                {
-                                    var magic = new UserMagic(spelltype) {IsTempSpell = true};
-                                    Info.Magics.Add(magic);
-                                    Enqueue(magic.GetInfo());
-                                }
+                                skillsToAdd.Add(Settings.FireRing);
+                                skillsToRemove.Remove(Settings.FireRing);          
                                 break;
                             case 8:
-                                HasHealRing = true;
-
-                                if (Enum.TryParse(Settings.HealRing, out spelltype))
-                                {
-                                    var magic = new UserMagic(spelltype) { IsTempSpell = true };
-                                    Info.Magics.Add(magic);
-                                    Enqueue(magic.GetInfo());
-                                }
+                                skillsToAdd.Add(Settings.HealRing);
+                                skillsToRemove.Remove(Settings.HealRing);  
                                 break;
                         }
                         break;
                 }
             }
 
+            AddTempSkills(skillsToAdd);
+            RemoveTempSkills(skillsToRemove);
+
             if (HasMuscleRing)
             {
                 MaxBagWeight = (ushort) (MaxBagWeight*2);
                 MaxWearWeight = Math.Min(byte.MaxValue, (byte)(MaxWearWeight * 2));
                 MaxHandWeight = Math.Min(byte.MaxValue, (byte)(MaxHandWeight * 2));
+            }
+        }
+
+        private void AddTempSkills(IEnumerable<string> skillsToAdd)
+        {
+            foreach (var skill in skillsToAdd)
+            {
+                Spell spelltype;
+                bool hasSkill = false;
+
+                if (!Enum.TryParse(skill, out spelltype)) return;
+
+                for (var i = Info.Magics.Count - 1; i >= 0; i--)
+                    if (Info.Magics[i].Spell == spelltype) hasSkill = true;
+
+                if (hasSkill) continue;
+
+                var magic = new UserMagic(spelltype) {IsTempSpell = true};
+                Info.Magics.Add(magic);
+                Enqueue(magic.GetInfo());
+            }
+        }
+
+        private void RemoveTempSkills(IEnumerable<string> skillsToRemove)
+        {
+            foreach (var skill in skillsToRemove)
+            {
+                Spell spelltype;
+                if (!Enum.TryParse(skill, out spelltype)) return;
+
+                for (var i = Info.Magics.Count - 1; i >= 0; i--)
+                {
+                    if (!Info.Magics[i].IsTempSpell || Info.Magics[i].Spell != spelltype) continue;
+
+                    Info.Magics.RemoveAt(i);
+                    Enqueue(new S.RemoveMagic {PlaceId = i});
+                }
             }
         }
 
@@ -1881,6 +1916,11 @@ namespace Server.MirObjects
 
                     case "MOVE":
                         if (!IsGM && !HasTeleportRing) return;
+                        if (!IsGM && CurrentMap.Info.NoPosition)
+                        {
+                            ReceiveChat(("You cannot position move on this map"), ChatType.System);
+                            return;
+                        }
 
                         int x, y;
 
@@ -2032,7 +2072,7 @@ namespace Server.MirObjects
             }
             else
             {
-                message = String.Format("{0}:{1}", Name, message);
+                message = String.Format("{0}:{1}", CurrentMap.Info.NoNames ? "?????" : Name, message);
 
                 p = new S.ObjectChat {ObjectID = ObjectID, Text = message, Type = ChatType.Normal};
 
@@ -3675,7 +3715,12 @@ namespace Server.MirObjects
 
                 case Spell.Teleport:
                     Point location = (Point) data[1];
-                    if (!CurrentMap.ValidPoint(location) || Envir.Random.Next(4) >= magic.Level + 1 || !Teleport(CurrentMap, location, false)) return;
+                    if (CurrentMap.Info.NoTeleport)
+                    {
+                        ReceiveChat(("You cannot teleport on this map"), ChatType.System);
+                        return;
+                    }
+                    if (!CurrentMap.ValidPoint(location) || Envir.Random.Next(4) >= magic.Level + 1 || !Teleport(CurrentMap, location, false)) return;                   
                     CurrentMap.Broadcast(new S.ObjectEffect {ObjectID = ObjectID, Effect = SpellEffect.Teleport}, CurrentLocation);
                     LevelMagic(magic);
                     AddBuff(new Buff {Type = BuffType.Teleport, Caster = this, ExpireTime = Envir.Time + 30000});
@@ -3920,6 +3965,15 @@ namespace Server.MirObjects
 
                 if (info.Source != location) continue;
 
+                if (info.NeedHole)
+                {
+                    Cell cell = CurrentMap.GetCell(location);
+
+                    if (cell.Objects == null ||
+                        cell.Objects.Where(ob => ob.Race == ObjectType.Spell).All(ob => ((SpellObject) ob).Spell != Spell.DigOutZombie))
+                        continue;
+                }
+
                 Map temp = Envir.GetMap(info.MapIndex);
 
                 if (temp == null || !temp.ValidPoint(info.Destination)) continue;
@@ -4042,7 +4096,7 @@ namespace Server.MirObjects
             return new S.ObjectPlayer
             {
                 ObjectID = ObjectID,
-                Name = Name,
+                Name = CurrentMap.Info.NoNames ? "?????" : Name,
                 NameColour = NameColour,
                 Class = Class,
                 Gender = Gender,
@@ -4195,7 +4249,7 @@ namespace Server.MirObjects
             LastHitTime = Envir.Time + 10000;
             RegenTime = Envir.Time + RegenDelay;
 
-            if (Envir.Time > BrownTime && PKPoints < 200)
+            if (Envir.Time > BrownTime && PKPoints < 200 && !CurrentMap.Info.Fight)
                 attacker.BrownTime = Envir.Time + Settings.Minute;
 
             DamageDura();
@@ -4924,6 +4978,13 @@ namespace Server.MirObjects
                 return;
             }
 
+            if (CurrentMap.Info.NoThrowItem)
+            {
+                ReceiveChat("You cannot drop items on this map", ChatType.System);
+                Enqueue(p);
+                return;            
+            }
+
             UserItem temp = null;
             int index = -1;
 
@@ -5253,9 +5314,27 @@ namespace Server.MirObjects
                     break;
             }
 
-            if (item.Info.Type == ItemType.Book)
-                for (int i = 0; i < Info.Magics.Count; i++)
-                    if (Info.Magics[i].Spell == (Spell) item.Info.Shape) return false;
+            switch (item.Info.Type)
+            {
+                case ItemType.Potion:
+                    if (CurrentMap.Info.NoDrug)
+                    {
+                        ReceiveChat("You cannot use Potions here", ChatType.System);
+                        return false;
+                    }
+                    break;
+
+                case ItemType.Book:
+                    if (Info.Magics.Any(t => t.Spell == (Spell)item.Info.Shape))
+                    {
+                        return false;
+                    }
+                    break;
+            }
+
+            //if (item.Info.Type == ItemType.Book)
+            //    for (int i = 0; i < Info.Magics.Count; i++)
+            //        if (Info.Magics[i].Spell == (Spell)item.Info.Shape) return false;
 
             return true;
         }

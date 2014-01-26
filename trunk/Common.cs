@@ -2031,6 +2031,8 @@ public abstract class Packet
                 return new S.ObjectSitDown();
             case 118:
                 return new S.InTrapRock();
+            case 119:
+                return new S.RemoveMagic();
             default:
                 throw new NotImplementedException();
         }

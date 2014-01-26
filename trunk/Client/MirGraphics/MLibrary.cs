@@ -40,7 +40,7 @@ namespace Client.MirGraphics
             FloorItems = new MLibrary(Settings.DataPath + "DNItems");
 
 
-        public static readonly MLibrary[] CArmours = new MLibrary[19],
+        public static readonly MLibrary[] CArmours = new MLibrary[35],
                                           CWeapons = new MLibrary[51],
                                           CHair = new MLibrary[8],
                                           AArmours = new MLibrary[12],
