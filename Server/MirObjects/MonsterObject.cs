@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Server.MirDatabase;
 using Server.MirEnvir;
 using Server.MirObjects.Monsters;
@@ -1470,7 +1471,15 @@ namespace Server.MirObjects
 
             Broadcast(new S.ObjectStruck { ObjectID = ObjectID, AttackerID = attacker.ObjectID, Direction = Direction, Location = CurrentLocation });
 
-            ChangeHP(armour - damage);
+            int additionalDamage = 0;
+
+            if (attacker.ItemSets.Any(s => s.Set == ItemSet.RedOrchid && s.SetComplete))
+            {
+                additionalDamage = (damage * 10) / 100;
+                attacker.ChangeHP(additionalDamage);
+            }
+
+            ChangeHP(armour - (damage + additionalDamage));
 
             return damage - armour;
         }

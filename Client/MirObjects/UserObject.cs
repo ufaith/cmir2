@@ -35,6 +35,7 @@ namespace Client.MirObjects
 
         public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14];
         public List<ClientMagic> Magics = new List<ClientMagic>();
+        public List<ItemSets> ItemSets = new List<ItemSets>();
 
         public ClientMagic NextMagic;
         public Point NextMagicLocation;
@@ -104,6 +105,7 @@ namespace Client.MirObjects
             RefreshLevelStats();
             RefreshBagWeight();
             RefreshEquipmentStats();
+            RefreshItemSetStats();
             RefreshSkills();
             RefreshBuffs();
             SetLibraries();
@@ -214,20 +216,10 @@ namespace Client.MirObjects
 
             HasTeleportRing = false;
             HasProtectionRing = false;
-            HasRevivalRing = false;
-            //HasClearRing = false;
             HasMuscleRing = false;
             HasParalysisRing = false;
-            HasFireRing = false;
-            HasHealRing = false;
 
-            for (var i = Magics.Count - 1; i >= 0; i--)
-            {
-                if (Magics[i].IsTempSpell)
-                {
-                    Magics.RemoveAt(i);
-                }
-            }
+            ItemSets.Clear();
 
             for (int i = 0; i < Equipment.Length; i++)
             {
@@ -287,21 +279,25 @@ namespace Client.MirObjects
                             case 4:
                                 HasProtectionRing = true;
                                 break;
-                            case 5:
-                                HasRevivalRing = true;
-                                break;
                             case 6:
                                 HasMuscleRing = true;
-                                break;
-                            case 7:
-                                HasFireRing = true;
-                                break;
-                            case 8:
-                                HasHealRing = true;
                                 break;
                         }
                         break;
                 }
+
+                if (temp.Info.Set == ItemSet.None) continue;
+
+                bool sameSetFound = false;
+                foreach (var set in ItemSets.Where(set => set.Set == temp.Info.Set && !set.Type.Contains(temp.Info.Type)).TakeWhile(set => !set.SetComplete))
+                {
+                    set.Type.Add(temp.Info.Type);
+                    set.Count++;
+                    sameSetFound = true;
+                }
+
+                if (!ItemSets.Any() || !sameSetFound)
+                    ItemSets.Add(new ItemSets { Count = 1, Set = temp.Info.Set, Type = new List<ItemType> { temp.Info.Type } });
             }
 
             if (HasMuscleRing)
@@ -309,6 +305,60 @@ namespace Client.MirObjects
                 MaxBagWeight = (ushort)(MaxBagWeight * 2);
                 MaxWearWeight = Math.Min(byte.MaxValue, (byte)(MaxWearWeight * 2));
                 MaxHandWeight = Math.Min(byte.MaxValue, (byte)(MaxHandWeight * 2));
+            }
+        }
+
+        private void RefreshItemSetStats()
+        {
+            foreach (var s in ItemSets.Where(s => s.SetComplete))
+            {
+                switch (s.Set)
+                {
+                    case ItemSet.Mundane:
+                        MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + 50);
+                        break;
+                    case ItemSet.NokChi:
+                        MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + 50);
+                        break;
+                    case ItemSet.TaoProtect:
+                        MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + 30);
+                        MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + 30);
+                        break;
+                    case ItemSet.RedOrchid:
+                        Accuracy = (byte)Math.Min(byte.MaxValue, Accuracy + 2);
+                        //drains extra hp from target to wear
+                        break;
+                    case ItemSet.RedFlower:
+                        MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + 50);
+                        MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP - 50);
+                        break;
+                    case ItemSet.Smash:
+                        AttackSpeed = Math.Min(int.MaxValue, AttackSpeed + 2);
+                        MinDC = (byte)Math.Min(byte.MaxValue, MinDC + 1);
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + 3);
+                        break;
+                    case ItemSet.HwanDevil:
+                        MaxWearWeight = (byte)Math.Min(byte.MaxValue, MaxWearWeight + 5);
+                        MaxBagWeight = (byte)Math.Min(byte.MaxValue, MaxBagWeight + 20);
+                        MinMC = (byte)Math.Min(byte.MaxValue, MinMC + 1);
+                        MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + 2);
+                        break;
+                    case ItemSet.Purity:
+                        MinSC = (byte)Math.Min(byte.MaxValue, MinSC + 1);
+                        MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + 2);
+                        //holy +2;
+                        break;
+                    case ItemSet.FiveString:
+                        MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + ((MaxHP / 100) * 30));
+                        MinAC = (byte)Math.Min(byte.MaxValue, MinAC + 2);
+                        MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + 2);
+                        break;
+                    case ItemSet.Spirit:
+                        MinDC = (byte)Math.Min(byte.MaxValue, MinDC + 2);
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + 5);
+                        AttackSpeed = Math.Min(int.MaxValue, AttackSpeed + 2);
+                        break;
+                }
             }
         }
 
@@ -524,6 +574,46 @@ namespace Client.MirObjects
             NextMagicDirection = 0;
             NextMagicLocation = Point.Empty;
             NextMagicObject = null;
+        }
+    }
+}
+
+public class ItemSets
+{
+    public ItemSet Set;
+    public List<ItemType> Type;
+    private byte Amount
+    {
+        get
+        {
+            switch (Set)
+            {
+                case ItemSet.Mundane:
+                case ItemSet.NokChi:
+                case ItemSet.TaoProtect:
+                    return 2;
+                case ItemSet.RedOrchid:
+                case ItemSet.RedFlower:
+                case ItemSet.Smash:
+                case ItemSet.HwanDevil:
+                case ItemSet.Purity:
+                case ItemSet.FiveString:
+                    return 3;
+                case ItemSet.Recall:
+                    return 4;
+                case ItemSet.Spirit:
+                    return 5;
+                default:
+                    return 0;
+            }
+        }
+    }
+    public byte Count;
+    public bool SetComplete
+    {
+        get
+        {
+            return Count == Amount;
         }
     }
 }

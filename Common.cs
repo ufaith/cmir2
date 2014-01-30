@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using C = ClientPackets;
 using S = ServerPackets;
 
@@ -352,6 +354,24 @@ public enum RequiredType : byte
     DC = 3,
     MC = 4,
     SC = 5,
+}
+
+[Obfuscation(Feature = "renaming", Exclude = true)]
+public enum ItemSet : byte
+{
+    None = 0,
+    Spirit = 1,
+    Recall = 2,
+    RedOrchid = 3,
+    RedFlower = 4,
+    Smash = 5,
+    HwanDevil = 6,
+    Purity = 7,
+    FiveString = 8,
+    Mundane = 9,
+    NokChi = 10,
+    TaoProtect = 11,
+    Mir = 12,
 }
 
 [Obfuscation(Feature = "renaming", Exclude = true)]
@@ -1181,6 +1201,7 @@ public class ItemInfo
     public RequiredType RequiredType = RequiredType.Level;
     public RequiredClass RequiredClass = RequiredClass.None;
     public RequiredGender RequiredGender = RequiredGender.None;
+    public ItemSet Set;
 
     public sbyte Shape;
     public byte Weight, Light, RequiredAmount;
@@ -1213,6 +1234,7 @@ public class ItemInfo
         RequiredType = (RequiredType) reader.ReadByte();
         RequiredClass = (RequiredClass) reader.ReadByte();
         RequiredGender = (RequiredGender) reader.ReadByte();
+        if(version >= 17) Set = (ItemSet)reader.ReadByte();
 
         Shape = reader.ReadSByte();
         Weight = reader.ReadByte();
@@ -1259,11 +1281,13 @@ public class ItemInfo
         writer.Write((byte) Type);
         writer.Write((byte) RequiredType);
         writer.Write((byte) RequiredClass);
-        writer.Write((byte)RequiredGender);
+        writer.Write((byte) RequiredGender);
+        writer.Write((byte) Set);
+
         writer.Write(Shape);
         writer.Write(Weight);
         writer.Write(Light);
-        writer.Write(RequiredAmount);
+        writer.Write(RequiredAmount);     
 
         writer.Write(Image);
         writer.Write(Durability);
@@ -2039,3 +2063,5 @@ public abstract class Packet
     }
 
 }
+
+

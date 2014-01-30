@@ -681,11 +681,14 @@ namespace Server.MirObjects
             switch (parts[0].ToUpper())
             {
                 case "MOVE":
-                    int x, y;
-                    if (parts.Length < 4) return;
+                    int x = 0, y = 0;
+                    if (parts.Length < 2) return;
 
-                    if (!int.TryParse(parts[2], out x)) return;
-                    if (!int.TryParse(parts[3], out y)) return;
+                    if (parts.Length > 3)
+                    {
+                        if (!int.TryParse(parts[2], out x)) return;
+                        if (!int.TryParse(parts[3], out y)) return;
+                    }
 
                     acts.Add(new NPCActions(ActionType.Teleport, parts[1], new Point(x, y)));
                     break;
@@ -1118,7 +1121,11 @@ namespace Server.MirObjects
                     case ActionType.Teleport:
                         var map = SMain.Envir.GetMapByNameAndInstance((string)act.Params[0]);
                         if (map == null) return;
-                        player.Teleport(map, (Point)act.Params[1]);
+
+                        var coords = (Point)act.Params[1];
+
+                        if (coords.X > 0 && coords.Y > 0) player.Teleport(map, coords);
+                        else player.TeleportRandom(200, 0, map);
                         break;
 
                     case ActionType.InstanceTeleport:
