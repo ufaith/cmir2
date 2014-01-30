@@ -1982,8 +1982,9 @@ namespace Server.MirObjects
                             LastRecallTime = Envir.Time + 180000;
                             for (var i = 1; i < GroupMembers.Count(); i++)
                             {
-                                if (GroupMembers[i].EnableGroupRecall && GroupMembers[i].CurrentMap == CurrentMap)
+                                if (GroupMembers[i].EnableGroupRecall)
                                     GroupMembers[i].Teleport(CurrentMap, CurrentLocation);
+                                else GroupMembers[i].ReceiveChat("A recall was attempted without your permission",ChatType.System);
                             }
                         }
                         break;
