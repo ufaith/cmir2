@@ -290,22 +290,4 @@ namespace Server.MirDatabase
 
         }
     }
-
-    //public class FlagInfo
-    //{
-    //    public uint FlagIndex;
-    //    public bool FlagCheck;
-
-    //    public FlagInfo(BinaryReader reader)
-    //    {
-    //        FlagIndex = reader.ReadUInt32();
-    //        FlagCheck = reader.ReadBoolean();
-    //    }
-
-    //    public void Save(BinaryWriter writer)
-    //    {
-    //        writer.Write(FlagIndex);
-    //        writer.Write(FlagCheck);
-    //    }
-    //}
 }

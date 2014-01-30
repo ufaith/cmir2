@@ -40,6 +40,7 @@ namespace Server
             RTypeComboBox.Items.AddRange(Enum.GetValues(typeof (RequiredType)).Cast<object>().ToArray());
             RClassComboBox.Items.AddRange(Enum.GetValues(typeof (RequiredClass)).Cast<object>().ToArray());
             RGenderComboBox.Items.AddRange(Enum.GetValues(typeof (RequiredGender)).Cast<object>().ToArray());
+            ISetComboBox.Items.AddRange(Enum.GetValues(typeof(ItemSet)).Cast<object>().ToArray());
 
             ITypeFilterComboBox.Items.AddRange(Enum.GetValues(typeof(ItemType)).Cast<object>().ToArray());
             ITypeFilterComboBox.Items.Add(new ComboBoxItem { Text = "All" });
@@ -76,14 +77,15 @@ namespace Server
                 ImageTextBox.Text = string.Empty;
                 DuraTextBox.Text = string.Empty;
                 ITypeComboBox.SelectedItem = null;
+                ISetComboBox.SelectedItem = null;
                 ShapeTextBox.Text = string.Empty;
                 SSizeTextBox.Text = string.Empty;
                 PriceTextBox.Text = string.Empty;
                 RTypeComboBox.SelectedItem = null;
                 RAmountTextBox.Text = string.Empty;
                 RClassComboBox.SelectedItem = null;
-                RGenderComboBox.SelectedItem = null;
-                LightTextBox.Text = string.Empty;
+                RGenderComboBox.SelectedItem = null;            
+                LightTextBox.Text = string.Empty;         
 
                 MinACTextBox.Text = string.Empty;
                 MaxACTextBox.Text = string.Empty;
@@ -120,6 +122,7 @@ namespace Server
             ImageTextBox.Text = info.Image.ToString();
             DuraTextBox.Text = info.Durability.ToString();
             ITypeComboBox.SelectedItem = info.Type;
+            ISetComboBox.SelectedItem = info.Set;
             ShapeTextBox.Text = info.Shape.ToString();
             SSizeTextBox.Text = info.StackSize.ToString();
             PriceTextBox.Text = info.Price.ToString();
@@ -127,7 +130,7 @@ namespace Server
             RAmountTextBox.Text = info.RequiredAmount.ToString();
             RClassComboBox.SelectedItem = info.RequiredClass;
             RGenderComboBox.SelectedItem = info.RequiredGender;
-            LightTextBox.Text = info.Light.ToString();
+            LightTextBox.Text = info.Light.ToString();          
 
             MinACTextBox.Text = info.MinAC.ToString();
             MaxACTextBox.Text = info.MaxAC.ToString();
@@ -164,6 +167,7 @@ namespace Server
                 if (ImageTextBox.Text != info.Image.ToString()) ImageTextBox.Text = string.Empty;
                 if (DuraTextBox.Text != info.Durability.ToString()) DuraTextBox.Text = string.Empty;
                 if (ITypeComboBox.SelectedItem == null || (ItemType)ITypeComboBox.SelectedItem != info.Type) ITypeComboBox.SelectedItem = null;
+                if (ISetComboBox.SelectedItem == null || (ItemSet)ISetComboBox.SelectedItem != info.Set) ISetComboBox.SelectedItem = null;
                 if (ShapeTextBox.Text != info.Shape.ToString()) ShapeTextBox.Text = string.Empty;
                 if (SSizeTextBox.Text != info.StackSize.ToString()) SSizeTextBox.Text = string.Empty;
                 if (PriceTextBox.Text != info.Price.ToString()) PriceTextBox.Text = string.Empty;
@@ -866,6 +870,14 @@ namespace Server
 
             MessageBox.Show(count + " Items have been imported");
             UpdateInterface(true);
+        }
+
+        private void ISetComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Set = (ItemSet)ISetComboBox.SelectedItem;
         }
     }
 }
