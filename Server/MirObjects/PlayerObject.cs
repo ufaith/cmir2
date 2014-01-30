@@ -1972,6 +1972,12 @@ namespace Server.MirObjects
                         if (GroupMembers == null || GroupMembers[0] != this || Dead)
                             return;
 
+                        if (CurrentMap.Info.NoRecall)
+                        {
+                            ReceiveChat("You cannot recall people on this map", ChatType.System);
+                            return;
+                        }
+
                         if (Envir.Time < LastRecallTime)
                         {
                             ReceiveChat(string.Format("You cannot recall for another {0} seconds", (LastRecallTime - Envir.Time)/1000), ChatType.System);
@@ -1984,7 +1990,9 @@ namespace Server.MirObjects
                             {
                                 if (GroupMembers[i].EnableGroupRecall)
                                     GroupMembers[i].Teleport(CurrentMap, CurrentLocation);
-                                else GroupMembers[i].ReceiveChat("A recall was attempted without your permission",ChatType.System);
+                                else
+                                    GroupMembers[i].ReceiveChat("A recall was attempted without your permission",
+                                        ChatType.System);
                             }
                         }
                         break;
