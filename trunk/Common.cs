@@ -165,6 +165,7 @@ public enum MirAction : byte
     DashR,
     DashFail,
     Stance,
+    Stance2,
     Attack1,
     Attack2,
     Attack3,

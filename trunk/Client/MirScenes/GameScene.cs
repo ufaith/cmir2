@@ -931,7 +931,7 @@ namespace Client.MirScenes
             if (MapControl != null && !MapControl.IsDisposed)
                 MapControl.Dispose();
 
-            MapControl = new MapControl { FileName = Path.Combine(Settings.MapPath, p.FileName + ".map"), Title = p.Title, MiniMap = p.MiniMap, BigMap = p.BigMap, Lights = p.Lights };
+            MapControl = new MapControl { FileName = Path.Combine(Settings.MapPath, p.FileName + ".map"), Title = p.Title, MiniMap = p.MiniMap, BigMap = p.BigMap, Lights = p.Lights, Lightning = p.Lightning, Fire = p.Fire };
             MapControl.LoadMap();
             InsertControl(0, MapControl);
         }
@@ -1507,6 +1507,7 @@ namespace Client.MirScenes
         private void Struck(S.Struck p)
         {
             NextRunTime = CMain.Time + 2500;
+            User.BlizzardFreezeTime = 0;
             User.ClearMagic();
 
             if (User.CurrentAction == MirAction.Struck) return; 
@@ -1542,6 +1543,8 @@ namespace Client.MirScenes
                 if (ob.CurrentAction == MirAction.Struck) return;
                 if (ob.ActionFeed.Count > 0 && ob.ActionFeed[ob.ActionFeed.Count - 1].Action == MirAction.Struck) return;
 
+                if (ob.Race == ObjectType.Player) 
+                    ((PlayerObject)ob).BlizzardFreezeTime = 0;
                 QueuedAction action = new QueuedAction { Action = MirAction.Struck, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
                 action.Params.Add(p.AttackerID);
                 ob.ActionFeed.Add(action);
@@ -1632,8 +1635,16 @@ namespace Client.MirScenes
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
 
-                ob.ActionFeed.Add(new QueuedAction {Action = MirAction.Die, Direction = p.Direction, Location = p.Location});
-                ob.Dead = true;
+                if (p.Type == 0)
+                {
+                    ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Die, Direction = p.Direction, Location = p.Location });
+                    ob.Dead = true;
+                }
+                else
+                {
+                    MapControl.Effects.Add(new Effect(Libraries.Magic2, 690, 10, 1000, ob.CurrentLocation));
+                    ob.Remove();
+                }
                 return;
             }
         }
@@ -2066,11 +2077,12 @@ namespace Client.MirScenes
                         ob.Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.GreatFoxSpirit], 375 + (CMain.Random.Next(3) * 20), 20, 1400, ob));
                         break;
                     case SpellEffect.MapLightning:
-                        ob.Effects.Add(new Effect(Libraries.Dragon, 400, 5, 600, ob));
+                        ob.Effects.Add(new Effect(Libraries.Dragon, 400 + (CMain.Random.Next(3) * 10), 5, 600, ob));
                         SoundManager.PlaySound(20000 + (ushort)Spell.ThunderBolt * 10);
                         break;
                     case SpellEffect.MapFire:
-                        ob.Effects.Add(new Effect(Libraries.Dragon, 440, 20, 600, ob));
+                        ob.Effects.Add(new Effect(Libraries.Dragon, 440, 20, 1600, ob) { Blend = false });
+                        ob.Effects.Add(new Effect(Libraries.Dragon, 470, 10, 800, ob));
                         SoundManager.PlaySound(20000 + (ushort)Spell.ThunderBolt * 10);
                         break;
                     case SpellEffect.Entrapment:
@@ -3231,6 +3243,8 @@ namespace Client.MirScenes
         public string Title = String.Empty;
         public ushort MiniMap, BigMap;
         public LightSetting Lights;
+        public bool Lightning, Fire;
+        public long LightningTime, FireTime;
 
         public bool FloorValid, LightsValid;
 
@@ -3359,6 +3373,20 @@ namespace Client.MirScenes
 
             for (int i = Effects.Count - 1; i >= 0; i--)
                 Effects[i].Process();
+
+            if (Lightning && CMain.Time > LightningTime)
+            {
+                LightningTime = CMain.Time + CMain.Random.Next(2000, 5000);
+                Point source = new Point(User.CurrentLocation.X + CMain.Random.Next(-7, 7), User.CurrentLocation.Y + CMain.Random.Next(-7, 7));
+                MapControl.Effects.Add(new Effect(Libraries.Dragon, 400 + (CMain.Random.Next(3) * 10), 5, 400, source));
+            }
+            if (Fire && CMain.Time > FireTime)
+            {
+                FireTime = CMain.Time + CMain.Random.Next(2000, 5000);
+                Point source = new Point(User.CurrentLocation.X + CMain.Random.Next(-7, 7), User.CurrentLocation.Y + CMain.Random.Next(-7, 7));
+                MapControl.Effects.Add(new Effect(Libraries.Dragon, 440, 20, 1600, source) { Blend = false });
+                MapControl.Effects.Add(new Effect(Libraries.Dragon, 470, 10, 800, source));
+            }
 
             CheckInput();
 
@@ -3936,7 +3964,7 @@ namespace Client.MirScenes
 
         private void CheckInput()
         {
-            if (CMain.Time < InputDelay || User.Poison == PoisonType.Paralysis || User.Poison == PoisonType.Frozen) return;
+            if (CMain.Time < InputDelay || CMain.Time < User.BlizzardFreezeTime || User.Poison == PoisonType.Paralysis || User.Poison == PoisonType.Frozen) return;
 
             if (User.NextMagic != null)
             {
@@ -4158,6 +4186,14 @@ namespace Client.MirScenes
                         
                         User.ClearMagic();
                         return;
+                    }
+                    break;
+                case Spell.Blizzard:
+                case Spell.MeteorStrike:
+                    if (User.NextMagicObject != null)
+                    {
+                        if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
+                            target = User.NextMagicObject;
                     }
                     break;
             }
@@ -9086,7 +9122,6 @@ namespace Client.MirScenes
                     break;
                 case BuffType.Rage:
                     text = string.Format("Rage\nIncreases DC by: 0-{0}.\n", Value);
-                    break;
                     break;
             }
 

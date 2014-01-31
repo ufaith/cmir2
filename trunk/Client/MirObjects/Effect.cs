@@ -26,6 +26,7 @@ namespace Client.MirObjects
         public float Rate = 1F;
         public Point DrawLocation;
         public bool Repeat;
+        public long RepeatUntil;
         
         public event EventHandler Complete;
 
@@ -68,7 +69,7 @@ namespace Client.MirObjects
 
             if (++CurrentFrame >= Count)
             {
-                if (Repeat)
+                if (Repeat && (RepeatUntil == 0 || CMain.Time < RepeatUntil))
                 {
                     CurrentFrame = 0;
                     Start = CMain.Time;

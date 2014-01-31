@@ -5,14 +5,15 @@ namespace Server.MirObjects.Monsters
 {
     public class HumanWizard : MonsterObject
     {
-        public long FearTime;
+        public long FearTime, DecreaseMPTime;
         public byte AttackRange = 6;
         public bool Summoned;
 
         protected internal HumanWizard(MonsterInfo info)
             : base(info)
         {
-            Direction = MirDirection.DownLeft;
+            Direction = MirDirection.Down;
+            Summoned = true;
         }
 
         protected override bool InAttackRange()
@@ -47,6 +48,19 @@ namespace Server.MirObjects.Monsters
             if (Target.Dead)
                 FindTarget();
 
+        }
+
+        protected override void ProcessAI()
+        {
+            base.ProcessAI();
+
+            if (Master != null && Master is PlayerObject && Envir.Time > DecreaseMPTime)
+            {
+                DecreaseMPTime = Envir.Time + 1000;
+                if (!Master.Dead) ((PlayerObject)Master).ChangeMP(-10);
+
+                if (((PlayerObject)Master).MP <= 0) Die();
+            }
         }
 
         protected override void ProcessTarget()
@@ -106,7 +120,42 @@ namespace Server.MirObjects.Monsters
         {
             base.Spawned();
 
-            Summoned = true;
+            Summoned = false;
+        }
+
+        public override void ChangeHP(int amount)
+        {
+            if (Master != null && Master is PlayerObject)
+            {
+                ((PlayerObject)Master).ChangeMP(-amount);
+                return;
+            }
+
+            base.ChangeHP(amount);
+        }
+
+        public override void Die()
+        {
+            if (Dead) return;
+
+            HP = 0;
+            Dead = true;
+
+            DeadTime = Envir.Time + DeadDelay;
+
+            Broadcast(new S.ObjectDied { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation, Type = (byte)(Master != null ? 1 : 0) });
+
+            if (EXPOwner != null && Master == null && EXPOwner.Race == ObjectType.Player) EXPOwner.WinExp(Info.Experience);
+
+            if (Respawn != null)
+                Respawn.Count--;
+
+            if (Master == null)
+                Drop();
+
+            PoisonList.Clear();
+            Envir.MonsterCount--;
+
         }
 
         public override Packet GetInfo()
@@ -140,6 +189,7 @@ namespace Server.MirObjects.Monsters
                 Hidden = Hidden,
                 Effect = SpellEffect.None,
                 WingEffect = wing,
+                Extra = Summoned,
             };
         }
     }

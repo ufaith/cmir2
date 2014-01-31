@@ -392,6 +392,7 @@ namespace ServerPackets
         public string Title = string.Empty;
         public ushort MiniMap, BigMap;
         public LightSetting Lights;
+        public bool Lightning, Fire;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -400,6 +401,8 @@ namespace ServerPackets
             MiniMap = reader.ReadUInt16();
             BigMap = reader.ReadUInt16();
             Lights = (LightSetting) reader.ReadByte();
+            Lightning = reader.ReadBoolean();
+            Fire = reader.ReadBoolean();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -409,6 +412,8 @@ namespace ServerPackets
             writer.Write(MiniMap);
             writer.Write(BigMap);
             writer.Write((byte) Lights);
+            writer.Write(Lightning);
+            writer.Write(Fire);
         }
     }
     public sealed class UserInformation : Packet
@@ -576,6 +581,7 @@ namespace ServerPackets
         public bool Dead, Hidden;
         public SpellEffect Effect;
         public byte WingEffect;
+        public bool Extra;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -595,6 +601,7 @@ namespace ServerPackets
             Hidden = reader.ReadBoolean();
             Effect = (SpellEffect) reader.ReadByte();
             WingEffect = reader.ReadByte();
+            Extra = reader.ReadBoolean();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -616,6 +623,7 @@ namespace ServerPackets
             writer.Write(Hidden);
             writer.Write((byte) Effect);
             writer.Write(WingEffect);
+            writer.Write(Extra);
         }
     }
     public sealed class ObjectRemove : Packet
@@ -1561,12 +1569,14 @@ namespace ServerPackets
         public uint ObjectID;
         public Point Location;
         public MirDirection Direction;
+        public byte Type;
 
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
             Location = new Point(reader.ReadInt32(), reader.ReadInt32());
             Direction = (MirDirection)reader.ReadByte();
+            Type = reader.ReadByte();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -1575,6 +1585,7 @@ namespace ServerPackets
             writer.Write(Location.X);
             writer.Write(Location.Y);
             writer.Write((byte)Direction);
+            writer.Write(Type);
         }
     }
     public sealed class ColourChanged : Packet

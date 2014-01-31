@@ -49,7 +49,7 @@ namespace Client.MirObjects
         public Effect ShieldEffect;
         public byte WingEffect;
         private short StanceDelay = 2500;
-        public long StanceTime;
+        public long StanceTime, BlizzardFreezeTime;
         
         public PlayerObject(uint objectID) : base(objectID)
         {
@@ -83,8 +83,8 @@ namespace Client.MirObjects
             
             SetLibraries();
 
-            if (Dead)
-                ActionFeed.Add(new QueuedAction { Action = MirAction.Dead, Direction = Direction, Location = CurrentLocation });
+            if (Dead) ActionFeed.Add(new QueuedAction { Action = MirAction.Dead, Direction = Direction, Location = CurrentLocation });
+            if (info.Extra) Effects.Add(new Effect(Libraries.Magic2, 670, 10, 800, this));
 
             SetAction();
         }
@@ -326,7 +326,8 @@ namespace Client.MirObjects
 
             if (ActionFeed.Count == 0)
             {
-                CurrentAction = CMain.Time > StanceTime ? MirAction.Standing : MirAction.Stance;
+                CurrentAction = CMain.Time > BlizzardFreezeTime ? MirAction.Standing : MirAction.Stance2;
+                if (CurrentAction == MirAction.Standing) CurrentAction = CMain.Time > StanceTime ? MirAction.Standing : MirAction.Stance;
 
                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
                 FrameIndex = 0;
@@ -351,6 +352,7 @@ namespace Client.MirObjects
 
                 CurrentAction = action.Action;
                 CurrentLocation = action.Location;
+                MirDirection olddirection = Direction;
                 Direction = action.Direction;
 
                 Point temp;
@@ -406,6 +408,7 @@ namespace Client.MirObjects
                             case Spell.ShoulderDash:
                                 Frames.Frames.TryGetValue(MirAction.Running, out Frame);
                                 CurrentAction = MirAction.DashL;
+                                Direction = olddirection;
                                 CurrentLocation = Functions.PointMove(CurrentLocation, Direction, 1);
                                 if (this == User)
                                 {
@@ -1055,6 +1058,33 @@ namespace Client.MirObjects
                                 break;
 
                             #endregion
+
+                            #region Mirroring
+
+                            case Spell.Mirroring:
+                                Effects.Add(new Effect(Libraries.Magic2, 650, 10, Frame.Count * FrameInterval, this));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
+
+                            #endregion
+
+                            #region Blizzard
+
+                            case Spell.Blizzard:
+                                Effects.Add(new Effect(Libraries.Magic2, 1540, 8, Frame.Count * FrameInterval, this));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
+
+                            #endregion
+
+                            #region MeteorStrike
+
+                            case Spell.MeteorStrike:
+                                Effects.Add(new Effect(Libraries.Magic2, 1590, 10, Frame.Count * FrameInterval, this));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
+
+                            #endregion
                         }
 
 
@@ -1190,6 +1220,7 @@ namespace Client.MirObjects
                 case MirAction.DashFail:
                 case MirAction.Harvest:
                 case MirAction.Stance:
+                case MirAction.Stance2:
                     if (CMain.Time >= NextMotion)
                     {
                         GameScene.Scene.MapControl.TextureValid = false;
@@ -1666,6 +1697,25 @@ namespace Client.MirObjects
 
                                     #endregion
 
+                                    #region Blizzard
+
+                                    case Spell.Blizzard:
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 1);
+                                        BlizzardFreezeTime = CMain.Time + 3000;
+                                        break;
+
+                                    #endregion
+
+                                    #region MeteorStrike
+
+                                    case Spell.MeteorStrike:
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 1);
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 2);
+                                        BlizzardFreezeTime = CMain.Time + 3000;
+                                        break;
+
+                                    #endregion
+
                                 }
 
 
@@ -1758,7 +1808,7 @@ namespace Client.MirObjects
             
             if (this == User) return;
 
-            if ((CurrentAction == MirAction.Standing || CurrentAction == MirAction.Stance || CurrentAction == MirAction.DashFail) && NextAction != null)
+            if ((CurrentAction == MirAction.Standing || CurrentAction == MirAction.Stance || CurrentAction == MirAction.Stance2 || CurrentAction == MirAction.DashFail) && NextAction != null)
                 SetAction();
             //if Revive and dead set action
 

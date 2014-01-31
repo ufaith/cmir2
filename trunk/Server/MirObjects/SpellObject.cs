@@ -28,7 +28,7 @@ namespace Server.MirObjects
             }
         }
 
-        public long TickTime;
+        public long TickTime, StartTime;
         public PlayerObject Caster;
         public int Value, TickSpeed;
         public Spell Spell;
@@ -65,6 +65,7 @@ namespace Server.MirObjects
         }
         public void ProcessSpell(MapObject ob)
         {
+            if (Envir.Time < StartTime) return;
             switch (Spell)
             {
                 case Spell.FireWall:
@@ -96,6 +97,28 @@ namespace Server.MirObjects
                             TickSpeed = 2000,
                             Value = Value/20
                         });
+                    break;
+                case Spell.Blizzard:
+                    if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) return;
+                    if (ob.Dead) return;
+                    if (Caster.ActiveBlizzard == false) return;
+                    if (!ob.IsAttackTarget(Caster)) return;
+                    ob.Attacked(Caster, Value, DefenceType.MACAgility, false);
+                    if (!ob.Dead && Envir.Random.Next(8) == 0)
+                        ob.ApplyPoison(new Poison
+                        {
+                            Duration = 5,
+                            Owner = Caster,
+                            PType = PoisonType.Slow,
+                            TickSpeed = 2000,
+                        });
+                    break;
+                case Spell.MeteorStrike:
+                    if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) return;
+                    if (ob.Dead) return;
+                    if (Caster.ActiveBlizzard == false) return;
+                    if (!ob.IsAttackTarget(Caster)) return;
+                    ob.Attacked(Caster, Value, DefenceType.MACAgility, false);
                     break;
             }
         }
@@ -188,6 +211,8 @@ namespace Server.MirObjects
                 case Spell.Healing:
                     return null;
                 case Spell.PoisonField:
+                case Spell.Blizzard:
+                case Spell.MeteorStrike:
                     if (!Show)
                         return null;
 
