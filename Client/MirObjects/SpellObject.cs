@@ -23,7 +23,7 @@ namespace Client.MirObjects
 
         public Spell Spell;
         public int FrameCount, FrameInterval, FrameIndex;
-        public bool Blend;
+        public bool Blend, Repeat;
         
 
         public SpellObject(uint objectID) : base(objectID)
@@ -37,6 +37,7 @@ namespace Client.MirObjects
             GameScene.Scene.MapControl.AddObject(this);
             Spell = info.Spell;
             Direction = info.Direction;
+            Repeat = true;
 
             switch (Spell)
             {
@@ -69,6 +70,27 @@ namespace Client.MirObjects
                     FrameCount = 0;
                     Blend = false;
                     break;
+                case Spell.Blizzard:
+                    CurrentLocation.Y = Math.Max(0, CurrentLocation.Y - 20);
+                    BodyLibrary = Libraries.Magic2;
+                    DrawFrame = 1550;
+                    FrameInterval = 100;
+                    FrameCount = 30;
+                    Light = 3;
+                    Blend = true;
+                    Repeat = false;
+                    break;
+                case Spell.MeteorStrike:
+                    MapControl.Effects.Add(new Effect(Libraries.Magic2, 1600, 10, 800, CurrentLocation) { Repeat = true, RepeatUntil = CMain.Time + 3000 });
+                    CurrentLocation.Y = Math.Max(0, CurrentLocation.Y - 20);
+                    BodyLibrary = Libraries.Magic2;
+                    DrawFrame = 1610;
+                    FrameInterval = 100;
+                    FrameCount = 30;
+                    Light = 3;
+                    Blend = true;
+                    Repeat = false;
+                    break;
             }
 
 
@@ -79,7 +101,7 @@ namespace Client.MirObjects
         {
             if (CMain.Time >= NextMotion)
             {
-                if (++FrameIndex >= FrameCount)
+                if (++FrameIndex >= FrameCount && Repeat)
                     FrameIndex = 0;
                 NextMotion = CMain.Time + FrameInterval;
             }
@@ -91,6 +113,7 @@ namespace Client.MirObjects
 
         public override void Draw()
         {
+            if (FrameIndex >= FrameCount && !Repeat) return;
             if (BodyLibrary == null) return;
 
             if (Blend)

@@ -171,6 +171,7 @@ namespace Server.MirObjects
 
         public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
         public long FlamingSwordTime;
+        public bool ActiveBlizzard;
         
         public override bool Blocking
         {
@@ -1183,7 +1184,9 @@ namespace Server.MirObjects
                     Title = CurrentMap.Info.Title,
                     MiniMap = CurrentMap.Info.MiniMap,
                     Lights = CurrentMap.Info.Light,
-                    BigMap = CurrentMap.Info.BigMap
+                    BigMap = CurrentMap.Info.BigMap,
+                    Lightning = CurrentMap.Info.Lightning,
+                    Fire = CurrentMap.Info.Fire
                 });
         }
         private void GetObjects()
@@ -3037,6 +3040,15 @@ namespace Server.MirObjects
                 case Spell.Rage:
                     Rage(magic);
                     break;
+                case Spell.Mirroring:
+                    Mirroring(magic);
+                    break;
+                case Spell.Blizzard:
+                    Blizzard(magic, target == null ? location : target.CurrentLocation, out cast);
+                    break;
+                case Spell.MeteorStrike:
+                    MeteorStrike(magic, target == null ? location : target.CurrentLocation, out cast);
+                    break;
                 default :
                     cast = false;
                     break;
@@ -3049,7 +3061,7 @@ namespace Server.MirObjects
 
         private void ShoulderDash(UserMagic magic)
         {
-            if (!CanWalk) return;
+            if (InTrapRock) return;
             int dist = Envir.Random.Next(2) + magic.Level + 2;
             int travel = 0;
             bool wall = true;
@@ -3659,15 +3671,15 @@ namespace Server.MirObjects
         {
             int damage = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
 
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction, 4);
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction, 3);
             CurrentMap.ActionList.Add(action);
 
-            MirDirection dir = (MirDirection)(((int)Direction + 1) % 8);
-            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, dir, 4);
+            Point location = Functions.PointMove(CurrentLocation, MirDirection.Right, 1);
+            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, Direction, 3);
             CurrentMap.ActionList.Add(action);
 
-            dir = (MirDirection)(((int)Direction - 1 + 8) % 8);
-            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, dir, 4);
+            location = Functions.PointMove(CurrentLocation, MirDirection.Left, 1);
+            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, Direction, 3);
             CurrentMap.ActionList.Add(action);
         }
         private void ProtectionField(UserMagic magic)
@@ -3693,6 +3705,60 @@ namespace Server.MirObjects
             AddBuff(new Buff { Type = BuffType.Rage, Caster = this, ExpireTime = Envir.Time + duration * 1000, Value = value });
             OperateTime = 0;
             LevelMagic(magic);
+        }
+        private void Mirroring(UserMagic magic)
+        {
+            MonsterObject monster;
+            DelayedAction action;
+            for (int i = 0; i < Pets.Count; i++)
+            {
+                monster = Pets[i];
+                if ((monster.Info.Name != Settings.CloneName) || monster.Dead) continue;
+                if (monster.Node == null) continue;
+                action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, monster, Front, true);
+                CurrentMap.ActionList.Add(action);
+                return;
+            }
+
+            MonsterInfo info = Envir.GetMonsterInfo(Settings.CloneName);
+            if (info == null) return;
+
+
+            LevelMagic(magic);
+
+            monster = MonsterObject.GetMonster(info);
+            monster.Master = this;
+            monster.ActionTime = Envir.Time + 1000;
+            monster.RefreshNameColour(false);
+
+            Pets.Add(monster);
+
+            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, monster, Front, false);
+            CurrentMap.ActionList.Add(action);
+        }
+        private void Blizzard(UserMagic magic, Point location, out bool cast)
+        {
+            cast = false;
+
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location);
+
+            ActiveBlizzard = true;
+            CurrentMap.ActionList.Add(action);
+            cast = true;
+        }
+        private void MeteorStrike(UserMagic magic, Point location, out bool cast)
+        {
+            cast = false;
+
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location);
+
+            ActiveBlizzard = true;
+            CurrentMap.ActionList.Add(action);
+            cast = true;
         }
 
         private void CompleteMagic(IList<object> data)
@@ -4367,6 +4433,7 @@ namespace Server.MirObjects
                 attacker.BrownTime = Envir.Time + Settings.Minute;
 
             DamageDura();
+            ActiveBlizzard = false;
 
             Enqueue(new S.Struck { AttackerID = attacker.ObjectID });
             Broadcast(new S.ObjectStruck { ObjectID = ObjectID, AttackerID = attacker.ObjectID, Direction = Direction, Location = CurrentLocation });
@@ -4413,6 +4480,7 @@ namespace Server.MirObjects
             RegenTime = Envir.Time + RegenDelay;
             
             DamageDura();
+            ActiveBlizzard = false;
 
             Enqueue(new S.Struck { AttackerID = attacker.ObjectID });
             Broadcast(new S.ObjectStruck { ObjectID = ObjectID, AttackerID = attacker.ObjectID, Direction = Direction, Location = CurrentLocation });
@@ -6152,12 +6220,18 @@ namespace Server.MirObjects
 
             for (int i = 0; i < CurrentMap.Players.Count; i++)
             {
-                if (CurrentMap.Players[i].ObjectID != id) continue;
+                if (CurrentMap.Players[i].ObjectID != id)
+                {
+                    for (int j = 0; j < CurrentMap.Players[i].Pets.Count; j++)
+                    {
+                        if (CurrentMap.Players[i].Pets[j].ObjectID != id && CurrentMap.Players[i].Pets[j] is Monsters.HumanWizard) continue;
+                        player = CurrentMap.Players[i];
+                        break;
+                    }
+                }
                 player = CurrentMap.Players[i];
-                break;
+                if (player != null) break;
             }
-
-            if (player == null) return;
 
             for (int i = 0; i < player.Info.Equipment.Length; i++)
             {

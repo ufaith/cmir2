@@ -744,7 +744,7 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                    #region PoisonField
+                #region PoisonField
 
                 case Spell.PoisonField:
                     value = (int)data[2];
@@ -846,7 +846,148 @@ namespace Server.MirEnvir
 
                 #endregion
 
+                #region Mirroring
 
+                case Spell.Mirroring:
+                    monster = (MonsterObject)data[2];
+                    front = (Point)data[3];
+                    bool finish = (bool)data[4];
+
+                    if (finish)
+                    {
+                        monster.Die();
+                        return;
+                    };
+
+                    if (ValidPoint(front))
+                        monster.Spawn(this, front);
+                    else
+                        monster.Spawn(player.CurrentMap, player.CurrentLocation);
+                    break;
+
+                #endregion
+
+                #region Blizzard
+
+                case Spell.Blizzard:
+                    value = (int)data[2];
+                    location = (Point)data[3];
+
+                    train = true;
+                    show = true;
+
+                    for (int y = location.Y - 2; y <= location.Y + 2; y++)
+                    {
+                        if (y < 0) continue;
+                        if (y >= Height) break;
+
+                        for (int x = location.X - 2; x <= location.X + 2; x++)
+                        {
+                            if (x < 0) continue;
+                            if (x >= Width) break;
+
+                            cell = GetCell(x, y);
+
+                            if (!cell.Valid) continue;
+
+                            bool cast = true;
+                            if (cell.Objects != null)
+                                for (int o = 0; o < cell.Objects.Count; o++)
+                                {
+                                    MapObject target = cell.Objects[o];
+                                    if (target.Race != ObjectType.Spell || ((SpellObject) target).Spell != Spell.Blizzard) continue;
+
+                                    cast = false;
+                                    break;
+                                }
+
+                            if (!cast) continue;
+
+                            SpellObject ob = new SpellObject
+                                {
+                                    Spell = Spell.Blizzard,
+                                    Value = value,
+                                    ExpireTime = Envir.Time + 3000,
+                                    TickSpeed = 440,
+                                    Caster = player,
+                                    CurrentLocation = new Point(x, y),
+                                    CastLocation = location,
+                                    Show = show,
+                                    CurrentMap = this,
+                                    StartTime = Envir.Time + 800,
+                                };
+
+                            show = false;
+
+                            AddObject(ob);
+                            ob.Spawned();
+                        }
+                    } 
+
+                    break;
+
+                #endregion
+
+                #region MeteorStrike
+
+                case Spell.MeteorStrike:
+                    value = (int)data[2];
+                    location = (Point)data[3];
+
+                    train = true;
+                    show = true;
+
+                    for (int y = location.Y - 2; y <= location.Y + 2; y++)
+                    {
+                        if (y < 0) continue;
+                        if (y >= Height) break;
+
+                        for (int x = location.X - 2; x <= location.X + 2; x++)
+                        {
+                            if (x < 0) continue;
+                            if (x >= Width) break;
+
+                            cell = GetCell(x, y);
+
+                            if (!cell.Valid) continue;
+
+                            bool cast = true;
+                            if (cell.Objects != null)
+                                for (int o = 0; o < cell.Objects.Count; o++)
+                                {
+                                    MapObject target = cell.Objects[o];
+                                    if (target.Race != ObjectType.Spell || ((SpellObject)target).Spell != Spell.MeteorStrike) continue;
+
+                                    cast = false;
+                                    break;
+                                }
+
+                            if (!cast) continue;
+
+                            SpellObject ob = new SpellObject
+                            {
+                                Spell = Spell.MeteorStrike,
+                                Value = value,
+                                ExpireTime = Envir.Time + 3000,
+                                TickSpeed = 440,
+                                Caster = player,
+                                CurrentLocation = new Point(x, y),
+                                CastLocation = location,
+                                Show = show,
+                                CurrentMap = this,
+                                StartTime = Envir.Time + 800,
+                            };
+
+                            show = false;
+
+                            AddObject(ob);
+                            ob.Spawned();
+                        }
+                    }
+
+                    break;
+
+                #endregion
             }
 
             if (train)
