@@ -10,6 +10,8 @@ using Blend = Microsoft.DirectX.Direct3D.Blend;
 
 namespace Client.MirGraphics
 {
+
+
     class DXManager
     {
         public static List<MImage> TextureList = new List<MImage>();
@@ -30,6 +32,7 @@ namespace Client.MirGraphics
 
         public static Texture RadarTexture;
         public static List<Texture> Lights = new List<Texture>();
+    
 
         public static void Create()
         {
@@ -68,6 +71,7 @@ namespace Client.MirGraphics
             Device.Disposing += (o, e) => Clean();
 
             Device.SetDialogBoxesEnabled(true);
+
             LoadTextures();
         }
 

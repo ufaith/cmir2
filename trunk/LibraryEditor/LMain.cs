@@ -59,7 +59,6 @@ namespace LibraryEditor
             HeightLabel.Text = _selectedImage.Height.ToString();
             OffSetXTextBox.Text = _selectedImage.X.ToString();
             OffSetYTextBox.Text = _selectedImage.Y.ToString();
-
             ImageBox.Image = _selectedImage.Image;
         }
 
@@ -206,8 +205,16 @@ namespace LibraryEditor
 
             Parallel.For(0, OpenWeMadeDialog.FileNames.Length, options, i =>
             {
-                WeMadeLibrary lib = new WeMadeLibrary(OpenWeMadeDialog.FileNames[i]);
-                lib.ToMLibrary();
+                if (Path.GetExtension(OpenWeMadeDialog.FileNames[i]) == ".wtl")
+                {
+                    WTLLibrary WTLlib = new WTLLibrary(OpenWeMadeDialog.FileNames[i]);
+                    WTLlib.ToMLibrary();
+                }
+                else
+                {
+                    WeMadeLibrary WILlib = new WeMadeLibrary(OpenWeMadeDialog.FileNames[i]);
+                    WILlib.ToMLibrary();
+                }
             });
 
         }
@@ -377,6 +384,79 @@ namespace LibraryEditor
             ImageList.Images.Clear();
             _indexList.Clear();
             PreviewListView.VirtualListSize = _library.Count;
+        }
+
+        private void convertlibsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to convert every .lib file in a folder to version 1?\nThis will break any .lib file that is not version 0!", "Convert lib folder", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+            MessageBox.Show("Select any .lib file you want.\nThe code will convert all .lib in this folder + subfolders.\nThis will take a while.\nYou will get a message when its finished!\nRember to backup first!");
+            if (OpenLibraryDialog.ShowDialog() != DialogResult.OK) return;
+            string MainFolder = Path.GetDirectoryName(OpenLibraryDialog.FileName);
+            string NewFolder = MainFolder + "\\converted\\";
+            ProcessDir(MainFolder, 0, NewFolder);
+            MessageBox.Show("Folder processing finaly finished.\n location: " + NewFolder);
+        }
+        const int HowDeepToScan = 6; 
+        public static void ProcessDir(string sourceDir, int recursionLvl, string outputDir)
+        {
+            if (recursionLvl <= HowDeepToScan)
+            {
+                // Process the list of files found in the directory. 
+                string[] fileEntries = Directory.GetFiles(sourceDir);
+                foreach (string fileName in fileEntries)
+                {
+                    if (Directory.Exists(outputDir) != true) Directory.CreateDirectory(outputDir);
+                    MLibraryv0 OldLibrary = new MLibraryv0(fileName);
+                    MLibrary NewLibrary = new MLibrary(outputDir + Path.GetFileName(fileName)) { Images = new List<MLibrary.MImage>(), IndexList = new List<int>(), Count = OldLibrary.Images.Count }; ;
+                    for (int i = 0; i < OldLibrary.Images.Count; i++)
+                        NewLibrary.Images.Add(null);
+                    for (int j = 0; j < OldLibrary.Images.Count; j++)
+                    {
+                        MLibraryv0.MImage oldimage = OldLibrary.GetMImage(j);
+                        NewLibrary.Images[j] = new MLibrary.MImage(oldimage.FBytes,oldimage.Width, oldimage.Height) { X = oldimage.X, Y = oldimage.Y };
+                    }                    
+                    NewLibrary.Save();
+                    for (int i = 0; i < NewLibrary.Images.Count; i++)
+                    {
+                        if (NewLibrary.Images[i].Preview != null)
+                            NewLibrary.Images[i].Preview.Dispose();
+                        if (NewLibrary.Images[i].Image != null)
+                            NewLibrary.Images[i].Image.Dispose();
+                        if (NewLibrary.Images[i].MaskImage != null)
+                            NewLibrary.Images[i].MaskImage.Dispose();
+                    }
+                    for (int i = 0; i < OldLibrary.Images.Count; i++)
+                    {
+                        if (OldLibrary.Images[i].Preview != null)
+                            OldLibrary.Images[i].Preview.Dispose();
+                        if (OldLibrary.Images[i].Image != null)
+                            OldLibrary.Images[i].Image.Dispose();
+                    }
+                    NewLibrary.Images.Clear();
+                    NewLibrary.IndexList.Clear();
+                    OldLibrary.Images.Clear();
+                    OldLibrary.IndexList.Clear();
+                    NewLibrary.Close();
+                    OldLibrary.Close();
+                    NewLibrary = null;
+                    OldLibrary = null;
+                    
+                 }
+                
+
+
+                // Recurse into subdirectories of this directory.
+                string[] subdirEntries = Directory.GetDirectories(sourceDir);
+                foreach (string subdir in subdirEntries)
+                {
+                    // Do not iterate through reparse points
+                    if (Path.GetFileName(Path.GetFullPath(subdir).TrimEnd(Path.DirectorySeparatorChar)) == Path.GetFileName(Path.GetFullPath(outputDir).TrimEnd(Path.DirectorySeparatorChar))) continue;
+                    if ((File.GetAttributes(subdir) &
+                         FileAttributes.ReparsePoint) !=
+                             FileAttributes.ReparsePoint)
+                    ProcessDir(subdir, recursionLvl + 1, outputDir + " \\" + Path.GetFileName(Path.GetFullPath(subdir).TrimEnd(Path.DirectorySeparatorChar)) + "\\");
+                }
+            }
         }
     }
 }

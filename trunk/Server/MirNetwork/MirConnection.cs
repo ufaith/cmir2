@@ -431,7 +431,6 @@ namespace Server.MirNetwork
                     SMain.Enqueue(SessionID + ", Disconnnected - Wrong Client Version.");
                     return;
                 }
-
             Enqueue(new S.ClientVersion { Result = 1 });
             Stage = GameStage.Login;
         }

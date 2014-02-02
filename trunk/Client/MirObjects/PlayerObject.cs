@@ -2165,6 +2165,7 @@ namespace Client.MirObjects
         {
             if (BodyLibrary != null)
                 BodyLibrary.Draw(DrawFrame + ArmourOffSet, DrawLocation, DrawColour, true);
+                //BodyLibrary.DrawTinted(DrawFrame + ArmourOffSet, DrawLocation, DrawColour, Color.DarkSeaGreen);
         }
         public void DrawHead()
         {
