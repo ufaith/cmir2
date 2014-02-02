@@ -91,6 +91,8 @@
             this.ExportButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
+            this.AutoRevCheckBox = new System.Windows.Forms.CheckBox();
+            this.UndeadCheckBox = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.MonsterInfoPanel.SuspendLayout();
@@ -124,6 +126,8 @@
             this.MonsterInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.MonsterInfoPanel.Controls.Add(this.UndeadCheckBox);
+            this.MonsterInfoPanel.Controls.Add(this.AutoRevCheckBox);
             this.MonsterInfoPanel.Controls.Add(this.ImageComboBox);
             this.MonsterInfoPanel.Controls.Add(this.label10);
             this.MonsterInfoPanel.Controls.Add(this.CoolEyeTextBox);
@@ -734,6 +738,28 @@
             this.ExportSelectedButton.UseVisualStyleBackColor = true;
             this.ExportSelectedButton.Click += new System.EventHandler(this.ExportSelected_Click);
             // 
+            // AutoRevCheckBox
+            // 
+            this.AutoRevCheckBox.AutoSize = true;
+            this.AutoRevCheckBox.Location = new System.Drawing.Point(353, 165);
+            this.AutoRevCheckBox.Name = "AutoRevCheckBox";
+            this.AutoRevCheckBox.Size = new System.Drawing.Size(71, 17);
+            this.AutoRevCheckBox.TabIndex = 87;
+            this.AutoRevCheckBox.Text = "Auto Rev";
+            this.AutoRevCheckBox.UseVisualStyleBackColor = true;
+            this.AutoRevCheckBox.CheckedChanged += new System.EventHandler(this.AutoRevCheckBox_CheckedChanged);
+            // 
+            // UndeadCheckBox
+            // 
+            this.UndeadCheckBox.AutoSize = true;
+            this.UndeadCheckBox.Location = new System.Drawing.Point(353, 188);
+            this.UndeadCheckBox.Name = "UndeadCheckBox";
+            this.UndeadCheckBox.Size = new System.Drawing.Size(64, 17);
+            this.UndeadCheckBox.TabIndex = 88;
+            this.UndeadCheckBox.Text = "Undead";
+            this.UndeadCheckBox.UseVisualStyleBackColor = true;
+            this.UndeadCheckBox.CheckedChanged += new System.EventHandler(this.UndeadCheckBox_CheckedChanged);
+            // 
             // MonsterInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -824,5 +850,7 @@
         private System.Windows.Forms.Button ExportButton;
         private System.Windows.Forms.Button ImportButton;
         private System.Windows.Forms.Button ExportSelectedButton;
+        private System.Windows.Forms.CheckBox UndeadCheckBox;
+        private System.Windows.Forms.CheckBox AutoRevCheckBox;
     }
 }

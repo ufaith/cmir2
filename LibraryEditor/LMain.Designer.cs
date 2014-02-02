@@ -401,7 +401,7 @@
             // 
             this.convertlibsToolStripMenuItem.Name = "convertlibsToolStripMenuItem";
             this.convertlibsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.convertlibsToolStripMenuItem.Text = "convert old libs";
+            this.convertlibsToolStripMenuItem.Text = "Convert Old Libs";
             this.convertlibsToolStripMenuItem.Click += new System.EventHandler(this.convertlibsToolStripMenuItem_Click);
             // 
             // LMain

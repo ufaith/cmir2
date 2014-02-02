@@ -64,7 +64,7 @@ namespace Server.MirObjects
 
         public long CellTime, BrownTime, PKPointTime, LastHitTime, EXPOwnerTime;
         public Color NameColour = Color.White;
-        public bool Dead, Undead, Harvested;
+        public bool Dead, Undead, Harvested, AutoRev;
         public int PKPoints;
 
         public ushort PotHealthAmount, PotManaAmount, HealAmount, VampAmount;
@@ -455,14 +455,16 @@ namespace Server.MirObjects
         {
             if (Race != ObjectType.Player && Race != ObjectType.Monster) return;
 
-
             byte time = Math.Min(byte.MaxValue, (byte)Math.Max(5, (RevTime - Envir.Time) / 1000));
             Packet p = new S.ObjectHealth { ObjectID = ObjectID, Percent = PercentHealth, Expire = time };
+
             if (Envir.Time < RevTime)
             {
                 CurrentMap.Broadcast(p, CurrentLocation);
                 return;
             }
+
+            if (Race == ObjectType.Monster && !AutoRev) return;
 
             if (Race == ObjectType.Player)
             {
@@ -604,5 +606,6 @@ namespace Server.MirObjects
         public MapObject Caster;
         public long ExpireTime;
         public int Value;
+        public bool Infinite;
     }
 }

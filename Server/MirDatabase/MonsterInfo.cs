@@ -24,7 +24,7 @@ namespace Server.MirDatabase
         
         public List<DropInfo> Drops = new List<DropInfo>();
 
-        public bool CanTame = true, CanPush = true;
+        public bool CanTame = true, CanPush = true, AutoRev = true, Undead = false;
 
         public MonsterInfo()
         {
@@ -71,6 +71,10 @@ namespace Server.MirDatabase
 
             CanPush = reader.ReadBoolean();
             CanTame = reader.ReadBoolean();
+
+            if (Envir.LoadVersion < 18) return;
+            AutoRev = reader.ReadBoolean();
+            Undead = reader.ReadBoolean();
         }
 
         public string GameName
@@ -113,6 +117,8 @@ namespace Server.MirDatabase
 
             writer.Write(CanPush);
             writer.Write(CanTame);
+            writer.Write(AutoRev);
+            writer.Write(Undead);
         }
 
         public void LoadDrops()

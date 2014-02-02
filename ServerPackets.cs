@@ -2521,6 +2521,7 @@ namespace ServerPackets
         public string Caster = string.Empty;
         public long Expire;
         public int Value;
+        public bool Infinite;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -2528,6 +2529,7 @@ namespace ServerPackets
             Caster = reader.ReadString();
             Expire = reader.ReadInt64();
             Value = reader.ReadInt32();
+            Infinite = reader.ReadBoolean();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
@@ -2535,6 +2537,7 @@ namespace ServerPackets
             writer.Write(Caster);
             writer.Write(Expire);
             writer.Write(Value);
+            writer.Write(Infinite);
         }
     }
     public sealed class RemoveBuff : Packet

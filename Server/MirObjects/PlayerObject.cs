@@ -16,7 +16,7 @@ namespace Server.MirObjects
         public string GMPassword = Settings.GMPassword;
         public bool IsGM, GMLogin, GMNeverDie, GMGameMaster,EnableGroupRecall;
 
-        public long LastRecallTime;
+        public long LastRecallTime, LastRevivalTime;
 
         public override ObjectType Race
         {
@@ -168,6 +168,7 @@ namespace Server.MirObjects
         public int PageSent;
         public List<AuctionInfo> Search = new List<AuctionInfo>();
         public List<ItemSets> ItemSets = new List<ItemSets>();
+        public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();
 
         public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
         public long FlamingSwordTime;
@@ -317,6 +318,9 @@ namespace Server.MirObjects
                 _runCounter--;
             }
 
+            if (HasClearRing)
+                AddBuff(new Buff { Type = BuffType.Hiding, Caster = this, ExpireTime = Envir.Time + 1, Infinite = true });
+
             ProcessBuffs();
             ProcessRegen();
             ProcessPoison();
@@ -380,6 +384,7 @@ namespace Server.MirObjects
                 Buff buff = Buffs[i];
 
                 if (Envir.Time <= buff.ExpireTime) continue;
+                //if (buff.Infinite) continue;
 
                 Buffs.RemoveAt(i);
                 Enqueue(new S.RemoveBuff {Type = buff.Type});
@@ -618,8 +623,10 @@ namespace Server.MirObjects
         }
         public override void Die()
         {
-            if (HasRevivalRing)
+            if (HasRevivalRing && Envir.Time > LastRevivalTime)
             {
+                LastRevivalTime = Envir.Time + 300000;
+
                 for (var i = (int)EquipmentSlot.RingL; i <= (int)EquipmentSlot.RingR; i++)
                 {
                     var item = Info.Equipment[i];
@@ -1252,6 +1259,7 @@ namespace Server.MirObjects
             RefreshBagWeight();
             RefreshEquipmentStats();
             RefreshItemSetStats();
+            RefreshMirSetStats();
             RefreshSkills();
             RefreshBuffs();
             //Location Stats ?
@@ -1374,7 +1382,9 @@ namespace Server.MirObjects
 
             var skillsToAdd = new List<string>();
             var skillsToRemove = new List<string> {Settings.HealRing, Settings.FireRing};
+
             ItemSets.Clear();
+            MirSet.Clear();
 
             for (int i = 0; i < Info.Equipment.Length; i++)
             {
@@ -1457,6 +1467,7 @@ namespace Server.MirObjects
 
                 if (temp.Info.Set == ItemSet.None) continue;
 
+                //Normal Sets
                 bool sameSetFound = false;
                 foreach (var set in ItemSets.Where(set => set.Set == temp.Info.Set && !set.Type.Contains(temp.Info.Type)).TakeWhile(set => !set.SetComplete))
                 {
@@ -1467,6 +1478,13 @@ namespace Server.MirObjects
 
                 if (!ItemSets.Any() || !sameSetFound)
                     ItemSets.Add(new ItemSets { Count = 1, Set = temp.Info.Set, Type = new List<ItemType> { temp.Info.Type } });
+
+                //Mir Set
+                if (temp.Info.Set == ItemSet.Mir)
+                {
+                    if (!MirSet.Contains((EquipmentSlot) i))
+                        MirSet.Add((EquipmentSlot) i);
+                }
             }
 
             AddTempSkills(skillsToAdd);
@@ -1499,7 +1517,6 @@ namespace Server.MirObjects
                         break;
                     case ItemSet.RedOrchid:
                         Accuracy = (byte)Math.Min(byte.MaxValue, Accuracy + 2);
-                        //drains extra hp from target to wear
                         break;
                     case ItemSet.RedFlower:
                         MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + 50);
@@ -1532,6 +1549,84 @@ namespace Server.MirObjects
                         AttackSpeed = Math.Min(int.MaxValue, AttackSpeed + 2);
                         break;
                 }
+            }
+        }
+
+        private void RefreshMirSetStats()
+        {
+            if (MirSet.Count() == 10)
+            {
+                MinAC = (byte)Math.Min(byte.MaxValue, MinAC + 1);
+                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + 4);
+                MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + 1);
+                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + 4);
+                MaxWearWeight = (byte)Math.Min(byte.MaxValue, MaxWearWeight + 27);
+                MaxBagWeight = (byte)Math.Min(byte.MaxValue, MaxBagWeight + 120);
+                MaxHandWeight = (byte)Math.Min(byte.MaxValue, MaxHandWeight + 34);
+                Luck = (sbyte)Math.Min(sbyte.MaxValue, Luck + 2);
+                AttackSpeed = Math.Min(int.MaxValue, AttackSpeed + 2);
+                MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + 70);
+                MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + 80);
+                //MR+6 //PR+6
+            }
+
+            else if (MirSet.Contains(EquipmentSlot.Armour) && MirSet.Contains(EquipmentSlot.Boots) && MirSet.Contains(EquipmentSlot.Belt) && MirSet.Contains(EquipmentSlot.Helmet) && MirSet.Contains(EquipmentSlot.Weapon))
+            {
+                MinDC = (byte)Math.Min(byte.MaxValue, MinDC + 1);
+                MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + 4);
+                MinMC = (byte)Math.Min(byte.MaxValue, MinMC + 1);
+                MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + 3);
+                MinSC = (byte)Math.Min(byte.MaxValue, MinSC + 1);
+                MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + 3);
+                MaxHandWeight = (byte)Math.Min(byte.MaxValue, MaxHandWeight + 34);
+                Agility = (byte)Math.Min(byte.MaxValue, Agility + 1);
+            }
+
+            else if (MirSet.Contains(EquipmentSlot.RingL) && MirSet.Contains(EquipmentSlot.RingR) && MirSet.Contains(EquipmentSlot.BraceletL) && MirSet.Contains(EquipmentSlot.BraceletR) && MirSet.Contains(EquipmentSlot.Necklace))
+            {
+                MinAC = (byte)Math.Min(byte.MaxValue, MinAC + 1);
+                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + 3);
+                MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + 1);
+                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + 1);
+                MaxWearWeight = (byte)Math.Min(byte.MaxValue, MaxWearWeight + 27);
+                MaxBagWeight = (byte)Math.Min(byte.MaxValue, MaxBagWeight + 50);
+            }
+
+            else if (MirSet.Contains(EquipmentSlot.Armour) && MirSet.Contains(EquipmentSlot.Boots) &&
+                     MirSet.Contains(EquipmentSlot.Belt))
+            {
+                MaxDC = (byte) Math.Min(byte.MaxValue, MaxDC + 1);
+                MaxMC = (byte) Math.Min(byte.MaxValue, MaxMC + 1);
+                MaxSC = (byte) Math.Min(byte.MaxValue, MaxSC + 1);
+                MaxHandWeight = (byte) Math.Min(byte.MaxValue, MaxHandWeight + 17);
+            }
+
+            else if (MirSet.Contains(EquipmentSlot.Armour) && MirSet.Contains(EquipmentSlot.Helmet) && MirSet.Contains(EquipmentSlot.Weapon))
+            {
+                MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + 2);
+                MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + 1);
+                MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + 1);
+                Agility = (byte)Math.Min(byte.MaxValue, Agility + 1);
+            }
+
+            else if ((MirSet.Contains(EquipmentSlot.RingL) || MirSet.Contains(EquipmentSlot.RingR)) && (MirSet.Contains(EquipmentSlot.BraceletL) || MirSet.Contains(EquipmentSlot.BraceletR)) && MirSet.Contains(EquipmentSlot.Necklace))
+            {
+                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + 1);
+                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + 1);
+                MaxWearWeight = (byte)Math.Min(byte.MaxValue, MaxWearWeight + 17);
+                MaxBagWeight = (byte)Math.Min(byte.MaxValue, MaxBagWeight + 30);
+            }
+
+            else if (MirSet.Contains(EquipmentSlot.RingL) && MirSet.Contains(EquipmentSlot.RingR))
+            {
+                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + 1);
+                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + 1);
+            }
+
+            else if (MirSet.Contains(EquipmentSlot.BraceletL) && MirSet.Contains(EquipmentSlot.BraceletR))
+            {
+                MinAC = (byte)Math.Min(byte.MaxValue, MinAC + 1);
+                MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + 1);
             }
         }
 
@@ -1971,6 +2066,7 @@ namespace Server.MirObjects
                         hintstring = EnableGroupRecall ? "Group Recall Enabled." : "Group Recall Disabled.";
                         ReceiveChat(hintstring, ChatType.Hint);
                         break;
+
                     case "GROUPRECALL":
                         if (GroupMembers == null || GroupMembers[0] != this || Dead)
                             return;
@@ -1986,6 +2082,7 @@ namespace Server.MirObjects
                             ReceiveChat(string.Format("You cannot recall for another {0} seconds", (LastRecallTime - Envir.Time)/1000), ChatType.System);
                             return; 
                         }
+
                         if (ItemSets.Any(set => set.Set == ItemSet.Recall && set.SetComplete))
                         {
                             LastRecallTime = Envir.Time + 180000;
@@ -2318,7 +2415,7 @@ namespace Server.MirObjects
                     return;
                 }
 
-            if (Hidden)
+            if (Hidden && !HasClearRing)
             {
                 Hidden = false;
 
@@ -2421,7 +2518,7 @@ namespace Server.MirObjects
                 return;
             }
 
-            if (Hidden)
+            if (Hidden && !HasClearRing)
             {
                 Hidden = false;
 
@@ -4432,6 +4529,9 @@ namespace Server.MirObjects
             if (Envir.Time > BrownTime && PKPoints < 200 && !CurrentMap.Info.Fight)
                 attacker.BrownTime = Envir.Time + Settings.Minute;
 
+            if (attacker.HasParalysisRing && 1 == Envir.Random.Next(1, 15))
+                ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 });
+
             DamageDura();
             ActiveBlizzard = false;
 
@@ -4509,7 +4609,7 @@ namespace Server.MirObjects
         public override void AddBuff(Buff b)
         {
             base.AddBuff(b);
-            Enqueue(new S.AddBuff { Type = b.Type, Caster = b.Caster.Name, Expire = b.ExpireTime - Envir.Time, Value = b.Value });
+            Enqueue(new S.AddBuff { Type = b.Type, Caster = b.Caster.Name, Expire = b.ExpireTime - Envir.Time, Value = b.Value, Infinite = b.Infinite});
             RefreshStats();
         }
 
@@ -7143,8 +7243,6 @@ public class ItemSets
                     return 4;
                 case ItemSet.Spirit:
                     return 5;
-                case ItemSet.Mir:
-                    return 10;
                 default:
                     return 0;
             }

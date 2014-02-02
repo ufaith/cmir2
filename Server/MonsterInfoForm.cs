@@ -93,6 +93,8 @@ namespace Server
 
                 CanPushCheckBox.Checked = false;
                 CanTameCheckBox.Checked = false;
+                AutoRevCheckBox.Checked = false;
+                UndeadCheckBox.Checked = false;
 
                 return;
             }
@@ -135,6 +137,8 @@ namespace Server
 
             CanPushCheckBox.Checked = info.CanPush;
             CanTameCheckBox.Checked = info.CanTame;
+            AutoRevCheckBox.Checked = info.AutoRev;
+            UndeadCheckBox.Checked = info.Undead;
 
             for (int i = 1; i < _selectedMonsterInfos.Count; i++)
             {
@@ -170,6 +174,9 @@ namespace Server
 
                 if (CanPushCheckBox.Checked != info.CanPush) CanPushCheckBox.CheckState = CheckState.Indeterminate;
                 if (CanTameCheckBox.Checked != info.CanTame) CanTameCheckBox.CheckState = CheckState.Indeterminate;
+
+                if (AutoRevCheckBox.Checked != info.AutoRev) AutoRevCheckBox.CheckState = CheckState.Indeterminate;
+                if (UndeadCheckBox.Checked != info.Undead) UndeadCheckBox.CheckState = CheckState.Indeterminate;
             }
 
         }
@@ -583,7 +590,21 @@ namespace Server
             for (int i = 0; i < _selectedMonsterInfos.Count; i++)
                 _selectedMonsterInfos[i].CanTame = CanTameCheckBox.Checked;
         }
+        private void AutoRevCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
 
+            for (int i = 0; i < _selectedMonsterInfos.Count; i++)
+                _selectedMonsterInfos[i].AutoRev = AutoRevCheckBox.Checked;
+        }
+
+        private void UndeadCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMonsterInfos.Count; i++)
+                _selectedMonsterInfos[i].Undead = UndeadCheckBox.Checked;
+        }
         private void MonsterInfoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Envir.SaveDB();
