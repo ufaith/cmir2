@@ -224,6 +224,7 @@ namespace Client.MirGraphics
     public sealed class MLibrary
     {
         private const string Extention = ".Lib";
+        public const int LibVersion = 1;
 
         private readonly string _fileName;
 
@@ -242,6 +243,7 @@ namespace Client.MirGraphics
         
         public void Initialize()
         {
+            int CurrentVersion = 0;
             _initialized = true;
 
             if (!File.Exists(_fileName))
@@ -251,7 +253,13 @@ namespace Client.MirGraphics
 
                 _fStream = new FileStream(_fileName, FileMode.Open, FileAccess.Read);
                 _reader = new BinaryReader(_fStream);
-
+                CurrentVersion = _reader.ReadInt32();
+                if (CurrentVersion != LibVersion)
+                {//cant use a directx based error popup cause it could be the lib file containing the interface is invalid :(
+                    System.Windows.Forms.MessageBox.Show("Wrong version, expecting lib version: " + LibVersion.ToString() + " found version: " + CurrentVersion.ToString() + ".", _fileName, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error, System.Windows.Forms.MessageBoxDefaultButton.Button1);
+                    System.Windows.Forms.Application.Exit();
+                    return;
+                }
                 _count = _reader.ReadInt32();
                 _images = new MImage[_count];
                 _indexList = new int[_count];
@@ -284,7 +292,7 @@ namespace Client.MirGraphics
             MImage mi = _images[index];
             if (!mi.TextureValid)
             {
-                _fStream.Seek(_indexList[index] + 12, SeekOrigin.Begin);
+                _fStream.Seek(_indexList[index] + 17, SeekOrigin.Begin);
                 mi.CreateTexture(_reader);
             }
 
@@ -339,7 +347,7 @@ namespace Client.MirGraphics
             {
                 if (!mi.TextureValid)
                 {
-                    _fStream.Seek(_indexList[index] + 12, SeekOrigin.Begin);
+                    _fStream.Seek(_indexList[index] + 17, SeekOrigin.Begin);
                     mi.CreateTexture(_reader);
                 }
                 return mi.GetTrueSize();
@@ -377,7 +385,7 @@ namespace Client.MirGraphics
                 return;
 
 
-
+            
             DXManager.Sprite.Draw2D(mi.Image, Point.Empty, 0, point, colour);
 
             mi.CleanTime = CMain.Time + Settings.CleanDelay;
@@ -397,9 +405,8 @@ namespace Client.MirGraphics
 
             float oldOpacity = DXManager.Opacity;
             DXManager.SetOpacity(opacity);
-
+            
             DXManager.Sprite.Draw2D(mi.Image, Point.Empty, 0, point, colour);
-
             DXManager.SetOpacity(oldOpacity);
             mi.CleanTime = CMain.Time + Settings.CleanDelay;
         }
@@ -420,7 +427,7 @@ namespace Client.MirGraphics
             DXManager.SetBlend(true, rate);
 
             DXManager.Sprite.Draw2D(mi.Image, Point.Empty, 0, point, colour);
-
+ 
             DXManager.SetBlend(oldBlend);
             mi.CleanTime = CMain.Time + Settings.CleanDelay;
         }
@@ -482,10 +489,25 @@ namespace Client.MirGraphics
                 return;
             
             DXManager.Sprite.Draw2D(mi.Image, new Rectangle(Point.Empty, new Size(mi.Width,mi.Height)), size, point, colour);
+            mi.CleanTime = CMain.Time + Settings.CleanDelay;
+        }
+
+        public void DrawTinted(int index, Point point, Color colour, Color Tint)
+        {
+            if (!CheckImage(index))
+                return;
+
+            MImage mi = _images[index];
+
+            if (point.X >= Settings.ScreenWidth || point.Y >= Settings.ScreenHeight || point.X + mi.Width < 0 || point.Y + mi.Height < 0)
+                return;
+            DXManager.Sprite.Draw2D(mi.Image, Point.Empty, 0, point, colour);
+
+            if (mi.HasMask != true) return;
+            DXManager.Sprite.Draw2D(mi.MaskImage, Point.Empty, 0, point, Tint);
 
             mi.CleanTime = CMain.Time + Settings.CleanDelay;
         }
-        
 
         
         public bool VisiblePixel(int index, Point point, bool accuate)
@@ -497,11 +519,18 @@ namespace Client.MirGraphics
      
     public sealed class MImage
     {
-        public short Width, Height, X, Y;
+        public short Width, Height, X, Y, ShadowX, ShadowY;
+        public byte Shadow;
         public int Length;
-     
-        public Texture Image;
+
         public bool TextureValid;
+        public Texture Image;
+        //layer 2:
+        public short MaskWidth, MaskHeight, MaskX, MaskY;
+        public int MaskLength;
+
+        public Texture MaskImage;
+        public Boolean HasMask;
        
         public long CleanTime;
         public Size TrueSize;
@@ -511,11 +540,28 @@ namespace Client.MirGraphics
 
         public MImage(BinaryReader reader)
         {
+
+            //read layer 1
             Width = reader.ReadInt16();
             Height = reader.ReadInt16();
             X = reader.ReadInt16();
             Y = reader.ReadInt16();
+            ShadowX = reader.ReadInt16();
+            ShadowY = reader.ReadInt16();
+            Shadow = reader.ReadByte();
             Length = reader.ReadInt32();
+            
+            //check if there's a second layer and read it
+            HasMask = ((Shadow >> 7) == 1) ? true : false;
+            if (HasMask)
+            {
+                reader.ReadBytes(Length);
+                MaskWidth = reader.ReadInt16();
+                MaskHeight = reader.ReadInt16();
+                MaskX = reader.ReadInt16();
+                MaskY = reader.ReadInt16();
+                MaskLength = reader.ReadInt32();
+            }
         }
 
         public unsafe void CreateTexture(BinaryReader reader)
@@ -533,12 +579,28 @@ namespace Client.MirGraphics
             stream.Dispose();
             Image.UnlockRectangle(0);
 
+            if (HasMask)
+            {
+                reader.ReadBytes(12);
+                w = Width + (4 - Width % 4) % 4;
+                h = Height + (4 - Height % 4) % 4;
+
+                MaskImage = new Texture(DXManager.Device, w, h, 1, Usage.None, Format.Dxt1, Pool.Managed);
+                stream = MaskImage.LockRectangle(0, LockFlags.Discard);
+
+                stream.Write(reader.ReadBytes(Length), 0, Length);
+
+                stream.Dispose();
+                MaskImage.UnlockRectangle(0);
+            }
+
             DXManager.TextureList.Add(this);
             TextureValid = true;
             Image.Disposing += (o, e) =>
             {
                 TextureValid = false;
                 Image = null;
+                MaskImage = null;
                 Data = null;
                 DXManager.TextureList.Remove(this);
             };

@@ -3831,7 +3831,7 @@ namespace Client.MirScenes
 
             DXManager.Device.RenderState.SourceBlend = Blend.DestinationColor;
             DXManager.Device.RenderState.DestinationBlend = Blend.BothInvSourceAlpha;
-
+            
             DXManager.Sprite.Draw2D(_lightTexture, PointF.Empty, 0, PointF.Empty, Color.White);
             DXManager.Sprite.End();
             DXManager.Sprite.Begin(SpriteFlags.AlphaBlend);
