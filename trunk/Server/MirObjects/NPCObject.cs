@@ -554,16 +554,16 @@ namespace Server.MirObjects
             {
                 case "MINLEVEL":
                     if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp)) return;
+                    if (!byte.TryParse(parts[1], out temp3)) return;
 
-                    CheckList.Add(new NPCChecks(CheckType.MinLevel, temp));
+                    CheckList.Add(new NPCChecks(CheckType.MinLevel, temp3));
                     break;
 
                 case "MAXLEVEL":
                     if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp)) return;
+                    if (!byte.TryParse(parts[1], out temp3)) return;
 
-                    CheckList.Add(new NPCChecks(CheckType.MaxLevel, temp));
+                    CheckList.Add(new NPCChecks(CheckType.MaxLevel, temp3));
                     break;
 
                 case "CHECKGOLD":
