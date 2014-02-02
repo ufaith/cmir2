@@ -12,7 +12,9 @@ namespace LibraryEditor
         private const string WixExtention = ".Wix",
                              WilExtention = ".Wil",
                              WzlExtention = ".Wzl",
-                             WzxExtention = ".Wzx";
+                             WzxExtention = ".Wzx",
+                             MizExtention = ".Miz",
+                             MixExtention = ".Mix";
 
         public WeMadeImage[] Images;
 
@@ -28,16 +30,23 @@ namespace LibraryEditor
         private string _IndexExtention = WixExtention;
 
         private bool _initialized;
-        public byte _nType = 0; //0 = .wil //1 = .wzl //2 = .wil new wemade design //3 = .wil mir3
-        private byte[] ImageStructureSize = { 8, 16, 16, 17};//base size of an image structure
+        public byte _nType = 0; //0 = .wil //1 = .wzl //2 = .wil new wemade design //3 = .wil mir3 //4 = .miz shanda mir3
+        private byte[] ImageStructureSize = { 8, 16, 16, 17, 16};//base size of an image structure
 
         public WeMadeLibrary(string name)
         {
-            if (Path.GetExtension(name) == ".wzl")
+            switch (Path.GetExtension(name).ToLower())
             {
-                _nType = 1;
-                _MainExtention = WzlExtention;
-                _IndexExtention = WzxExtention;
+                case ".wzl":
+                    _nType = 1;
+                    _MainExtention = WzlExtention;
+                    _IndexExtention = WzxExtention;
+                    break;
+                case ".miz":
+                    _nType = 4;
+                    _MainExtention = MizExtention;
+                    _IndexExtention = MixExtention;
+                    break;
             }
             _fileName = Path.ChangeExtension(name, null);
             Initialize();
@@ -94,6 +103,9 @@ namespace LibraryEditor
                 {
                     switch (_nType)
                     {
+                        case 4:
+                            stream.Seek(24, SeekOrigin.Begin);
+                            break;
                         case 3:
                             reader.ReadBytes(26);
                             if (reader.ReadUInt16() != 0xB13A)
@@ -277,6 +289,10 @@ namespace LibraryEditor
                     case 1:
                         nSize = reader.ReadInt32();
                         break;
+                    case 4:
+                        bo16bit = true;
+                        nSize = reader.ReadInt32();
+                        break;
                     case 2:
                         bo16bit = true;
                         reader.ReadInt16();
@@ -316,6 +332,7 @@ namespace LibraryEditor
                         bytes = reader.ReadBytes(nSize);
                         break;
                     case 1://shanda wzl file compressed
+                    case 4://shanda miz file compressed
                         output = new MemoryStream();
                         Ionic.Zlib.ZlibStream deflateStream = new Ionic.Zlib.ZlibStream(output,Ionic.Zlib.CompressionMode.Decompress);
                         deflateStream.Write(reader.ReadBytes(nSize), 0, nSize);
@@ -373,7 +390,7 @@ namespace LibraryEditor
                             else
                                 scan0[y*Width + x] = palette[bytes[index++]];
                         }
-                        if ((nType == 1) & (Width % 4 > 0))
+                        if (((nType == 1) || (nType == 4)) & (Width % 4 > 0))
                             index += WidthBytes(bo16bit ? 16 : 8, Width) - (Width * (bo16bit ? 2 : 1));
                     }
                 }

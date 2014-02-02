@@ -394,7 +394,7 @@
             // 
             // OpenWeMadeDialog
             // 
-            this.OpenWeMadeDialog.Filter = "Wemade|*.Wil;*.Wtl|Shanda|*.Wzl";
+            this.OpenWeMadeDialog.Filter = "Wemade|*.Wil;*.Wtl|Shanda|*.Wzl;*.Miz";
             this.OpenWeMadeDialog.Multiselect = true;
             // 
             // convertlibsToolStripMenuItem
