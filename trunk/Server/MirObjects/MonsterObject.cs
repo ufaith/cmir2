@@ -236,7 +236,8 @@ namespace Server.MirObjects
         {
             Info = info;
 
-            Undead = !Info.CanTame;
+            Undead = Info.Undead;
+            AutoRev = info.AutoRev;
             CoolEye = info.CoolEye > Envir.Random.Next(100);
             Direction = (MirDirection)Envir.Random.Next(8);
 
@@ -1468,6 +1469,9 @@ namespace Server.MirObjects
 
             if (EXPOwner == attacker)
                 EXPOwnerTime = Envir.Time + EXPOwnerDelay;
+
+            if (attacker.HasParalysisRing && 1 == Envir.Random.Next(1, 15))
+                ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 });
 
             Broadcast(new S.ObjectStruck { ObjectID = ObjectID, AttackerID = attacker.ObjectID, Direction = Direction, Location = CurrentLocation });
 

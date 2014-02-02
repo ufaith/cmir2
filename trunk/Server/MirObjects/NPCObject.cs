@@ -1189,6 +1189,7 @@ namespace Server.MirObjects
                         for (int o = 0; o < player.Info.Inventory.Length; o++)
                         {
                             UserItem item = player.Info.Inventory[o];
+                            if (item == null) continue;
                             if (item.Info != info) continue;
 
                             if (count > item.Count)

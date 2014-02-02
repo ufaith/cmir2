@@ -897,9 +897,9 @@ namespace Client.MirScenes
             {
                 MirImageControl image = BuffList[i];
                 Buff buff = Buffs[i];
-                image.Location = new Point(640 - i * 30, 15);
+                image.Location = new Point((Settings.ScreenWidth - 160) - i * 30, 15);
                 image.Hint = buff.ToString();
-                ((MirLabel)image.Controls[0]).Text = Math.Round((buff.Expire - CMain.Time) / 1000D).ToString();
+                ((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : Math.Round((buff.Expire - CMain.Time) / 1000D).ToString();
 
                 switch (buff.Type)
                 {
@@ -2268,7 +2268,7 @@ namespace Client.MirScenes
         }
         private void AddBuff(S.AddBuff p)
         {
-            Buff buff = new Buff {Type = p.Type, Caster = p.Caster, Expire = CMain.Time + p.Expire, Value = p.Value};
+            Buff buff = new Buff {Type = p.Type, Caster = p.Caster, Expire = CMain.Time + p.Expire, Value = p.Value, Infinite = p.Infinite};
             for (int i = 0; i < Buffs.Count; i++)
             {
                 if (Buffs[i].Type != buff.Type) continue;
@@ -9092,6 +9092,7 @@ namespace Client.MirScenes
         public string Caster;
         public long Expire;
         public int Value;
+        public bool Infinite;
 
         public override string ToString()
         {
@@ -9125,8 +9126,10 @@ namespace Client.MirScenes
                     break;
             }
 
-
-            text += string.Format("Expire: {0} (s)\nCaster: {1}", Math.Round((Expire - CMain.Time) / 1000D), Caster);
+            if(Infinite)
+                text += string.Format("Expire: Never\nCaster: {0}", Caster);
+            else
+                text += string.Format("Expire: {0} (s)\nCaster: {1}", Math.Round((Expire - CMain.Time) / 1000D), Caster);
 
             return text;
         }
