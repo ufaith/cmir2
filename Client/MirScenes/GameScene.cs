@@ -3302,61 +3302,10 @@ namespace Client.MirScenes
             MapObject.MouseObject = null;
             MapObject.TargetObject = null;
             MapObject.MagicObject = null;
-
-            try
-            {
-                if (File.Exists(FileName))
-                {
-                    int offSet = 21;
-                    byte[] fileBytes = File.ReadAllBytes(FileName);
-                    int w = BitConverter.ToInt16(fileBytes, offSet);
-                    offSet += 2;
-                    int xor = BitConverter.ToInt16(fileBytes, offSet);
-                    offSet += 2;
-                    int h = BitConverter.ToInt16(fileBytes, offSet);
-                    Width = w ^ xor;
-                    Height = h ^ xor;
-                    M2CellInfo = new CellInfo[Width,Height];
-
-                    offSet = 54;
-
-                    for (int x = 0; x < Width; x++)
-                        for (int y = 0; y < Height; y++)
-                        {
-                            M2CellInfo[x, y] = new CellInfo
-                                {
-                                    BackImage = (int) (BitConverter.ToInt32(fileBytes, offSet) ^ 0xAA38AA38),
-                                    MiddleImage = (short) (BitConverter.ToInt16(fileBytes, offSet += 4) ^ xor),
-                                    FrontImage = (short) (BitConverter.ToInt16(fileBytes, offSet += 2) ^ xor),
-                                    DoorIndex = fileBytes[offSet += 2],
-                                    DoorOffset = fileBytes[++offSet],
-                                    AnimationFrame = fileBytes[++offSet],
-                                    AnimationTick = fileBytes[++offSet],
-                                    FileIndex = fileBytes[++offSet],
-                                    Light = fileBytes[++offSet],
-                                    Unknown = fileBytes[++offSet],
-                                };
-                            offSet++;
-                        }
-                }
-                else
-                {
-                    Width = 1000;
-                    Height = 1000;
-                    M2CellInfo = new CellInfo[Width,Height];
-
-                    for (int x = 0; x < Width; x++)
-                        for (int y = 0; y < Height; y++)
-                        {
-                            M2CellInfo[x, y] = new CellInfo();
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                if (Settings.LogErrors) CMain.SaveError(ex.ToString());
-            }
-
+            MapReader Map = new MapReader(FileName);
+            M2CellInfo = Map.MapCells;
+            Width = Map.Width;
+            Height = Map.Height;
         }
 
         public void Process()
@@ -3574,7 +3523,7 @@ namespace Client.MirScenes
 
                     if (M2CellInfo[x, y].BackImage == 0) continue;
                     index = (M2CellInfo[x, y].BackImage & 0x1FFFF) - 1;
-                    Libraries.Tiles.Draw(index, drawX, drawY);
+                    Libraries.MapLibs[M2CellInfo[x, y].BackIndex].Draw(index, drawX, drawY);
                 }
             }
 
@@ -3594,7 +3543,7 @@ namespace Client.MirScenes
 
                     if (index < 0) continue;
 
-                    Libraries.SmallTiles.Draw(index, drawX, drawY);
+                    Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].Draw(index, drawX, drawY);
                 }
             }
             for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY; y++)
@@ -3610,12 +3559,12 @@ namespace Client.MirScenes
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
 
                     index = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
-                    int fileIndex = M2CellInfo[x, y].FileIndex;
-                    Size s = Libraries.Objects[fileIndex].GetSize(index);
+                    int fileIndex = M2CellInfo[x, y].FrontIndex;
+                    Size s = Libraries.MapLibs[fileIndex].GetSize(index);
 
                     if (index < 0 || s.Width != CellWidth || s.Height != CellHeight) continue;
 
-                    Libraries.Objects[fileIndex].Draw(index, drawX, drawY);
+                    Libraries.MapLibs[fileIndex].Draw(index, drawX, drawY);
                 }
             }
 
@@ -3642,7 +3591,7 @@ namespace Client.MirScenes
 
                     if (index < 0) continue;
 
-                    int fileIndex = M2CellInfo[x, y].FileIndex;
+                    int fileIndex = M2CellInfo[x, y].FrontIndex;
                     byte animation = M2CellInfo[x, y].AnimationFrame;
 
 
@@ -3661,14 +3610,14 @@ namespace Client.MirScenes
                         index += (AnimationCount%(animation + (animation*animationTick)))/(1 + animationTick);
                     }
 
-                    Size s = Libraries.Objects[fileIndex].GetSize(index);
+                    Size s = Libraries.MapLibs[fileIndex].GetSize(index);
 
                     if (s.Width == CellWidth && s.Height == CellHeight && animation == 0) continue;
 
                     if (blend)
-                        Libraries.Objects[fileIndex].DrawBlend(index, new Point(drawX, drawY - s.Height), Color.White, index >= 2723 && index <= 2732);
+                        Libraries.MapLibs[fileIndex].DrawBlend(index, new Point(drawX, drawY - s.Height), Color.White, index >= 2723 && index <= 2732);
                     else
-                        Libraries.Objects[fileIndex].Draw(index, drawX, drawY - s.Height);
+                        Libraries.MapLibs[fileIndex].Draw(index, drawX, drawY - s.Height);
                 }
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
@@ -3809,7 +3758,7 @@ namespace Client.MirScenes
                     int imageIndex = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
                     if (M2CellInfo[x, y].Light <= 0 || M2CellInfo[x, y].Light >= 10) continue;
                     light = M2CellInfo[x, y].Light*3;
-                    int fileIndex = M2CellInfo[x, y].FileIndex;
+                    int fileIndex = M2CellInfo[x, y].FrontIndex;
 
                     p = new Point(
                         (x + OffSetX - MapObject.User.Movement.X) * CellWidth + MapObject.User.OffSetMove.X,
@@ -3817,7 +3766,7 @@ namespace Client.MirScenes
                     p.Offset(((light + 1)*-65 + CellWidth)/2, ((light + 1)*-50 + CellHeight)/2);
 
                     if (M2CellInfo[x, y].AnimationFrame > 0)
-                        p.Offset(Libraries.Objects[fileIndex].GetOffSet(imageIndex));
+                        p.Offset(Libraries.MapLibs[fileIndex].GetOffSet(imageIndex));
 
                     if (light > DXManager.Lights.Count)
                         light = DXManager.Lights.Count - 1;
@@ -4389,61 +4338,7 @@ namespace Client.MirScenes
 
         #endregion
 
-        public class CellInfo
-        {
-            public int BackImage;
-            public short MiddleImage;
-            public short FrontImage;
-
-            public byte DoorIndex;
-            public byte DoorOffset;
-            public byte AnimationFrame;
-            public byte AnimationTick;
-            public byte FileIndex;
-            public byte Light;
-            public byte Unknown;
-
-            public List<MapObject> CellObjects;
-
-            public void AddObject(MapObject ob)
-            {
-                if (CellObjects == null) CellObjects = new List<MapObject>();
-
-                CellObjects.Insert(0, ob);
-                Sort();
-            }
-            public void RemoveObject(MapObject ob)
-            {
-                CellObjects.Remove(ob);
-
-                if (CellObjects.Count == 0) CellObjects = null;
-                else Sort();
-            }
-            public void DrawObjects()
-            {
-                if (CellObjects == null) return;
-                for (int i = 0; i < CellObjects.Count; i++)
-                    CellObjects[i].Draw();
-            }
-
-            public void Sort()
-            {
-                CellObjects.Sort(delegate(MapObject ob1, MapObject ob2)
-                {
-                    if (ob1.Race == ObjectType.Item && ob2.Race != ObjectType.Item)
-                        return -1;
-                    if (ob2.Race == ObjectType.Item && ob1.Race != ObjectType.Item)
-                        return 1;
-                    if (ob1.Race == ObjectType.Spell && ob2.Race != ObjectType.Spell)
-                        return -1;
-                    if (ob2.Race == ObjectType.Spell && ob1.Race != ObjectType.Spell)
-                        return 1;
-
-                        int i = ob2.Dead.CompareTo(ob1.Dead);
-                        return i == 0 ? ob1.ObjectID.CompareTo(ob2.ObjectID) : i;
-                    });
-            }
-        }
+ 
 
         public void RemoveObject(MapObject ob)
         {
