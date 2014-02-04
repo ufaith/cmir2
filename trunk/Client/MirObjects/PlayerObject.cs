@@ -1862,7 +1862,7 @@ namespace Client.MirObjects
             int y = CurrentLocation.Y - CurrentLocation.Y % 2;
 
             int index = (GameScene.Scene.MapControl.M2CellInfo[x, y].BackImage & 0x1FFFF) - 1;
-            index = GameScene.Scene.MapControl.M2CellInfo[x, y].FileIndex * 10000 + index;
+            index = (GameScene.Scene.MapControl.M2CellInfo[x, y].FrontIndex - 2) * 10000 + index;
             int moveSound;
 
             if ((index >= 330 && index <= 349) || (index >= 450 && index <= 454) || (index >= 550 && index <= 554) ||
