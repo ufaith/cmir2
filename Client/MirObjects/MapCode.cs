@@ -75,26 +75,95 @@ namespace Client.MirObjects
         public int Width, Height;
         public CellInfo[,] MapCells;
         private string FileName;
-
+        private byte[] Bytes;
+        private bool loaded;
+        
         public MapReader(string FileName)
         {
             this.FileName = FileName;
-            LoadMap();
+            initiate();
         }
 
-        public void LoadMap()
+        private void initiate()
+        {
+            if (File.Exists(FileName))
+            {
+                Bytes = File.ReadAllBytes(FileName);
+                loaded = true;
+            }
+            else
+                return;
+            //wemade mir3 maps have no title they just start with blank bytes
+            if (Bytes[0] == 0)
+            {
+                //load wemade mir3 map
+                //LoadMapType5();
+                return;
+            }
+            //shanda mir3 maps start with title: (C) SNDA, MIR3.
+            if ((Bytes[0] == 0x0F) && (Bytes[5] == 0x53) && (Bytes[14] == 0x33))
+            {
+                //load shanda mir3 map
+                //LoadMapType6();
+                return;
+            }
+            //wemades antihack map (laby maps) title start with: Mir2 AntiHack
+            if ((Bytes[0] == 0x15) && (Bytes[4] == 0x32) && (Bytes[6] == 0x41) && (Bytes[19] == 0x31))
+            {
+                //load wemade mir2 antihack map (aka laby maps)
+                //LoadMapType4();
+                return;
+            }
+            //wemades 2010 map format i guess title starts with: Map 2010 Ver 1.0
+            if ((Bytes[0] == 0x10) && (Bytes[2] == 0x61) && (Bytes[7] == 0x31) && (Bytes[14] == 0x31))
+            {
+                LoadMapType1();
+                return;
+            }
+            //shanda's 2012 format and one of shandas(wemades) older formats share same header info, only difference is the filesize
+            if ((Bytes[4] == 0x0F) && (Bytes[18] == 0x0D) && (Bytes[19] == 0x0A))
+            {
+                int W = Bytes[0] + (Bytes[1] << 8);
+                int H = Bytes[2] + (Bytes[3] << 8);
+                if (Bytes.Length > (52 + (W*H*14)))
+                {
+                    //load shanda 2012 format
+                    //LoadMapType3();
+                    return;
+                }
+                else
+                {
+                     //load format other format
+                    //LoadMapType2();
+                    return;
+                }
+            }
+
+            //3/4 heroes map format (myth/lifcos i guess)
+            if ((Bytes[0] == 0x0D) && (Bytes[1] == 0x4C) && (Bytes[7] == 0x20) && (Bytes[11] == 0x6D))
+            {
+                //load 3/4 heroes map format
+                //LoadMapType7();
+                return;
+            }
+            //if it's none of the above load the default old school format
+            //LoadMapType0();
+
+        }
+
+        private void LoadMapType1()
         {
             try
             {
-                if (File.Exists(FileName))
+                if (loaded)
                 {
                     int offSet = 21;
-                    byte[] fileBytes = File.ReadAllBytes(FileName);
-                    int w = BitConverter.ToInt16(fileBytes, offSet);
+                    
+                    int w = BitConverter.ToInt16(Bytes, offSet);
                     offSet += 2;
-                    int xor = BitConverter.ToInt16(fileBytes, offSet);
+                    int xor = BitConverter.ToInt16(Bytes, offSet);
                     offSet += 2;
-                    int h = BitConverter.ToInt16(fileBytes, offSet);
+                    int h = BitConverter.ToInt16(Bytes, offSet);
                     Width = w ^ xor;
                     Height = h ^ xor;
                     MapCells = new CellInfo[Width, Height];
@@ -107,17 +176,17 @@ namespace Client.MirObjects
                             MapCells[x, y] = new CellInfo
                                 {
                                     BackIndex = 0,
-                                    BackImage = (int)(BitConverter.ToInt32(fileBytes, offSet) ^ 0xAA38AA38),
+                                    BackImage = (int)(BitConverter.ToInt32(Bytes, offSet) ^ 0xAA38AA38),
                                     MiddleIndex = 1,
-                                    MiddleImage = (short)(BitConverter.ToInt16(fileBytes, offSet += 4) ^ xor),
-                                    FrontImage = (short)(BitConverter.ToInt16(fileBytes, offSet += 2) ^ xor),
-                                    DoorIndex = fileBytes[offSet += 2],
-                                    DoorOffset = fileBytes[++offSet],
-                                    AnimationFrame = fileBytes[++offSet],
-                                    AnimationTick = fileBytes[++offSet],
-                                    FrontIndex = (short)(fileBytes[++offSet] + 2),
-                                    Light = fileBytes[++offSet],
-                                    Unknown = fileBytes[++offSet],
+                                    MiddleImage = (short)(BitConverter.ToInt16(Bytes, offSet += 4) ^ xor),
+                                    FrontImage = (short)(BitConverter.ToInt16(Bytes, offSet += 2) ^ xor),
+                                    DoorIndex = Bytes[offSet += 2],
+                                    DoorOffset = Bytes[++offSet],
+                                    AnimationFrame = Bytes[++offSet],
+                                    AnimationTick = Bytes[++offSet],
+                                    FrontIndex = (short)(Bytes[++offSet] + 2),
+                                    Light = Bytes[++offSet],
+                                    Unknown = Bytes[++offSet],
                                 };
                             offSet++;
                         }
