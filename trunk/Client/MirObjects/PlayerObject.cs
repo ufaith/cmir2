@@ -49,6 +49,7 @@ namespace Client.MirObjects
         public Effect ShieldEffect;
         public byte WingEffect;
         private short StanceDelay = 2500;
+
         public long StanceTime, BlizzardFreezeTime;
         
         public PlayerObject(uint objectID) : base(objectID)
@@ -873,7 +874,7 @@ namespace Client.MirObjects
                             #region FrostCrunch
 
                             case Spell.FrostCrunch:
-                                Effects.Add(new Effect(Libraries.Magic2, 400, 6, Frame.Count * FrameInterval, this));
+                                Effects.Add(new Effect(Libraries.Magic2, 400, 10, Frame.Count * FrameInterval, this));
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
                                 break;
 
@@ -891,7 +892,7 @@ namespace Client.MirObjects
                             #region FlameField
 
                             case Spell.FlameField:
-                                MapControl.Effects.Add(new Effect(Libraries.Magic2, 910, 20, 1800, CurrentLocation));
+                                MapControl.Effects.Add(new Effect(Libraries.Magic2, 910, 23, 1800, CurrentLocation));
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
                                 break;
 

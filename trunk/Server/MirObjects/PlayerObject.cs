@@ -161,6 +161,7 @@ namespace Server.MirObjects
 
         public bool NPCGoto;
         public string NPCGotoPage;
+        public NPCTimeRecall TimeRecall;
 
         public bool UserMatch;
         public string MatchName;
@@ -320,6 +321,20 @@ namespace Server.MirObjects
 
             if (HasClearRing)
                 AddBuff(new Buff { Type = BuffType.Hiding, Caster = this, ExpireTime = Envir.Time + 1, Infinite = true });
+
+            //NPC Time Recall
+            if (TimeRecall != null && Envir.Time > TimeRecall.TimePeriod && TimeRecall.Active)
+            {
+                TimeRecall.Active = false;
+                Teleport(TimeRecall.PlayerMap, TimeRecall.PlayerCoords);
+
+                if (TimeRecall.NPCGotoPage != null && !NPCGoto && TimeRecall.Interrupted == false)
+                {
+                    NPCGoto = true;
+                    NPCGotoPage = TimeRecall.NPCGotoPage;
+                    CallNPC(TimeRecall.NPCID, NPCGotoPage);
+                }
+            }
 
             ProcessBuffs();
             ProcessRegen();
@@ -2122,6 +2137,10 @@ namespace Server.MirObjects
                             player.Teleport(CurrentMap, CurrentLocation);
                         break;
 
+                    case "TIME":
+                        ReceiveChat(string.Format("The time is : {0}", DateTime.Now.ToString("hh:mm tt")), ChatType.System);
+                        break;
+
                     case "MAP":
                         var mapName = CurrentMap.Info.FileName;
                         var mapTitle = CurrentMap.Info.Title;
@@ -3159,6 +3178,8 @@ namespace Server.MirObjects
         private void ShoulderDash(UserMagic magic)
         {
             if (InTrapRock) return;
+            if (!CanWalk) return;
+
             int dist = Envir.Random.Next(2) + magic.Level + 2;
             int travel = 0;
             bool wall = true;
@@ -3428,6 +3449,7 @@ namespace Server.MirObjects
             {
                 target.Respawn.Count--;
                 Envir.MonsterCount--;
+                CurrentMap.MonsterCount--;
                 target.Respawn = null;
             }
 
@@ -5845,6 +5867,8 @@ namespace Server.MirObjects
 
         public void CallNPC(uint objectID, string key)
         {
+            if (TimeRecall != null) TimeRecall.Interrupted = true;
+
             if (Dead) return;
             for (int i = 0; i < CurrentMap.NPCs.Count; i++)
             {

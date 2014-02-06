@@ -64,6 +64,7 @@ namespace Server.MirObjects
 
         public long CellTime, BrownTime, PKPointTime, LastHitTime, EXPOwnerTime;
         public Color NameColour = Color.White;
+        
         public bool Dead, Undead, Harvested, AutoRev;
         public int PKPoints;
 

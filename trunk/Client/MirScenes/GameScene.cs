@@ -50,7 +50,17 @@ namespace Client.MirScenes
         public NPCDialog NPCDialog;
         public NPCGoodsDialog NPCGoodsDialog;
         public NPCDropDialog NPCDropDialog;
+        public HelpDialog HelpDialog;
+        public KeyboardLayoutDialog KeyboardLayoutDialog;
+        public CraftingDialog CraftingDialog;
+        public IntelligentCreatureDialog IntelligentCreatureDialog;
+        public RideDialog RideDialog;
+        public FishingDialog FishingDialog;
+        public FriendDialog FriendDialog;
+        public RelationshipDialog RelationshipDialog;
+        public MentorDialog MentorDialog;
         public GroupDialog GroupDialog;
+        public GuildDialog GuildDialog;
         public BigMapDialog BigMapDialog;
         public TrustMerchantDialog TrustMerchantDialog;
         
@@ -120,7 +130,17 @@ namespace Client.MirScenes
             NPCDialog = new NPCDialog {Parent = this, Visible = false};
             NPCGoodsDialog = new NPCGoodsDialog { Parent = this, Visible = false };
             NPCDropDialog = new NPCDropDialog { Parent = this, Visible = false };
+            HelpDialog = new HelpDialog { Parent = this, Visible = false };
+            KeyboardLayoutDialog = new KeyboardLayoutDialog { Parent = this, Visible = false };
+            CraftingDialog = new CraftingDialog { Parent = this, Visible = false };
+            IntelligentCreatureDialog = new IntelligentCreatureDialog { Parent = this, Visible = false };
+            RideDialog = new RideDialog { Parent = this, Visible = false };
+            FishingDialog = new FishingDialog { Parent = this, Visible = false };
+            FriendDialog = new FriendDialog { Parent = this, Visible = false };
+            RelationshipDialog = new RelationshipDialog { Parent = this, Visible = false };
+            MentorDialog = new MentorDialog { Parent = this, Visible = false };
             GroupDialog = new GroupDialog { Parent = this, Visible = false };
+            GuildDialog = new GuildDialog { Parent = this, Visible = false };
             BigMapDialog = new BigMapDialog {Parent = this, Visible = false};
             TrustMerchantDialog = new TrustMerchantDialog {Parent = this, Visible = false};
 
@@ -217,13 +237,64 @@ namespace Client.MirScenes
                     }
                     else CharacterDialog.Hide();
                     break;
+                case Keys.E:
+                    if (!IntelligentCreatureDialog.Visible) IntelligentCreatureDialog.Show();
+                    else IntelligentCreatureDialog.Hide();
+                    break;
+
+                case Keys.J:
+                    if (!RideDialog.Visible) RideDialog.Show();
+                    else RideDialog.Hide();
+                    break;
+                
+                case Keys.N:
+                    if (!FishingDialog.Visible) FishingDialog.Show();
+                    else FishingDialog.Hide();
+                    break;
+
+                case Keys.W:
+                    if (!FriendDialog.Visible) FriendDialog.Show();
+                    else FriendDialog.Hide();
+                    break;
+
+                case Keys.L:
+                    if (!RelationshipDialog.Visible) RelationshipDialog.Show();
+                    else RelationshipDialog.Hide();
+                    break;
+
+                case Keys.F:
+                    if (!MentorDialog.Visible) MentorDialog.Show();
+                    else MentorDialog.Hide();
+                    break;
+
+               /* case Keys.P:
+                    if (!GroupDialog.Visible) GroupDialog.Show();
+                    else GroupDialog.Hide();
+                    break;
+                */
+                case Keys.G:
+                    if (!GuildDialog.Visible) GuildDialog.Show();
+                    else GuildDialog.Hide();
+                    break;
+
+
                 case Keys.Escape:
                     InventoryDialog.Hide();
                     CharacterDialog.Hide();
                     OptionDialog.Hide();
                     MenuDialog.Hide();
                     NPCDialog.Hide();
-                     GroupDialog.Hide();
+                    HelpDialog.Hide();
+                    KeyboardLayoutDialog.Hide();
+                    CraftingDialog.Hide();
+                    IntelligentCreatureDialog.Hide();
+                    RideDialog.Hide();
+                    FishingDialog.Hide();
+                    FriendDialog.Hide();
+                    RelationshipDialog.Hide();
+                    MentorDialog.Hide();
+                    GroupDialog.Hide();
+                    GuildDialog.Hide();
                     InspectDialog.Hide();
                     StorageDialog.Hide();
                     TrustMerchantDialog.Hide();
@@ -6936,9 +7007,9 @@ namespace Client.MirScenes
         public MirButton ExitButton,
                          LogOutButton,
                          HelpButton,
-                         UnkownButton1,
-                         UnkownButton2,
-                         UnkownButton3,
+                         KeyboardLayoutButton,
+                         CraftingButton,
+                         IntelligentCreatureButton,
                          RideButton,
                          FishingButton,
                          FriendButton,
@@ -6988,33 +7059,59 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Location = new Point(3, 50),
                 };
-            UnkownButton1 = new MirButton
-                {
-                    Index = 2000,
-                    HoverIndex = 2001,
-                    PressedIndex = 2002,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 69),
-                };
-            UnkownButton2 = new MirButton
-                {
-                    Index = 1997,
-                    HoverIndex = 1998,
-                    PressedIndex = 1999,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 88),
-                };
-            UnkownButton3 = new MirButton
+            HelpButton.Click += (o, e) =>
+			            {
+				            if (GameScene.Scene.HelpDialog.Visible)
+					            GameScene.Scene.HelpDialog.Hide();
+				            else GameScene.Scene.HelpDialog.Show();
+			            };
+            KeyboardLayoutButton = new MirButton
                 {
                     Index = 1973,
                     HoverIndex = 1974,
                     PressedIndex = 1975,
                     Parent = this,
                     Library = Libraries.Prguse,
+                    Location = new Point(3, 69),
+                };
+            KeyboardLayoutButton.Click += (o, e) =>
+			            {
+				            if (GameScene.Scene.KeyboardLayoutDialog.Visible)
+					            GameScene.Scene.KeyboardLayoutDialog.Hide();
+				            else GameScene.Scene.KeyboardLayoutDialog.Show();
+			            };
+
+            CraftingButton = new MirButton
+                {
+                    Index = 2000,
+                    HoverIndex = 2001,
+                    PressedIndex = 2002,
+                    Parent = this,
+                    Library = Libraries.Prguse,
+                    Location = new Point(3, 88),
+                };
+            CraftingButton.Click += (o, e) =>
+			        {
+				        if (GameScene.Scene.CraftingDialog.Visible)
+					        GameScene.Scene.CraftingDialog.Hide();
+				        else GameScene.Scene.CraftingDialog.Show();
+			        };
+
+            IntelligentCreatureButton = new MirButton
+                {
+                    Index = 431,
+                    HoverIndex = 432,
+                    PressedIndex = 433,
+                    Parent = this,
+                    Library = Libraries.Prguse2,
                     Location = new Point(3, 107),
                 };
+            IntelligentCreatureButton.Click += (o, e) =>
+		              {
+			             if (GameScene.Scene.IntelligentCreatureDialog.Visible)
+				             GameScene.Scene.IntelligentCreatureDialog.Hide();
+			             else GameScene.Scene.IntelligentCreatureDialog.Show();
+		              };
             RideButton = new MirButton
                 {
                     Index = 1976,
@@ -7024,6 +7121,13 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Location = new Point(3, 126),
                 };
+            RideButton.Click += (o, e) =>
+		               {
+			               if (GameScene.Scene.RideDialog.Visible)
+				               GameScene.Scene.RideDialog.Hide();
+			               else GameScene.Scene.RideDialog.Show();
+		               };
+
             FishingButton = new MirButton
                 {
                     Index = 1979,
@@ -7033,6 +7137,13 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Location = new Point(3, 145),
                 };
+            FishingButton.Click += (o, e) =>
+                      {
+                          if (GameScene.Scene.FishingDialog.Visible)
+                              GameScene.Scene.FishingDialog.Hide();
+                          else GameScene.Scene.FishingDialog.Show();
+                      };
+
             FriendButton = new MirButton
                 {
                     Index = 1982,
@@ -7042,6 +7153,13 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Location = new Point(3, 164),
                 };
+            FriendButton.Click += (o, e) =>
+                        {
+                            if (GameScene.Scene.FriendDialog.Visible)
+                                GameScene.Scene.FriendDialog.Hide();
+                            else GameScene.Scene.FriendDialog.Show();
+                        };
+
             MentorButton = new MirButton
                 {
                     Index = 1985,
@@ -7051,8 +7169,15 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Location = new Point(3, 183),
                 };
+            MentorButton.Click += (o, e) =>
+                        {
+                            if (GameScene.Scene.MentorDialog.Visible)
+                                GameScene.Scene.MentorDialog.Hide();
+                            else GameScene.Scene.MentorDialog.Show();
+                        };
 
-            RelationshipButton = new MirButton
+
+            RelationshipButton = new MirButton  /* lover button */
                 {
                     Index = 1988,
                     HoverIndex = 1989,
@@ -7061,6 +7186,12 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Location = new Point(3, 202),
                 };
+            RelationshipButton.Click += (o, e) =>
+            {
+                if (GameScene.Scene.RelationshipDialog.Visible)
+                    GameScene.Scene.RelationshipDialog.Hide();
+                else GameScene.Scene.RelationshipDialog.Show();
+            };
 
             GroupButton = new MirButton
                 {
@@ -7071,21 +7202,28 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Location = new Point(3, 221),
                 };
-              GroupButton.Click += (o, e) =>
-              {
-                  if (GameScene.Scene.GroupDialog.Visible)
-                      GameScene.Scene.GroupDialog.Hide();
-                  else GameScene.Scene.GroupDialog.Show();
-              };
+            GroupButton.Click += (o, e) =>
+             {
+                 if (GameScene.Scene.GroupDialog.Visible)
+                     GameScene.Scene.GroupDialog.Hide();
+                 else GameScene.Scene.GroupDialog.Show();
+             };
+
             GuildButton = new MirButton
-                {
-                    Index = 1994,
-                    HoverIndex = 1995,
-                    PressedIndex = 1996,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 240),
-                };
+               {
+                   Index = 1994,
+                   HoverIndex = 1995,
+                   PressedIndex = 1996,
+                   Parent = this,
+                   Library = Libraries.Prguse,
+                   Location = new Point(3, 240),
+               };
+            GuildButton.Click += (o, e) =>
+               {
+                   if (GameScene.Scene.GuildDialog.Visible)
+                       GameScene.Scene.GuildDialog.Hide();
+                   else GameScene.Scene.GuildDialog.Show();
+               };
 
         }
 
@@ -8142,6 +8280,454 @@ namespace Client.MirScenes
             FKeys[Key - 1].PressedIndex = 1658;
         }
     }
+
+    public sealed class HelpDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public HelpDialog()
+        {
+            Index = 920;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                Index = 57,
+                Library = Libraries.Title,
+                Location = new Point(18, 5),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(509, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
+
+    public sealed class KeyboardLayoutDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public KeyboardLayoutDialog()
+        {
+            Index = 920;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                // Index = 7,
+                Library = Libraries.Title,
+                Location = new Point(18, 4),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(509, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
+    public sealed class CraftingDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public CraftingDialog()
+        {
+            Index = 260;
+            Library = Libraries.Prguse2;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                // Index = 7,
+                Library = Libraries.Title,
+                Location = new Point(18, 4),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(255, 5),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
+    public sealed class IntelligentCreatureDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton, HelpPetButton;
+
+        public IntelligentCreatureDialog()
+        {
+            Index = 468;
+            Library = Libraries.Title;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                // Index = 7,
+                Library = Libraries.Title,
+                Location = new Point(18, 4),
+                Parent = this
+            }; 
+
+            HelpPetButton = new MirButton
+            {
+                HoverIndex = 258,
+                Index = 257,
+                Location = new Point(375, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 259,
+                Sound = SoundList.ButtonA,
+            };
+
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(425, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
+    public sealed class RideDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public RideDialog()
+        {
+            Index = 167;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                // Index = 7,
+                Library = Libraries.Title,
+                Location = new Point(18, 4),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(297, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
+
+    public sealed class FishingDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public FishingDialog()
+        {
+            Index = 1340;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                // Index = 7,
+                Library = Libraries.Title,
+                Location = new Point(17, 4),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(175, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
+
+    public sealed class FriendDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public FriendDialog()
+        {
+            Index = 199;
+            Library = Libraries.Title;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                Index = 6,
+                Library = Libraries.Title,
+                Location = new Point(18, 4),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(237, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
+
+    public sealed class RelationshipDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public RelationshipDialog()
+        {
+            Index = 120;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+            TitleLabel = new MirImageControl
+            {
+                Index = 52,
+                Library = Libraries.Title,
+                Location = new Point(18, 4),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(206, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
+    public sealed class MentorDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public MentorDialog()
+        {
+            Index = 170;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                Index = 51,
+                Library = Libraries.Title,
+                Location = new Point(18, 4),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(219, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
     public sealed class GroupDialog : MirImageControl
     {
         public static bool AllowGroup;
@@ -8338,6 +8924,55 @@ namespace Client.MirScenes
             Visible = true;
         }
     }
+
+    public sealed class GuildDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel;
+        public MirButton CloseButton;
+
+        public GuildDialog()
+        {
+            Index = 180;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
+
+            TitleLabel = new MirImageControl
+            {
+                // Index = 7,
+                Library = Libraries.Title,
+                Location = new Point(18, 4),
+                Parent = this
+            };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(563, 6),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+        }
+
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+
     public sealed class BigMapDialog : MirControl
     {
         public BigMapDialog()

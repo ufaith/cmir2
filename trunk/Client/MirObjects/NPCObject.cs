@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using Client.MirControls;
 using Client.MirGraphics;
 using Client.MirScenes;
 using S = ServerPackets;
@@ -24,6 +25,8 @@ namespace Client.MirObjects
         public Frame Frame;
         public int BaseIndex, FrameIndex, FrameInterval;
 
+        public string Profession = string.Empty;
+
         public NPCObject(uint objectID) : base(objectID)
         {
         }
@@ -32,7 +35,6 @@ namespace Client.MirObjects
         {
             Name = info.Name;
             NameColour = info.NameColour;
-
             CurrentLocation = info.Location;
             Movement = info.Location;
             MapLocation = info.Location;
@@ -208,6 +210,36 @@ namespace Client.MirObjects
         public override void DrawEffects()
         {
             //Time Stone
+        }
+
+        public override void DrawName()
+        {
+            if (!Name.Contains("_"))
+            {
+                base.DrawName();
+                return;
+            }
+
+            string[] splitName = Name.Split('_');
+            MirLabel tempLabel = null;
+
+            for (int i = 0; i < splitName.Count(); i++)
+            {
+
+                tempLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    BackColour = Color.Transparent,
+                    ForeColour = i == 0 ? NameColour : Color.White,
+                    OutLine = true,
+                    OutLineColour = Color.Black,
+                    Text = splitName[i],
+                };
+
+                tempLabel.Text = splitName[i];
+                tempLabel.Location = new Point(DisplayRectangle.X + (48 - tempLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - tempLabel.Size.Height / 2) + (Dead ? 35 : 8) - (((splitName.Count() - 1) * 10) / 2) + (i * 12));
+                tempLabel.Draw();
+            }
         }
     }
 }

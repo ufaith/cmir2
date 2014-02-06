@@ -262,7 +262,7 @@ namespace Server.MirObjects
 
             Spawned();
             Envir.MonsterCount++;
-
+            CurrentMap.MonsterCount++;
             return true;
         }
         public void Spawn(MapRespawn respawn)
@@ -287,6 +287,7 @@ namespace Server.MirObjects
 
                 Spawned();
                 Respawn.Count++;
+                respawn.Map.MonsterCount++;
                 Envir.MonsterCount++;
                 return;
             }
@@ -454,7 +455,7 @@ namespace Server.MirObjects
 
             PoisonList.Clear();
             Envir.MonsterCount--;
-
+            CurrentMap.MonsterCount--;
         }
 
         public void Revive(uint hp)
@@ -472,7 +473,7 @@ namespace Server.MirObjects
                 Respawn.Count++;
 
             Envir.MonsterCount++;
-
+            CurrentMap.MonsterCount++;
         }
 
         public override int Pushed(MapObject pusher, MirDirection dir, int distance)

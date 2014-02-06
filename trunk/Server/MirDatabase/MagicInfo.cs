@@ -172,7 +172,7 @@ namespace Server.MirDatabase
             Curse = new MagicInfo { Spell = Spell.Curse, Icon = 45, Level1 = 40, Level2 = 42, Level3 = 44, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 17, LevelCost = 3 };
             Plague = new MagicInfo { Spell = Spell.Plague, Icon = 74, Level1 = 42, Level2 = 44, Level3 = 47, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 20, LevelCost = 5 };
             PoisonField = new MagicInfo { Spell = Spell.PoisonField, Icon = 54, Level1 = 43, Level2 = 45, Level3 = 48, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 30, LevelCost = 5 };
-            EnergyShield = new MagicInfo { Spell = Spell.EnergyShield, Icon = 47, Level1 = 48, Level2 = 51, Level3 = 54, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 50, LevelCost = 20 };
+            EnergyShield = new MagicInfo { Spell = Spell.EnergyShield, Icon = 57, Level1 = 48, Level2 = 51, Level3 = 54, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 50, LevelCost = 20 };
 
 
 
