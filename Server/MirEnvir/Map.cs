@@ -20,6 +20,7 @@ namespace Server.MirEnvir
         public int Width, Height;
         public Cell[,] Cells;
         public long LightningTime, FireTime;
+        public int MonsterCount;
 
         public List<NPCObject> NPCs = new List<NPCObject>();
         public List<PlayerObject> Players = new List<PlayerObject>();

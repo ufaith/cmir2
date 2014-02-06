@@ -177,7 +177,7 @@ namespace Client.MirObjects
             CreateLabel();
 
             if (NameLabel == null) return;
-
+            
             NameLabel.Text = Name;
             NameLabel.Location = new Point(DisplayRectangle.X + (48 - NameLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - NameLabel.Size.Height / 2) + (Dead ? 35 : 8));
             NameLabel.Draw();

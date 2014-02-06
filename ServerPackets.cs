@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
-
 namespace ServerPackets
 {
     public sealed class Connected : Packet
@@ -1753,6 +1752,7 @@ namespace ServerPackets
 
         public uint ObjectID;
         public string Name = string.Empty;
+
         public Color NameColour;
         public byte Image;
         public Point Location;
