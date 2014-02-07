@@ -24,6 +24,7 @@ namespace Client.MirObjects
         public FrameSet Frames;
         public Frame Frame;
         public int BaseIndex, FrameIndex, FrameInterval;
+        public MirLabel TempLabel;
 
         public string Profession = string.Empty;
 
@@ -221,25 +222,42 @@ namespace Client.MirObjects
             }
 
             string[] splitName = Name.Split('_');
-            MirLabel tempLabel = null;
 
-            for (int i = 0; i < splitName.Count(); i++)
+            for (int s = 0; s < splitName.Count(); s++)
             {
+                CreateNPCLabel(splitName[s], s);
 
-                tempLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    BackColour = Color.Transparent,
-                    ForeColour = i == 0 ? NameColour : Color.White,
-                    OutLine = true,
-                    OutLineColour = Color.Black,
-                    Text = splitName[i],
-                };
-
-                tempLabel.Text = splitName[i];
-                tempLabel.Location = new Point(DisplayRectangle.X + (48 - tempLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - tempLabel.Size.Height / 2) + (Dead ? 35 : 8) - (((splitName.Count() - 1) * 10) / 2) + (i * 12));
-                tempLabel.Draw();
+                TempLabel.Text = splitName[s];
+                TempLabel.Location = new Point(DisplayRectangle.X + (48 - TempLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - TempLabel.Size.Height / 2) + (Dead ? 35 : 8) - (((splitName.Count() - 1) * 10) / 2) + (s * 12));
+                TempLabel.Draw();
             }
+        }
+
+        public void CreateNPCLabel(string word, int wordOrder)
+        {
+            TempLabel = null;
+
+            for (int i = 0; i < LabelList.Count; i++)
+            {
+                if (LabelList[i].Text != word || LabelList[i].ForeColour != (wordOrder == 0 ? NameColour : Color.White)) continue;
+                TempLabel = LabelList[i];
+                break;
+            }
+
+            if (TempLabel != null && !TempLabel.IsDisposed) return;
+
+            TempLabel = new MirLabel
+            {
+                AutoSize = true,
+                BackColour = Color.Transparent,
+                ForeColour = wordOrder == 0 ? NameColour : Color.White,
+                OutLine = true,
+                OutLineColour = Color.Black,
+                Text = word,
+            };
+
+            TempLabel.Disposing += (o, e) => LabelList.Remove(TempLabel);
+            LabelList.Add(TempLabel);
         }
     }
 }
