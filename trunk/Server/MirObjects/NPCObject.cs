@@ -559,18 +559,15 @@ namespace Server.MirObjects
 
             switch (parts[0].ToUpper())
             {
-                case "MINLEVEL":
-                    if (parts.Length < 2) return;
-                    if (!byte.TryParse(parts[1], out temp3)) return;
-
-                    CheckList.Add(new NPCChecks(CheckType.MinLevel, temp3));
-                    break;
-
-                case "MAXLEVEL":
-                    if (parts.Length < 2) return;
-                    if (!byte.TryParse(parts[1], out temp3)) return;
-
-                    CheckList.Add(new NPCChecks(CheckType.MaxLevel, temp3));
+                case "LEVEL":
+                    if (parts.Length < 3) return;
+                    if (!byte.TryParse(parts[2], out temp3)) return;
+                    try
+                    {
+                        Compare(parts[1], 0, 0);
+                        CheckList.Add(new NPCChecks(CheckType.Level, parts[1], temp3));
+                    }
+                    catch (ArgumentException){}
                     break;
 
                 case "CHECKGOLD":
@@ -688,6 +685,21 @@ namespace Server.MirObjects
                     CheckList.Add(new NPCChecks(CheckType.CheckMon, monCount, parts[2], instanceId));
                     break;
 
+                case "RANDOM":
+                    if (parts.Length < 2) return;
+                    if (!int.TryParse(parts[1], out temp)) return;
+                    CheckList.Add(new NPCChecks(CheckType.Random, temp));
+                    break;
+
+                case "GROUPLEADER":
+                    CheckList.Add(new NPCChecks(CheckType.Groupleader));
+                    break;
+
+                case "GROUPCOUNT":
+                    if (parts.Length < 2) return;
+                    if (!int.TryParse(parts[1], out temp)) return;
+                    CheckList.Add(new NPCChecks(CheckType.GroupCount, temp));
+                    break;
             }
 
         }
@@ -957,6 +969,29 @@ namespace Server.MirObjects
                     if (parts.Length < 3 || !int.TryParse(parts[2], out temp1)) temp1 = 1;
                     acts.Add(new NPCActions(ActionType.MonClear, parts[1], temp1));
                     break;
+
+                case "GROUPRECALL":
+                    acts.Add(new NPCActions(ActionType.GroupRecall));
+                    break;
+
+                case "GROUPTELEPORT":
+                    if (parts.Length < 2) return;
+                    
+                    if (parts.Length == 4)
+                    {
+                        instanceId = 1;
+                        if (!int.TryParse(parts[2], out x)) x = 0;
+                        if (!int.TryParse(parts[3], out y)) y = 0;
+                    }
+                    else
+                    {
+                        if (parts.Length < 3 || !int.TryParse(parts[2], out instanceId)) instanceId = 1;
+                        if (parts.Length < 4 || !int.TryParse(parts[3], out x)) x = 0;
+                        if (parts.Length < 5 || !int.TryParse(parts[4], out y)) y = 0;
+                    }
+
+                    acts.Add(new NPCActions(ActionType.GroupTeleport, parts[1], instanceId, new Point(x, y)));
+                    break;
             }
 
         }
@@ -1084,14 +1119,8 @@ namespace Server.MirObjects
             {
                 switch (check.Type)
                 {
-                    case CheckType.MaxLevel:
-                        if (player.Level > (byte) check.Params[0])
-                            failed = true;
-                        break;
-
-                    case CheckType.MinLevel:
-                        if (player.Level < (byte) check.Params[0])
-                            failed = true;
+                    case CheckType.Level:
+                        failed = !Compare((string)check.Params[0], player.Level, (byte)check.Params[1]);
                         break;
 
                     case CheckType.CheckGold:
@@ -1194,6 +1223,18 @@ namespace Server.MirObjects
                         }
 
                         failed = map.MonsterCount < (int)check.Params[0];
+                        break;
+
+                    case CheckType.Random:
+                        failed = 0 != SMain.Envir.Random.Next(0, (int) check.Params[0]);
+                        break;
+
+                    case CheckType.Groupleader:
+                        failed = (player.GroupMembers == null || player.GroupMembers[0] != player);
+                        break;
+
+                    case CheckType.GroupCount:
+                        failed = (player.GroupMembers == null || player.GroupMembers.Count < (int)check.Params[0]);
                         break;
                 }
 
@@ -1487,6 +1528,33 @@ namespace Server.MirObjects
                             }
                         }
                         break;
+                    case ActionType.GroupRecall:
+                        if (player.GroupMembers == null) return;
+
+                        for (i = 0; i < player.GroupMembers.Count(); i++)
+                        {
+                            player.GroupMembers[i].Teleport(player.CurrentMap, player.CurrentLocation);
+                        }
+                        break;
+
+                    case ActionType.GroupTeleport:
+                        if (player.GroupMembers == null) return;
+
+                        map = SMain.Envir.GetMapByNameAndInstance((string)act.Params[0], (int)act.Params[1]);
+                        if (map == null) return;
+
+                        for (i = 0; i < player.GroupMembers.Count(); i++)
+                        {
+                            if (((Point) act.Params[2]).X == 0 || ((Point) act.Params[2]).Y == 0)
+                            {
+                                player.GroupMembers[i].TeleportRandom(200, 0, map);
+                            }
+                            else
+                            {
+                                player.GroupMembers[i].Teleport(map, (Point) act.Params[2]);
+                            }
+                        }
+                        break;
                 }
             }
         }
@@ -1509,7 +1577,20 @@ namespace Server.MirObjects
 
             player.Enqueue(new S.NPCResponse { Page = parseElseSay });
         }
-        
+
+        public static bool Compare<T>(string op, T left, T right) where T : IComparable<T>
+        {
+            switch (op)
+            {
+                case "<": return left.CompareTo(right) < 0;
+                case ">": return left.CompareTo(right) > 0;
+                case "<=": return left.CompareTo(right) <= 0;
+                case ">=": return left.CompareTo(right) >= 0;
+                case "==": return left.Equals(right);
+                case "!=": return !left.Equals(right);
+                default: throw new ArgumentException("Invalid comparison operator: {0}", op);
+            }
+        }
     }
 
     public class NPCChecks
@@ -1569,12 +1650,13 @@ namespace Server.MirObjects
         TimeRecallPage,
         BreakTimeRecall,
         MonClear,
+        GroupRecall,
+        GroupTeleport,
     }
     public enum CheckType
     {
         IsAdmin,
-        MinLevel,
-        MaxLevel,
+        Level,
         CheckItem,
         CheckGold,
         CheckGender,
@@ -1588,6 +1670,9 @@ namespace Server.MirObjects
         Check,
         CheckHum,
         CheckMon,
+        Random,
+        Groupleader,
+        GroupCount,
     }
 
     public class NPCTimeRecall

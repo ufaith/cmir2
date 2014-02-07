@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.ItemInfoPanel = new System.Windows.Forms.Panel();
+            this.label35 = new System.Windows.Forms.Label();
+            this.ISetComboBox = new System.Windows.Forms.ComboBox();
             this.EffectTextBox = new System.Windows.Forms.TextBox();
             this.label34 = new System.Windows.Forms.Label();
             this.RGenderComboBox = new System.Windows.Forms.ComboBox();
@@ -107,8 +109,6 @@
             this.ExportAllButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
-            this.ISetComboBox = new System.Windows.Forms.ComboBox();
-            this.label35 = new System.Windows.Forms.Label();
             this.ItemInfoPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -193,6 +193,25 @@
             this.ItemInfoPanel.Name = "ItemInfoPanel";
             this.ItemInfoPanel.Size = new System.Drawing.Size(612, 330);
             this.ItemInfoPanel.TabIndex = 11;
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(45, 168);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(49, 13);
+            this.label35.TabIndex = 75;
+            this.label35.Text = "Item Set:";
+            // 
+            // ISetComboBox
+            // 
+            this.ISetComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ISetComboBox.FormattingEnabled = true;
+            this.ISetComboBox.Location = new System.Drawing.Point(100, 165);
+            this.ISetComboBox.Name = "ISetComboBox";
+            this.ISetComboBox.Size = new System.Drawing.Size(92, 21);
+            this.ISetComboBox.TabIndex = 74;
+            this.ISetComboBox.SelectedIndexChanged += new System.EventHandler(this.ISetComboBox_SelectedIndexChanged);
             // 
             // EffectTextBox
             // 
@@ -909,25 +928,6 @@
             this.ImportButton.Text = "Import";
             this.ImportButton.UseVisualStyleBackColor = true;
             this.ImportButton.Click += new System.EventHandler(this.ImportButton_Click);
-            // 
-            // ISetComboBox
-            // 
-            this.ISetComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ISetComboBox.FormattingEnabled = true;
-            this.ISetComboBox.Location = new System.Drawing.Point(100, 165);
-            this.ISetComboBox.Name = "ISetComboBox";
-            this.ISetComboBox.Size = new System.Drawing.Size(92, 21);
-            this.ISetComboBox.TabIndex = 74;
-            this.ISetComboBox.SelectedIndexChanged += new System.EventHandler(this.ISetComboBox_SelectedIndexChanged);
-            // 
-            // label35
-            // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(45, 168);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(49, 13);
-            this.label35.TabIndex = 75;
-            this.label35.Text = "Item Set:";
             // 
             // ItemInfoForm
             // 

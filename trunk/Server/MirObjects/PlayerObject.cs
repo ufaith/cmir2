@@ -1161,6 +1161,7 @@ namespace Server.MirObjects
             for (int i = 0; i < Info.Equipment.Length; i++)
             {
                 item = Info.Equipment[i];
+
                 if (item == null) continue;
                 CheckItemInfo(item.Info);
             }
@@ -1768,6 +1769,12 @@ namespace Server.MirObjects
                 {
                     IsGM = true;
                     SMain.Enqueue(string.Format("{0} is now a GM", Name));
+                    ReceiveChat("You have been made a GM", ChatType.System);
+                }
+                else
+                {
+                    SMain.Enqueue(string.Format("{0} attempted a GM login", Name));
+                    ReceiveChat("Incorrect login password", ChatType.System);
                 }
                 GMLogin = false;
                 return;
@@ -5644,6 +5651,7 @@ namespace Server.MirObjects
         }
         private bool CanEquipItem(UserItem item, int slot)
         {
+
             switch ((EquipmentSlot)slot)
             {
                 case EquipmentSlot.Weapon:

@@ -389,7 +389,7 @@ namespace LibraryEditor
         private void convertlibsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to convert every .lib file in the folder to version 1?\nThis will break any .lib file that is not version 0!", "Convert lib folder", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
-            MessageBox.Show("Select any .lib file you want.\nThe code will convert all .lib files in this folder + subfolders.\nThis will take a while.\nYou will get a message when its finished!\nRemeber to backup first!");
+            MessageBox.Show("Select any .lib file you want.\nThe code will convert all .lib files in this folder + subfolders.\nThis will take a while.\nYou will get a message when its finished!\nRemember to backup first!");
             if (OpenLibraryDialog.ShowDialog() != DialogResult.OK) return;
             string MainFolder = Path.GetDirectoryName(OpenLibraryDialog.FileName);
             string NewFolder = MainFolder + "\\Converted\\";
@@ -405,6 +405,8 @@ namespace LibraryEditor
                 string[] fileEntries = Directory.GetFiles(sourceDir);
                 foreach (string fileName in fileEntries)
                 {
+                    if (Path.GetExtension(fileName) != ".lib") continue;
+
                     if (Directory.Exists(outputDir) != true) Directory.CreateDirectory(outputDir);
                     MLibraryv0 OldLibrary = new MLibraryv0(fileName);
                     MLibrary NewLibrary = new MLibrary(outputDir + Path.GetFileName(fileName)) { Images = new List<MLibrary.MImage>(), IndexList = new List<int>(), Count = OldLibrary.Images.Count }; ;

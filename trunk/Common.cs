@@ -1455,7 +1455,8 @@ public class UserItem
 
         AttackSpeed = reader.ReadSByte();
         Luck = reader.ReadSByte();
-       
+
+        if (version <= 18) return;
     }
     public void Save(BinaryWriter writer)
     {
@@ -1480,7 +1481,6 @@ public class UserItem
 
         writer.Write(AttackSpeed);
         writer.Write(Luck);
-
     }
 
 
