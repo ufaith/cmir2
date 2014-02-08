@@ -88,6 +88,22 @@ namespace Server.MirObjects
 
         }
 
+        private bool _observer;
+        public bool Observer
+        {
+            get
+            {
+                return _observer;
+            }
+            set
+            {
+                if (_observer == value) return;
+                _observer = value;
+
+                Broadcast(_observer ? new S.ObjectRemove {ObjectID = ObjectID} : GetInfo());
+            }
+        }
+
         public MapObject _target;
         public virtual MapObject Target
         {

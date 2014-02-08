@@ -696,9 +696,36 @@ namespace Server.MirObjects
                     break;
 
                 case "GROUPCOUNT":
-                    if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp)) return;
-                    CheckList.Add(new NPCChecks(CheckType.GroupCount, temp));
+                    if (parts.Length < 3) return;
+                    if (!int.TryParse(parts[2], out temp)) return;
+                    try
+                    {
+                        Compare(parts[1], 0, 0);
+                        CheckList.Add(new NPCChecks(CheckType.GroupCount, parts[1], temp));
+                    }
+                    catch (ArgumentException){}
+                    break;
+
+                case "PETCOUNT":
+                    if (parts.Length < 3) return;
+                    if (!int.TryParse(parts[2], out temp)) return;
+                    try
+                    {
+                        Compare(parts[1], 0, 0);
+                        CheckList.Add(new NPCChecks(CheckType.PetCount, parts[1], temp));
+                    }
+                    catch (ArgumentException){}
+                    break;
+
+                case "PETLEVEL":
+                    if (parts.Length < 3) return;
+                    if (!int.TryParse(parts[2], out temp)) return;
+                    try
+                    {
+                        Compare(parts[1], 0, 0);
+                        CheckList.Add(new NPCChecks(CheckType.PetLevel, parts[1], temp));
+                    }
+                    catch (ArgumentException){}
                     break;
             }
 
@@ -953,11 +980,23 @@ namespace Server.MirObjects
                     acts.Add(new NPCActions(ActionType.TimeRecall, temp3));
                     break;
 
+                case "TIMERECALLGROUP":
+                    if (parts.Length < 2) return;
+                    if (!long.TryParse(parts[1], out temp3)) return;
+
+                    acts.Add(new NPCActions(ActionType.TimeRecallGroup, temp3));
+                    break;
+
                 case "TIMERECALLPAGE":
                     if (parts.Length < 2) return;
-                    string page = string.Empty;
-                    page = "[" + parts[1] + "]";
+                    string page = "[" + parts[1] + "]";
                     acts.Add(new NPCActions(ActionType.TimeRecallPage, page));
+                    break;
+
+                case "TIMERECALLGROUPPAGE":
+                    if (parts.Length < 2) return;
+                    page = "[" + parts[1] + "]";
+                    acts.Add(new NPCActions(ActionType.TimeRecallGroupPage, page));
                     break;
 
                 case "BREAKTIMERECALL":
@@ -1091,7 +1130,7 @@ namespace Server.MirObjects
                             SayCommandCheck = DateTime.Now.ToShortDateString();
                             break;
                         case "USERCOUNT":
-                            //SayCommandCheck = Envir.PlayerCount.ToString(CultureInfo.InvariantCulture);
+                            SayCommandCheck = SMain.Envir.PlayerCount.ToString(CultureInfo.InvariantCulture);
                             break;
                         case "PKPOINT":
                             SayCommandCheck = player.PKPoints.ToString();
@@ -1234,7 +1273,18 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.GroupCount:
-                        failed = (player.GroupMembers == null || player.GroupMembers.Count < (int)check.Params[0]);
+                        failed = (player.GroupMembers == null || !Compare((string)check.Params[0], player.GroupMembers.Count, (int)check.Params[1]));
+                        break;
+
+                    case CheckType.PetCount:
+                        failed = !Compare((string) check.Params[0], player.Pets.Count(), (int) check.Params[1]);
+                        break;
+
+                    case CheckType.PetLevel:
+                        for (int i = 0; i < player.Pets.Count(); i++)
+                        {
+                            failed = !Compare((string)check.Params[0], player.Pets[i].PetLevel, (int)check.Params[1]);
+                        }
                         break;
                 }
 
@@ -1498,11 +1548,35 @@ namespace Server.MirObjects
                         };
                         break;
 
+                    case ActionType.TimeRecallGroup:
+                        if (player.GroupMembers == null) return;
+                        for (i = 0; i < player.GroupMembers.Count(); i++)
+                        {
+                            player.GroupMembers[i].TimeRecall = new NPCTimeRecall
+                            {
+                                PlayerMap = player.CurrentMap,
+                                PlayerCoords = player.CurrentLocation,
+                                TimePeriod = (long)act.Params[0]
+                            };
+                        }
+                        break;
+
                     case ActionType.TimeRecallPage:
                         if (player.TimeRecall == null) return;
 
                         player.TimeRecall.NPCID = player.NPCID;
                         player.TimeRecall.NPCGotoPage = (string)act.Params[0];
+                        break;
+
+                    case ActionType.TimeRecallGroupPage:
+                        if (player.TimeRecall == null) return;
+                        if (player.GroupMembers == null) return;
+                        for (i = 0; i < player.GroupMembers.Count(); i++)
+                        {
+                            if (player.GroupMembers[i].TimeRecall == null) continue;
+                            player.GroupMembers[i].TimeRecall.NPCID = player.NPCID;
+                            player.GroupMembers[i].TimeRecall.NPCGotoPage = (string)act.Params[0];
+                        }
                         break;
 
                     case ActionType.BreakTimeRecall:
@@ -1647,7 +1721,9 @@ namespace Server.MirObjects
         Param3,
         Mongen,
         TimeRecall,
+        TimeRecallGroup,
         TimeRecallPage,
+        TimeRecallGroupPage,
         BreakTimeRecall,
         MonClear,
         GroupRecall,
@@ -1673,6 +1749,8 @@ namespace Server.MirObjects
         Random,
         Groupleader,
         GroupCount,
+        PetLevel,
+        PetCount,
     }
 
     public class NPCTimeRecall
