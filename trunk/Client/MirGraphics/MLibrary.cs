@@ -127,20 +127,20 @@ namespace Client.MirGraphics
             //shanda mir3 (allowed from 300-399)
             for (int i = 0; i < Mapstate.Length; i++)
             {
-                MapLibs[100 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Tilesc" + Mapstate[i]);
-                MapLibs[101 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Tiles30c" + Mapstate[i]);
-                MapLibs[102 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Tiles5c" + Mapstate[i]);
-                MapLibs[103 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Smtilesc" + Mapstate[i]);
-                MapLibs[104 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Housesc" + Mapstate[i]);
-                MapLibs[105 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Cliffsc" + Mapstate[i]);
-                MapLibs[106 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Dungeonsc" + Mapstate[i]);
-                MapLibs[107 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Innersc" + Mapstate[i]);
-                MapLibs[108 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Furnituresc" + Mapstate[i]);
-                MapLibs[109 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Wallsc" + Mapstate[i]);
-                MapLibs[110 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "smObjectsc" + Mapstate[i]);
-                MapLibs[111 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Animationsc" + Mapstate[i]);
-                MapLibs[112 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Object1c" + Mapstate[i]);
-                MapLibs[113 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\" + "Object2c" + Mapstate[i]);
+                MapLibs[300 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Tilesc" + Mapstate[i]);
+                MapLibs[301 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Tiles30c" + Mapstate[i]);
+                MapLibs[302 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Tiles5c" + Mapstate[i]);
+                MapLibs[303 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Smtilesc" + Mapstate[i]);
+                MapLibs[304 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Housesc" + Mapstate[i]);
+                MapLibs[305 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Cliffsc" + Mapstate[i]);
+                MapLibs[306 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Dungeonsc" + Mapstate[i]);
+                MapLibs[307 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Innersc" + Mapstate[i]);
+                MapLibs[308 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Furnituresc" + Mapstate[i]);
+                MapLibs[309 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Wallsc" + Mapstate[i]);
+                MapLibs[310 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "smObjectsc" + Mapstate[i]);
+                MapLibs[311 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Animationsc" + Mapstate[i]);
+                MapLibs[312 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Object1c" + Mapstate[i]);
+                MapLibs[313 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir3\\" + "Object2c" + Mapstate[i]);
             }
             #endregion
 
@@ -182,7 +182,10 @@ namespace Client.MirGraphics
 
             for (int i = 0; i < MapLibs.Length; i++)
             {
-                MapLibs.Initialize();
+                if (MapLibs[i] == null)
+                    MapLibs[i] = new MLibrary("");
+                else
+                    MapLibs[i].Initialize();
                 Progress++;
             }
 
@@ -250,6 +253,17 @@ namespace Client.MirGraphics
             }
 
             Loaded = true;
+            //map testing code
+            /*
+            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 0 - 0.map");
+            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 1 - 0.map");
+            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 2 - 0.map");
+            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 3 - n0.map");
+            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 4 - laby01.map");
+            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 5 - 0.map");
+            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 6 - 0.map");
+            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 7 - 0.map");
+            //*/
         }
 
     }
@@ -321,10 +335,11 @@ namespace Client.MirGraphics
                 _fStream.Position = _indexList[index];
                 _images[index] = new MImage(_reader);
             }
-
             MImage mi = _images[index];
             if (!mi.TextureValid)
             {
+                if ((mi.Width == 0) || (mi.Height == 0))
+                    return false;
                 _fStream.Seek(_indexList[index] + 17, SeekOrigin.Begin);
                 mi.CreateTexture(_reader);
             }
@@ -542,6 +557,25 @@ namespace Client.MirGraphics
             mi.CleanTime = CMain.Time + Settings.CleanDelay;
         }
 
+        public void DrawUp(int index, int x, int y)
+        {
+            if (x >= Settings.ScreenWidth)
+                return;
+
+            if (!CheckImage(index))
+                return;
+
+            MImage mi = _images[index];
+            y -= mi.Height;
+            if (y >= Settings.ScreenHeight)
+                return;
+            if (x + mi.Width < 0 || y + mi.Height < 0)
+                return;
+
+
+            DXManager.Sprite.Draw2D(mi.Image, Point.Empty, 0, new PointF(x, y), Color.White);
+            mi.CleanTime = CMain.Time + Settings.CleanDelay;
+        }
         
         public bool VisiblePixel(int index, Point point, bool accuate)
         {

@@ -1861,7 +1861,9 @@ namespace Client.MirObjects
         {
             int x = CurrentLocation.X - CurrentLocation.X % 2;
             int y = CurrentLocation.Y - CurrentLocation.Y % 2;
-
+            if (GameScene.Scene.MapControl.M2CellInfo[x, y].FrontIndex > 99) return; //prevents any move sounds on non mir2 maps atm < since i havent bothered transfering all those fixed values yet
+            if (GameScene.Scene.MapControl.M2CellInfo[x, y].MiddleIndex > 99) return; //prevents any move sounds on non mir2 maps atm < since i havent bothered transfering all those fixed values yet
+            if (GameScene.Scene.MapControl.M2CellInfo[x, y].BackIndex > 99) return; //prevents any move sounds on non mir2 maps atm < since i havent bothered transfering all those fixed values yet
             int index = (GameScene.Scene.MapControl.M2CellInfo[x, y].BackImage & 0x1FFFF) - 1;
             index = (GameScene.Scene.MapControl.M2CellInfo[x, y].FrontIndex - 2) * 10000 + index;
             int moveSound;

@@ -92,12 +92,23 @@ namespace Client.MirObjects
                 loaded = true;
             }
             else
+            {
+                Width = 1000;
+                Height = 1000;
+                MapCells = new CellInfo[Width, Height];
+
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {
+                        MapCells[x, y] = new CellInfo();
+                    }
                 return;
+            }
             //wemade mir3 maps have no title they just start with blank bytes
             if (Bytes[0] == 0)
             {
                 //load wemade mir3 map
-                //LoadMapType5();
+                LoadMapType5();
                 return;
             }
             //shanda mir3 maps start with title: (C) SNDA, MIR3.
@@ -155,54 +166,94 @@ namespace Client.MirObjects
         {
             try
             {
-                if (loaded)
-                {
-                    int offSet = 21;
-                    
-                    int w = BitConverter.ToInt16(Bytes, offSet);
-                    offSet += 2;
-                    int xor = BitConverter.ToInt16(Bytes, offSet);
-                    offSet += 2;
-                    int h = BitConverter.ToInt16(Bytes, offSet);
-                    Width = w ^ xor;
-                    Height = h ^ xor;
-                    MapCells = new CellInfo[Width, Height];
+                int offSet = 21;
+                   
+                int w = BitConverter.ToInt16(Bytes, offSet);
+                offSet += 2;
+                int xor = BitConverter.ToInt16(Bytes, offSet);
+                offSet += 2;
+                int h = BitConverter.ToInt16(Bytes, offSet);
+                Width = w ^ xor;
+                Height = h ^ xor;
+                MapCells = new CellInfo[Width, Height];
 
-                    offSet = 54;
+                offSet = 54;
 
-                    for (int x = 0; x < Width; x++)
-                        for (int y = 0; y < Height; y++)
-                        {
-                            MapCells[x, y] = new CellInfo
-                                {
-                                    BackIndex = 0,
-                                    BackImage = (int)(BitConverter.ToInt32(Bytes, offSet) ^ 0xAA38AA38),
-                                    MiddleIndex = 1,
-                                    MiddleImage = (short)(BitConverter.ToInt16(Bytes, offSet += 4) ^ xor),
-                                    FrontImage = (short)(BitConverter.ToInt16(Bytes, offSet += 2) ^ xor),
-                                    DoorIndex = Bytes[offSet += 2],
-                                    DoorOffset = Bytes[++offSet],
-                                    AnimationFrame = Bytes[++offSet],
-                                    AnimationTick = Bytes[++offSet],
-                                    FrontIndex = (short)(Bytes[++offSet] + 2),
-                                    Light = Bytes[++offSet],
-                                    Unknown = Bytes[++offSet],
-                                };
-                            offSet++;
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {
+                        MapCells[x, y] = new CellInfo
+                            {
+                                BackIndex = 0,
+                                BackImage = (int)(BitConverter.ToInt32(Bytes, offSet) ^ 0xAA38AA38),
+                                MiddleIndex = 1,
+                                MiddleImage = (short)(BitConverter.ToInt16(Bytes, offSet += 4) ^ xor),
+                                FrontImage = (short)(BitConverter.ToInt16(Bytes, offSet += 2) ^ xor),
+                                DoorIndex = Bytes[offSet += 2],
+                                DoorOffset = Bytes[++offSet],
+                                AnimationFrame = Bytes[++offSet],
+                                AnimationTick = Bytes[++offSet],
+                                FrontIndex = (short)(Bytes[++offSet] + 2),
+                                Light = Bytes[++offSet],
+                                Unknown = Bytes[++offSet],
+                            };
+                        offSet++;
+                    }
+            }
+            catch (Exception ex)
+            {
+                if (Settings.LogErrors) CMain.SaveError(ex.ToString());
+            }
+        }
+
+        private void LoadMapType5()
+        {
+            try
+            {
+                byte flag = 0;
+                int offset = 20;
+                short Attribute = (short)(BitConverter.ToInt16(Bytes,offset));
+                Width = (int)(BitConverter.ToInt16(Bytes,offset+=2));
+                Height = (int)(BitConverter.ToInt16(Bytes, offset += 2));
+                //ignoring eventfile and fogcolor for now (seems unused in maps i checked)
+                offset = 28;
+                //initiate all cells
+                MapCells = new CellInfo[Width, Height];
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                        MapCells[x, y] = new CellInfo();
+                //read all back tiles
+                for (int x = 0; x < (Width/2); x++)
+                    for (int y = 0; y < (Height/2); y++)
+                    {
+                        for (int i = 0; i < 4; i++)
+                        {//todo: check if my math is accurate here:p
+                            //MapCells[(x*2) + (i % 2), (y*2) + (i / 2)].BackIndex = (short)(Bytes[offset] > 0 ? Bytes[offset] + 100 : 0);
+                            MapCells[(x * 2) + (i % 2), (y * 2) + (i / 2)].BackIndex = (short)(Bytes[offset]+100);
+                            MapCells[(x*2) + (i % 2), (y*2) + (i / 2)].BackImage = (int)(BitConverter.ToInt16(Bytes, offset + 1)+1);
                         }
-                }
-                else
-                {
-                    Width = 1000;
-                    Height = 1000;
-                    MapCells = new CellInfo[Width, Height];
+                        offset += 3;
+                    }
+                //read rest of data
+                offset = 28 + (3 * (Width /2) * (Height / 2));
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {
+                        flag = Bytes[offset++];
+                        offset+=2;//aniframe > aniframefr
+                        MapCells[x,y].FrontIndex = (short)(Bytes[offset] > 0 ? Bytes[offset] + 100 : 0);
+                        offset++;
+                        MapCells[x,y].MiddleIndex = (short)(Bytes[offset] > 0 ? Bytes[offset] + 100 : 0);
+                        offset++;
+                        MapCells[x,y].MiddleImage = (short)(BitConverter.ToInt16(Bytes,offset)+1);
+                        offset += 2;
+                        MapCells[x, y].FrontImage = (short)(BitConverter.ToInt16(Bytes, offset)+1);
 
-                    for (int x = 0; x < Width; x++)
-                        for (int y = 0; y < Height; y++)
-                        {
-                            MapCells[x, y] = new CellInfo();
-                        }
-                }
+                        offset += 2;
+                        offset += 5;//mir3 maps dont have doors so dont bother reading the info, also not using light info atm
+                        if (flag == 1) MapCells[x, y].BackImage |= 0x20000000;
+                        if (flag == 2) MapCells[x, y].FrontImage = (short)(MapCells[x, y].FrontImage | 0x8000);
+                    }
             }
             catch (Exception ex)
             {
