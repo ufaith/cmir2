@@ -14,7 +14,7 @@ namespace Server.MirObjects
     public sealed class PlayerObject : MapObject
     {
         public string GMPassword = Settings.GMPassword;
-        public bool IsGM, GMLogin, GMNeverDie, GMGameMaster,EnableGroupRecall;
+        public bool IsGM, GMLogin, GMNeverDie, GMGameMaster, EnableGroupRecall;
 
         public long LastRecallTime, LastRevivalTime;
 
@@ -334,6 +334,12 @@ namespace Server.MirObjects
                     NPCGotoPage = TimeRecall.NPCGotoPage;
                     CallNPC(TimeRecall.NPCID, NPCGotoPage);
                 }
+            }
+
+            for (int i = Pets.Count() - 1; i >= 0; i--)
+            {
+                if (Pets[i].Dead)
+                    Pets.Remove(Pets[i]);
             }
 
             ProcessBuffs();
@@ -1259,6 +1265,8 @@ namespace Server.MirObjects
                         MapObject ob = cell.Objects[i];
                         if (ob == this) continue;
 
+                        if (ob.Race == ObjectType.Player && ob.Observer) continue;
+
                         Enqueue(ob.GetInfo());
 
                         if (ob.Race == ObjectType.Player || ob.Race == ObjectType.Monster)
@@ -2070,6 +2078,14 @@ namespace Server.MirObjects
                         GMGameMaster = !GMGameMaster;
 
                         hintstring = GMGameMaster ? "GameMaster Mode." : "Normal Mode.";
+                        ReceiveChat(hintstring, ChatType.Hint);
+                        break;
+
+                    case "OBSERVER":
+                        if (!IsGM) return;
+                        Observer = !Observer;
+
+                        hintstring = Observer ? "Observer Mode." : "Normal Mode.";
                         ReceiveChat(hintstring, ChatType.Hint);
                         break;
 
