@@ -3598,7 +3598,7 @@ namespace Client.MirScenes
                 }
             }
 
-            for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY; y++)
+            for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY + 5; y++)
             {
                 if (y <= 0) continue;
                 if (y >= Height) break;
@@ -3613,11 +3613,11 @@ namespace Client.MirScenes
                     index = M2CellInfo[x, y].MiddleImage - 1;
 
                     if (index < 0) continue;
-
-                    Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].Draw(index, drawX, drawY);
+                    if ((M2CellInfo[x, y].MiddleIndex < 99) || (M2CellInfo[x, y].MiddleIndex > 200)) //mir3 mid layer is same level as front layer not real middle
+                        Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].Draw(index, drawX, drawY);
                 }
             }
-            for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY; y++)
+            for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY + 5; y++)
             {
                 if (y <= 0) continue;
                 if (y >= Height) break;
@@ -3634,7 +3634,6 @@ namespace Client.MirScenes
                     Size s = Libraries.MapLibs[fileIndex].GetSize(index);
 
                     if (index < 0 || s.Width != CellWidth || s.Height != CellHeight) continue;
-
                     Libraries.MapLibs[fileIndex].Draw(index, drawX, drawY);
                 }
             }
@@ -3657,8 +3656,17 @@ namespace Client.MirScenes
                     if (x <= 0) continue;
                     if (x >= Width) break;
                     int drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X;
-
-                    int index = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
+                    int index;
+                    #region draw mir3 middle layer
+                    if ((M2CellInfo[x, y].MiddleIndex > 99) && (M2CellInfo[x, y].MiddleIndex < 200))
+                    {
+                        index = M2CellInfo[x, y].MiddleImage - 1;
+                        if (index < 0) continue;
+                            Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].DrawUp(index, drawX, drawY);
+                    }
+                    #endregion
+                    #region draw front layer
+                    index = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
 
                     if (index < 0) continue;
 
@@ -3684,11 +3692,11 @@ namespace Client.MirScenes
                     Size s = Libraries.MapLibs[fileIndex].GetSize(index);
 
                     if (s.Width == CellWidth && s.Height == CellHeight && animation == 0) continue;
-
                     if (blend)
                         Libraries.MapLibs[fileIndex].DrawBlend(index, new Point(drawX, drawY - s.Height), Color.White, index >= 2723 && index <= 2732);
                     else
                         Libraries.MapLibs[fileIndex].Draw(index, drawX, drawY - s.Height);
+                    #endregion
                 }
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
