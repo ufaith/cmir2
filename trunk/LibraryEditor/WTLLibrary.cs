@@ -167,7 +167,6 @@ namespace LibraryEditor
             int offset = 0, blockOffSet = 0;
             List<byte> countList = new List<byte>();
             int tWidth = 2;
-            int loop = 0;
 
             while (tWidth < Width)
                 tWidth *= 2;
@@ -177,7 +176,10 @@ namespace LibraryEditor
             Bitmap output = new Bitmap(outputWidth, outputHeight);
             if (_fBytes.Length != imageLength) return null;
             BitmapData data = output.LockBits(new Rectangle(0, 0, outputWidth, outputHeight), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-            byte[] pixels = new byte[outputWidth * outputHeight * 4];
+            byte* pixels = (byte*)data.Scan0;
+            int cap = outputWidth * outputHeight * 4;
+            int currentx = 0;
+
             while (blockOffSet < imageLength)
             {
                 countList.Clear();
@@ -190,23 +192,20 @@ namespace LibraryEditor
 
                     if (i % 2 == 0)
                     {
-                        int oldx = offset % (Width / 4);
-
-                        if (oldx == 0 && (loop > 0 || i > 0))
-                            oldx = oldx - (tWidth - outputWidth) / 4 + (tWidth / 4);
-
-                        int reduce = 0;
+                        if (currentx >= tWidth)
+                            currentx -= tWidth;
 
                         for (int off = 0; off < count; off++)
                         {
-                            oldx++;
-                            if (oldx < tWidth / 4)
-                                continue;
 
-                            reduce += (tWidth - outputWidth) / 4;
-                           oldx = 0;
+                            if (currentx < outputWidth)
+                                offset++;
+
+                            currentx += 4;
+
+                            if (currentx >= tWidth)
+                                currentx -= tWidth;
                         }
-                        offset += count >= reduce ? count - reduce : count;
                         continue;
                     }
 
@@ -217,9 +216,9 @@ namespace LibraryEditor
 
                         byte[] newPixels = new byte[64];
                         byte[] block = new byte[size];
+
                         Array.Copy(_fBytes, blockOffSet, block, 0, size);
                         blockOffSet += size;
-
                         DecompressBlock(newPixels, block);
 
                         int pixelOffSet = 0;
@@ -228,28 +227,31 @@ namespace LibraryEditor
                         for (int py = 0; py < 4; py++)
                         {
                             for (int px = 0; px < 4; px++)
-                           {
-                               int blockx = offset % (outputWidth / 4);
-                               int blocky = offset / (outputWidth / 4);
+                            {
+                                int blockx = offset % (outputWidth / 4);
+                                int blocky = offset / (outputWidth / 4);
 
-                               int x = blockx * 4;
-                               int y = blocky * 4;
-                               int destPixel = ((y + py) * outputWidth) * 4 + (x + px) * 4;
-                               Array.Copy(newPixels, pixelOffSet, sourcePixel, 0, 4);
-                               pixelOffSet += 4;
+                                int x = blockx * 4;
+                                int y = blocky * 4;
 
-                               if (destPixel + 4 > pixels.Length)
+                                int destPixel = ((y + py) * outputWidth) * 4 + (x + px) * 4;
+
+                                Array.Copy(newPixels, pixelOffSet, sourcePixel, 0, 4);
+                                pixelOffSet += 4;
+
+                                if (destPixel + 4 > cap)
                                     break;
                                 for (int pc = 0; pc < 4; pc++)
                                     pixels[destPixel + pc] = sourcePixel[pc];
                             }
                         }
                         offset++;
+                        if (currentx >= outputWidth)
+                            currentx -= outputWidth;
+                        currentx += 4;
                     }
-                    loop++;
                 }
             }
-            Marshal.Copy(pixels, 0, data.Scan0, pixels.Length);
 
             output.UnlockBits(data);
             return output;
