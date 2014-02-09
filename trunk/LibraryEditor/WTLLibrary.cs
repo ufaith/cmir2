@@ -285,6 +285,15 @@ namespace LibraryEditor
 
             codes[8 + 3] = 255;
             codes[12 + 3] = (a <= b) ? (byte)0 : (byte)255;
+            for (int i = 0; i < 4; i++)
+            {
+                if ((codes[i * 4] == 0) && (codes[(i * 4) + 1] == 0) && (codes[(i * 4) + 2] == 0) && (codes[(i * 4)+3] == 255))
+                { //dont ever use pure black cause that gives transparency issues
+                    codes[i * 4] = 1;
+                    codes[(i * 4) + 1] = 1;
+                    codes[(i * 4) + 2] = 1;
+                }
+            }
 
             byte[] indices = new byte[16];
             for (int i = 0; i < 4; i++)
