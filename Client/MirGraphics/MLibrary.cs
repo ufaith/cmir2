@@ -89,40 +89,40 @@ namespace Client.MirGraphics
             {
                 MapLibs[i+1] = new MLibrary(Settings.DataPath + "Objects" + i.ToString());
             }
-            //wemade mir3 (allowed from 100-199)
+            //shanda mir2 (allowed from 100-199)
+            MapLibs[100] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Tiles");
+            for (int i = 1; i < 10; i++)
+            {
+                MapLibs[100 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Tiles" + i);
+            }
+            MapLibs[110] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\SmTiles");
+            for (int i = 1; i < 10; i++)
+            {
+                MapLibs[110 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\SmTiles" + i);
+            }
+            MapLibs[120] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Objects");
+            for (int i = 1; i < 31; i++)
+            {
+                MapLibs[120 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Objects" + i);
+            }
+            //wemade mir3 (allowed from 200-299)
             string[] Mapstate = { "", "wood\\", "sand\\", "snow\\", "forest\\"};
             for (int i = 0; i < Mapstate.Length; i++)
             {
-                MapLibs[100 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Tilesc");
-                MapLibs[101 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Tiles30c");
-                MapLibs[102 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Tiles5c");
-                MapLibs[103 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Smtilesc");
-                MapLibs[104 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Housesc");
-                MapLibs[105 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Cliffsc");
-                MapLibs[106 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Dungeonsc");
-                MapLibs[107 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Innersc");
-                MapLibs[108 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Furnituresc");
-                MapLibs[109 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Wallsc");
-                MapLibs[110 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "smObjectsc");
-                MapLibs[111 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Animationsc");
-                MapLibs[112 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Object1c");
-                MapLibs[113 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Object2c");
-            }
-            //shanda mir2 (allowed from 200-299)
-            MapLibs[200] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Tiles");
-            for (int i = 1; i < 10; i++)
-            {
-                MapLibs[200 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Tiles" + i);
-            }
-            MapLibs[210] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\SmTiles");
-            for (int i = 1; i < 10; i++)
-            {
-                MapLibs[210 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\SmTiles" + i);
-            }
-            MapLibs[220] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Objects");
-            for (int i = 1; i < 31; i++)
-            {
-                MapLibs[220 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Objects" + i);
+                MapLibs[200 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Tilesc");
+                MapLibs[201 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Tiles30c");
+                MapLibs[202 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Tiles5c");
+                MapLibs[203 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Smtilesc");
+                MapLibs[204 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Housesc");
+                MapLibs[205 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Cliffsc");
+                MapLibs[206 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Dungeonsc");
+                MapLibs[207 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Innersc");
+                MapLibs[208 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Furnituresc");
+                MapLibs[209 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Wallsc");
+                MapLibs[210 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "smObjectsc");
+                MapLibs[211 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Animationsc");
+                MapLibs[212 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Object1c");
+                MapLibs[213 + (i * 15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Object2c");
             }
             Mapstate = new string[] { "", "wood", "sand", "snow", "forest"};
             //shanda mir3 (allowed from 300-399)
