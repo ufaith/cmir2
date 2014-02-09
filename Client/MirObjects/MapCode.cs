@@ -18,8 +18,11 @@ namespace Client.MirObjects
         public byte DoorIndex;
         public byte DoorOffset;
 
-        public byte AnimationFrame;
-        public byte AnimationTick;
+        public byte FrontAnimationFrame;
+        public byte FrontAnimationTick;
+
+        public byte MiddleAnimationFrame;
+        public byte MiddleAnimationTick;
 
         public short TileAnimationIndex;
         public short TileAnimationTick;
@@ -191,8 +194,8 @@ namespace Client.MirObjects
                                 FrontImage = (short)(BitConverter.ToInt16(Bytes, offSet += 2) ^ xor),
                                 DoorIndex = Bytes[offSet += 2],
                                 DoorOffset = Bytes[++offSet],
-                                AnimationFrame = Bytes[++offSet],
-                                AnimationTick = Bytes[++offSet],
+                                FrontAnimationFrame = Bytes[++offSet],
+                                FrontAnimationTick = Bytes[++offSet],
                                 FrontIndex = (short)(Bytes[++offSet] + 2),
                                 Light = Bytes[++offSet],
                                 Unknown = Bytes[++offSet],
@@ -240,7 +243,11 @@ namespace Client.MirObjects
                     for (int y = 0; y < Height; y++)
                     {
                         flag = Bytes[offset++];
-                        offset+=2;//aniframe > aniframefr
+                        MapCells[x, y].MiddleAnimationFrame = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationFrame = Bytes[offset] == 255? (byte)0 : Bytes[offset];
+                        offset++;
+                        MapCells[x, y].MiddleAnimationTick = 2;
+                        MapCells[x, y].FrontAnimationTick = 2;
                         MapCells[x,y].FrontIndex = (short)(Bytes[offset] > 0 ? Bytes[offset] + 100 : 0);
                         offset++;
                         MapCells[x,y].MiddleIndex = (short)(Bytes[offset] > 0 ? Bytes[offset] + 100 : 0);
@@ -248,11 +255,14 @@ namespace Client.MirObjects
                         MapCells[x,y].MiddleImage = (short)(BitConverter.ToInt16(Bytes,offset)+1);
                         offset += 2;
                         MapCells[x, y].FrontImage = (short)(BitConverter.ToInt16(Bytes, offset)+1);
-
                         offset += 2;
-                        offset += 5;//mir3 maps dont have doors so dont bother reading the info, also not using light info atm
-                        if (flag == 1) MapCells[x, y].BackImage |= 0x20000000;
-                        if (flag == 2) MapCells[x, y].FrontImage = (short)(MapCells[x, y].FrontImage | 0x8000);
+                        offset += 3;//mir3 maps dont have doors so dont bother reading the info
+                        if (Bytes[offset] > 0)
+                            offset = offset;
+                        MapCells[x, y].Light = (byte)(Bytes[offset] & 0x0F);
+                        offset += 2;
+                        if ((flag & 0x01) != 1) MapCells[x, y].BackImage |= 0x20000000;
+                        if ((flag & 0x02) != 2) MapCells[x, y].FrontImage = (short)(MapCells[x, y].FrontImage | 0x8000);
                     }
             }
             catch (Exception ex)

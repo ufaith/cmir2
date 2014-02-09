@@ -90,7 +90,7 @@ namespace Client.MirGraphics
                 MapLibs[i+1] = new MLibrary(Settings.DataPath + "Objects" + i.ToString());
             }
             //wemade mir3 (allowed from 100-199)
-            string[] Mapstate = { "", "wood", "sand", "snow", "forest"};
+            string[] Mapstate = { "", "wood\\", "sand\\", "snow\\", "forest\\"};
             for (int i = 0; i < Mapstate.Length; i++)
             {
                 MapLibs[100 +(i*15)] = new MLibrary(Settings.DataPath + "Map\\Wemade-Mir3\\" + Mapstate[i] + "Tilesc");
@@ -124,6 +124,7 @@ namespace Client.MirGraphics
             {
                 MapLibs[220 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Objects" + i);
             }
+            Mapstate = new string[] { "", "wood", "sand", "snow", "forest"};
             //shanda mir3 (allowed from 300-399)
             for (int i = 0; i < Mapstate.Length; i++)
             {
@@ -574,6 +575,27 @@ namespace Client.MirGraphics
 
 
             DXManager.Sprite.Draw2D(mi.Image, Point.Empty, 0, new PointF(x, y), Color.White);
+            mi.CleanTime = CMain.Time + Settings.CleanDelay;
+        }
+        public void DrawUpBlend(int index, Point point)
+        {
+            if (!CheckImage(index))
+                return;
+
+            MImage mi = _images[index];
+
+            point.Y -= mi.Height;
+
+
+            if (point.X >= Settings.ScreenWidth || point.Y >= Settings.ScreenHeight || point.X + mi.Width < 0 || point.Y + mi.Height < 0)
+                return;
+
+            bool oldBlend = DXManager.Blending;
+            DXManager.SetBlend(true, 1);
+
+            DXManager.Sprite.Draw2D(mi.Image, Point.Empty, 0, point, Color.White);
+
+            DXManager.SetBlend(oldBlend);
             mi.CleanTime = CMain.Time + Settings.CleanDelay;
         }
         
