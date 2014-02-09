@@ -3657,12 +3657,36 @@ namespace Client.MirScenes
                     if (x >= Width) break;
                     int drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X;
                     int index;
+                    byte animation;
+                    bool blend;
                     #region draw mir3 middle layer
                     if ((M2CellInfo[x, y].MiddleIndex > 99) && (M2CellInfo[x, y].MiddleIndex < 200))
                     {
                         index = M2CellInfo[x, y].MiddleImage - 1;
-                        if (index < 0) continue;
-                            Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].DrawUp(index, drawX, drawY);
+                        if (index > 0)
+                        {
+                            animation = M2CellInfo[x, y].MiddleAnimationFrame;
+                            blend = false;
+                            if ((animation > 0) && (animation < 255))
+                            {
+                                if ((animation & 0x07) > 0)
+                                {
+                                    blend = true;
+                                    animation &= 0x07;
+                                }
+                                if (animation > 0)
+                                {
+                                    byte animationTick = M2CellInfo[x, y].MiddleAnimationTick;
+                                    index += (AnimationCount % (animation + (animation * animationTick))) / (1 + animationTick);
+                                }
+                            }
+                            
+                            //if (M2CellInfo[x,y].Blend)
+                            //if (blend)
+                            //    Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].DrawUpBlend(index, new Point(drawX, drawY));
+                            //else
+                                Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].DrawUp(index, drawX, drawY);
+                        }
                     }
                     #endregion
                     #region draw front layer
@@ -3671,10 +3695,8 @@ namespace Client.MirScenes
                     if (index < 0) continue;
 
                     int fileIndex = M2CellInfo[x, y].FrontIndex;
-                    byte animation = M2CellInfo[x, y].AnimationFrame;
-
-
-                    bool blend;
+                    animation = M2CellInfo[x, y].FrontAnimationFrame;
+                    
                     if ((animation & 0x80) > 0)
                     {
                         blend = true;
@@ -3685,7 +3707,7 @@ namespace Client.MirScenes
 
                     if (animation > 0)
                     {
-                        byte animationTick = M2CellInfo[x, y].AnimationTick;
+                        byte animationTick = M2CellInfo[x, y].FrontAnimationTick;
                         index += (AnimationCount%(animation + (animation*animationTick)))/(1 + animationTick);
                     }
 
@@ -3844,7 +3866,7 @@ namespace Client.MirScenes
                         (y + OffSetY - MapObject.User.Movement.Y) * CellHeight + MapObject.User.OffSetMove.Y + 32);
                     p.Offset(((light + 1)*-65 + CellWidth)/2, ((light + 1)*-50 + CellHeight)/2);
 
-                    if (M2CellInfo[x, y].AnimationFrame > 0)
+                    if (M2CellInfo[x, y].FrontAnimationFrame > 0)
                         p.Offset(Libraries.MapLibs[fileIndex].GetOffSet(imageIndex));
 
                     if (light > DXManager.Lights.Count)
