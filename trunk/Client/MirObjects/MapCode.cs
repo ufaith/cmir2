@@ -122,8 +122,7 @@ namespace Client.MirObjects
             //wemades antihack map (laby maps) title start with: Mir2 AntiHack
             if ((Bytes[0] == 0x15) && (Bytes[4] == 0x32) && (Bytes[6] == 0x41) && (Bytes[19] == 0x31))
             {
-                //load wemade mir2 antihack map (aka laby maps)
-                //LoadMapType4();
+                LoadMapType4();
                 return;
             }
             //wemades 2010 map format i guess title starts with: Map 2010 Ver 1.0
@@ -146,7 +145,7 @@ namespace Client.MirObjects
                 else
                 {
                      //load format other format
-                    //LoadMapType2();
+                    LoadMapType2();
                     return;
                 }
             }
@@ -154,12 +153,50 @@ namespace Client.MirObjects
             //3/4 heroes map format (myth/lifcos i guess)
             if ((Bytes[0] == 0x0D) && (Bytes[1] == 0x4C) && (Bytes[7] == 0x20) && (Bytes[11] == 0x6D))
             {
-                //load 3/4 heroes map format
-                //LoadMapType7();
+                LoadMapType7();
                 return;
             }
             //if it's none of the above load the default old school format
-            //LoadMapType0();
+            LoadMapType0();
+
+        }
+
+        private void LoadMapType0()
+        {
+            try
+            {
+                int offset = 0;
+                Width = BitConverter.ToInt16(Bytes, offset);
+                offset += 2;
+                Height = BitConverter.ToInt16(Bytes, offset);
+                MapCells = new CellInfo[Width, Height];
+                offset = 52;
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {//12
+                        MapCells[x, y] = new CellInfo();
+                        MapCells[x, y].BackIndex = 0;
+                        MapCells[x, y].MiddleIndex = 1;
+                        MapCells[x, y].BackImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].MiddleImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].FrontImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].DoorIndex = Bytes[offset++];
+                        MapCells[x, y].DoorOffset = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationFrame = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationTick = Bytes[offset++];
+                        MapCells[x, y].FrontIndex = (short)(Bytes[offset++]+ 2);
+                        MapCells[x, y].Light = Bytes[offset++];
+                        if ((MapCells[x, y].BackImage & 0x8000) != 0)
+                            MapCells[x, y].BackImage = (MapCells[x, y].BackImage & 0x7FFF) | 0x20000000;
+                    }
+            }
+            catch (Exception ex)
+            {
+                if (Settings.LogErrors) CMain.SaveError(ex.ToString());
+            }
 
         }
 
@@ -206,6 +243,88 @@ namespace Client.MirObjects
                 if (Settings.LogErrors) CMain.SaveError(ex.ToString());
             }
         }
+
+        private void LoadMapType2()
+        {
+            try
+            {
+                int offset = 0;
+                Width = BitConverter.ToInt16(Bytes, offset);
+                offset += 2;
+                Height = BitConverter.ToInt16(Bytes, offset);
+                MapCells = new CellInfo[Width, Height];
+                offset = 52;
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {//14
+                        MapCells[x, y] = new CellInfo();
+                        MapCells[x, y].BackImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].MiddleImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].FrontImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].DoorIndex = Bytes[offset++];
+                        MapCells[x, y].DoorOffset = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationFrame = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationTick = Bytes[offset++];
+                        MapCells[x, y].FrontIndex = (short)(Bytes[offset++] + 120);
+                        MapCells[x, y].Light = Bytes[offset++];
+                        MapCells[x, y].BackIndex = (short)(Bytes[offset++] + 100);
+                        MapCells[x, y].MiddleIndex = (short)(Bytes[offset++] + 110);
+                        if ((MapCells[x, y].BackImage & 0x8000) != 0)
+                            MapCells[x, y].BackImage = (MapCells[x, y].BackImage & 0x7FFF) | 0x20000000;
+                    }
+            }
+            catch (Exception ex)
+            {
+                if (Settings.LogErrors) CMain.SaveError(ex.ToString());
+            }
+
+        }
+
+        private void LoadMapType4()
+        {
+            try
+            {
+                int offset = 31;
+                int w = BitConverter.ToInt16(Bytes, offset);
+                offset += 2;
+                int xor = BitConverter.ToInt16(Bytes, offset);
+                offset += 2;
+                int h = BitConverter.ToInt16(Bytes, offset);
+                Width = w ^ xor;
+                Height = h ^ xor;
+                MapCells = new CellInfo[Width, Height];
+                offset = 64;
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {//12
+                        MapCells[x, y] = new CellInfo();
+                        MapCells[x, y].BackIndex = 0;
+                        MapCells[x, y].MiddleIndex = 1;
+                        MapCells[x, y].BackImage = (short)(BitConverter.ToInt16(Bytes, offset) ^ xor);
+                        offset += 2;
+                        MapCells[x, y].MiddleImage = (short)(BitConverter.ToInt16(Bytes, offset) ^ xor);
+                        offset += 2;
+                        MapCells[x, y].FrontImage = (short)(BitConverter.ToInt16(Bytes, offset) ^xor);
+                        offset += 2;
+                        MapCells[x, y].DoorIndex = Bytes[offset++];
+                        MapCells[x, y].DoorOffset = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationFrame = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationTick = Bytes[offset++];
+                        MapCells[x, y].FrontIndex = (short)(Bytes[offset++] + 2);
+                        MapCells[x, y].Light = Bytes[offset++];
+                        if ((MapCells[x, y].BackImage & 0x8000) != 0)
+                            MapCells[x, y].BackImage = (MapCells[x, y].BackImage & 0x7FFF) | 0x20000000;
+                    }
+            }
+            catch (Exception ex)
+            {
+                if (Settings.LogErrors) CMain.SaveError(ex.ToString());
+            }
+        }
+
 
         private void LoadMapType5()
         {
@@ -257,7 +376,7 @@ namespace Client.MirObjects
                         MapCells[x, y].Light = (byte)(Bytes[offset] & 0x0F);
                         offset += 2;
                         if ((flag & 0x01) != 1) MapCells[x, y].BackImage |= 0x20000000;
-                        if ((flag & 0x02) != 2) MapCells[x, y].FrontImage = (short)(MapCells[x, y].FrontImage | 0x8000);
+                        if ((flag & 0x02) != 2) MapCells[x, y].FrontImage = (short)((UInt16)MapCells[x, y].FrontImage | 0x8000);
                     }
             }
             catch (Exception ex)
@@ -299,15 +418,9 @@ namespace Client.MirObjects
                         MapCells[x, y].MiddleAnimationTick = 1;
                         MapCells[x, y].FrontAnimationTick = 1;
                         MapCells[x, y].Light = (byte)(Bytes[offset] & 0x0F);
-                        if (Bytes[offset+2] != 0)
-                            offset = offset;
-                        if (Bytes[offset+3] != 0)
-                            offset = offset;
-                        if (Bytes[offset+4] != 0)
-                            offset = offset;
                         offset += 8;
                         if ((flag & 0x01) != 1) MapCells[x, y].BackImage |= 0x20000000;
-                        if ((flag & 0x02) != 2) MapCells[x, y].FrontImage = (short)(MapCells[x, y].FrontImage | 0x8000);
+                        if ((flag & 0x02) != 2) MapCells[x, y].FrontImage = (short)((UInt16)MapCells[x, y].FrontImage | 0x8000);
 
                     }
             }
@@ -316,6 +429,47 @@ namespace Client.MirObjects
                 if (Settings.LogErrors) CMain.SaveError(ex.ToString());
             }
 
+        }
+
+        private void LoadMapType7()
+        {
+            try
+            {
+                int offset = 21;
+                Width = BitConverter.ToInt16(Bytes, offset);
+                offset += 4;
+                Height = BitConverter.ToInt16(Bytes, offset);
+                MapCells = new CellInfo[Width, Height];
+
+                offset = 54;
+
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {//total 15
+                        MapCells[x, y] = new CellInfo
+                        {
+                            BackIndex = 0,
+                            BackImage = (int)BitConverter.ToInt32(Bytes, offset),
+                            MiddleIndex = 1,
+                            MiddleImage = (short)BitConverter.ToInt16(Bytes, offset += 4),
+                            FrontImage = (short)BitConverter.ToInt16(Bytes, offset += 2),
+                            DoorIndex = Bytes[offset += 2],
+                            DoorOffset = Bytes[++offset],
+                            FrontAnimationFrame = Bytes[++offset],
+                            FrontAnimationTick = Bytes[++offset],
+                            FrontIndex = (short)(Bytes[++offset] + 2),
+                            Light = Bytes[++offset],
+                            Unknown = Bytes[++offset],
+                        };
+                        if ((MapCells[x, y].BackImage & 0x8000) != 0)
+                            MapCells[x, y].BackImage = (MapCells[x, y].BackImage & 0x7FFF) | 0x20000000;
+                        offset++;
+                    }
+            }
+            catch (Exception ex)
+            {
+                if (Settings.LogErrors) CMain.SaveError(ex.ToString());
+            }
         }
 
     }
