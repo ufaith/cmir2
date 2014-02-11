@@ -93,18 +93,19 @@ namespace Client.MirGraphics
             MapLibs[100] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Tiles");
             for (int i = 1; i < 10; i++)
             {
-                MapLibs[100 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Tiles" + i);
+                MapLibs[100 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Tiles" + (i+1));
             }
             MapLibs[110] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\SmTiles");
             for (int i = 1; i < 10; i++)
             {
-                MapLibs[110 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\SmTiles" + i);
+                MapLibs[110 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\SmTiles" + (i+1));
             }
             MapLibs[120] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Objects");
             for (int i = 1; i < 31; i++)
             {
-                MapLibs[120 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Objects" + i);
+                MapLibs[120 + i] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\Objects" + (i+1));
             }
+            MapLibs[190] = new MLibrary(Settings.DataPath + "Map\\Shanda-Mir2\\AniTiles1");
             //wemade mir3 (allowed from 200-299)
             string[] Mapstate = { "", "wood\\", "sand\\", "snow\\", "forest\\"};
             for (int i = 0; i < Mapstate.Length; i++)
@@ -254,17 +255,6 @@ namespace Client.MirGraphics
             }
 
             Loaded = true;
-            //map testing code
-            /*
-            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 0 - 0.map");
-            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 1 - 0.map");
-            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 2 - 0.map");
-            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 3 - n0.map");
-            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 4 - laby01.map");
-            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 5 - 0.map");
-            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 6 - 0.map");
-            new MirObjects.MapReader("D:\\mir\\organised\\map info\\different maptypes test folder\\Type 7 - 0.map");
-            //*/
         }
 
     }
@@ -467,7 +457,6 @@ namespace Client.MirGraphics
             MImage mi = _images[index];
 
             if (offSet) point.Offset(mi.X, mi.Y);
-
 
             if (point.X >= Settings.ScreenWidth || point.Y >= Settings.ScreenHeight || point.X + mi.Width < 0 || point.Y + mi.Height < 0)
                 return;
