@@ -24,9 +24,9 @@ namespace Client.MirObjects
         public byte MiddleAnimationFrame;
         public byte MiddleAnimationTick;
 
-        public short TileAnimationIndex;
-        public short TileAnimationTick;
-        public short TileAnimationFrame;
+        public short TileAnimationImage;
+        public short TileAnimationOffset;
+        public byte  TileAnimationFrames;
 
         public byte Light;
         public byte Unknown;
@@ -138,13 +138,11 @@ namespace Client.MirObjects
                 int H = Bytes[2] + (Bytes[3] << 8);
                 if (Bytes.Length > (52 + (W*H*14)))
                 {
-                    //load shanda 2012 format
-                    //LoadMapType3();
+                    LoadMapType3();
                     return;
                 }
                 else
                 {
-                     //load format other format
                     LoadMapType2();
                     return;
                 }
@@ -281,6 +279,50 @@ namespace Client.MirObjects
                 if (Settings.LogErrors) CMain.SaveError(ex.ToString());
             }
 
+        }
+
+        private void LoadMapType3()
+        {
+            try
+            {
+                int offset = 0;
+                Width = BitConverter.ToInt16(Bytes, offset);
+                offset += 2;
+                Height = BitConverter.ToInt16(Bytes, offset);
+                MapCells = new CellInfo[Width, Height];
+                offset = 52;
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {//36
+                        MapCells[x, y] = new CellInfo();
+                        MapCells[x, y].BackImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].MiddleImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].FrontImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].DoorIndex = Bytes[offset++];
+                        MapCells[x, y].DoorOffset = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationFrame = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationTick = Bytes[offset++];
+                        MapCells[x, y].FrontIndex = (short)(Bytes[offset++] + 120);
+                        MapCells[x, y].Light = Bytes[offset++];
+                        MapCells[x, y].BackIndex = (short)(Bytes[offset++] + 100);
+                        MapCells[x, y].MiddleIndex = (short)(Bytes[offset++] + 110);
+                        MapCells[x, y].TileAnimationImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 7;//2bytes from tileanimframe, 2 bytes always blank?, 2bytes potentialy 'backtiles index', 1byte fileindex for the backtiles?
+                        MapCells[x, y].TileAnimationFrames = Bytes[offset++];
+                        MapCells[x, y].TileAnimationOffset = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 14; //tons of light, blending, .. related options i hope
+                        if ((MapCells[x, y].BackImage & 0x8000) != 0)
+                            MapCells[x, y].BackImage = (MapCells[x, y].BackImage & 0x7FFF) | 0x20000000;
+                    }
+
+            }
+            catch (Exception ex)
+            {
+                if (Settings.LogErrors) CMain.SaveError(ex.ToString());
+            }
         }
 
         private void LoadMapType4()

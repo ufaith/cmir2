@@ -3666,6 +3666,18 @@ namespace Client.MirScenes
                     byte animation;
                     bool blend;
                     Size s;
+                    #region draw shanda's tile animation layer
+                    index = M2CellInfo[x, y].TileAnimationImage;
+                    animation = M2CellInfo[x, y].TileAnimationFrames;
+                    if ((index > 0) & (animation > 0))
+                    {
+                        index--;
+                        int animationoffset = M2CellInfo[x, y].TileAnimationOffset ^ 0x2000;
+                        index += animationoffset * (AnimationCount % animation);
+                        Libraries.MapLibs[190].DrawUp(index, drawX, drawY);
+                    }
+
+                    #endregion
                     #region draw mir3 middle layer
                     if ((M2CellInfo[x, y].MiddleIndex > 199) && (M2CellInfo[x, y].MiddleIndex != -1))
                     {
@@ -3719,12 +3731,16 @@ namespace Client.MirScenes
                         byte animationTick = M2CellInfo[x, y].FrontAnimationTick;
                         index += (AnimationCount%(animation + (animation*animationTick)))/(1 + animationTick);
                     }
-
                     s = Libraries.MapLibs[fileIndex].GetSize(index);
 
                     if (s.Width == CellWidth && s.Height == CellHeight && animation == 0) continue;
                     if (blend)
-                        Libraries.MapLibs[fileIndex].DrawBlend(index, new Point(drawX, drawY - s.Height), Color.White, index >= 2723 && index <= 2732);
+                    {
+                        if ((fileIndex > 99) & (fileIndex < 199))
+                            Libraries.MapLibs[fileIndex].DrawBlend(index, new Point(drawX, drawY - (3 * CellHeight)), Color.White, true);
+                        else
+                        Libraries.MapLibs[fileIndex].DrawBlend(index, new Point(drawX, drawY - s.Height), Color.White, (index >= 2723 && index <= 2732));
+                    }
                     else
                         Libraries.MapLibs[fileIndex].Draw(index, drawX, drawY - s.Height);
                     #endregion
