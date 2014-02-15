@@ -3688,10 +3688,10 @@ namespace Client.MirScenes
                             blend = false;
                             if ((animation > 0) && (animation < 255))
                             {
-                                if ((animation & 0x07) > 0)
+                                if ((animation & 0x0F) > 0)
                                 {
                                     blend = true;
-                                    animation &= 0x07;
+                                    animation &= 0x0F;
                                 }
                                 if (animation > 0)
                                 {

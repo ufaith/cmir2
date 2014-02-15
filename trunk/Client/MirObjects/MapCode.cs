@@ -403,6 +403,8 @@ namespace Client.MirObjects
                         flag = Bytes[offset++];
                         MapCells[x, y].MiddleAnimationFrame = Bytes[offset++];
                         MapCells[x, y].FrontAnimationFrame = Bytes[offset] == 255? (byte)0 : Bytes[offset];
+                        if (MapCells[x, y].FrontAnimationFrame > 0x0F)
+                            MapCells[x, y].FrontAnimationFrame = (byte)(/*0x80 ^*/ (MapCells[x, y].FrontAnimationFrame & 0x0F));
                         offset++;
                         MapCells[x, y].MiddleAnimationTick = 1;
                         MapCells[x, y].FrontAnimationTick = 1;
@@ -460,6 +462,8 @@ namespace Client.MirObjects
                             MapCells[x, y].FrontIndex = -1;
                         MapCells[x, y].MiddleAnimationFrame = Bytes[offset++];
                         MapCells[x, y].FrontAnimationFrame = Bytes[offset] == 255 ? (byte)0 : Bytes[offset];
+                        if (MapCells[x, y].FrontAnimationFrame > 0x0F)//assuming shanda used same value not sure
+                            MapCells[x, y].FrontAnimationFrame = (byte)(/*0x80 ^*/ (MapCells[x, y].FrontAnimationFrame & 0x0F));
                         offset++;
                         MapCells[x, y].MiddleAnimationTick = 1;
                         MapCells[x, y].FrontAnimationTick = 1;
