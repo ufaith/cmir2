@@ -213,8 +213,7 @@ namespace Server.MirEnvir
             Height = BitConverter.ToInt16(fileBytes, offSet);
             Cells = new Cell[Width, Height];
 
-            offSet = 28 + (3 * (Width / 2) * (Height / 2));
-
+            offSet = 28 + (3 * ((Width / 2) + (Width % 2)) * (Height / 2));
             for (int x = 0; x < Width; x++)
                 for (int y = 0; y < Height; y++)
                 {//total 14

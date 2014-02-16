@@ -396,7 +396,7 @@ namespace Client.MirObjects
                         offset += 3;
                     }
                 //read rest of data
-                offset = 28 + (3 * (Width /2) * (Height / 2));
+                offset = 28 + (3 * ((Width /2) + (Width %2)) * (Height / 2));
                 for (int x = 0; x < Width; x++)
                     for (int y = 0; y < Height; y++)
                     {
