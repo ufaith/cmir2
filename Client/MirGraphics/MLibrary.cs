@@ -23,7 +23,10 @@ namespace Client.MirGraphics
             MagIcon2 = new MLibrary(Settings.DataPath + "MagIcon2"),
             Magic = new MLibrary(Settings.DataPath + "Magic"),
             Magic2 = new MLibrary(Settings.DataPath + "Magic2"),
-            Magic3 = new MLibrary(Settings.DataPath + "Magic3");
+            Magic3 = new MLibrary(Settings.DataPath + "Magic3"),
+            Effect = new MLibrary(Settings.DataPath + "Effect"),
+            CustomEffects = new MLibrary(Settings.DataPath + "CustomEffects");
+        
 
         public static readonly MLibrary
             Dragon = new MLibrary(Settings.DataPath + "Dragon");
@@ -154,7 +157,7 @@ namespace Client.MirGraphics
         {
             Count = MapLibs.Length + Monsters.Length + NPCs.Length + CArmours.Length + 
                 CHair.Length + CWeapons.Length + AArmours.Length + AHair.Length + AWeaponsL.Length + AWeaponsR.Length +
-                CHumEffect.Length + 13;
+                CHumEffect.Length + 15;
 
             Dragon.Initialize();
             Progress++;
@@ -173,6 +176,10 @@ namespace Client.MirGraphics
             Magic2.Initialize();
             Progress++;
             Magic3.Initialize();
+            Progress++;
+            Effect.Initialize();
+            Progress++;
+            CustomEffects.Initialize();
             Progress++;
 
             Items.Initialize();

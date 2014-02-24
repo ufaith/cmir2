@@ -254,7 +254,8 @@ namespace Client.MirControls
 
             CharacterDialog dialog = GameScene.Scene.CharacterDialog;
 
-
+            if ((Item.SoulBoundId != -1)  && (MapObject.User.Id != Item.SoulBoundId))
+                return;
             switch (Item.Info.Type)
             {
                 case ItemType.Weapon:
@@ -468,7 +469,10 @@ namespace Client.MirControls
                                     GameScene.SelectedCell = null;
                                     return;
                                 }
-
+                                if (GameScene.SelectedCell.Item.Cursed)
+                                {
+                                    return;
+                                }
 
                                 if (Item == null)
                                 {
@@ -1051,7 +1055,10 @@ namespace Client.MirControls
         protected override void OnMouseEnter()
         {
             base.OnMouseEnter();
-            GameScene.Scene.CreateItemLabel(Item);
+            if (GridType == MirGridType.Inspect)
+                GameScene.Scene.CreateItemLabel(Item, true);
+            else
+                GameScene.Scene.CreateItemLabel(Item);
         }
         protected override void OnMouseLeave()
         {

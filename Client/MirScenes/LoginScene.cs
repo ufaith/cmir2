@@ -86,29 +86,29 @@ namespace Client.MirScenes
         {
             switch (p.Index)
             {
-                case 0:
+                case (short)ServerPacketIds.Connected:
                     Network.Connected = true;
                     SendVersion();
                     break;
-                case 1:
+                case (short)ServerPacketIds.ClientVersion:
                     ClientVersion((S.ClientVersion) p);
                     break;
-                case 3:
+                case (short)ServerPacketIds.NewAccount:
                     NewAccount((S.NewAccount) p);
                     break;
-                case 4:
+                case (short)ServerPacketIds.ChangePassword:
                     ChangePassword((S.ChangePassword) p);
                     break;
-                case 5:
+                case (short)ServerPacketIds.ChangePasswordBanned:
                     ChangePassword((S.ChangePasswordBanned) p);
                     break;
-                case 6:
+                case (short)ServerPacketIds.Login:
                     Login((S.Login) p);
                     break;
-                case 7:
+                case (short)ServerPacketIds.LoginBanned:
                     Login((S.LoginBanned) p);
                     break;
-                case 8:
+                case (short)ServerPacketIds.LoginSucces:
                     Login((S.LoginSuccess) p);
                     break;
                 default:

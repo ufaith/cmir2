@@ -259,25 +259,25 @@ namespace Client.MirScenes
         {
             switch (p.Index)
             {
-                case 9:
+                case (short)ServerPacketIds.NewCharacter:
                     NewCharacter((S.NewCharacter)p);
                     break;
-                case 10:
+                case (short)ServerPacketIds.NewCharacterSuccess:
                     NewCharacter((S.NewCharacterSuccess)p);
                     break;
-                case 11:
+                case (short)ServerPacketIds.DeleteCharacter:
                     DeleteCharacter((S.DeleteCharacter)p);
                     break;
-                case 12:
+                case (short)ServerPacketIds.DeleteCharacterSuccess:
                     DeleteCharacter((S.DeleteCharacterSuccess)p);
                     break;
-                case 13:
+                case (short)ServerPacketIds.StartGame:
                     StartGame((S.StartGame)p);
                     break;
-                case 14:
+                case (short)ServerPacketIds.StartGameBanned:
                     StartGame((S.StartGameBanned)p);
                     break;
-                case 15:
+                case (short)ServerPacketIds.StartGameDelay:
                     StartGame((S.StartGameDelay) p);
                     break;
                 default:
@@ -426,7 +426,6 @@ namespace Client.MirScenes
                     break;
             }
         }
-
         private void UpdateInterface()
         {
             for (int i = 0; i < CharacterButtons.Length; i++)

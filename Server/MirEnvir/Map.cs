@@ -977,7 +977,7 @@ namespace Server.MirEnvir
                                 if (target.Race != ObjectType.Monster) continue;
                                 //Only targets
                                 if (!target.IsAttackTarget(player) || player.Level + 10 < target.Level) continue;
-                                target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = magic.Level + 2, TickSpeed = 1000 });
+                                target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = magic.Level + 2, TickSpeed = 1000 }, player);
                                 target.OperateTime = 0;
                                 train = true;
                             }
@@ -995,7 +995,7 @@ namespace Server.MirEnvir
                 case Spell.PoisonField:
                     value = (int)data[2];
                     location = (Point)data[3];
-
+                    byte bonusdmg = (byte)data[4];
                     train = true;
                     bool show = true;
 
@@ -1029,7 +1029,7 @@ namespace Server.MirEnvir
                             SpellObject ob = new SpellObject
                                 {
                                     Spell = Spell.PoisonField,
-                                    Value = value,
+                                    Value = value + bonusdmg,
                                     ExpireTime = Envir.Time + 6000,
                                     TickSpeed = 1000,
                                     Caster = player,

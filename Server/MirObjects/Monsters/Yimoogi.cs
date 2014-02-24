@@ -105,7 +105,7 @@ namespace Server.MirObjects.Monsters
                         Duration = 6,
                         PType = PoisonType.Red,
                         TickSpeed = 2000
-                    });                
+                    }, this);                
                 }
                 else
                 {

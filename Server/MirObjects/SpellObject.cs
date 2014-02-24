@@ -96,7 +96,7 @@ namespace Server.MirObjects
                             PType = PoisonType.Green,
                             TickSpeed = 2000,
                             Value = Value/20
-                        });
+                        }, Caster);
                     break;
                 case Spell.Blizzard:
                     if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) return;
@@ -107,11 +107,11 @@ namespace Server.MirObjects
                     if (!ob.Dead && Envir.Random.Next(8) == 0)
                         ob.ApplyPoison(new Poison
                         {
-                            Duration = 5,
+                            Duration = 5 + Envir.Random.Next(Caster.Freezing),
                             Owner = Caster,
                             PType = PoisonType.Slow,
                             TickSpeed = 2000,
-                        });
+                        }, Caster);
                     break;
                 case Spell.MeteorStrike:
                     if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) return;
@@ -236,7 +236,7 @@ namespace Server.MirObjects
 
         }
 
-        public override void ApplyPoison(Poison p)
+        public override void ApplyPoison(Poison p, MapObject Caster = null, bool NoResist = false)
         {
             throw new NotSupportedException();
         }

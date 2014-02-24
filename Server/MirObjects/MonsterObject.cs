@@ -1450,6 +1450,12 @@ namespace Server.MirObjects
             if (damageWeapon)
                 attacker.DamageWeapon();
 
+            if ((attacker.CriticalRate * Settings.CriticalRateWeight) > Envir.Random.Next(100))
+            {
+                Broadcast(new S.ObjectEffect { ObjectID =ObjectID, Effect = SpellEffect.Critical});
+                damage = Math.Min(int.MaxValue, damage + (int)Math.Floor(damage * (((double)attacker.CriticalDamage / (double)Settings.CriticalDamageWeight) * 10)));
+            }
+
             if (armour >= damage) return 0;
 
             if (attacker.LifeOnHit > 0)
@@ -1472,19 +1478,31 @@ namespace Server.MirObjects
                 EXPOwnerTime = Envir.Time + EXPOwnerDelay;
 
             if (attacker.HasParalysisRing && 1 == Envir.Random.Next(1, 15))
-                ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 });
+                ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 }, attacker);
+            byte LevelOffset = (byte)(Level > attacker.Level ? 0 : Math.Min(10, attacker.Level - Level));
+            if (attacker.Freezing > 0)
+                if ((Envir.Random.Next(Settings.FreezingAttackWeight) < attacker.Freezing) && (Envir.Random.Next(LevelOffset) == 0))
+                    ApplyPoison(new Poison { PType = PoisonType.Slow, Duration = Math.Min(10, (3 + Envir.Random.Next(attacker.Freezing))), TickSpeed = 1000 }, attacker);
+            if (attacker.PoisonAttack > 0)
+                if ((Envir.Random.Next(Settings.PoisonAttackWeight) < attacker.PoisonAttack) && (Envir.Random.Next(LevelOffset) == 0))
+                    ApplyPoison(new Poison { PType = PoisonType.Green, Duration = 5, TickSpeed = 1000, Value = Math.Min(10, 3 + Envir.Random.Next(attacker.PoisonAttack)) }, attacker);
 
             Broadcast(new S.ObjectStruck { ObjectID = ObjectID, AttackerID = attacker.ObjectID, Direction = Direction, Location = CurrentLocation });
 
-            int additionalDamage = 0;
-
-            if (attacker.ItemSets.Any(s => s.Set == ItemSet.RedOrchid && s.SetComplete))
+            if (attacker.HpDrainRate > 0)
             {
-                additionalDamage = (damage * 10) / 100;
-                attacker.ChangeHP(additionalDamage);
+                attacker.HpDrain += Math.Max(0, ((float)(damage - armour) / 100) * attacker.HpDrainRate);
+                if (attacker.HpDrain > 2)
+                {
+                    int HpGain = (int)Math.Floor(attacker.HpDrain);
+                    attacker.ChangeHP(HpGain);
+                    attacker.HpDrain -= HpGain;
+
+                }
             }
 
-            ChangeHP(armour - (damage + additionalDamage));
+
+            ChangeHP(armour - damage);
 
             return damage - armour;
         }
@@ -1550,7 +1568,7 @@ namespace Server.MirObjects
             return damage - armour;
         }
 
-        public override void ApplyPoison(Poison p)
+        public override void ApplyPoison(Poison p, MapObject Caster = null, bool NoResist = false)
         {
             if (p.Owner != null && p.Owner.IsAttackTarget(this))
                 Target = p.Owner;
@@ -1564,7 +1582,8 @@ namespace Server.MirObjects
             for (int i = 0; i < PoisonList.Count; i++)
             {
                 if (PoisonList[i].PType != p.PType) continue;
-
+                if ((PoisonList[i].PType == PoisonType.Green) && (PoisonList[i].Value > p.Value)) return;//cant cast weak poison to cancel out strong poison
+                if ((PoisonList[i].PType != PoisonType.Green) && ((PoisonList[i].Duration - PoisonList[i].Time) > p.Duration)) return;//cant cast 1 second poison to make a 1minute poison go away!
                 PoisonList[i] = p;
                 return;
             }

@@ -65,6 +65,8 @@ namespace Client.MirScenes
         public TrustMerchantDialog TrustMerchantDialog;
         
         public static List<ItemInfo> ItemInfoList = new List<ItemInfo>();
+        public static List<UserId> UserIdList = new List<UserId>();
+        public static List<ChatItem> ChatItemList = new List<ChatItem>();
 
         public List<Buff> Buffs = new List<Buff>();
 
@@ -597,315 +599,324 @@ namespace Client.MirScenes
         {
             switch (p.Index)
             {
-                case 16: //MapInfo
+                case (short)ServerPacketIds.MapInformation: //MapInfo
                     MapInformation((S.MapInformation) p);
                     break;
-                case 17:
+                case (short)ServerPacketIds.UserInformation:
                     UserInformation((S.UserInformation) p);
                     break;
-                case 18:
+                case (short)ServerPacketIds.UserLocation:
                     UserLocation((S.UserLocation) p);
                     break;
-                case 19:
+                case (short)ServerPacketIds.ObjectPlayer:
                     ObjectPlayer((S.ObjectPlayer) p);
                     break;
-                case 20:
+                case (short)ServerPacketIds.ObjectRemove:
                     ObjectRemove((S.ObjectRemove) p);
                     break;
-                case 21:
+                case (short)ServerPacketIds.ObjectTurn:
                     ObjectTurn((S.ObjectTurn) p);
                     break;
-                case 22:
+                case (short)ServerPacketIds.ObjectWalk:
                     ObjectWalk((S.ObjectWalk) p);
                     break;
-                case 23:
+                case (short)ServerPacketIds.ObjectRun:
                     ObjectRun((S.ObjectRun) p);
                     break;
-                case 24:
+                case (short)ServerPacketIds.Chat:
                     ReceiveChat((S.Chat) p);
                     break;
-                case 25:
+                case (short)ServerPacketIds.ObjectChat:
                     ObjectChat((S.ObjectChat) p);
                     break;
-                case 27:
+                case (short)ServerPacketIds.MoveItem:
                     MoveItem((S.MoveItem) p);
                     break;
-                case 28:
+                case (short)ServerPacketIds.EquipItem:
                     EquipItem((S.EquipItem) p);
                     break;
-                case 29:
+                case (short)ServerPacketIds.MergeItem:
                     MergeItem((S.MergeItem) p);
                     break;
-                case 30:
+                case (short)ServerPacketIds.RemoveItem:
                     RemoveItem((S.RemoveItem) p);
                     break;
-                case 31:
+                case (short)ServerPacketIds.TakeBackItem:
                     TakeBackItem((S.TakeBackItem) p);
                     break;
-                case 32:
+                case (short)ServerPacketIds.StoreItem:
                     StoreItem((S.StoreItem) p);
                     break;
-                case 33:
+                case (short)ServerPacketIds.SplitItem:
                     SplitItem((S.SplitItem) p);
                     break;
-                case 34:
+                case (short)ServerPacketIds.SplitItem1:
                     SplitItem1((S.SplitItem1) p);
                     break;
-                case 35:
+                case (short)ServerPacketIds.UseItem:
                     UseItem((S.UseItem) p);
                     break;
-                case 36:
+                case (short)ServerPacketIds.DropItem:
                     DropItem((S.DropItem) p);
                     break;
-                case 37:
+                case (short)ServerPacketIds.PlayerUpdate:
                     PlayerUpdate((S.PlayerUpdate) p);
                     break;
-                case 38:
+                case (short)ServerPacketIds.PlayerInspect:
                     PlayerInspect((S.PlayerInspect) p);
                     break;
-                case 39:
+                case (short)ServerPacketIds.LogOutSuccess:
                     LogOutSuccess((S.LogOutSuccess) p);
                     break;
-                case 40:
+                case (short)ServerPacketIds.TimeOfDay:
                     TimeOfDay((S.TimeOfDay) p);
                     break;
-                case 41:
+                case (short)ServerPacketIds.ChangeAMode:
                     ChangeAMode((S.ChangeAMode) p);
                     break;
-                case 42:
+                case (short)ServerPacketIds.ChangePMode:
                     ChangePMode((S.ChangePMode) p);
                     break;
-                case 43:
+                case (short)ServerPacketIds.ObjectItem:
                     ObjectItem((S.ObjectItem) p);
                     break;
-                case 44:
+                case (short)ServerPacketIds.ObjectGold:
                     ObjectGold((S.ObjectGold) p);
                     break;
-                case 45:
+                case (short)ServerPacketIds.GainedItem:
                     GainedItem((S.GainedItem) p);
                     break;
-                case 46:
+                case (short)ServerPacketIds.GainedGold:
                     GainedGold((S.GainedGold) p);
                     break;
-                case 47:
+                case (short)ServerPacketIds.LoseGold:
                     LoseGold((S.LoseGold) p);
                     break;
-                case 48:
+                case (short)ServerPacketIds.ObjectMonster:
                     ObjectMonster((S.ObjectMonster) p);
                     break;
-                case 49:
+                case (short)ServerPacketIds.ObjectAttack:
                     ObjectAttack((S.ObjectAttack) p);
                     break;
-                case 50:
+                case (short)ServerPacketIds.Struck:
                     Struck((S.Struck) p);
                     break;
-                case 51:
+                case (short)ServerPacketIds.ObjectStruck:
                     ObjectStruck((S.ObjectStruck) p);
                     break;
-                case 52:
+                case (short)ServerPacketIds.DuraChanged:
                     DuraChanged((S.DuraChanged) p);
                     break;
-                case 53:
+                case (short)ServerPacketIds.HealthChanged:
                     HealthChanged((S.HealthChanged) p);
                     break;
-                case 54:
+                case (short)ServerPacketIds.DeleteItem:
                     DeleteItem((S.DeleteItem) p);
                     break;
-                case 55:
+                case (short)ServerPacketIds.Death:
                     Death((S.Death) p);
                     break;
-                case 56:
+                case (short)ServerPacketIds.ObjectDied:
                     ObjectDied((S.ObjectDied) p);
                     break;
-                case 57:
+                case (short)ServerPacketIds.ColourChanged:
                     ColourChanged((S.ColourChanged) p);
                     break;
-                case 58:
+                case (short)ServerPacketIds.ObjectColourChanged:
                     ObjectColourChanged((S.ObjectColourChanged) p);
                     break;
-                case 59:
+                case (short)ServerPacketIds.GainExperience:
                     GainExperience((S.GainExperience) p);
                     break;
-                case 60:
+                case (short)ServerPacketIds.LevelChanged:
                     LevelChanged((S.LevelChanged) p);
                     break;
-                case 61:
+                case (short)ServerPacketIds.ObjectLeveled:
                     ObjectLeveled((S.ObjectLeveled) p);
                     break;
-                case 62:
+                case (short)ServerPacketIds.ObjectHarvest:
                     ObjectHarvest((S.ObjectHarvest) p);
                     break;
-                case 63:
+                case (short)ServerPacketIds.ObjectHarvested:
                     ObjectHarvested((S.ObjectHarvested) p);
                     break;
-                case 64:
+                case (short)ServerPacketIds.ObjectNpc:
                     ObjectNPC((S.ObjectNPC) p);
                     break;
-                case 65:
+                case (short)ServerPacketIds.NPCResponse:
                     NPCResponse((S.NPCResponse) p);
                     break;
-                case 66:
+                case (short)ServerPacketIds.ObjectHide:
                     ObjectHide((S.ObjectHide) p);
                     break;
-                case 67:
+                case (short)ServerPacketIds.ObjectShow:
                     ObjectShow((S.ObjectShow) p);
                     break;
-                case 68:
+                case (short)ServerPacketIds.Poisoned:
                     Poisoned((S.Poisoned) p);
                     break;
-                case 69:
+                case (short)ServerPacketIds.ObjectPoisoned:
                     ObjectPoisoned((S.ObjectPoisoned) p);
                     break;
-                case 70:
+                case (short)ServerPacketIds.MapChanged:
                     MapChanged((S.MapChanged) p);
                     break;
-                case 71:
+                case (short)ServerPacketIds.ObjectTeleportOut:
                     ObjectTeleportOut((S.ObjectTeleportOut) p);
                     break;
-                case 72:
+                case (short)ServerPacketIds.ObjectTeleportIn:
                     ObjectTeleportIn((S.ObjectTeleportIn) p);
                     break;
-                case 73:
+                case (short)ServerPacketIds.TeleportIn:
                     TeleportIn();
                     break;
-                case 74:
+                case (short)ServerPacketIds.NPCGoods:
                     NPCGoods((S.NPCGoods) p);
                     break;
-                case 75:
+                case (short)ServerPacketIds.NPCSell:
                     NPCSell();
                     break;
-                case 76:
+                case (short)ServerPacketIds.NPCRepair:
                     NPCRepair((S.NPCRepair) p);
                     break;
-                case 77:
+                case (short)ServerPacketIds.NPCSRepair:
                     NPCSRepair((S.NPCSRepair) p);
                     break;
-                case 78:
+                case (short)ServerPacketIds.NPCStorage:
                     NPCStorage();
                     break;
-                case 79:
+                case (short)ServerPacketIds.SellItem:
                     SellItem((S.SellItem)p);
                     break;
-                case 80:
+                case (short)ServerPacketIds.RepairItem:
                     RepairItem((S.RepairItem)p);
                     break;
-                case 81:
+                case (short)ServerPacketIds.ItemRepaired:
                     ItemRepaired((S.ItemRepaired)p);
                     break;
-                case 82:
+                case (short)ServerPacketIds.NewMagic:
                     NewMagic((S.NewMagic)p);
                     break;
-                case 83:
+                case (short)ServerPacketIds.MagicLeveled:
                     MagicLeveled((S.MagicLeveled)p);
                     break;
-                case 84:
+                case (short)ServerPacketIds.Magic:
                     Magic((S.Magic)p);
                     break;
-                case 85:
+                case (short)ServerPacketIds.ObjectMagic:
                     ObjectMagic((S.ObjectMagic)p);
                     break;
-                case 86:
+                case (short)ServerPacketIds.ObjectEffect:
                     ObjectEffect((S.ObjectEffect)p);
                     break;
-                case 87:
+                case (short)ServerPacketIds.Pushed:
                     Pushed((S.Pushed)p);
                     break;
-                case 88:
+                case (short)ServerPacketIds.ObjectPushed:
                     ObjectPushed((S.ObjectPushed)p);
                     break;
-                case 89:
+                case (short)ServerPacketIds.ObjectName:
                     ObjectName((S.ObjectName)p);
                     break;
-                case 90:
+                case (short)ServerPacketIds.UserStorage:
                     UserStorage((S.UserStorage)p);
                     break;
-                case 91:
+                case (short)ServerPacketIds.SwitchGroup:
                     SwitchGroup((S.SwitchGroup) p);
                     break;
-                case 92:
+                case (short)ServerPacketIds.DeleteGroup:
                     DeleteGroup();
                     break;
-                case 93:
+                case (short)ServerPacketIds.DeleteMember:
                     DeleteMember((S.DeleteMember)p);
                     break;
-                case 94:
+                case (short)ServerPacketIds.GroupInvite:
                     GroupInvite((S.GroupInvite)p);
                     break;
-                case 95:
+                case (short)ServerPacketIds.AddMember:
                     AddMember((S.AddMember)p);
                     break;
-                case 96:
+                case (short)ServerPacketIds.Revived:
                     Revived();
                     break;
-                case 97:
+                case (short)ServerPacketIds.ObjectRevived:
                     ObjectRevived((S.ObjectRevived)p);
                     break;
-                case 98:
+                case (short)ServerPacketIds.SpellToggle:
                     SpellToggle((S.SpellToggle)p);
                     break;
-                case 99:
+                case (short)ServerPacketIds.ObjectHealth:
                     ObjectHealth((S.ObjectHealth)p);
                     break;
-                case 100:
+                case (short)ServerPacketIds.MapEffect:
                     MapEffect((S.MapEffect) p);
                     break;
-                case 101:
+                case (short)ServerPacketIds.ObjectRangeAttack:
                     ObjectRangeAttack((S.ObjectRangeAttack)p);
                     break;
-                case 102:
+                case (short)ServerPacketIds.AddBuff:
                     AddBuff((S.AddBuff)p);
                     break;
-                case 103:
+                case (short)ServerPacketIds.RemoveBuff:
                     RemoveBuff((S.RemoveBuff)p);
                     break;
-                case 104:
+                case (short)ServerPacketIds.ObjectHidden:
                     ObjectHidden((S.ObjectHidden) p);
                     break;
-                case 105:
+                case (short)ServerPacketIds.RefreshItem:
                     RefreshItem((S.RefreshItem) p);
                     break;
-                case 106:
+                case (short)ServerPacketIds.ObjectSpell:
                     ObjectSpell((S.ObjectSpell)p);
                     break;
-                case 107:
+                case (short)ServerPacketIds.UserDash:
                     UserDash((S.UserDash)p);
                     break;
-                case 108:
+                case (short)ServerPacketIds.ObjectDash:
                     ObjectDash((S.ObjectDash)p);
                     break;
-                case 109:
+                case (short)ServerPacketIds.UserDashFail:
                     UserDashFail((S.UserDashFail)p);
                     break;
-                case 110:
+                case (short)ServerPacketIds.ObjectDashFail:
                     ObjectDashFail((S.ObjectDashFail)p);
                     break;
-                case 111:
+                case (short)ServerPacketIds.NPCConsign:
                     NPCConsign();
                     break;
-                case 112:
+                case (short)ServerPacketIds.NPCMarket:
                     NPCMarket((S.NPCMarket)p);
                     break;
-                case 113:
+                case (short)ServerPacketIds.NPCMarketPage:
                     NPCMarketPage((S.NPCMarketPage)p);
                     break;
-                case 114:
+                case (short)ServerPacketIds.ConsignItem:
                     ConsignItem((S.ConsignItem)p);
                     break;
-                case 115:
+                case (short)ServerPacketIds.MarketFail:
                     MarketFail((S.MarketFail)p);
                     break;
-                case 116:
+                case (short)ServerPacketIds.MarketSuccess:
                     MarketSuccess((S.MarketSuccess)p);
                     break;
-                case 117:
+                case (short)ServerPacketIds.ObjectSitDown:
                     ObjectSitDown((S.ObjectSitDown)p);
                     break;
-                case 118:
+                case (short)ServerPacketIds.InTrapRock:
                     S.InTrapRock packetdata = (S.InTrapRock)p;
                     User.InTrapRock = packetdata.Trapped;
                     break;
-                case 119:
+                case (short)ServerPacketIds.RemoveMagic:
                     RemoveMagic((S.RemoveMagic)p);
+                    break;
+                case (short)ServerPacketIds.BaseStatsInfo:
+                    BaseStatsInfo((S.BaseStatsInfo)p);
+                    break;
+                case (short)ServerPacketIds.UserName:
+                    UserName((S.UserName)p);
+                    break;
+                case (short)ServerPacketIds.ChatItemStats:
+                    ChatItemStats((S.ChatItemStats)p);
                     break;
                 default:
                     base.ProcessPacket(p);
@@ -1412,6 +1423,7 @@ namespace Client.MirScenes
             InspectDialog.Class = p.Class;
             InspectDialog.Gender = p.Gender;
             InspectDialog.Hair = p.Hair;
+            InspectDialog.Level = p.Level;
 
             InspectDialog.RefreshInferface();
             InspectDialog.Show();
@@ -2160,6 +2172,12 @@ namespace Client.MirScenes
                         ob.Effects.Add(new Effect(Libraries.Magic2, 1010, 10, 1500, ob));
                         ob.Effects.Add(new Effect(Libraries.Magic2, 1020, 8, 1200, ob));
                         break;
+                    case SpellEffect.Critical:
+                        ob.Effects.Add(new Effect(Libraries.CustomEffects, 0, 12, 60, ob));
+                        break;
+                    case SpellEffect.Reflect:
+                        ob.Effects.Add(new Effect(Libraries.Effect, 580, 10, 70, ob)); 
+                        break;
                 }
                 return;
             }
@@ -2571,6 +2589,33 @@ namespace Client.MirScenes
             }
         }
 
+        private void BaseStatsInfo(S.BaseStatsInfo p)
+        {
+            User.CoreStats = p.Stats;
+            User.RefreshStats();
+        }
+
+        private void UserName(S.UserName p)
+        {
+            for (int i = 0; i < UserIdList.Count; i++)
+                if (UserIdList[i].Id == p.Id)
+                {
+                    UserIdList[i].UserName = p.Name;
+                    break;
+                }
+            DisposeItemLabel();
+            HoverItem = null;
+        }
+
+        private void ChatItemStats(S.ChatItemStats p)
+        {
+            for (int i = 0; i < ChatItemList.Count; i++)
+                if (ChatItemList[i].ID == p.ChatItemId)
+                {
+                    ChatItemList[i].ItemStats = p.Stats;
+                    ChatItemList[i].RecievedTick = CMain.Time;
+                }
+        }
 
         public void AddItem(UserItem item)
         {
@@ -2628,7 +2673,7 @@ namespace Client.MirScenes
             ItemLabel = null;
         }
 
-        public void CreateItemLabel(UserItem item)
+        public void CreateItemLabel(UserItem item, bool Inspect = false)
         {
             if (item == null)
             {
@@ -2638,8 +2683,16 @@ namespace Client.MirScenes
             }
 
             if (item == HoverItem && ItemLabel != null && !ItemLabel.IsDisposed) return;
-
+            byte level = Inspect ? InspectDialog.Level: MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class: MapObject.User.Class;
             HoverItem = item;
+            ItemInfo RealItem = item.Info;
+            if (RealItem.LevelBased & RealItem.ClassBased) RealItem = Functions.GetClassAndLevelBasedItem(RealItem, job, level, ItemInfoList);
+                else
+                {
+                    if (RealItem.LevelBased) RealItem = Functions.GetLevelBasedItem(RealItem, level, ItemInfoList);
+                    if (RealItem.ClassBased) RealItem = Functions.GetClassBasedItem(RealItem, job, ItemInfoList);
+                }
 
             ItemLabel = new MirControl
                 {
@@ -2700,7 +2753,7 @@ namespace Client.MirScenes
                     PotionItemInfo();
                     break;
                 default:
-                    EquipmentItemInfo();
+                    EquipmentItemInfo(RealItem);
                     break;
             }
 
@@ -2712,11 +2765,11 @@ namespace Client.MirScenes
                 switch (MapObject.User.Gender)
                 {
                     case MirGender.Male:
-                        if (!HoverItem.Info.RequiredGender.HasFlag(RequiredGender.Male))
+                        if (!RealItem.RequiredGender.HasFlag(RequiredGender.Male))
                             colour = Color.Red;
                         break;
                     case MirGender.Female:
-                        if (!HoverItem.Info.RequiredGender.HasFlag(RequiredGender.Female))
+                        if (!RealItem.RequiredGender.HasFlag(RequiredGender.Female))
                             colour = Color.Red;
                         break;
                 }
@@ -2734,29 +2787,29 @@ namespace Client.MirScenes
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
-            if (HoverItem.Info.RequiredClass != RequiredClass.None)
+            if (RealItem.RequiredClass != RequiredClass.None)
             {
                 Color colour = Color.White;
+                
                 switch (MapObject.User.Class)
                 {
                     case MirClass.Warrior:
-                        if (!HoverItem.Info.RequiredClass.HasFlag(RequiredClass.Warrior))
+                        if (!RealItem.RequiredClass.HasFlag(RequiredClass.Warrior))
                             colour = Color.Red;
                         break;
                     case MirClass.Wizard:
-                        if (!HoverItem.Info.RequiredClass.HasFlag(RequiredClass.Wizard))
+                        if (!RealItem.RequiredClass.HasFlag(RequiredClass.Wizard))
                             colour = Color.Red;
                         break;
                     case MirClass.Taoist:
-                        if (!HoverItem.Info.RequiredClass.HasFlag(RequiredClass.Taoist))
+                        if (!RealItem.RequiredClass.HasFlag(RequiredClass.Taoist))
                             colour = Color.Red;
                         break;
                     case MirClass.Assassin:
-                        if (!HoverItem.Info.RequiredClass.HasFlag(RequiredClass.Assassin))
+                        if (!RealItem.RequiredClass.HasFlag(RequiredClass.Assassin))
                             colour = Color.Red;
                         break;
                 }
-
                 MirLabel label = new MirLabel
                     {
                         AutoSize = true,
@@ -2764,10 +2817,10 @@ namespace Client.MirScenes
                         Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                         OutLine = false,
                         Parent = ItemLabel,
-                        Text = string.Format("Class Required: {0}", HoverItem.Info.RequiredClass),
+                        Text = string.Format("Class Required: {0}", RealItem.RequiredClass),
                     };
 
-                if (HoverItem.Info.RequiredClass == RequiredClass.WarWizTao)
+                if (RealItem.RequiredClass == RequiredClass.WarWizTao)
                     label.Text = string.Format("Class Required: {0}, {1}, {2}", RequiredClass.Warrior, RequiredClass.Wizard, RequiredClass.Taoist);
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
@@ -2775,40 +2828,40 @@ namespace Client.MirScenes
             }
 
 
-            if (HoverItem.Info.RequiredAmount > 0)
+            if (RealItem.RequiredAmount > 0)
             {
                 string text;
                 Color colour = Color.White;
-                switch (HoverItem.Info.RequiredType)
+                switch (RealItem.RequiredType)
                 {
                     case RequiredType.Level:
-                        text = string.Format("Required Level: {0}", HoverItem.Info.RequiredAmount);
-                        if (MapObject.User.Level < HoverItem.Info.RequiredAmount)
+                        text = string.Format("Required Level: {0}", RealItem.RequiredAmount);
+                        if (MapObject.User.Level < RealItem.RequiredAmount)
                             colour = Color.Red;
                         break;
                     case RequiredType.AC:
-                        text = string.Format("Required AC: {0}", HoverItem.Info.RequiredAmount);
-                        if (MapObject.User.MaxAC < HoverItem.Info.RequiredAmount)
+                        text = string.Format("Required AC: {0}", RealItem.RequiredAmount);
+                        if (MapObject.User.MaxAC < RealItem.RequiredAmount)
                             colour = Color.Red;
                         break;
                     case RequiredType.MAC:
-                        text = string.Format("Required MAC: {0}", HoverItem.Info.RequiredAmount);
-                        if (MapObject.User.MaxMAC < HoverItem.Info.RequiredAmount)
+                        text = string.Format("Required MAC: {0}", RealItem.RequiredAmount);
+                        if (MapObject.User.MaxMAC < RealItem.RequiredAmount)
                             colour = Color.Red;
                         break;
                     case RequiredType.DC:
-                        text = string.Format("Required DC: {0}", HoverItem.Info.RequiredAmount);
-                        if (MapObject.User.MaxDC < HoverItem.Info.RequiredAmount)
+                        text = string.Format("Required DC: {0}", RealItem.RequiredAmount);
+                        if (MapObject.User.MaxDC < RealItem.RequiredAmount)
                             colour = Color.Red;
                         break;
                     case RequiredType.MC:
-                        text = string.Format("Required MC: {0}", HoverItem.Info.RequiredAmount);
-                        if (MapObject.User.MaxMC < HoverItem.Info.RequiredAmount)
+                        text = string.Format("Required MC: {0}", RealItem.RequiredAmount);
+                        if (MapObject.User.MaxMC < RealItem.RequiredAmount)
                             colour = Color.Red;
                         break;
                     case RequiredType.SC:
-                        text = string.Format("Required SC: {0}", HoverItem.Info.RequiredAmount);
-                        if (MapObject.User.MaxSC < HoverItem.Info.RequiredAmount)
+                        text = string.Format("Required SC: {0}", RealItem.RequiredAmount);
+                        if (MapObject.User.MaxSC < RealItem.RequiredAmount)
                             colour = Color.Red;
                         break;
                     default:
@@ -2828,7 +2881,181 @@ namespace Client.MirScenes
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
+            #region "bindmodes"
+            if (HoverItem.Info.Bind != BindMode.none)
+            {
+                byte count = 0;
+                string text = "";
+                if (HoverItem.Info.Bind.HasFlag(BindMode.DontDeathdrop))
+                {
+                    MirLabel label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = "can't drop on death"
+                    };
+                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                }
 
+                if (HoverItem.Info.Bind.HasFlag(BindMode.DontDrop))
+                {
+                    text = "can't drop";
+                    count = 1;
+                }
+
+                if (HoverItem.Info.Bind.HasFlag(BindMode.DontUpgrade))
+                {
+                    text = (text == "")? "can't upgrade": ", can't upgrade";
+                    count += 1;
+                }
+                if (count > 2)
+                {
+                    MirLabel label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = text
+                    };
+                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    count = 0;
+                }
+
+                if (HoverItem.Info.Bind.HasFlag(BindMode.DontSell))
+                {
+                    text = (text == "") ? "can't sell" : ", can't sell";
+                    count += 1;
+                }
+                if (count > 2)
+                {
+                    MirLabel label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = text
+                    };
+                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    count = 0;
+                }
+
+                if (HoverItem.Info.Bind.HasFlag(BindMode.DontTrade))
+                {
+                    text = (text == "") ? "can't trade" : ", can't trade";
+                    count += 1;
+                }
+                if (count > 2)
+                {
+                    MirLabel label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = text
+                    };
+                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    count = 0;
+                }
+
+                if (HoverItem.Info.Bind.HasFlag(BindMode.DontStore))
+                {
+                    text = (text == "") ? "can't store" : ", can't store";
+                    count += 1;
+                }
+                if (count > 1)
+                {
+                    MirLabel label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = text
+                    };
+                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    count = 0;
+                }
+
+                if (HoverItem.Info.Bind.HasFlag(BindMode.DontRepair))
+                {
+                    text = (text == "") ? "can't repair" : ", can't repair";
+                    count += 1;
+                }
+                if (count > 1)
+                {
+                    MirLabel label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = text
+                    };
+                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    count = 0;
+                }
+            }
+            
+            #endregion
+            if ((HoverItem.Info.BindOnEquip) & HoverItem.SoulBoundId == -1)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = "Soulbinds on equip!"
+                };
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+            if (HoverItem.SoulBoundId != -1)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = "Soulbound to: " + GetUserName((uint)HoverItem.SoulBoundId)
+                };
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+            if ((!HoverItem.Info.NeedIdentify || HoverItem.Identified) && HoverItem.Cursed)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Red,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = "Cursed"
+                };
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
             ItemLabel.Size = ItemLabel.Size.Add(0, 4);
 
             ItemLabel.Visible = true;
@@ -2894,7 +3121,7 @@ namespace Client.MirScenes
 
         }
 
-        private void EquipmentItemInfo()
+        private void EquipmentItemInfo(ItemInfo RealItem)
         {
             if (HoverItem.Info.Durability > 0)
             {
@@ -2914,9 +3141,9 @@ namespace Client.MirScenes
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
             }
 
-            int value1 = HoverItem.Info.MinAC;
-            int value2 = HoverItem.Info.MaxAC;
-            int addedValue1 = HoverItem.AC;
+            int value1 = RealItem.MinAC;
+            int value2 = RealItem.MaxAC;
+            int addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.AC: 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
@@ -2935,9 +3162,9 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.MinMAC;
-            value2 = HoverItem.Info.MaxMAC;
-            addedValue1 = HoverItem.MAC;
+            value1 = RealItem.MinMAC;
+            value2 = RealItem.MaxMAC;
+            addedValue1 =  (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.MAC: 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
@@ -2956,9 +3183,9 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.MinDC;
-            value2 = HoverItem.Info.MaxDC;
-            addedValue1 = HoverItem.DC;
+            value1 = RealItem.MinDC;
+            value2 = RealItem.MaxDC;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.DC: 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
@@ -2977,9 +3204,9 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.MinMC;
-            value2 = HoverItem.Info.MaxMC;
-            addedValue1 = HoverItem.MC;
+            value1 = RealItem.MinMC;
+            value2 = RealItem.MaxMC;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.MC: 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
@@ -2998,9 +3225,9 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.MinSC;
-            value2 = HoverItem.Info.MaxSC;
-            addedValue1 = HoverItem.SC;
+            value1 = RealItem.MinSC;
+            value2 = RealItem.MaxSC;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.SC: 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
@@ -3019,8 +3246,8 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.HP;
-            addedValue1 = HoverItem.HP;
+            value1 = RealItem.HP;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.HP: 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
@@ -3039,8 +3266,8 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.MP;
-            addedValue1 = HoverItem.MP;
+            value1 = RealItem.MP;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.MP: 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
@@ -3059,8 +3286,8 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.Accuracy;
-            addedValue1 = HoverItem.Accuracy;
+            value1 = RealItem.Accuracy;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.Accuracy: 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
@@ -3079,8 +3306,8 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.Agility;
-            addedValue1 = HoverItem.Agility;
+            value1 = RealItem.Agility;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.Agility: 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
@@ -3099,8 +3326,8 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.AttackSpeed;
-            addedValue1 = HoverItem.AttackSpeed;
+            value1 = RealItem.AttackSpeed;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.AttackSpeed: 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
@@ -3119,7 +3346,7 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.BagWeight;
+            value1 = RealItem.BagWeight;
 
             if (value1 > 0)
             {
@@ -3137,7 +3364,7 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.HandWeight;
+            value1 = RealItem.HandWeight;
 
             if (value1 > 0)
             {
@@ -3155,7 +3382,7 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.WearWeight;
+            value1 = RealItem.WearWeight;
 
             if (value1 > 0)
             {
@@ -3173,7 +3400,7 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = HoverItem.Info.Luck;
+            value1 = RealItem.Luck;
             addedValue1 = HoverItem.Luck;
 
 
@@ -3193,6 +3420,285 @@ namespace Client.MirScenes
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
+            value1 = RealItem.MagicResist;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MagicResist : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Magic Resist: +{0} (+{1})" : "Magic Resist: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.PoisonResist;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonResist : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Poison Resist: +{0} (+{1})" : "Poison Resist: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.HealthRecovery;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.HealthRecovery : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "HealthRecovery: +{0} (+{1})" : "HealthRecovery: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.SpellRecovery;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.ManaRecovery : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "ManaRecovery: +{0} (+{1})" : "ManaRecovery: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.PoisonRecovery;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonRecovery : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "PoisonRecovery: +{0} (+{1})" : "PoisonRecovery: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.HPrate;
+
+            if (value1 > 0)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Max HP: +{0}%", value1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.MPrate;
+
+            if (value1 > 0)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Max MP: +{0}%", value1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.MaxAcRate;
+
+            if (value1 > 0)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Max AC: +{0}%", value1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.MaxMacRate;
+
+            if (value1 > 0)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Max Mac: +{0}%", value1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.CriticalRate;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.CriticalRate : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Critcal Chance: +{0} (+{1})" : "Critical Chance: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.CriticalDamage;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.CriticalDamage : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Critical Damage: +{0} (+{1})" : "Critical Damage: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.Holy;
+
+            if (value1 > 0)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Holy: +{0}", value1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.Freezing;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Freezing : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Freezing: +{0} (+{1})" : "Freezing: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
+            value1 = RealItem.PoisonAttack;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonAttack : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Poison: +{0} (+{1})" : "Poison: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+            value1 = RealItem.Strong;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Strong : 0;
+
+            if ((value1 > 0) || (addedValue1 > 0))
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Reduced duraloss: +{0} (+{1})" : "Reduced duraloss: +{0}", value1 + addedValue1, addedValue1)
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+            
         }
 
         public class OutPutMessage
@@ -3271,6 +3777,19 @@ namespace Client.MirScenes
             }
 
             return null;
+        }
+
+        public string GetUserName(uint id)
+        {
+            for (int i = 0; i < UserIdList.Count; i++)
+            {
+                UserId who = UserIdList[i];
+                if (id == who.Id)
+                    return who.UserName;
+            }
+            Network.Enqueue(new C.RequestUserName { UserID = id });
+            UserIdList.Add(new UserId() { Id = id, UserName = "Unknown" });
+            return "";
         }
     }
 
@@ -3973,7 +4492,11 @@ namespace Client.MirScenes
                 }
 
                 MirItemCell cell = GameScene.SelectedCell;
-
+                if (cell.Item.Info.Bind.HasFlag(BindMode.DontDrop))
+                {
+                    MirMessageBox messageBox = new MirMessageBox(string.Format("You cannot drop {0}?", cell.Item.Name), MirMessageBoxButtons.OK);
+                    return;
+                }
                 if (cell.Item.Count == 1)
                 {
                     MirMessageBox messageBox = new MirMessageBox(string.Format("Are you sure you want to drop {0}?", cell.Item.Name), MirMessageBoxButtons.YesNo);
@@ -5683,7 +6206,7 @@ namespace Client.MirScenes
         public MirImageControl CharacterPage, StatusPage, StatePage, SkillPage, ClassImage;
 
         public MirLabel NameLabel, GuildLabel, LoverLabel;
-        public MirLabel ACLabel, MACLabel, DCLabel, MCLabel, SCLabel, HealthLabel, ManaLabel;
+        public MirLabel ACLabel, MACLabel, DCLabel, MCLabel, SCLabel, HealthLabel, ManaLabel, StatuspageHeaderLabel, StatuspageDataLabel;
         public MirLabel HeadingLabel, StatLabel;
         public MirButton NextButton, BackButton;
 
@@ -5742,6 +6265,7 @@ namespace Client.MirScenes
                     SCLabel.Text = string.Format("{0}-{1}", MapObject.User.MinSC, MapObject.User.MaxSC);
                     HealthLabel.Text = string.Format("{0}/{1}", MapObject.User.HP, MapObject.User.MaxHP);
                     ManaLabel.Text = string.Format("{0}/{1}", MapObject.User.MP, MapObject.User.MaxMP);
+                    StatuspageDataLabel.Text = string.Format("{0}\n{1}", MapObject.User.CriticalRate, MapObject.User.CriticalDamage);
                 };
 
             StatePage = new MirImageControl
@@ -5754,13 +6278,16 @@ namespace Client.MirScenes
                 };
             StatePage.BeforeDraw += (o, e) =>
                 {
-                    StatLabel.Text = string.Format("{0:#0.##%}\n{1}/{2}\n{3}/{4}\n{5}/{6}\n{7}\n{8}\n+{9}\n+{10}",
+                    StatLabel.Text = string.Format("{0:#0.##%}\n{1}/{2}\n{3}/{4}\n{5}/{6}\n{7}\n{8}\n+{9}\n+{10}\n+{11}\n+{12}\n+{13}\n+{14}\n+{15}\n+{16}\n+{17}\n+{18}",
                                                    MapObject.User.Experience/(double) MapObject.User.MaxExperience,
                                                    MapObject.User.CurrentBagWeight, MapObject.User.MaxBagWeight,
                                                    MapObject.User.CurrentWearWeight, MapObject.User.MaxWearWeight,
                                                    MapObject.User.CurrentHandWeight, MapObject.User.MaxHandWeight,
                                                    MapObject.User.Accuracy, MapObject.User.Agility,
-                                                   MapObject.User.Luck, MapObject.User.ASpeed);
+                                                   MapObject.User.Luck, MapObject.User.ASpeed, 
+                                                   MapObject.User.MagicResist, MapObject.User.PoisonResist, 
+                                                   MapObject.User.HealthRecovery, MapObject.User.SpellRecovery, MapObject.User.PoisonRecovery, 
+                                                   MapObject.User.Holy, MapObject.User.Freezing, MapObject.User.PoisonAttack);
                 };
 
 
@@ -5967,7 +6494,7 @@ namespace Client.MirScenes
                 {
                     AutoSize = true,
                     Parent = StatusPage,
-                    Location = new Point(105, 62),
+                    Location = new Point(105, 63),
                     NotControl = true,
                     Text = "0-0"
                 };
@@ -5976,7 +6503,7 @@ namespace Client.MirScenes
                 {
                     AutoSize = true,
                     Parent = StatusPage,
-                    Location = new Point(105, 89),
+                    Location = new Point(105, 90),
                     NotControl = true,
                     Text = "0-0"
                 };
@@ -5985,7 +6512,7 @@ namespace Client.MirScenes
                 {
                     AutoSize = true,
                     Parent = StatusPage,
-                    Location = new Point(105, 115),
+                    Location = new Point(105, 117),
                     NotControl = true,
                     Text = "0-0"
                 };
@@ -5994,7 +6521,7 @@ namespace Client.MirScenes
                 {
                     AutoSize = true,
                     Parent = StatusPage,
-                    Location = new Point(105, 143),
+                    Location = new Point(105, 144),
                     NotControl = true,
                     Text = "0-0"
                 };
@@ -6002,7 +6529,7 @@ namespace Client.MirScenes
                 {
                     AutoSize = true,
                     Parent = StatusPage,
-                    Location = new Point(105, 170),
+                    Location = new Point(105, 171),
                     NotControl = true,
                     Text = "0-0"
                 };
@@ -6010,7 +6537,7 @@ namespace Client.MirScenes
                 {
                     AutoSize = true,
                     Parent = StatusPage,
-                    Location = new Point(105, 196),
+                    Location = new Point(105, 198),
                     NotControl = true,
                     Text = "0/0"
                 };
@@ -6022,6 +6549,21 @@ namespace Client.MirScenes
                     NotControl = true,
                     Text = "0/0"
                 };
+            StatuspageHeaderLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    Parent = StatusPage,
+                    Location = new Point(20, 238),
+                    NotControl = true,
+                    Text = "Critical Rate\nCritical Damage"
+                };
+            StatuspageDataLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    Parent = StatusPage,
+                    Location = new Point(105,238),
+                    NotControl = true
+                };
 
             HeadingLabel = new MirLabel
                 {
@@ -6029,7 +6571,7 @@ namespace Client.MirScenes
                     Parent = StatePage,
                     Location = new Point(10, 59),
                     NotControl = true,
-                    Text = "Experience\nBag Weight\nWear Weight\nHand Weight\nAccuracy\nAgility\nLuck\nAttack Speed"
+                    Text = "Experience\nBag Weight\nWear Weight\nHand Weight\nAccuracy\nAgility\nLuck\nAttack Speed\nMagicResist\nPoisonResist\nHealthRecovery\nManaRecovery\nPoisonRecovery\nHoly\nFreezing\nPoisonAttack"
                 };
             StatLabel = new MirLabel
                 {
@@ -6454,6 +6996,7 @@ namespace Client.MirScenes
         public MirClass Class;
         public MirGender Gender;
         public byte Hair;
+        public byte Level;
 
         public MirButton CloseButton, GroupButton, FriendButton, MailButton;
         public MirImageControl CharacterPage, ClassImage;
@@ -7786,6 +8329,11 @@ namespace Client.MirScenes
             switch (PType)
             {
                 case PanelType.Sell:
+                    if (TargetItem.Info.Bind.HasFlag(BindMode.DontSell))
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("Cannot sell this item.", ChatType.System);
+                        return;
+                    }
                     if (GameScene.Gold + TargetItem.Price() / 2 <= uint.MaxValue)
                     {
                         Network.Enqueue(new C.SellItem { UniqueID = TargetItem.UniqueID, Count = TargetItem.Count });
@@ -7795,6 +8343,11 @@ namespace Client.MirScenes
                     GameScene.Scene.ChatDialog.ReceiveChat("Cannot carry anymore gold.", ChatType.System);
                     break;
                 case PanelType.Repair:
+                    if (TargetItem.Info.Bind.HasFlag(BindMode.DontRepair))
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("Cannot repair this item.", ChatType.System);
+                        return;
+                    }
                     if (GameScene.Gold >= TargetItem.RepairPrice()*GameScene.NPCRate)
                     {
                         Network.Enqueue(new C.RepairItem { UniqueID = TargetItem.UniqueID });
@@ -7804,6 +8357,11 @@ namespace Client.MirScenes
                     GameScene.Scene.ChatDialog.ReceiveChat("You do not have enough gold.", ChatType.System);
                     break;
                 case PanelType.SpecialRepair:
+                    if (TargetItem.Info.Bind.HasFlag(BindMode.DontRepair))
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("Cannot repair this item.", ChatType.System);
+                        return;
+                    }
                     if (GameScene.Gold >= (TargetItem.RepairPrice() * 3) * GameScene.NPCRate)
                     {
                         Network.Enqueue(new C.SRepairItem { UniqueID = TargetItem.UniqueID });
@@ -7813,6 +8371,11 @@ namespace Client.MirScenes
                         GameScene.Scene.ChatDialog.ReceiveChat("You do not have enough gold.", ChatType.System);
                     break;
                 case PanelType.Consign:
+                    if (TargetItem.Info.Bind.HasFlag(BindMode.DontStore))
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("Cannot store this item.", ChatType.System);
+                        return;
+                    }
                     MirAmountBox box = new MirAmountBox("Consignment Price:", TargetItem.Info.Image, Globals.MaxConsignment, Globals.MinConsignment)
                         {
                             InputTextBox = {Text = string.Empty},

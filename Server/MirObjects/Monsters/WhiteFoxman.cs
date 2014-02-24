@@ -58,7 +58,7 @@ namespace Server.MirObjects.Monsters
                         Duration = 5,
                         PType = PoisonType.Slow,
                         TickSpeed = 1000,
-                    });
+                    }, this);
             }
 
             if (Target.Dead)

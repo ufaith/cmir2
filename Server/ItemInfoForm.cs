@@ -109,7 +109,51 @@ namespace Server
                 HWeightTextBox.Text = string.Empty;
                 BWeightText.Text = string.Empty;
                 EffectTextBox.Text = string.Empty;
+                
+                PoisonRecoverytextBox.Text = string.Empty;
+                SpellRecoverytextBox.Text = string.Empty;
+                MagicResisttextBox.Text = string.Empty;
+                HealthRecoveryTextbox.Text = string.Empty;
+                StrongTextbox.Text = string.Empty;
+                MacRateTextbox.Text = string.Empty;
+                ACRateTextbox.Text = string.Empty;
+                PoisonResisttextBox.Text = string.Empty;
+                PoisonAttacktextbox.Text = string.Empty;
+                Freezingtextbox.Text = string.Empty;
+                Holytextbox.Text = string.Empty;
+                HPratetextbox.Text = string.Empty;
+                MPratetextbox.Text = string.Empty;
+                HpDrainRatetextBox.Text = string.Empty;
+                CriticalDamagetextBox.Text = string.Empty;
+                CriticalRatetextBox.Text = string.Empty;
+                ReflecttextBox.Text = string.Empty;
 
+                LevelBasedcheckbox.Checked = false;
+                ClassBasedcheckbox.Checked = false;
+
+                Bind_dontstorecheckbox.Checked = false;
+                Bind_dontupgradecheckbox.Checked = false;
+                Bind_dontrepaircheckbox.Checked = false;
+                Bind_donttradecheckbox.Checked = false;
+                Bind_dontsellcheckbox.Checked = false;
+                Bind_destroyondropcheckbox.Checked = false;
+                Bind_dontdeathdropcheckbox.Checked = false;
+                Bind_dontdropcheckbox.Checked = false;
+
+                NeedIdentifycheckbox.Checked = false;
+                ShowGroupPickupcheckbox.Checked = false;
+                BindOnEquipcheckbox.Checked = false;
+                ParalysischeckBox.Checked = false;
+                TeleportcheckBox.Checked = false;
+                ClearcheckBox.Checked = false;
+                ProtectioncheckBox.Checked = false;
+                RevivalcheckBox.Checked = false;
+                MusclecheckBox.Checked = false;
+                FlamecheckBox.Checked = false;
+                HealingcheckBox.Checked = false;
+                ProbecheckBox.Checked = false;
+                SkillcheckBox.Checked = false;
+                NoDuraLosscheckBox.Checked = false;
                 return;
             }
 
@@ -157,6 +201,53 @@ namespace Server
             StartItemCheckBox.Checked = info.StartItem;
             EffectTextBox.Text = info.Effect.ToString();
 
+            PoisonRecoverytextBox.Text = info.PoisonRecovery.ToString();
+            SpellRecoverytextBox.Text = info.SpellRecovery.ToString();
+            MagicResisttextBox.Text = info.MagicResist.ToString();
+            HealthRecoveryTextbox.Text = info.HealthRecovery.ToString();
+            StrongTextbox.Text = info.Strong.ToString();
+            MacRateTextbox.Text = info.MaxMacRate.ToString();
+            ACRateTextbox.Text = info.MaxAcRate.ToString();
+            PoisonResisttextBox.Text = info.PoisonResist.ToString();
+            PoisonAttacktextbox.Text = info.PoisonAttack.ToString();
+            Freezingtextbox.Text = info.Freezing.ToString();
+            Holytextbox.Text = info.Holy.ToString();
+            HPratetextbox.Text = info.HPrate.ToString();
+            MPratetextbox.Text = info.MPrate.ToString();
+            HpDrainRatetextBox.Text = info.HpDrainRate.ToString();
+            CriticalRatetextBox.Text = info.CriticalRate.ToString();
+            CriticalDamagetextBox.Text = info.CriticalDamage.ToString();
+            ReflecttextBox.Text = info.Reflect.ToString();
+
+            LevelBasedcheckbox.Checked = info.LevelBased;
+            ClassBasedcheckbox.Checked = info.ClassBased;
+
+            
+            Bind_dontstorecheckbox.Checked = info.Bind.HasFlag(BindMode.DontStore);
+            Bind_dontupgradecheckbox.Checked = info.Bind.HasFlag(BindMode.DontUpgrade);
+            Bind_dontrepaircheckbox.Checked = info.Bind.HasFlag(BindMode.DontRepair);
+            Bind_donttradecheckbox.Checked = info.Bind.HasFlag(BindMode.DontTrade);
+            Bind_dontsellcheckbox.Checked = info.Bind.HasFlag(BindMode.DontSell);
+            Bind_destroyondropcheckbox.Checked = info.Bind.HasFlag(BindMode.DestroyOnDrop);
+            Bind_dontdeathdropcheckbox.Checked = info.Bind.HasFlag(BindMode.DontDeathdrop);
+            Bind_dontdropcheckbox.Checked = info.Bind.HasFlag(BindMode.DontDrop);
+
+            NeedIdentifycheckbox.Checked = info.NeedIdentify;
+            ShowGroupPickupcheckbox.Checked = info.ShowGroupPickup;
+            BindOnEquipcheckbox.Checked = info.BindOnEquip;
+
+            ParalysischeckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Paralize);
+            TeleportcheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Teleport);
+            ClearcheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Clearring);
+            ProtectioncheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Protection);
+            RevivalcheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Revival);
+            MusclecheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Muscle);
+            FlamecheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Flame);
+            HealingcheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Healing);
+            ProbecheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Probe);
+            SkillcheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Skill);
+            NoDuraLosscheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.NoDuraLoss);
+
             for (int i = 1; i < _selectedItemInfos.Count; i++)
             {
                 info = _selectedItemInfos[i];
@@ -201,6 +292,49 @@ namespace Server
 
                 if (StartItemCheckBox.Checked != info.StartItem) StartItemCheckBox.CheckState = CheckState.Indeterminate;
                 if (EffectTextBox.Text != info.Effect.ToString()) EffectTextBox.Text = string.Empty;
+
+                if (PoisonRecoverytextBox.Text != info.PoisonRecovery.ToString()) PoisonRecoverytextBox.Text = string.Empty;
+                if (SpellRecoverytextBox.Text != info.SpellRecovery.ToString()) SpellRecoverytextBox.Text = string.Empty;
+                if (MagicResisttextBox.Text != info.MagicResist.ToString()) MagicResisttextBox.Text = string.Empty;
+                if (HealthRecoveryTextbox.Text != info.HealthRecovery.ToString()) HealthRecoveryTextbox.Text = string.Empty;
+                if (StrongTextbox.Text != info.Strong.ToString()) StrongTextbox.Text = string.Empty;
+                if (MacRateTextbox.Text != info.MaxMacRate.ToString()) MacRateTextbox.Text = string.Empty;
+                if (ACRateTextbox.Text != info.MaxAcRate.ToString()) ACRateTextbox.Text = string.Empty;
+                if (PoisonResisttextBox.Text != info.PoisonResist.ToString()) PoisonResisttextBox.Text = string.Empty;
+                if (PoisonAttacktextbox.Text != info.PoisonAttack.ToString()) PoisonAttacktextbox.Text = string.Empty;
+                if (Freezingtextbox.Text != info.Freezing.ToString()) Freezingtextbox.Text = string.Empty;
+                if (Holytextbox.Text != info.Holy.ToString()) Holytextbox.Text = string.Empty;
+                if (HPratetextbox.Text != info.HPrate.ToString()) HPratetextbox.Text = string.Empty;
+                if (MPratetextbox.Text != info.MPrate.ToString()) MPratetextbox.Text = string.Empty;
+                if (HpDrainRatetextBox.Text != info.HpDrainRate.ToString()) HpDrainRatetextBox.Text = string.Empty;
+                if (CriticalRatetextBox.Text != info.CriticalRate.ToString()) CriticalRatetextBox.Text = string.Empty;
+                if (CriticalDamagetextBox.Text != info.CriticalDamage.ToString()) CriticalDamagetextBox.Text = string.Empty;
+                if (ReflecttextBox.Text != info.Reflect.ToString()) ReflecttextBox.Text = string.Empty;
+                if (LevelBasedcheckbox.Checked != info.LevelBased) LevelBasedcheckbox.CheckState = CheckState.Indeterminate;
+                if (ClassBasedcheckbox.Checked != info.ClassBased) ClassBasedcheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_dontstorecheckbox.Checked != info.Bind.HasFlag(BindMode.DontStore)) Bind_dontstorecheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_dontupgradecheckbox.Checked != info.Bind.HasFlag(BindMode.DontUpgrade)) Bind_dontupgradecheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_dontrepaircheckbox.Checked != info.Bind.HasFlag(BindMode.DontRepair)) Bind_dontrepaircheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_donttradecheckbox.Checked != info.Bind.HasFlag(BindMode.DontTrade)) Bind_donttradecheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_dontsellcheckbox.Checked != info.Bind.HasFlag(BindMode.DontSell)) Bind_dontsellcheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_destroyondropcheckbox.Checked != info.Bind.HasFlag(BindMode.DestroyOnDrop)) Bind_destroyondropcheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_dontdeathdropcheckbox.Checked != info.Bind.HasFlag(BindMode.DontDeathdrop)) Bind_dontdeathdropcheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_dontdropcheckbox.Checked != info.Bind.HasFlag(BindMode.DontDrop)) Bind_dontdropcheckbox.CheckState = CheckState.Indeterminate;
+                if (NeedIdentifycheckbox.Checked != info.NeedIdentify) NeedIdentifycheckbox.CheckState = CheckState.Indeterminate;
+                if (ShowGroupPickupcheckbox.Checked != info.ShowGroupPickup) ShowGroupPickupcheckbox.CheckState = CheckState.Indeterminate;
+                if (BindOnEquipcheckbox.Checked != info.BindOnEquip) BindOnEquipcheckbox.CheckState = CheckState.Indeterminate;
+
+                if (ParalysischeckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Paralize)) ParalysischeckBox.CheckState = CheckState.Indeterminate;
+                if (TeleportcheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Teleport)) TeleportcheckBox.CheckState = CheckState.Indeterminate;
+                if (ClearcheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Clearring)) ClearcheckBox.CheckState = CheckState.Indeterminate;
+                if (ProtectioncheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Protection)) ProtectioncheckBox.CheckState = CheckState.Indeterminate;
+                if (RevivalcheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Revival)) RevivalcheckBox.CheckState = CheckState.Indeterminate;
+                if (MusclecheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Muscle)) MusclecheckBox.CheckState = CheckState.Indeterminate;
+                if (FlamecheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Flame)) FlamecheckBox.CheckState = CheckState.Indeterminate;
+                if (HealingcheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Healing)) HealingcheckBox.CheckState = CheckState.Indeterminate;
+                if (ProbecheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Probe)) ProbecheckBox.CheckState = CheckState.Indeterminate;
+                if (SkillcheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Skill)) SkillcheckBox.CheckState = CheckState.Indeterminate;
+                if (NoDuraLosscheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLosscheckBox.CheckState = CheckState.Indeterminate;
             }
         }
 
@@ -879,6 +1013,505 @@ namespace Server
 
             for (int i = 0; i < _selectedItemInfos.Count; i++)
                 _selectedItemInfos[i].Set = (ItemSet)ISetComboBox.SelectedItem;
+        }
+
+        private void ACRateTextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].MaxAcRate = temp;
+        }
+
+        private void MacRateTextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].MaxMacRate = temp;
+        }
+
+        private void MagicResisttextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].MagicResist = temp;
+        }
+
+        private void PoisonResisttextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].PoisonResist = temp;
+        }
+
+        private void HealthRecoveryTextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].HealthRecovery = temp;
+        }
+
+        private void SpellRecoverytextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].SpellRecovery = temp;
+        }
+
+        private void PoisonRecoverytextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].PoisonRecovery = temp;
+        }
+
+        private void HporMpRatetextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].HPrate = temp;
+        }
+
+        private void Holytextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Holy = temp;
+        }
+
+        private void Freezingtextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Freezing = temp;
+        }
+
+        private void PoisonAttacktextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].PoisonAttack = temp;
+        }
+
+        private void ClassBasedcheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].ClassBased = ClassBasedcheckbox.Checked;
+        }
+
+        private void LevelBasedcheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].LevelBased = LevelBasedcheckbox.Checked;
+        }
+
+        private void Bind_dontdropcheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Bind = (Bind_dontdropcheckbox.Checked ? _selectedItemInfos[i].Bind |= BindMode.DontDrop : _selectedItemInfos[i].Bind ^= BindMode.DontDrop);
+        }
+
+        private void Bind_dontdeathdropcheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Bind = (Bind_dontdeathdropcheckbox.Checked ? _selectedItemInfos[i].Bind |= BindMode.DontDeathdrop : _selectedItemInfos[i].Bind ^= BindMode.DontDeathdrop);
+        }
+
+        private void Bind_destroyondropcheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Bind = (Bind_destroyondropcheckbox.Checked ? _selectedItemInfos[i].Bind |= BindMode.DestroyOnDrop : _selectedItemInfos[i].Bind ^= BindMode.DestroyOnDrop);
+        }
+
+        private void Bind_dontsellcheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Bind = (Bind_dontsellcheckbox.Checked ? _selectedItemInfos[i].Bind |= BindMode.DontSell : _selectedItemInfos[i].Bind ^= BindMode.DontSell);
+        }
+
+        private void Bind_donttradecheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Bind = (Bind_donttradecheckbox.Checked ? _selectedItemInfos[i].Bind |= BindMode.DontTrade : _selectedItemInfos[i].Bind ^= BindMode.DontTrade);
+        }
+
+        private void Bind_dontrepaircheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Bind = (Bind_dontrepaircheckbox.Checked ? _selectedItemInfos[i].Bind |= BindMode.DontRepair : _selectedItemInfos[i].Bind ^= BindMode.DontRepair);
+        }
+
+        private void Bind_dontstorecheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Bind = (Bind_dontstorecheckbox.Checked ? _selectedItemInfos[i].Bind |= BindMode.DontStore : _selectedItemInfos[i].Bind ^= BindMode.DontStore);
+        }
+
+        private void Bind_dontupgradecheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Bind = (Bind_dontupgradecheckbox.Checked ? _selectedItemInfos[i].Bind |= BindMode.DontUpgrade : _selectedItemInfos[i].Bind ^= BindMode.DontUpgrade);
+        }
+
+        private void NeedIdentifycheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].NeedIdentify = NeedIdentifycheckbox.Checked;
+        }
+
+        private void ShowGroupPickupcheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].ShowGroupPickup = ShowGroupPickupcheckbox.Checked;
+        }
+
+        private void BindOnEquipcheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].BindOnEquip = BindOnEquipcheckbox.Checked;
+        }
+
+        private void MPratetextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].MPrate = temp;
+        }
+
+        private void HpDrainRatetextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].HpDrainRate = temp;
+        }
+
+
+        private void ParalysischeckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (ParalysischeckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Paralize : _selectedItemInfos[i].Unique ^= SpecialItemMode.Paralize);
+        }
+
+        private void TeleportcheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (TeleportcheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Teleport : _selectedItemInfos[i].Unique ^= SpecialItemMode.Teleport);
+        }
+
+        private void ClearcheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (ClearcheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Clearring : _selectedItemInfos[i].Unique ^= SpecialItemMode.Clearring);
+        }
+
+        private void ProtectioncheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (ProtectioncheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Protection : _selectedItemInfos[i].Unique ^= SpecialItemMode.Protection);
+        }
+
+        private void RevivalcheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (RevivalcheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Revival : _selectedItemInfos[i].Unique ^= SpecialItemMode.Revival);
+        }
+
+        private void MusclecheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (MusclecheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Muscle : _selectedItemInfos[i].Unique ^= SpecialItemMode.Muscle);
+        }
+
+        private void FlamecheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (FlamecheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Flame : _selectedItemInfos[i].Unique ^= SpecialItemMode.Flame);
+        }
+
+        private void HealingcheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (HealingcheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Healing : _selectedItemInfos[i].Unique ^= SpecialItemMode.Healing);
+        }
+
+        private void ProbecheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (ProbecheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Probe : _selectedItemInfos[i].Unique ^= SpecialItemMode.Probe);
+        }
+
+        private void SkillcheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (SkillcheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.Skill : _selectedItemInfos[i].Unique ^= SpecialItemMode.Skill);
+        }
+
+        private void NoDuraLosscheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Unique = (NoDuraLosscheckBox.Checked ? _selectedItemInfos[i].Unique |= SpecialItemMode.NoDuraLoss : _selectedItemInfos[i].Unique ^= SpecialItemMode.NoDuraLoss);
+        }
+
+        private void StrongTextbox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Strong = temp;
+        }
+
+        private void CriticalRatetextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].CriticalRate = temp;
+        }
+
+        private void CriticalDamagetextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].CriticalDamage = temp;
+        }
+
+        private void ReflecttextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Reflect = temp;
         }
     }
 }

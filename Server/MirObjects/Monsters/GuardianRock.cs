@@ -44,6 +44,7 @@ namespace Server.MirObjects.Monsters
         private void PullAttack()
         {
             MirDirection pushdir = Functions.DirectionFromPoint(Target.CurrentLocation, CurrentLocation);
+            if (Envir.Random.Next(Settings.MagicResistWeight) < Target.MagicResist) return;
             Target.Pushed(this, pushdir, 4);
         }
 

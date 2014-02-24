@@ -34,7 +34,7 @@ namespace Server.MirObjects.Monsters
             if (Target.Attacked(this, damage, DefenceType.MACAgility) <= 0) return;
 
             if (Envir.Random.Next(20) == 0)
-                Target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 });
+                Target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 }, this);
         }
     }
 }

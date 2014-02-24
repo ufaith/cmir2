@@ -193,154 +193,160 @@ namespace Server.MirNetwork
 
             switch (p.Index)
             {
-                case 0:
+                case (short)ClientPacketIds.ClientVersion:
                     ClientVersion((C.ClientVersion) p);
                     break;
-                case 1:
+                case (short)ClientPacketIds.Disconnect:
                     Disconnect();
                     break;
-                case 2: // Keep Alive
+                case (short)ClientPacketIds.KeepAlive: // Keep Alive
                     return;
-                case 3:
+                case (short)ClientPacketIds.NewAccount:
                     NewAccount((C.NewAccount) p);
                     break;
-                case 4:
+                case (short)ClientPacketIds.ChangePassword:
                     ChangePassword((C.ChangePassword) p);
                     break;
-                case 5:
+                case (short)ClientPacketIds.Login:
                     Login((C.Login) p);
                     break;
-                case 6:
+                case (short)ClientPacketIds.NewCharacter:
                     NewCharacter((C.NewCharacter) p);
                     break;
-                case 7:
+                case (short)ClientPacketIds.DeleteCharacter:
                     DeleteCharacter((C.DeleteCharacter) p);
                     break;
-                case 8:
+                case (short)ClientPacketIds.StartGame:
                     StartGame((C.StartGame) p);
                     break;
-                case 9:
+                case (short)ClientPacketIds.LogOut:
                     LogOut();
                     break;
-                case 10:
+                case (short)ClientPacketIds.Turn:
                     Turn((C.Turn) p);
                     break;
-                case 11:
+                case (short)ClientPacketIds.Walk:
                     Walk((C.Walk) p);
                     break;
-                case 12:
+                case (short)ClientPacketIds.Run:
                     Run((C.Run) p);
                     break;
-                case 13:
+                case (short)ClientPacketIds.Chat:
                     Chat((C.Chat) p);
                     break;
-                case 14:
+                case (short)ClientPacketIds.MoveItem:
                     MoveItem((C.MoveItem) p);
                     break;
-                case 15:
+                case (short)ClientPacketIds.StoreItem:
                     StoreItem((C.StoreItem) p);
                     break;
-                case 16:
+                case (short)ClientPacketIds.TakeBackItem:
                     TakeBackItem((C.TakeBackItem) p);
                     break;
-                case 17:
+                case (short)ClientPacketIds.MergeItem:
                     MergeItem((C.MergeItem) p);
                     break;
-                case 18:
+                case (short)ClientPacketIds.EquipItem:
                     EquipItem((C.EquipItem) p);
                     break;
-                case 19:
+                case (short)ClientPacketIds.RemoveItem:
                     RemoveItem((C.RemoveItem) p);
                     break;
-                case 20:
+                case (short)ClientPacketIds.SplitItem:
                     SplitItem((C.SplitItem) p);
                     break;
-                case 21:
+                case (short)ClientPacketIds.UseItem:
                     UseItem((C.UseItem) p);
                     break;
-                case 22:
+                case (short)ClientPacketIds.DropItem:
                     DropItem((C.DropItem) p);
                     break;
-                case 23:
+                case (short)ClientPacketIds.DropGold:
                     DropGold((C.DropGold) p);
                     break;
-                case 24:
+                case (short)ClientPacketIds.PickUp:
                     PickUp();
                     break;
-                case 25:
+                case (short)ClientPacketIds.Inspect:
                     Inspect((C.Inspect)p);
                     break;
-                case 26:
+                case (short)ClientPacketIds.ChangeAMode:
                     ChangeAMode((C.ChangeAMode)p);
                     break;
-                case 27:
+                case (short)ClientPacketIds.ChangePMode:
                     ChangePMode((C.ChangePMode)p);
                     break;
-                case 28:
+                case (short)ClientPacketIds.Attack:
                     Attack((C.Attack)p);
                     break;
-                case 29:
+                case (short)ClientPacketIds.Harvest:
                     Harvest((C.Harvest)p);
                     break;
-                case 30:
+                case (short)ClientPacketIds.CallNPC:
                     CallNPC((C.CallNPC)p);
                     break;
-                case 31:
+                case (short)ClientPacketIds.BuyItem:
                     BuyItem((C.BuyItem)p);
                     break;
-                case 32:
+                case (short)ClientPacketIds.SellItem:
                     SellItem((C.SellItem)p);
                     break;
-                case 33:
+                case (short)ClientPacketIds.RepairItem:
                     RepairItem((C.RepairItem)p);
                     break;
-                case 34:
+                case (short)ClientPacketIds.BuyItemBack:
                     BuyItemBack((C.BuyItemBack)p);
                     break;
-                case 35:
+                case (short)ClientPacketIds.SRepairItem:
                     SRepairItem((C.SRepairItem)p);
                     break;
-                case 36:
+                case (short)ClientPacketIds.MagicKey:
                     MagicKey((C.MagicKey)p);
                     break;
-                case 37:
+                case (short)ClientPacketIds.Magic:
                     Magic((C.Magic)p);
                     break;
-                case 38:
+                case (short)ClientPacketIds.SwitchGroup:
                     SwitchGroup((C.SwitchGroup)p);
                     return;
-                case 39:
+                case (short)ClientPacketIds.AddMember:
                     AddMember((C.AddMember)p);
                     return;
-                case 40:
+                case (short)ClientPacketIds.DellMember:
                     DelMember((C.DelMember)p);
                     return;
-                case 41:
+                case (short)ClientPacketIds.GroupInvite:
                     GroupInvite((C.GroupInvite)p);
                     return;
-                case 42:
+                case (short)ClientPacketIds.TownRevive:
                     TownRevive();
                     return;
-                case 43:
+                case (short)ClientPacketIds.SpellToggle:
                     SpellToggle((C.SpellToggle)p);
                     return;
-                case 44:
+                case (short)ClientPacketIds.ConsignItem:
                     ConsignItem((C.ConsignItem)p);
                     return;
-                case 45:
+                case (short)ClientPacketIds.MarketSearch:
                     MarketSearch((C.MarketSearch)p);
                     return;
-                case 46:
+                case (short)ClientPacketIds.MarketRefresh:
                     MarketRefresh();
                     return;
-                case 47:
+                case (short)ClientPacketIds.MarketPage:
                     MarketPage((C.MarketPage) p);
                     return;
-                case 48:
+                case (short)ClientPacketIds.MarketBuy:
                     MarketBuy((C.MarketBuy)p);
                     return;
-                case 49:
+                case (short)ClientPacketIds.MarketGetBack:
                     MarketGetBack((C.MarketGetBack)p);
+                    return;
+                case (short)ClientPacketIds.RequestUserName:
+                    RequestUserName((C.RequestUserName)p);
+                    return;
+                case (short)ClientPacketIds.RequestChatItem:
+                    RequestChatItem((C.RequestChatItem)p);
                     return;
                 default:
                     throw new NotImplementedException();
@@ -847,6 +853,18 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.MarketGetBack(p.AuctionID);
+        }
+        private void RequestUserName(C.RequestUserName p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.RequestUserName(p.UserID);
+        }
+        private void RequestChatItem(C.RequestChatItem p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.RequestChatItem(p.ChatItemID);
         }
     }
 }

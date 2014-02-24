@@ -144,5 +144,12 @@ namespace Server
 
             form.ShowDialog();
         }
+
+        private void balanceConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BalanceConfigForm form = new BalanceConfigForm();
+
+            form.ShowDialog();
+        }
     }
 }

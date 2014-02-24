@@ -38,6 +38,8 @@ namespace Server.MirObjects.Monsters
 
         protected override void ProcessAI()
         {
+            if (!Visible)
+                SetHP(MaxHP);
             if (!Dead && Envir.Time > VisibleTime)
             {
                 VisibleTime = Envir.Time + 2000;
@@ -125,9 +127,9 @@ namespace Server.MirObjects.Monsters
             if (Target.Attacked(this, damage, DefenceType.MAC) <= 0) return;
 
             if (Envir.Random.Next(5) == 0)
-                Target.ApplyPoison(new Poison {Owner = this, Duration = 15, PType = PoisonType.Green, Value = GetAttackPower(MinSC, MaxSC), TickSpeed = 2000});
+                Target.ApplyPoison(new Poison {Owner = this, Duration = 15, PType = PoisonType.Green, Value = GetAttackPower(MinSC, MaxSC), TickSpeed = 2000}, this);
             if (Envir.Random.Next(15) == 0)
-                Target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 });
+                Target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 }, this);
         }
 
 

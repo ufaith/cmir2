@@ -81,6 +81,31 @@ namespace Server
                              ParalysisRing = "Paralysis";
                             
 
+        //character settings
+        private static String[] BaseStatClassNames = { "Warrior", "Wizard", "Taoist", "Assasin" };
+        public static BaseStats[] ClassBaseStats = new BaseStats[4]{new BaseStats(MirClass.Warrior),new BaseStats(MirClass.Wizard), new BaseStats(MirClass.Taoist), new BaseStats(MirClass.Assassin)};
+        
+        //item related settings
+        public static byte MaxMagicResist = 6,
+                    MagicResistWeight = 10,
+                    MaxPoisonResist = 6,
+                    PoisonResistWeight = 10,
+                    MaxCriticalRate = 18,
+                    CriticalRateWeight = 5,
+                    MaxCriticalDamage = 10,
+                    CriticalDamageWeight = 50,
+                    MaxFreezing = 6,
+                    FreezingAttackWeight = 10,
+                    MaxPoisonAttack = 6,
+                    PoisonAttackWeight = 10,
+                    MaxHealthRegen = 8,
+                    HealthRegenWeight = 10,
+                    MaxManaRegen = 8,
+                    ManaRegenWeight = 10,
+                    MaxPoisonRecovery = 6;
+        public static Boolean PvpCanResistMagic = false,
+                              PvpCanResistPoison = false,
+                              PvpCanFreeze = false;
 
         public static void Load()
         {
@@ -134,6 +159,54 @@ namespace Server
             //Items
             HealRing = Reader.ReadString("Items", "HealRing", HealRing);
             FireRing = Reader.ReadString("Items", "FireRing", FireRing);
+
+            for (int i = 0; i < ClassBaseStats.Length; i++)
+            {
+                ClassBaseStats[i].HpGain = Reader.ReadFloat(BaseStatClassNames[i], "HpGain", ClassBaseStats[i].HpGain);
+                ClassBaseStats[i].HpGainRate = Reader.ReadFloat(BaseStatClassNames[i], "HpGainRate", ClassBaseStats[i].HpGainRate);
+                ClassBaseStats[i].MpGainRate = Reader.ReadFloat(BaseStatClassNames[i], "MpGainRate", ClassBaseStats[i].MpGainRate);
+                ClassBaseStats[i].BagWeightGain = Reader.ReadFloat(BaseStatClassNames[i], "BagWeightGain", ClassBaseStats[i].BagWeightGain);
+                ClassBaseStats[i].WearWeightGain = Reader.ReadFloat(BaseStatClassNames[i], "WearWeightGain", ClassBaseStats[i].WearWeightGain);
+                ClassBaseStats[i].HandWeightGain = Reader.ReadFloat(BaseStatClassNames[i], "HandWeightGain", ClassBaseStats[i].HandWeightGain);
+                ClassBaseStats[i].MinAc = Reader.ReadByte(BaseStatClassNames[i], "MinAc", ClassBaseStats[i].MinAc);
+                ClassBaseStats[i].MaxAc = Reader.ReadByte(BaseStatClassNames[i], "MaxAc", ClassBaseStats[i].MaxAc);
+                ClassBaseStats[i].MinMac = Reader.ReadByte(BaseStatClassNames[i], "MinMac", ClassBaseStats[i].MinMac);
+                ClassBaseStats[i].MaxMac = Reader.ReadByte(BaseStatClassNames[i], "MaxMac", ClassBaseStats[i].MaxMac);
+                ClassBaseStats[i].MinDc = Reader.ReadByte(BaseStatClassNames[i], "MinDc", ClassBaseStats[i].MinDc);
+                ClassBaseStats[i].MaxDc = Reader.ReadByte(BaseStatClassNames[i], "MaxDc", ClassBaseStats[i].MaxDc);
+                ClassBaseStats[i].MinMc = Reader.ReadByte(BaseStatClassNames[i], "MinMc", ClassBaseStats[i].MinMc);
+                ClassBaseStats[i].MaxMc = Reader.ReadByte(BaseStatClassNames[i], "MaxMc", ClassBaseStats[i].MaxMc);
+                ClassBaseStats[i].MinSc = Reader.ReadByte(BaseStatClassNames[i], "MinSc", ClassBaseStats[i].MinSc);
+                ClassBaseStats[i].MaxSc = Reader.ReadByte(BaseStatClassNames[i], "MaxSc", ClassBaseStats[i].MaxSc);
+                ClassBaseStats[i].StartAgility = Reader.ReadByte(BaseStatClassNames[i], "StartAgility", ClassBaseStats[i].StartAgility);
+                ClassBaseStats[i].StartAccuracy = Reader.ReadByte(BaseStatClassNames[i], "StartAccuracy", ClassBaseStats[i].StartAccuracy);
+                ClassBaseStats[i].StartCriticalRate = Reader.ReadByte(BaseStatClassNames[i], "StartCriticalRate", ClassBaseStats[i].StartCriticalRate);
+                ClassBaseStats[i].StartCriticalDamage = Reader.ReadByte(BaseStatClassNames[i], "StartCriticalDamage", ClassBaseStats[i].StartCriticalDamage);
+                ClassBaseStats[i].CritialRateGain = Reader.ReadByte(BaseStatClassNames[i], "CritialRateGain", ClassBaseStats[i].CritialRateGain);
+                ClassBaseStats[i].CriticalDamageGain = Reader.ReadByte(BaseStatClassNames[i], "CriticalDamageGain", ClassBaseStats[i].CriticalDamageGain);
+            }
+
+            MaxMagicResist = Reader.ReadByte("Items","MaxMagicResist",MaxMagicResist);
+            MagicResistWeight = Reader.ReadByte("Items","MagicResistWeight",MagicResistWeight);
+            MaxPoisonResist = Reader.ReadByte("Items","MaxPoisonResist",MaxPoisonResist);
+            PoisonResistWeight = Reader.ReadByte("Items","PoisonResistWeight",PoisonResistWeight);
+            MaxCriticalRate = Reader.ReadByte("Items","MaxCriticalRate",MaxCriticalRate);
+            CriticalRateWeight = Reader.ReadByte("Items","CriticalRateWeight",CriticalRateWeight);
+            MaxCriticalDamage = Reader.ReadByte("Items","MaxCriticalDamage",MaxCriticalDamage);
+            CriticalDamageWeight = Math.Max((byte)1,Reader.ReadByte("Items","CriticalDamageWeight",CriticalDamageWeight));
+            MaxFreezing = Reader.ReadByte("Items","MaxFreezing",MaxFreezing);
+            FreezingAttackWeight = Reader.ReadByte("Items","FreezingAttackWeight",FreezingAttackWeight);
+            MaxPoisonAttack = Reader.ReadByte("Items","MaxPoisonAttack",MaxPoisonAttack);
+            PoisonAttackWeight = Reader.ReadByte("Items","PoisonAttackWeight",PoisonAttackWeight);
+            MaxHealthRegen = Reader.ReadByte("Items", "MaxHealthRegen", MaxHealthRegen);
+            HealthRegenWeight = Reader.ReadByte("Items", "HealthRegenWeight", HealthRegenWeight);
+            MaxManaRegen = Reader.ReadByte("Items", "MaxManaRegen", MaxManaRegen);
+            ManaRegenWeight = Reader.ReadByte("Items", "ManaRegenWeight", ManaRegenWeight);
+            MaxPoisonRecovery = Reader.ReadByte("Items", "MaxPoisonRecovery", MaxPoisonRecovery);
+
+            PvpCanResistMagic = Reader.ReadBoolean("Items","PvpCanResistMagic",PvpCanResistMagic);
+            PvpCanResistPoison = Reader.ReadBoolean("Items", "PvpCanResistPoison", PvpCanResistPoison);
+            PvpCanFreeze = Reader.ReadBoolean("Items", "PvpCanFreeze", PvpCanFreeze);
 
             if (!Directory.Exists(EnvirPath))
                 Directory.CreateDirectory(EnvirPath);
@@ -231,6 +304,53 @@ namespace Server
 
             Reader.Write("Items", "HealRing", HealRing);
             Reader.Write("Items", "FireRing", FireRing);
+
+            for (int i = 0; i < ClassBaseStats.Length; i++)
+            {
+                Reader.Write(BaseStatClassNames[i], "HpGain", ClassBaseStats[i].HpGain);
+                Reader.Write(BaseStatClassNames[i], "HpGainRate", ClassBaseStats[i].HpGainRate);
+                Reader.Write(BaseStatClassNames[i], "MpGainRate", ClassBaseStats[i].MpGainRate);
+                Reader.Write(BaseStatClassNames[i], "BagWeightGain", ClassBaseStats[i].BagWeightGain);
+                Reader.Write(BaseStatClassNames[i], "WearWeightGain", ClassBaseStats[i].WearWeightGain);
+                Reader.Write(BaseStatClassNames[i], "HandWeightGain", ClassBaseStats[i].HandWeightGain);
+                Reader.Write(BaseStatClassNames[i], "MinAc", ClassBaseStats[i].MinAc);
+                Reader.Write(BaseStatClassNames[i], "MaxAc", ClassBaseStats[i].MaxAc);
+                Reader.Write(BaseStatClassNames[i], "MinMac", ClassBaseStats[i].MinMac);
+                Reader.Write(BaseStatClassNames[i], "MaxMac", ClassBaseStats[i].MaxMac);
+                Reader.Write(BaseStatClassNames[i], "MinDc", ClassBaseStats[i].MinDc);
+                Reader.Write(BaseStatClassNames[i], "MaxDc", ClassBaseStats[i].MaxDc);
+                Reader.Write(BaseStatClassNames[i], "MinMc", ClassBaseStats[i].MinMc);
+                Reader.Write(BaseStatClassNames[i], "MaxMc", ClassBaseStats[i].MaxMc);
+                Reader.Write(BaseStatClassNames[i], "MinSc", ClassBaseStats[i].MinSc);
+                Reader.Write(BaseStatClassNames[i], "MaxSc", ClassBaseStats[i].MaxSc);
+                Reader.Write(BaseStatClassNames[i], "StartAgility", ClassBaseStats[i].StartAgility);
+                Reader.Write(BaseStatClassNames[i], "StartAccuracy", ClassBaseStats[i].StartAccuracy);
+                Reader.Write(BaseStatClassNames[i], "StartCriticalRate", ClassBaseStats[i].StartCriticalRate);
+                Reader.Write(BaseStatClassNames[i], "StartCriticalDamage", ClassBaseStats[i].StartCriticalDamage);
+                Reader.Write(BaseStatClassNames[i], "CritialRateGain", ClassBaseStats[i].CritialRateGain);
+                Reader.Write(BaseStatClassNames[i], "CriticalDamageGain", ClassBaseStats[i].CriticalDamageGain);
+            }
+
+            Reader.Write("Items", "MaxMagicResist", MaxMagicResist);
+            Reader.Write("Items", "MagicResistWeight", MagicResistWeight);
+            Reader.Write("Items", "MaxPoisonResist", MaxPoisonResist);
+            Reader.Write("Items", "PoisonResistWeight", PoisonResistWeight);
+            Reader.Write("Items", "MaxCriticalRate", MaxCriticalRate);
+            Reader.Write("Items", "CriticalRateWeight", CriticalRateWeight);
+            Reader.Write("Items", "MaxCriticalDamage", MaxCriticalDamage);
+            Reader.Write("Items", "CriticalDamageWeight", CriticalDamageWeight);
+            Reader.Write("Items", "MaxFreezing", MaxFreezing);
+            Reader.Write("Items", "FreezingAttackWeight", FreezingAttackWeight);
+            Reader.Write("Items", "MaxPoisonAttack", MaxPoisonAttack);
+            Reader.Write("Items", "PoisonAttackWeight", PoisonAttackWeight);
+            Reader.Write("Items", "MaxHealthRegen", MaxHealthRegen);
+            Reader.Write("Items", "HealthRegenWeight", HealthRegenWeight);
+            Reader.Write("Items", "MaxManaRegen", MaxManaRegen);
+            Reader.Write("Items", "ManaRegenWeight", ManaRegenWeight);
+            Reader.Write("ITems", "MaxPoisonRecovery", MaxPoisonRecovery);
+            Reader.Write("Items", "PvpCanResistMagic", PvpCanResistMagic);
+            Reader.Write("Items", "PvpCanResistPoison", PvpCanResistPoison);
+            Reader.Write("Items", "PvpCanFreeze", PvpCanFreeze);
         }
 
         public static void LoadEXP()
