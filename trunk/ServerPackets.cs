@@ -9,7 +9,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 0; }
+            get { return (short)ServerPacketIds.Connected; }
         }
 
         protected override void ReadPacket(BinaryReader reader)
@@ -24,7 +24,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 1; }
+            get { return (short)ServerPacketIds.ClientVersion; }
         }
 
         public byte Result;
@@ -47,7 +47,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 2; }
+            get { return (short)ServerPacketIds.Disconnect; }
         }
 
         public byte Reason;
@@ -73,7 +73,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 3; }
+            get { return (short)ServerPacketIds.NewAccount; }
         }
 
         public byte Result;
@@ -104,7 +104,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 4; }
+            get { return (short)ServerPacketIds.ChangePassword; }
         }
 
         public byte Result;
@@ -132,7 +132,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 5; }
+            get { return (short)ServerPacketIds.ChangePasswordBanned; }
         }
 
         public string Reason = string.Empty;
@@ -154,7 +154,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 6; }
+            get { return (short)ServerPacketIds.Login; }
         }
 
         public byte Result;
@@ -180,7 +180,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 7; }
+            get { return (short)ServerPacketIds.LoginBanned; }
         }
 
         public string Reason = string.Empty;
@@ -202,7 +202,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 8; }
+            get { return (short)ServerPacketIds.LoginSucces; }
         }
 
         public List<SelectInfo> Characters = new List<SelectInfo>();
@@ -227,7 +227,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 9; }
+            get { return (short)ServerPacketIds.NewCharacter; }
         }
 
         /*
@@ -254,7 +254,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 10; }
+            get { return (short)ServerPacketIds.NewCharacterSuccess; }
         }
 
         public SelectInfo CharInfo;
@@ -273,7 +273,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 11; }
+            get { return (short)ServerPacketIds.DeleteCharacter; }
         }
 
         public byte Result;
@@ -297,7 +297,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 12; }
+            get { return (short)ServerPacketIds.DeleteCharacterSuccess; }
         }
 
         public int CharacterIndex;
@@ -316,7 +316,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 13; }
+            get { return (short)ServerPacketIds.StartGame; }
         }
 
         public byte Result;
@@ -342,7 +342,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 14; }
+            get { return (short)ServerPacketIds.StartGameBanned; }
         }
 
         public string Reason = string.Empty;
@@ -364,7 +364,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 15; }
+            get { return (short)ServerPacketIds.StartGameDelay; }
         }
 
         public long Milliseconds;
@@ -384,7 +384,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 16; }
+            get { return (short)ServerPacketIds.MapInformation; }
         }
 
         public string FileName = string.Empty;
@@ -419,10 +419,11 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 17; }
+            get { return (short)ServerPacketIds.UserInformation; }
         }
 
         public uint ObjectID;
+        public uint RealId;
         public string Name = string.Empty;
         public Color NameColour;
         public MirClass Class;
@@ -442,6 +443,7 @@ namespace ServerPackets
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
+            RealId = reader.ReadUInt32();
             Name = reader.ReadString();
             NameColour = Color.FromArgb(reader.ReadInt32());
             Class = (MirClass) reader.ReadByte();
@@ -486,6 +488,7 @@ namespace ServerPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(ObjectID);
+            writer.Write(RealId);
             writer.Write(Name);
             writer.Write(NameColour.ToArgb());
             writer.Write((byte) Class);
@@ -538,7 +541,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 18; }
+            get { return (short)ServerPacketIds.UserLocation; }
         }
 
         public Point Location;
@@ -563,7 +566,7 @@ namespace ServerPackets
 
         public override short Index
         {
-            get { return 19; }
+            get { return (short)ServerPacketIds.ObjectPlayer; }
         }
 
         public uint ObjectID;
@@ -629,7 +632,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 20; }
+            get { return (short)ServerPacketIds.ObjectRemove; }
         }
 
         public uint ObjectID;
@@ -649,7 +652,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 21; }
+            get { return (short)ServerPacketIds.ObjectTurn; }
         }
 
         public uint ObjectID;
@@ -675,7 +678,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 22; }
+            get { return (short)ServerPacketIds.ObjectWalk; }
         }
 
         public uint ObjectID;
@@ -701,7 +704,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 23; }
+            get { return (short)ServerPacketIds.ObjectRun; }
         }
 
         public uint ObjectID;
@@ -727,7 +730,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 24; }
+            get { return (short)ServerPacketIds.Chat; }
         }
 
         public string Message = string.Empty;
@@ -749,7 +752,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 25; }
+            get { return (short)ServerPacketIds.ObjectChat; }
         }
 
         public uint ObjectID;
@@ -774,7 +777,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 26; }
+            get { return (short)ServerPacketIds.NewItemInfo; }
         }
 
         public ItemInfo Info;
@@ -793,7 +796,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 27; }
+            get { return (short)ServerPacketIds.MoveItem; }
         }
 
         public MirGridType Grid;
@@ -820,7 +823,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 28; }
+            get { return (short)ServerPacketIds.EquipItem; }
         }
 
         public MirGridType Grid;
@@ -848,7 +851,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 29; }
+            get { return (short)ServerPacketIds.MergeItem; }
         }
 
         public MirGridType GridFrom, GridTo;
@@ -877,7 +880,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 30; }
+            get { return (short)ServerPacketIds.RemoveItem; }
         }
 
         public MirGridType Grid;
@@ -905,7 +908,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 31; }
+            get { return (short)ServerPacketIds.TakeBackItem; }
         }
 
         public int From, To;
@@ -929,7 +932,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 32; }
+            get { return (short)ServerPacketIds.StoreItem; }
         }
 
         public int From, To;
@@ -953,7 +956,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 33; }
+            get { return (short)ServerPacketIds.SplitItem; }
         }
 
         public UserItem Item;
@@ -978,7 +981,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 34; }
+            get { return (short)ServerPacketIds.SplitItem1; }
         }
 
         public MirGridType Grid;
@@ -1006,7 +1009,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 35; }
+            get { return (short)ServerPacketIds.UseItem; }
         }
 
         public ulong UniqueID;
@@ -1028,7 +1031,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 36; }
+            get { return (short)ServerPacketIds.DropItem; }
         }
 
         public ulong UniqueID;
@@ -1053,7 +1056,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 37; }
+            get { return (short)ServerPacketIds.PlayerUpdate; }
         }
 
         public uint ObjectID;
@@ -1085,7 +1088,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 38; }
+            get { return (short)ServerPacketIds.PlayerInspect; }
         }
 
         public string Name = string.Empty;
@@ -1093,6 +1096,7 @@ namespace ServerPackets
         public MirClass Class;
         public MirGender Gender;
         public byte Hair;
+        public byte Level;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -1108,6 +1112,7 @@ namespace ServerPackets
             Class = (MirClass) reader.ReadByte();
             Gender = (MirGender) reader.ReadByte();
             Hair = reader.ReadByte();
+            Level = reader.ReadByte();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -1125,6 +1130,7 @@ namespace ServerPackets
             writer.Write((byte) Class);
             writer.Write((byte) Gender);
             writer.Write(Hair);
+            writer.Write(Level);
 
         }
     }
@@ -1132,7 +1138,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 39; }
+            get { return (short)ServerPacketIds.LogOutSuccess; }
         }
 
         public List<SelectInfo> Characters = new List<SelectInfo>();
@@ -1157,7 +1163,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 40; }
+            get { return (short)ServerPacketIds.TimeOfDay; }
         }
 
         public LightSetting Lights;
@@ -1176,7 +1182,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 41; }
+            get { return (short)ServerPacketIds.ChangeAMode; }
         }
 
         public AttackMode Mode;
@@ -1195,7 +1201,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 42; }
+            get { return (short)ServerPacketIds.ChangePMode; }
         }
 
         public PetMode Mode;
@@ -1214,7 +1220,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 43; }
+            get { return (short)ServerPacketIds.ObjectItem; }
         }
 
         public uint ObjectID;
@@ -1247,7 +1253,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 44; }
+            get { return (short)ServerPacketIds.ObjectGold; }
         }
 
         public uint ObjectID;
@@ -1274,7 +1280,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 45; }
+            get { return (short)ServerPacketIds.GainedItem; }
         }
 
         public UserItem Item;
@@ -1293,7 +1299,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 46; }
+            get { return (short)ServerPacketIds.GainedGold; }
         }
 
         public uint Gold;
@@ -1312,7 +1318,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 47; }
+            get { return (short)ServerPacketIds.LoseGold; }
         }
 
         public uint Gold;
@@ -1331,7 +1337,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 48; }
+            get { return (short)ServerPacketIds.ObjectMonster; }
         }
 
         public uint ObjectID;
@@ -1391,7 +1397,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 49; }
+            get { return (short)ServerPacketIds.ObjectAttack; }
         }
 
         public uint ObjectID;
@@ -1426,7 +1432,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 50; }
+            get { return (short)ServerPacketIds.Struck; }
         }
 
         public uint AttackerID;
@@ -1445,7 +1451,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 51; }
+            get { return (short)ServerPacketIds.ObjectStruck; }
         }
 
         public uint ObjectID;
@@ -1474,7 +1480,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 52; }
+            get { return (short)ServerPacketIds.DuraChanged; }
         }
 
         public ulong UniqueID;
@@ -1496,7 +1502,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 53; }
+            get { return (short)ServerPacketIds.HealthChanged; }
         }
 
         public ushort HP, MP;
@@ -1517,7 +1523,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 54; }
+            get { return (short)ServerPacketIds.DeleteItem; }
         }
 
         public ulong UniqueID;
@@ -1539,7 +1545,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 55; }
+            get { return (short)ServerPacketIds.Death; }
         }
 
         public Point Location;
@@ -1562,7 +1568,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 56; }
+            get { return (short)ServerPacketIds.ObjectDied; }
         }
 
         public uint ObjectID;
@@ -1591,7 +1597,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 57; }
+            get { return (short)ServerPacketIds.ColourChanged; }
         }
 
         public Color NameColour;
@@ -1610,7 +1616,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 58; }
+            get { return (short)ServerPacketIds.ObjectColourChanged; }
         }
 
         public uint ObjectID;
@@ -1632,7 +1638,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 59; }
+            get { return (short)ServerPacketIds.GainExperience; }
         }
 
         public uint Amount;
@@ -1651,7 +1657,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 60; }
+            get { return (short)ServerPacketIds.LevelChanged; }
         }
 
         public byte Level;
@@ -1675,7 +1681,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 61; }
+            get { return (short)ServerPacketIds.ObjectLeveled; }
         }
 
         public uint ObjectID;
@@ -1694,7 +1700,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 62; }
+            get { return (short)ServerPacketIds.ObjectHarvest; }
         }
 
         public uint ObjectID;
@@ -1720,7 +1726,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 63; }
+            get { return (short)ServerPacketIds.ObjectHarvested; }
         }
 
         public uint ObjectID;
@@ -1747,7 +1753,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 64; }
+            get { return (short)ServerPacketIds.ObjectNpc; }
         }
 
         public uint ObjectID;
@@ -1780,7 +1786,7 @@ namespace ServerPackets
     }
     public sealed class NPCResponse : Packet
     {
-        public override short Index { get { return 65; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCResponse; } }
 
         public List<string> Page;
 
@@ -1803,7 +1809,7 @@ namespace ServerPackets
     }
     public sealed class ObjectHide : Packet
     {
-        public override short Index { get { return 66; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectHide; } }
 
         public uint ObjectID;
 
@@ -1818,7 +1824,7 @@ namespace ServerPackets
     }
     public sealed class ObjectShow : Packet
     {
-        public override short Index { get { return 67; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectShow; } }
 
         public uint ObjectID;
 
@@ -1833,7 +1839,7 @@ namespace ServerPackets
     }
     public sealed class Poisoned : Packet
     {
-        public override short Index { get { return 68; } }
+        public override short Index { get { return (short)ServerPacketIds.Poisoned; } }
 
         public PoisonType Poison;
 
@@ -1848,7 +1854,7 @@ namespace ServerPackets
     }
     public sealed class ObjectPoisoned : Packet
     {
-        public override short Index { get { return 69; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectPoisoned; } }
 
         public uint ObjectID;
         public PoisonType Poison;
@@ -1868,7 +1874,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 70; }
+            get { return (short)ServerPacketIds.MapChanged; }
         }
 
         public string FileName = string.Empty;
@@ -1903,7 +1909,7 @@ namespace ServerPackets
     }
     public sealed class ObjectTeleportOut : Packet
     {
-        public override short Index { get { return 71; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectTeleportOut; } }
 
         public uint ObjectID;
         public byte Type;
@@ -1921,7 +1927,7 @@ namespace ServerPackets
     }
     public sealed class ObjectTeleportIn : Packet
     {
-        public override short Index { get { return 72; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectTeleportIn; } }
 
         public uint ObjectID;
         public byte Type;
@@ -1939,7 +1945,7 @@ namespace ServerPackets
     }
     public sealed class TeleportIn : Packet
     {
-        public override short Index { get { return 73; } }
+        public override short Index { get { return (short)ServerPacketIds.TeleportIn; } }
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -1950,7 +1956,7 @@ namespace ServerPackets
     }
     public sealed class NPCGoods : Packet
     {
-        public override short Index { get { return 74; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCGoods; } }
 
         public List<int> List = new List<int>();
         public float Rate;
@@ -1976,7 +1982,7 @@ namespace ServerPackets
     }
     public sealed class NPCSell : Packet
     {
-        public override short Index { get { return 75; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCSell; } }
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -1987,7 +1993,7 @@ namespace ServerPackets
     }
     public sealed class NPCRepair : Packet
     {
-        public override short Index { get { return 76; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCRepair; } }
         public float Rate;
 
         protected override void ReadPacket(BinaryReader reader)
@@ -2001,7 +2007,7 @@ namespace ServerPackets
     }
     public sealed class NPCSRepair : Packet
     {
-        public override short Index { get { return 77; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCSRepair; } }
 
         public float Rate;
 
@@ -2016,7 +2022,7 @@ namespace ServerPackets
     }
     public sealed class NPCStorage : Packet
     {
-        public override short Index { get { return 78; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCStorage; } }
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -2027,7 +2033,7 @@ namespace ServerPackets
     }
     public sealed class SellItem : Packet
     {
-        public override short Index { get { return 79; } }
+        public override short Index { get { return (short)ServerPacketIds.SellItem; } }
 
         public ulong UniqueID;
         public uint Count;
@@ -2048,7 +2054,7 @@ namespace ServerPackets
     }
     public sealed class RepairItem : Packet
     {
-        public override short Index { get { return 80; } }
+        public override short Index { get { return (short)ServerPacketIds.RepairItem; } }
 
         public ulong UniqueID;
 
@@ -2063,7 +2069,7 @@ namespace ServerPackets
     }
     public sealed class ItemRepaired : Packet
     {
-        public override short Index { get { return 81; } }
+        public override short Index { get { return (short)ServerPacketIds.ItemRepaired; } }
 
         public ulong UniqueID;
         public ushort MaxDura, CurrentDura;
@@ -2085,7 +2091,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 82; }
+            get { return (short)ServerPacketIds.NewMagic; }
         }
 
         public ClientMagic Magic;
@@ -2104,7 +2110,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 119; }
+            get { return (short)ServerPacketIds.RemoveMagic; }
         }
 
         public int PlaceId;
@@ -2123,7 +2129,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 83; }
+            get { return (short)ServerPacketIds.MagicLeveled; }
         }
 
         public Spell Spell;
@@ -2146,7 +2152,7 @@ namespace ServerPackets
     }
     public sealed class Magic : Packet
     {
-        public override short Index { get { return 84; } }
+        public override short Index { get { return (short)ServerPacketIds.Magic; } }
 
         public Spell Spell;
         public uint TargetID;
@@ -2174,7 +2180,7 @@ namespace ServerPackets
     }
     public sealed class ObjectMagic : Packet
     {
-        public override short Index { get { return 85; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectMagic; } }
 
         public uint ObjectID;
         public Point Location;
@@ -2215,7 +2221,7 @@ namespace ServerPackets
     }
     public sealed class ObjectEffect : Packet
     {
-        public override short Index { get { return 86; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectEffect; } }
 
         public uint ObjectID;
         public SpellEffect Effect;
@@ -2235,7 +2241,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 87; }
+            get { return (short)ServerPacketIds.Pushed; }
         }
 
         public Point Location;
@@ -2259,7 +2265,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 88; }
+            get { return (short)ServerPacketIds.ObjectPushed; }
         }
 
         public uint ObjectID;
@@ -2283,7 +2289,7 @@ namespace ServerPackets
     }
     public sealed class ObjectName : Packet
     {
-        public override short Index { get { return 89; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectName; } }
 
         public uint ObjectID;
         public string Name = string.Empty;
@@ -2301,7 +2307,7 @@ namespace ServerPackets
     }
     public sealed class UserStorage : Packet
     {
-        public override short Index { get { return 90; } }
+        public override short Index { get { return (short)ServerPacketIds.UserStorage; } }
 
         public UserItem[] Storage;
 
@@ -2333,7 +2339,7 @@ namespace ServerPackets
     }
     public sealed class SwitchGroup : Packet
     {
-        public override short Index { get { return 91; } }
+        public override short Index { get { return (short)ServerPacketIds.SwitchGroup; } }
 
         public bool AllowGroup;
         protected override void ReadPacket(BinaryReader reader)
@@ -2347,7 +2353,7 @@ namespace ServerPackets
     }
     public sealed class DeleteGroup : Packet
     {
-        public override short Index { get { return 92; } }
+        public override short Index { get { return (short)ServerPacketIds.DeleteGroup; } }
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -2358,7 +2364,7 @@ namespace ServerPackets
     }
     public sealed class DeleteMember : Packet
     {
-        public override short Index { get { return 93; } }
+        public override short Index { get { return (short)ServerPacketIds.DeleteMember; } }
 
         public string Name = string.Empty;
         protected override void ReadPacket(BinaryReader reader)
@@ -2372,7 +2378,7 @@ namespace ServerPackets
     }
     public sealed class GroupInvite : Packet
     {
-        public override short Index { get { return 94; } }
+        public override short Index { get { return (short)ServerPacketIds.GroupInvite; } }
 
         public string Name = string.Empty;
         protected override void ReadPacket(BinaryReader reader)
@@ -2386,7 +2392,7 @@ namespace ServerPackets
     }
     public sealed class AddMember : Packet
     {
-        public override short Index { get { return 95; } }
+        public override short Index { get { return (short)ServerPacketIds.AddMember; } }
 
         public string Name = string.Empty;
         protected override void ReadPacket(BinaryReader reader)
@@ -2400,7 +2406,7 @@ namespace ServerPackets
     }
     public sealed class Revived : Packet
     {
-        public override short Index { get { return 96; } }
+        public override short Index { get { return (short)ServerPacketIds.Revived; } }
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -2411,7 +2417,7 @@ namespace ServerPackets
     }
     public sealed class ObjectRevived : Packet
     {
-        public override short Index { get { return 97; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectRevived; } }
         public uint ObjectID;
         public bool Effect;
 
@@ -2428,7 +2434,7 @@ namespace ServerPackets
     }
     public sealed class SpellToggle : Packet
     {
-        public override short Index { get { return 98; } }
+        public override short Index { get { return (short)ServerPacketIds.SpellToggle; } }
         public Spell Spell;
         public bool CanUse;
 
@@ -2445,7 +2451,7 @@ namespace ServerPackets
     }
     public sealed class ObjectHealth : Packet
     {
-        public override short Index { get { return 99; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectHealth; } }
         public uint ObjectID;
         public byte Percent, Expire;
 
@@ -2464,7 +2470,7 @@ namespace ServerPackets
     }
     public sealed class MapEffect : Packet
     {
-        public override short Index { get { return 100; } }
+        public override short Index { get { return (short)ServerPacketIds.MapEffect; } }
 
         public Point Location;
         public SpellEffect Effect;
@@ -2485,7 +2491,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 101; }
+            get { return (short)ServerPacketIds.ObjectRangeAttack; }
         }
 
         public uint ObjectID;
@@ -2515,7 +2521,7 @@ namespace ServerPackets
     }
     public sealed class AddBuff : Packet
     {
-        public override short Index { get { return 102; } }
+        public override short Index { get { return (short)ServerPacketIds.AddBuff; } }
 
         public BuffType Type;
         public string Caster = string.Empty;
@@ -2542,7 +2548,7 @@ namespace ServerPackets
     }
     public sealed class RemoveBuff : Packet
     {
-        public override short Index { get { return 103; } }
+        public override short Index { get { return (short)ServerPacketIds.RemoveBuff; } }
 
         public BuffType Type;
 
@@ -2557,7 +2563,7 @@ namespace ServerPackets
     }
     public sealed class ObjectHidden :Packet
     {
-        public override short Index { get { return 104; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectHidden; } }
         public uint ObjectID;
         public bool Hidden;
 
@@ -2574,7 +2580,7 @@ namespace ServerPackets
     }
     public sealed class RefreshItem : Packet
     {
-        public override short Index { get { return 105; } }
+        public override short Index { get { return (short)ServerPacketIds.RefreshItem; } }
         public UserItem Item;
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -2589,7 +2595,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 106; }
+            get { return (short)ServerPacketIds.ObjectSpell; }
         }
 
         public uint ObjectID;
@@ -2619,7 +2625,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 107; }
+            get { return (short)ServerPacketIds.UserDash; }
         }
 
         public Point Location;
@@ -2643,7 +2649,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 108; }
+            get { return (short)ServerPacketIds.ObjectDash; }
         }
 
         public uint ObjectID;
@@ -2670,7 +2676,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 109; }
+            get { return (short)ServerPacketIds.UserDashFail; }
         }
 
         public Point Location;
@@ -2694,7 +2700,7 @@ namespace ServerPackets
     {
         public override short Index
         {
-            get { return 110; }
+            get { return (short)ServerPacketIds.ObjectDashFail; }
         }
 
         public uint ObjectID;
@@ -2719,7 +2725,7 @@ namespace ServerPackets
     }
     public sealed class NPCConsign : Packet
     {
-        public override short Index { get { return 111; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCConsign; } }
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -2730,7 +2736,7 @@ namespace ServerPackets
     }
     public sealed class NPCMarket : Packet
     {
-        public override short Index { get { return 112; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCMarket; } }
 
         public List<ClientAuction> Listings = new List<ClientAuction>();
         public int Pages;
@@ -2759,7 +2765,7 @@ namespace ServerPackets
     }
     public sealed class NPCMarketPage : Packet
     {
-        public override short Index { get { return 113; } }
+        public override short Index { get { return (short)ServerPacketIds.NPCMarketPage; } }
 
         public List<ClientAuction> Listings = new List<ClientAuction>();
 
@@ -2780,7 +2786,7 @@ namespace ServerPackets
     }
     public sealed class ConsignItem : Packet
     {
-        public override short Index { get { return 114; } }
+        public override short Index { get { return (short)ServerPacketIds.ConsignItem; } }
 
         public ulong UniqueID;
         public bool Success;
@@ -2798,7 +2804,7 @@ namespace ServerPackets
     }
     public sealed class MarketFail : Packet
     {
-        public override short Index { get { return 115; } }
+        public override short Index { get { return (short)ServerPacketIds.MarketFail; } }
 
         public byte Reason;
 
@@ -2825,7 +2831,7 @@ namespace ServerPackets
     }
     public sealed class MarketSuccess : Packet
     {
-        public override short Index { get { return 116; } }
+        public override short Index { get { return (short)ServerPacketIds.MarketSuccess; } }
 
         public string Message = string.Empty;
         
@@ -2840,7 +2846,7 @@ namespace ServerPackets
     }
     public sealed class ObjectSitDown : Packet
     {
-        public override short Index { get { return 117; } }
+        public override short Index { get { return (short)ServerPacketIds.ObjectSitDown; } }
         public uint ObjectID;
         public Point Location;
         public MirDirection Direction;
@@ -2864,7 +2870,7 @@ namespace ServerPackets
     }
     public sealed class InTrapRock : Packet
     {
-        public override short Index { get { return 118; } }
+        public override short Index { get { return (short)ServerPacketIds.InTrapRock; } }
         public bool Trapped;
 
         protected override void ReadPacket(BinaryReader reader)
@@ -2874,6 +2880,59 @@ namespace ServerPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(Trapped);
+        }
+    }
+    public sealed class BaseStatsInfo : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.BaseStatsInfo; }
+        }
+
+        public BaseStats Stats;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Stats = new BaseStats(reader);
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            Stats.Save(writer);
+        }
+    }
+
+    public sealed class UserName : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.UserName; } }
+        public uint Id;
+        public string Name;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Id = reader.ReadUInt32();
+            Name = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Id);
+            writer.Write(Name);
+        }
+    }
+    public sealed class ChatItemStats : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.ChatItemStats; } }
+        public ulong ChatItemId;
+        public UserItem Stats;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ChatItemId = reader.ReadUInt64();
+            Stats = new UserItem(reader);
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ChatItemId);
+            if (Stats != null) Stats.Save(writer);
         }
     }
 }

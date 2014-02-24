@@ -86,7 +86,7 @@ namespace Server.MirObjects.Monsters
                         {
                             if (!ob.IsAttackTarget(this)) continue;
 
-                            Target.Attacked(this, damage, DefenceType.ACAgility);
+                            ob.Attacked(this, damage, DefenceType.ACAgility);
                         }
                         else continue;
 

@@ -41,11 +41,13 @@ namespace Server.MirObjects.Monsters
 
                 int damage = GetAttackPower(MinDC, MaxDC);
                 if (damage == 0) return;
+                if (Envir.Random.Next(Settings.MagicResistWeight) >= Target.MagicResist)
+                {
+                    int delay = Functions.MaxDistance(CurrentLocation, Target.CurrentLocation) * 50 + 500; //50 MS per Step
 
-                int delay = Functions.MaxDistance(CurrentLocation, Target.CurrentLocation) * 50 + 500; //50 MS per Step
-
-                DelayedAction action = new DelayedAction(DelayedType.Damage, Envir.Time + delay, Target, damage, DefenceType.MACAgility);
-                ActionList.Add(action);
+                    DelayedAction action = new DelayedAction(DelayedType.Damage, Envir.Time + delay, Target, damage, DefenceType.MACAgility);
+                    ActionList.Add(action);
+                }
             }
             else
             {

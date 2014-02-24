@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 19;
+        public const int Version = 22;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -83,7 +83,6 @@ namespace Server.MirEnvir
         public LightSetting Lights;
         public LinkedList<MapObject> Objects = new LinkedList<MapObject>();
         public Dragon DragonSystem;
-
 
         static Envir()
         {
@@ -233,6 +232,10 @@ namespace Server.MirEnvir
             for (int i = 0; i < Players.Count; i++) Players[i].Enqueue(p);
         }
 
+        public void RequiresBaseStatUpdate()
+        {
+            for (int i = 0; i < Players.Count; i++) Players[i].HasUpdatedBaseStats = false;
+        }
 
         public void SaveDB()
         {
@@ -486,7 +489,6 @@ namespace Server.MirEnvir
                     if (DragonSystem.Load()) DragonSystem.Info.LoadDrops();
                 }
             }
-
             SMain.Enqueue("Envir Started.");
         }
         private void StartNetwork()
@@ -922,7 +924,7 @@ namespace Server.MirEnvir
                     UpgradeRing(item);
                     break;
             }
-
+            if (!info.NeedIdentify) item.Identified = true;
             return item;
         }
 
@@ -1168,6 +1170,7 @@ namespace Server.MirEnvir
                 return;
             }
         }
+
     }
 }
 

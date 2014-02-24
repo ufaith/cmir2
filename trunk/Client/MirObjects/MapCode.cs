@@ -79,7 +79,6 @@ namespace Client.MirObjects
         public CellInfo[,] MapCells;
         private string FileName;
         private byte[] Bytes;
-        private bool loaded;
         
         public MapReader(string FileName)
         {
@@ -92,7 +91,6 @@ namespace Client.MirObjects
             if (File.Exists(FileName))
             {
                 Bytes = File.ReadAllBytes(FileName);
-                loaded = true;
             }
             else
             {

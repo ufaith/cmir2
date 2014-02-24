@@ -326,6 +326,39 @@ public enum PoisonType : byte
     Stun,
     Paralysis
 }
+[Flags]
+[Obfuscation(Feature = "renaming", Exclude = true)]
+public enum BindMode : byte
+{
+    none = 0,
+    DontDeathdrop = 1,
+    DontDrop = 2,
+    DontSell = 4,
+    DontStore = 8,
+    DontTrade = 16,
+    DontRepair = 32,
+    DontUpgrade = 64,
+    DestroyOnDrop = 128
+}
+
+[Flags]
+[Obfuscation(Feature = "renaming", Exclude = true)]
+public enum SpecialItemMode : short
+{
+    none = 0,
+    Paralize = 0x0001,
+    Teleport = 0x0002,
+    Clearring = 0x0004,
+    Protection = 0x0008,
+    Revival = 0x0010,
+    Muscle = 0x0020,
+    Flame = 0x0040,
+    Healing = 0x0080,
+    Probe = 0x0100,
+    Skill = 0x0200,
+    NoDuraLoss = 0x0400
+}
+
 
 [Flags]
 [Obfuscation(Feature = "renaming", Exclude = true)]
@@ -373,6 +406,14 @@ public enum ItemSet : byte
     NokChi = 10,
     TaoProtect = 11,
     Mir = 12,
+    Bone,
+    Bug,
+    WhiteGold,
+    WhiteGoldH,
+    RedJade,
+    RedJadeH,
+    Nephrite,
+    NephriteH
 }
 
 [Obfuscation(Feature = "renaming", Exclude = true)]
@@ -485,6 +526,8 @@ public enum SpellEffect : byte
     MapLightning,
     MapFire,
     Entrapment,
+    Reflect,
+    Critical,
 }
 
 public enum BuffType : byte
@@ -512,6 +555,188 @@ public enum DefenceType : byte
     None
 }
 
+public enum ServerPacketIds : short
+{
+    Connected,
+    ClientVersion,
+    Disconnect,
+    NewAccount,
+    ChangePassword,
+    ChangePasswordBanned,
+    Login,
+    LoginBanned,
+    LoginSucces,
+    NewCharacter,
+    NewCharacterSuccess,
+    DeleteCharacter,
+    DeleteCharacterSuccess,
+    StartGame,
+    StartGameBanned,
+    StartGameDelay,
+    MapInformation,
+    UserInformation,
+    UserLocation,
+    ObjectPlayer,
+    ObjectRemove,
+    ObjectTurn,
+    ObjectWalk,
+    ObjectRun,
+    Chat,
+    ObjectChat,
+    NewItemInfo,
+    MoveItem,
+    EquipItem,
+    MergeItem,
+    RemoveItem,
+    TakeBackItem,
+    StoreItem,
+    SplitItem,
+    SplitItem1,
+    UseItem,
+    DropItem,
+    PlayerUpdate,
+    PlayerInspect,
+    LogOutSuccess,
+    TimeOfDay,
+    ChangeAMode,
+    ChangePMode,
+    ObjectItem,
+    ObjectGold,
+    GainedItem,
+    GainedGold,
+    LoseGold,
+    ObjectMonster,
+    ObjectAttack,
+    Struck,
+    ObjectStruck,
+    DuraChanged,
+    HealthChanged,
+    DeleteItem,
+    Death,
+    ObjectDied,
+    ColourChanged,
+    ObjectColourChanged,
+    GainExperience,
+    LevelChanged,
+    ObjectLeveled,
+    ObjectHarvest,
+    ObjectHarvested,
+    ObjectNpc,
+    NPCResponse,
+    ObjectHide,
+    ObjectShow,
+    Poisoned,
+    ObjectPoisoned,
+    MapChanged,
+    ObjectTeleportOut,
+    ObjectTeleportIn,
+    TeleportIn,
+    NPCGoods,
+    NPCSell,
+    NPCRepair,
+    NPCSRepair,
+    NPCStorage,
+    SellItem,
+    RepairItem,
+    ItemRepaired,
+    NewMagic,
+    RemoveMagic,
+    MagicLeveled,
+    Magic,
+    ObjectMagic,
+    ObjectEffect,
+    Pushed,
+    ObjectPushed,
+    ObjectName,
+    UserStorage,
+    SwitchGroup,
+    DeleteGroup,
+    DeleteMember,
+    GroupInvite,
+    AddMember,
+    Revived,
+    ObjectRevived,
+    SpellToggle,
+    ObjectHealth,
+    MapEffect,
+    ObjectRangeAttack,
+    AddBuff,
+    RemoveBuff,
+    ObjectHidden,
+    RefreshItem,
+    ObjectSpell,
+    UserDash,
+    ObjectDash,
+    UserDashFail,
+    ObjectDashFail,
+    NPCConsign,
+    NPCMarket,
+    NPCMarketPage,
+    ConsignItem,
+    MarketFail,
+    MarketSuccess,
+    ObjectSitDown,
+    InTrapRock,
+    BaseStatsInfo,
+    UserName,
+    ChatItemStats
+}
+
+public enum ClientPacketIds : short
+{
+    ClientVersion,
+    Disconnect,
+    KeepAlive,
+    NewAccount,
+    ChangePassword,
+    Login,
+    NewCharacter,
+    DeleteCharacter,
+    StartGame,
+    LogOut,
+    Turn,
+    Walk,
+    Run,
+    Chat,
+    MoveItem,
+    StoreItem,
+    TakeBackItem,
+    MergeItem,
+    EquipItem,
+    RemoveItem,
+    SplitItem,
+    UseItem,
+    DropItem,
+    DropGold,
+    PickUp,
+    Inspect,
+    ChangeAMode,
+    ChangePMode,
+    Attack,
+    Harvest,
+    CallNPC,
+    BuyItem,
+    SellItem,
+    RepairItem,
+    BuyItemBack,
+    SRepairItem,
+    MagicKey,
+    Magic,
+    SwitchGroup,
+    AddMember,
+    DellMember,
+    GroupInvite,
+    TownRevive,
+    SpellToggle,
+    ConsignItem,
+    MarketSearch,
+    MarketRefresh,
+    MarketPage,
+    MarketBuy,
+    MarketGetBack,
+    RequestUserName,
+    RequestChatItem
+}
 
 public class InIReader
 {
@@ -821,6 +1046,19 @@ public class InIReader
             Write(section, key, Default);
         }
 
+
+        return result;
+    }
+
+    public float ReadFloat(string section, string key, float Default)
+    {
+        float result;
+
+        if (!float.TryParse(FindValue(section, key), out result))
+        {
+            result = Default;
+            Write(section, key, Default);
+        }
 
         return result;
     }
@@ -1161,6 +1399,43 @@ public static class Functions
                 return dir;
         }
     }
+    public static ItemInfo GetLevelBasedItem(ItemInfo Origin, byte level, List<ItemInfo> ItemList)
+    {
+        ItemInfo output = Origin;
+        for (int i = 0; i < ItemList.Count; i++)
+        {
+            ItemInfo info = ItemList[i];
+            if (info.Name.StartsWith(Origin.Name))
+                if ((info.RequiredType == RequiredType.Level) && (info.RequiredAmount <= level) && (output.RequiredAmount < info.RequiredAmount))
+                    output = info;
+        }
+        return output;
+    }
+    public static ItemInfo GetClassBasedItem(ItemInfo Origin, MirClass job, List<ItemInfo> ItemList)
+    {
+        for (int i = 0; i < ItemList.Count; i++)
+        {
+            ItemInfo info = ItemList[i];
+            if (info.Name.StartsWith(Origin.Name))
+                if ((byte)info.RequiredClass == (1 << (byte)job))
+                    return info;
+        }
+        return Origin;
+    }
+
+    public static ItemInfo GetClassAndLevelBasedItem(ItemInfo Origin, MirClass job, byte level, List<ItemInfo> ItemList)
+    {
+        ItemInfo output = Origin;
+        for (int i = 0; i < ItemList.Count; i++)
+        {
+            ItemInfo info = ItemList[i];
+            if (info.Name.StartsWith(Origin.Name))
+                if ((byte)info.RequiredClass == (1 << (byte)job))
+                    if ((info.RequiredType == RequiredType.Level) && (info.RequiredAmount <= level) && (output.RequiredAmount < info.RequiredAmount))
+                        output = info;
+        }
+        return output;
+    }
 }
 
 public class SelectInfo
@@ -1218,6 +1493,17 @@ public class ItemInfo
     public bool StartItem;
     public byte Effect;
 
+    public byte Strong;
+    public byte MagicResist, PoisonResist, HealthRecovery, SpellRecovery, PoisonRecovery, HPrate, MPrate;
+    public byte CriticalRate, CriticalDamage;
+    public bool NeedIdentify, ShowGroupPickup, BindOnEquip;
+    public bool ClassBased;
+    public bool LevelBased;
+    public byte MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, HpDrainRate;
+    
+    public BindMode Bind = BindMode.none;
+    public byte Reflect;
+    public SpecialItemMode Unique = SpecialItemMode.none;
 
     public bool IsConsumable
     {
@@ -1273,6 +1559,38 @@ public class ItemInfo
         WearWeight = reader.ReadByte();
 
         if (version >= 9) Effect = reader.ReadByte();
+        if (version >= 20)
+        {
+            Strong = reader.ReadByte();
+            MagicResist = reader.ReadByte();
+            PoisonResist = reader.ReadByte();
+            HealthRecovery = reader.ReadByte();
+            SpellRecovery = reader.ReadByte();
+            PoisonRecovery = reader.ReadByte();
+            HPrate = reader.ReadByte();
+            MPrate = reader.ReadByte();
+            CriticalRate = reader.ReadByte();
+            CriticalDamage = reader.ReadByte();
+            byte bools = reader.ReadByte();
+            NeedIdentify = (bools & 0x01) == 0x01;
+            ShowGroupPickup = (bools & 0x02) == 0x02;
+            BindOnEquip = (bools & 0x04) == 0x04;
+            ClassBased = (bools & 0x08) == 0x08;
+            LevelBased = (bools & 0x10) == 0x10;
+            MaxAcRate = reader.ReadByte();
+            MaxMacRate = reader.ReadByte();
+            Holy = reader.ReadByte();
+            Freezing = reader.ReadByte();
+            PoisonAttack = reader.ReadByte();
+            Bind = (BindMode)reader.ReadByte();
+            
+        }
+        if (version >= 21)
+        {
+            Reflect = reader.ReadByte();
+            HpDrainRate = reader.ReadByte();
+            Unique = (SpecialItemMode)reader.ReadInt16();
+        }
     }
 
     public void Save(BinaryWriter writer)
@@ -1321,6 +1639,32 @@ public class ItemInfo
         writer.Write(WearWeight);
 
         writer.Write(Effect);
+        writer.Write(Strong);
+        writer.Write(MagicResist);
+        writer.Write(PoisonResist);
+        writer.Write(HealthRecovery);
+        writer.Write(SpellRecovery);
+        writer.Write(PoisonRecovery);
+        writer.Write(HPrate);
+        writer.Write(MPrate);
+        writer.Write(CriticalRate);
+        writer.Write(CriticalDamage);
+        byte bools = 0;
+        if (NeedIdentify) bools |= 0x01;
+        if (ShowGroupPickup) bools |= 0x02;
+        if (BindOnEquip) bools |= 0x04;
+        if (ClassBased) bools |= 0x08;
+        if (LevelBased) bools |= 0x10;
+        writer.Write(bools);
+        writer.Write(MaxAcRate);
+        writer.Write(MaxMacRate);
+        writer.Write(Holy);
+        writer.Write(Freezing);
+        writer.Write(PoisonAttack);
+        writer.Write((byte)Bind);
+        writer.Write(Reflect);
+        writer.Write(HpDrainRate);
+        writer.Write((short)Unique);
     }
 
     public static ItemInfo FromText(string text)
@@ -1373,6 +1717,31 @@ public class ItemInfo
         if (!uint.TryParse(data[32], out info.StackSize)) return null;
         if (!byte.TryParse(data[33], out info.Effect)) return null;
 
+        if (!byte.TryParse(data[34], out info.Strong)) return null;
+        if (!byte.TryParse(data[35], out info.MagicResist)) return null;
+        if (!byte.TryParse(data[36], out info.PoisonResist)) return null;
+        if (!byte.TryParse(data[37], out info.HealthRecovery)) return null;
+        if (!byte.TryParse(data[38], out info.SpellRecovery)) return null;
+        if (!byte.TryParse(data[39], out info.PoisonRecovery)) return null;
+        if (!byte.TryParse(data[40], out info.HPrate)) return null;
+        if (!byte.TryParse(data[41], out info.MPrate)) return null;
+        if (!byte.TryParse(data[42], out info.CriticalRate)) return null;
+        if (!byte.TryParse(data[43], out info.CriticalDamage)) return null;
+        if (!bool.TryParse(data[44], out info.NeedIdentify)) return null;
+        if (!bool.TryParse(data[45], out info.ShowGroupPickup)) return null;
+        if (!byte.TryParse(data[46], out info.MaxAcRate)) return null;
+        if (!byte.TryParse(data[47], out info.MaxMacRate)) return null;
+        if (!byte.TryParse(data[48], out info.Holy)) return null;
+        if (!byte.TryParse(data[49], out info.Freezing)) return null;
+        if (!byte.TryParse(data[50], out info.PoisonAttack)) return null;
+        if (!bool.TryParse(data[51], out info.ClassBased)) return null;
+        if (!bool.TryParse(data[52], out info.LevelBased)) return null;
+        if (!Enum.TryParse(data[53], out info.Bind)) return null;
+        if (!bool.TryParse(data[54], out info.BindOnEquip)) return null;
+        if (!byte.TryParse(data[55], out info.Reflect)) return null;
+        if (!byte.TryParse(data[56], out info.HpDrainRate)) return null;
+        if (!Enum.TryParse(data[57], out info.Unique)) return null;
+
         return info;
 
     }
@@ -1380,10 +1749,11 @@ public class ItemInfo
     public string ToText()
     {
         return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},{25},{26}," +
-                             "{27},{28},{29},{30},{31},{32},{33}",
+                             "{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57}",
             Name, (byte)Type, (byte)RequiredType, (byte)RequiredClass, (byte)RequiredGender, Shape, Weight, Light, RequiredAmount, MinAC, MaxAC, MinMAC, MaxMAC, MinDC, MaxDC,
             MinMC, MaxMC, MinSC, MaxSC, Accuracy, Agility, HP, MP, AttackSpeed, Luck, BagWeight, HandWeight, WearWeight, StartItem, Image, Durability, Price, 
-            StackSize, Effect);
+            StackSize, Effect, Strong, MagicResist, PoisonResist, HealthRecovery, SpellRecovery, PoisonRecovery, HPrate, MPrate, CriticalRate, CriticalDamage, NeedIdentify, 
+            ShowGroupPickup, MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, ClassBased, LevelBased, (byte)Bind, BindOnEquip, Reflect, HpDrainRate,(short)Unique);
     }
 
     
@@ -1403,16 +1773,20 @@ public class UserItem
     public ushort CurrentDura, MaxDura;
     public uint Count = 1;
 
-    public byte AC, MAC, DC, MC, SC, Accuracy, Agility, HP, MP;
+    public byte AC, MAC, DC, MC, SC, Accuracy, Agility, HP, MP, Strong, MagicResist, PoisonResist, HealthRecovery, ManaRecovery, PoisonRecovery, CriticalRate, CriticalDamage, Freezing, PoisonAttack;
     public sbyte AttackSpeed, Luck;
 
     public bool DuraChanged;
+    public int SoulBoundId = -1;
+    public bool Identified = false;
+    public bool Cursed = false;
 
     public bool IsAdded
     {
         get
         {
-            return AC != 0 || MAC != 0 || DC != 0 || MC != 0 || SC != 0 || Accuracy != 0 || Agility != 0 || HP != 0 || MP != 0 || AttackSpeed != 0 || Luck != 0;
+            return AC != 0 || MAC != 0 || DC != 0 || MC != 0 || SC != 0 || Accuracy != 0 || Agility != 0 || HP != 0 || MP != 0 || AttackSpeed != 0 || Luck != 0 || Strong != 0 || MagicResist != 0 || PoisonResist != 0 ||
+                HealthRecovery != 0 || ManaRecovery != 0 || PoisonRecovery != 0 || CriticalRate != 0 || CriticalDamage != 0 || Freezing != 0 || PoisonAttack != 0;
         }
     }
 
@@ -1429,6 +1803,7 @@ public class UserItem
 
     public UserItem(ItemInfo info)
     {
+        SoulBoundId = -1;
         ItemIndex = info.Index;
         Info = info;
     }
@@ -1457,6 +1832,21 @@ public class UserItem
         Luck = reader.ReadSByte();
 
         if (version <= 18) return;
+        SoulBoundId = reader.ReadInt32();
+        byte Bools = reader.ReadByte();        
+        Identified = (Bools & 0x01) == 0x01;
+        Cursed = (Bools & 0x02) == 0x02;
+        Strong = reader.ReadByte();
+        MagicResist = reader.ReadByte();
+        PoisonResist = reader.ReadByte();
+        HealthRecovery = reader.ReadByte();
+        ManaRecovery = reader.ReadByte();
+        PoisonRecovery = reader.ReadByte();
+        CriticalRate = reader.ReadByte();
+        CriticalDamage = reader.ReadByte();
+        Freezing = reader.ReadByte();
+        PoisonAttack = reader.ReadByte();
+        if (version <= 22) return;
     }
     public void Save(BinaryWriter writer)
     {
@@ -1481,6 +1871,21 @@ public class UserItem
 
         writer.Write(AttackSpeed);
         writer.Write(Luck);
+        writer.Write(SoulBoundId);
+        byte Bools=0;        
+        if (Identified) Bools |= 0x01;
+        if (Cursed) Bools |= 0x02;
+        writer.Write(Bools);
+        writer.Write(Strong);
+        writer.Write(MagicResist);
+        writer.Write(PoisonResist);
+        writer.Write(HealthRecovery);
+        writer.Write(ManaRecovery);
+        writer.Write(PoisonRecovery);
+        writer.Write(CriticalRate);
+        writer.Write(CriticalDamage);
+        writer.Write(Freezing);
+        writer.Write(PoisonAttack);
     }
 
 
@@ -1506,7 +1911,7 @@ public class UserItem
         }
 
 
-        p = (uint)(p * ((AC + MAC + DC + MC + SC + Accuracy + Agility + HP + MP + AttackSpeed + Luck) * 0.1F + 1F));
+        p = (uint)(p * ((AC + MAC + DC + MC + SC + Accuracy + Agility + HP + MP + AttackSpeed + Luck + Strong + MagicResist + PoisonResist + HealthRecovery + ManaRecovery + PoisonRecovery + CriticalRate + CriticalDamage + Freezing + PoisonAttack) * 0.1F + 1F));
         
 
         return p * Count;
@@ -1520,7 +1925,7 @@ public class UserItem
         if (Info.Durability > 0)
         {
             p = (uint)Math.Floor(MaxDura * ((Info.Price / 2F) / Info.Durability) + Info.Price / 2F);
-            p = (uint)(p * ((AC + MAC + DC + MC + SC + Accuracy + Agility + HP + MP + AttackSpeed + Luck) * 0.1F + 1F));
+            p = (uint)(p * ((AC + MAC + DC + MC + SC + Accuracy + Agility + HP + MP + AttackSpeed + Luck + Strong + MagicResist + PoisonResist + HealthRecovery + ManaRecovery + PoisonRecovery + CriticalRate + CriticalDamage + Freezing + PoisonAttack) * 0.1F + 1F));
 
         }
 
@@ -1550,6 +1955,19 @@ public class UserItem
                 Luck = Luck,
 
                 DuraChanged = DuraChanged,
+                SoulBoundId = SoulBoundId,
+                Identified = Identified,
+                Cursed = Cursed,
+                Strong = Strong,
+                MagicResist = MagicResist,
+                PoisonResist = PoisonResist,
+                HealthRecovery = HealthRecovery,
+                ManaRecovery = ManaRecovery,
+                PoisonRecovery = PoisonRecovery,
+                CriticalRate = CriticalRate,
+                CriticalDamage = CriticalDamage,
+                Freezing = Freezing,
+                PoisonAttack = PoisonAttack
             };
 
         return item;
@@ -1709,106 +2127,110 @@ public abstract class Packet
     {
         switch (index)
         {
-            case 0:
+            case (short)ClientPacketIds.ClientVersion:
                 return new C.ClientVersion();
-            case 1:
+            case (short)ClientPacketIds.Disconnect:
                 return new C.Disconnect();
-            case 2:
+            case (short)ClientPacketIds.KeepAlive:
                 return new C.KeepAlive();
-            case 3:
+            case (short)ClientPacketIds.NewAccount:
                 return new C.NewAccount();
-            case 4:
+            case (short)ClientPacketIds.ChangePassword:
                 return new C.ChangePassword();
-            case 5:
+            case (short)ClientPacketIds.Login:
                 return new C.Login();
-            case 6:
+            case (short)ClientPacketIds.NewCharacter:
                 return new C.NewCharacter();
-            case 7:
+            case (short)ClientPacketIds.DeleteCharacter:
                 return new C.DeleteCharacter();
-            case 8:
+            case (short)ClientPacketIds.StartGame:
                 return new C.StartGame();
-            case 9:
+            case (short)ClientPacketIds.LogOut:
                 return new C.LogOut();
-            case 10:
+            case (short)ClientPacketIds.Turn:
                 return new C.Turn();
-            case 11:
+            case (short)ClientPacketIds.Walk:
                 return new C.Walk();
-            case 12:
+            case (short)ClientPacketIds.Run:
                 return new C.Run();
-            case 13:
+            case (short)ClientPacketIds.Chat:
                 return new C.Chat();
-            case 14:
+            case (short)ClientPacketIds.MoveItem:
                 return new C.MoveItem();
-            case 15:
+            case (short)ClientPacketIds.StoreItem:
                 return new C.StoreItem();
-            case 16:
+            case (short)ClientPacketIds.TakeBackItem:
                 return new C.TakeBackItem();
-            case 17:
+            case (short)ClientPacketIds.MergeItem:
                 return new C.MergeItem();
-            case 18:
+            case (short)ClientPacketIds.EquipItem:
                 return new C.EquipItem();
-            case 19:
+            case (short)ClientPacketIds.RemoveItem:
                 return new C.RemoveItem();
-            case 20:
+            case (short)ClientPacketIds.SplitItem:
                 return new C.SplitItem();
-            case 21:
+            case (short)ClientPacketIds.UseItem:
                 return new C.UseItem();
-            case 22:
+            case (short)ClientPacketIds.DropItem:
                 return new C.DropItem();
-            case 23:
+            case (short)ClientPacketIds.DropGold:
                 return new C.DropGold();
-            case 24:
+            case (short)ClientPacketIds.PickUp:
                 return new C.PickUp();
-            case 25:
+            case (short)ClientPacketIds.Inspect:
                 return new C.Inspect();
-            case 26:
+            case (short)ClientPacketIds.ChangeAMode:
                 return new C.ChangeAMode();
-            case 27:
+            case (short)ClientPacketIds.ChangePMode:
                 return new C.ChangePMode();
-            case 28:
+            case (short)ClientPacketIds.Attack:
                 return new C.Attack();
-            case 29:
+            case (short)ClientPacketIds.Harvest:
                 return new C.Harvest();
-            case 30:
+            case (short)ClientPacketIds.CallNPC:
                 return new C.CallNPC();
-            case 31:
+            case (short)ClientPacketIds.BuyItem:
                 return new C.BuyItem();
-            case 32:
+            case (short)ClientPacketIds.SellItem:
                 return new C.SellItem();
-            case 33:
+            case (short)ClientPacketIds.RepairItem:
                 return new C.RepairItem();
-            case 34:
+            case (short)ClientPacketIds.BuyItemBack:
                 return new C.BuyItemBack();
-            case 35:
+            case (short)ClientPacketIds.SRepairItem:
                 return new C.SRepairItem();
-            case 36:
+            case (short)ClientPacketIds.MagicKey:
                 return new C.MagicKey();
-            case 37:
+            case (short)ClientPacketIds.Magic:
                 return new C.Magic();
-            case 38:
+            case (short)ClientPacketIds.SwitchGroup:
                 return new C.SwitchGroup();
-            case 39:
+            case (short)ClientPacketIds.AddMember:
                 return new C.AddMember();
-            case 40:
+            case (short)ClientPacketIds.DellMember:
                 return new C.DelMember();
-            case 41:
+            case (short)ClientPacketIds.GroupInvite:
                 return new C.GroupInvite();
-            case 42:
+            case (short)ClientPacketIds.TownRevive:
                 return new C.TownRevive();
-            case 43:
+            case (short)ClientPacketIds.SpellToggle:
                 return new C.SpellToggle();
-            case 44:
+            case (short)ClientPacketIds.ConsignItem:
                 return new C.ConsignItem();
-            case 45:
+            case (short)ClientPacketIds.MarketSearch:
                 return new C.MarketSearch();
-            case 46:
+            case (short)ClientPacketIds.MarketRefresh:
                 return new C.MarketRefresh();
-            case 47:
+            case (short)ClientPacketIds.MarketPage:
                 return new C.MarketPage();
-            case 48:
+            case (short)ClientPacketIds.MarketBuy:
                 return new C.MarketBuy();
-            case 49:
+            case (short)ClientPacketIds.MarketGetBack:
                 return new C.MarketGetBack();
+            case (short)ClientPacketIds.RequestUserName:
+                return new C.RequestUserName();
+            case (short)ClientPacketIds.RequestChatItem:
+                return new C.RequestChatItem();
             default:
                 throw new NotImplementedException();
         }
@@ -1818,251 +2240,428 @@ public abstract class Packet
     {
         switch (index)
         {
-            case 0:
+            case (short)ServerPacketIds.Connected:
                 return new S.Connected();
-            case 1:
+            case (short)ServerPacketIds.ClientVersion:
                 return new S.ClientVersion();
-            case 2:
+            case (short)ServerPacketIds.Disconnect:
                 return new S.Disconnect();
-            case 3:
+            case (short)ServerPacketIds.NewAccount:
                 return new S.NewAccount();
-            case 4:
+            case (short)ServerPacketIds.ChangePassword:
                 return new S.ChangePassword();
-            case 5:
+            case (short)ServerPacketIds.ChangePasswordBanned:
                 return new S.ChangePasswordBanned();
-            case 6:
+            case (short)ServerPacketIds.Login:
                 return new S.Login();
-            case 7:
+            case (short)ServerPacketIds.LoginBanned:
                 return new S.LoginBanned();
-            case 8:
+            case (short)ServerPacketIds.LoginSucces:
                 return new S.LoginSuccess();
-            case 9:
+            case (short)ServerPacketIds.NewCharacter:
                 return new S.NewCharacter();
-            case 10:
+            case (short)ServerPacketIds.NewCharacterSuccess:
                 return new S.NewCharacterSuccess();
-            case 11:
+            case (short)ServerPacketIds.DeleteCharacter:
                 return new S.DeleteCharacter();
-            case 12:
+            case (short)ServerPacketIds.DeleteCharacterSuccess:
                 return new S.DeleteCharacterSuccess();
-            case 13:
+            case (short)ServerPacketIds.StartGame:
                 return new S.StartGame();
-            case 14:
+            case (short)ServerPacketIds.StartGameBanned:
                 return new S.StartGameBanned();
-            case 15:
+            case (short)ServerPacketIds.StartGameDelay:
                 return new S.StartGameDelay();
-            case 16:
+            case (short)ServerPacketIds.MapInformation:
                 return new S.MapInformation();
-            case 17:
+            case (short)ServerPacketIds.UserInformation:
                 return new S.UserInformation();
-            case 18:
+            case (short)ServerPacketIds.UserLocation:
                 return new S.UserLocation();
-            case 19:
+            case (short)ServerPacketIds.ObjectPlayer:
                 return new S.ObjectPlayer();
-            case 20:
+            case (short)ServerPacketIds.ObjectRemove:
                 return new S.ObjectRemove();
-            case 21:
+            case (short)ServerPacketIds.ObjectTurn:
                 return new S.ObjectTurn();
-            case 22:
+            case (short)ServerPacketIds.ObjectWalk:
                 return new S.ObjectWalk();
-            case 23:
+            case (short)ServerPacketIds.ObjectRun:
                 return new S.ObjectRun();
-            case 24:
+            case (short)ServerPacketIds.Chat:
                 return new S.Chat();
-            case 25:
+            case (short)ServerPacketIds.ObjectChat:
                 return new S.ObjectChat();
-            case 26:
+            case (short)ServerPacketIds.NewItemInfo:
                 return new S.NewItemInfo();
-            case 27:
+            case (short)ServerPacketIds.MoveItem:
                 return new S.MoveItem();
-            case 28:
+            case (short)ServerPacketIds.EquipItem:
                 return new S.EquipItem();
-            case 29:
+            case (short)ServerPacketIds.MergeItem:
                 return new S.MergeItem();
-            case 30:
+            case (short)ServerPacketIds.RemoveItem:
                 return new S.RemoveItem();
-            case 31:
+            case (short)ServerPacketIds.TakeBackItem:
                 return new S.TakeBackItem();
-            case 32:
+            case (short)ServerPacketIds.StoreItem:
                 return new S.StoreItem();
-            case 33:
+            case (short)ServerPacketIds.SplitItem:
                 return new S.SplitItem();
-            case 34:
+            case (short)ServerPacketIds.SplitItem1:
                 return new S.SplitItem1();
-            case 35:
+            case (short)ServerPacketIds.UseItem:
                 return new S.UseItem();
-            case 36:
+            case (short)ServerPacketIds.DropItem:
                 return new S.DropItem();
-            case 37:
+            case (short)ServerPacketIds.PlayerUpdate:
                 return new S.PlayerUpdate();
-            case 38:
+            case (short)ServerPacketIds.PlayerInspect:
                 return new S.PlayerInspect();
-            case 39:
+            case (short)ServerPacketIds.LogOutSuccess:
                 return new S.LogOutSuccess();
-            case 40:
+            case (short)ServerPacketIds.TimeOfDay:
                 return new S.TimeOfDay();
-            case 41:
+            case (short)ServerPacketIds.ChangeAMode:
                 return new S.ChangeAMode();
-            case 42:
+            case (short)ServerPacketIds.ChangePMode:
                 return new S.ChangePMode();
-            case 43:
+            case (short)ServerPacketIds.ObjectItem:
                 return new S.ObjectItem();
-            case 44:
+            case (short)ServerPacketIds.ObjectGold:
                 return new S.ObjectGold();
-            case 45:
+            case (short)ServerPacketIds.GainedItem:
                 return new S.GainedItem();
-            case 46:
+            case (short)ServerPacketIds.GainedGold:
                 return new S.GainedGold();
-            case 47:
+            case (short)ServerPacketIds.LoseGold:
                 return new S.LoseGold();
-            case 48:
+            case (short)ServerPacketIds.ObjectMonster:
                 return new S.ObjectMonster();
-            case 49:
+            case (short)ServerPacketIds.ObjectAttack:
                 return new S.ObjectAttack();
-            case 50:
+            case (short)ServerPacketIds.Struck:
                 return new S.Struck();
-            case 51:
+            case (short)ServerPacketIds.ObjectStruck:
                 return new S.ObjectStruck();
-            case 52:
+            case (short)ServerPacketIds.DuraChanged:
                 return new S.DuraChanged();
-            case 53:
+            case (short)ServerPacketIds.HealthChanged:
                 return new S.HealthChanged();
-            case 54:
+            case (short)ServerPacketIds.DeleteItem:
                 return new S.DeleteItem();
-            case 55:
+            case (short)ServerPacketIds.Death:
                 return new S.Death();
-            case 56:
+            case (short)ServerPacketIds.ObjectDied:
                 return new S.ObjectDied();
-            case 57:
+            case (short)ServerPacketIds.ColourChanged:
                 return new S.ColourChanged();
-            case 58:
+            case (short)ServerPacketIds.ObjectColourChanged:
                 return new S.ObjectColourChanged();
-            case 59:
+            case (short)ServerPacketIds.GainExperience:
                 return new S.GainExperience();
-            case 60:
+            case (short)ServerPacketIds.LevelChanged:
                 return new S.LevelChanged();
-            case 61:
+            case (short)ServerPacketIds.ObjectLeveled:
                 return new S.ObjectLeveled();
-            case 62:
+            case (short)ServerPacketIds.ObjectHarvest:
                 return new S.ObjectHarvest();
-            case 63:
+            case (short)ServerPacketIds.ObjectHarvested:
                 return new S.ObjectHarvested();
-            case 64:
+            case (short)ServerPacketIds.ObjectNpc:
                 return new S.ObjectNPC();
-            case 65:
+            case (short)ServerPacketIds.NPCResponse:
                 return new S.NPCResponse();
-            case 66:
+            case (short)ServerPacketIds.ObjectHide:
                 return new S.ObjectHide();
-            case 67:
+            case (short)ServerPacketIds.ObjectShow:
                 return new S.ObjectShow();
-            case 68:
+            case (short)ServerPacketIds.Poisoned:
                 return new S.Poisoned();
-            case 69:
+            case (short)ServerPacketIds.ObjectPoisoned:
                 return new S.ObjectPoisoned();
-            case 70:
+            case (short)ServerPacketIds.MapChanged:
                 return new S.MapChanged();
-            case 71:
+            case (short)ServerPacketIds.ObjectTeleportOut:
                 return new S.ObjectTeleportOut();
-            case 72:
+            case (short)ServerPacketIds.ObjectTeleportIn:
                 return new S.ObjectTeleportIn();
-            case 73:
+            case (short)ServerPacketIds.TeleportIn:
                 return new S.TeleportIn();
-            case 74:
+            case (short)ServerPacketIds.NPCGoods:
                 return new S.NPCGoods();
-            case 75:
+            case (short)ServerPacketIds.NPCSell:
                 return new S.NPCSell();
-            case 76:
+            case (short)ServerPacketIds.NPCRepair:
                 return new S.NPCRepair();
-            case 77:
+            case (short)ServerPacketIds.NPCSRepair:
                 return new S.NPCSRepair();
-            case 78:
+            case (short)ServerPacketIds.NPCStorage:
                 return new S.NPCStorage();
-            case 79:
+            case (short)ServerPacketIds.SellItem:
                 return new S.SellItem();
-            case 80:
+            case (short)ServerPacketIds.RepairItem:
                 return new S.RepairItem();
-            case 81:
+            case (short)ServerPacketIds.ItemRepaired:
                 return new S.ItemRepaired();
-            case 82:
+            case (short)ServerPacketIds.NewMagic:
                 return new S.NewMagic();
-            case 83:
+            case (short)ServerPacketIds.MagicLeveled:
                 return new S.MagicLeveled();
-            case 84:
+            case (short)ServerPacketIds.Magic:
                 return new S.Magic();
-            case 85:
+            case (short)ServerPacketIds.ObjectMagic:
                 return new S.ObjectMagic();
-            case 86:
+            case (short)ServerPacketIds.ObjectEffect:
                 return new S.ObjectEffect();
-            case 87:
+            case (short)ServerPacketIds.Pushed:
                 return new S.Pushed();
-            case 88:
+            case (short)ServerPacketIds.ObjectPushed:
                 return new S.ObjectPushed();
-            case 89:
+            case (short)ServerPacketIds.ObjectName:
                 return new S.ObjectName();
-            case 90:
+            case (short)ServerPacketIds.UserStorage:
                 return new S.UserStorage();
-            case 91:
+            case (short)ServerPacketIds.SwitchGroup:
                 return new S.SwitchGroup();
-            case 92:
+            case (short)ServerPacketIds.DeleteGroup:
                 return new S.DeleteGroup();
-            case 93:
+            case (short)ServerPacketIds.DeleteMember:
                 return new S.DeleteMember();
-            case 94:
+            case (short)ServerPacketIds.GroupInvite:
                 return new S.GroupInvite();
-            case 95:
+            case (short)ServerPacketIds.AddMember:
                 return new S.AddMember();
-            case 96:
+            case (short)ServerPacketIds.Revived:
                 return new S.Revived();
-            case 97:
+            case (short)ServerPacketIds.ObjectRevived:
                 return new S.ObjectRevived();
-            case 98:
+            case (short)ServerPacketIds.SpellToggle:
                 return new S.SpellToggle();
-            case 99:
+            case (short)ServerPacketIds.ObjectHealth:
                 return new S.ObjectHealth();
-            case 100:
+            case (short)ServerPacketIds.MapEffect:
                 return new S.MapEffect();
-            case 101:
+            case (short)ServerPacketIds.ObjectRangeAttack:
                 return new S.ObjectRangeAttack();
-            case 102:
+            case (short)ServerPacketIds.AddBuff:
                 return new S.AddBuff();
-            case 103:
+            case (short)ServerPacketIds.RemoveBuff:
                 return new S.RemoveBuff();
-            case 104:
+            case (short)ServerPacketIds.ObjectHidden:
                 return new S.ObjectHidden();
-            case 105:
+            case (short)ServerPacketIds.RefreshItem:
                 return new S.RefreshItem();
-            case 106:
+            case (short)ServerPacketIds.ObjectSpell:
                 return new S.ObjectSpell();
-            case 107:
+            case (short)ServerPacketIds.UserDash:
                 return new S.UserDash();
-            case 108:
+            case (short)ServerPacketIds.ObjectDash:
                 return new S.ObjectDash();
-            case 109:
+            case (short)ServerPacketIds.UserDashFail:
                 return new S.UserDashFail();
-            case 110:
+            case (short)ServerPacketIds.ObjectDashFail:
                 return new S.ObjectDashFail();
-            case 111:
+            case (short)ServerPacketIds.NPCConsign:
                 return new S.NPCConsign();
-            case 112:
+            case (short)ServerPacketIds.NPCMarket:
                 return new S.NPCMarket();
-            case 113:
+            case (short)ServerPacketIds.NPCMarketPage:
                 return new S.NPCMarketPage();
-            case 114:
+            case (short)ServerPacketIds.ConsignItem:
                 return new S.ConsignItem();
-            case 115:
+            case (short)ServerPacketIds.MarketFail:
                 return new S.MarketFail();
-            case 116:
+            case (short)ServerPacketIds.MarketSuccess:
                 return new S.MarketSuccess();
-            case 117:
+            case (short)ServerPacketIds.ObjectSitDown:
                 return new S.ObjectSitDown();
-            case 118:
+            case (short)ServerPacketIds.InTrapRock:
                 return new S.InTrapRock();
-            case 119:
+            case (short)ServerPacketIds.RemoveMagic:
                 return new S.RemoveMagic();
+            case (short)ServerPacketIds.BaseStatsInfo:
+                return new S.BaseStatsInfo();
+            case (short)ServerPacketIds.UserName:
+                return new S.UserName();
+            case (short)ServerPacketIds.ChatItemStats:
+                return new S.ChatItemStats();
             default:
                 throw new NotImplementedException();
         }
     }
 
+    
+}
+public class BaseStats
+{
+    public float HpGain, HpGainRate, MpGainRate, BagWeightGain, WearWeightGain, HandWeightGain;
+    public byte MinAc, MaxAc, MinMac, MaxMac, MinDc, MaxDc, MinMc, MaxMc, MinSc, MaxSc, StartAgility, StartAccuracy, StartCriticalRate, StartCriticalDamage, CritialRateGain, CriticalDamageGain;
+
+    public BaseStats(MirClass Job)
+    {
+        switch (Job)
+        {
+            case MirClass.Warrior:
+                HpGain = 4F;
+                HpGainRate = 4.5F;
+                MpGainRate = 0;
+                BagWeightGain = 3F;
+                WearWeightGain = 20F;
+                HandWeightGain = 13F;
+                MinAc = 0;
+                MaxAc = 7;
+                MinMac = 0;
+                MaxMac = 0;
+                MinDc = 5;
+                MaxDc = 5;
+                MinMc = 0;
+                MaxMc = 0;
+                MinSc = 0;
+                MaxSc = 0;
+                StartAgility = 15;
+                StartAccuracy = 5;
+                StartCriticalRate = 0;
+                StartCriticalDamage = 0;
+                CritialRateGain = 0;
+                CriticalDamageGain = 0;
+                break;
+            case MirClass.Wizard:
+                HpGain = 15F;
+                HpGainRate = 1.8F;
+                MpGainRate = 0;
+                BagWeightGain = 5F;
+                WearWeightGain = 100F;
+                HandWeightGain = 90F;
+                MinAc = 0;
+                MaxAc = 0;
+                MinMac = 0;
+                MaxMac = 0;
+                MinDc = 7;
+                MaxDc = 7;
+                MinMc = 7;
+                MaxMc = 7;
+                MinSc = 0;
+                MaxSc = 0;
+                StartAgility = 15;
+                StartAccuracy = 5;
+                StartCriticalRate = 0;
+                StartCriticalDamage = 0;
+                CritialRateGain = 0;
+                CriticalDamageGain = 0;
+                break;
+            case MirClass.Taoist:
+                HpGain = 6F;
+                HpGainRate = 2.5F;
+                MpGainRate = 0;
+                BagWeightGain = 4F;
+                WearWeightGain = 50F;
+                HandWeightGain = 42F;
+                MinAc = 0;
+                MaxAc = 0;
+                MinMac = 12;
+                MaxMac = 6;
+                MinDc = 7;
+                MaxDc = 7;
+                MinMc = 0;
+                MaxMc = 0;
+                MinSc = 7;
+                MaxSc = 7;
+                StartAgility = 18;
+                StartAccuracy = 5;
+                StartCriticalRate = 0;
+                StartCriticalDamage = 0;
+                CritialRateGain = 0;
+                CriticalDamageGain = 0;
+                break;
+            case MirClass.Assassin:
+                HpGain = 4F;
+                HpGainRate = 3.25F;
+                MpGainRate = 0;
+                BagWeightGain = 3.5F;
+                WearWeightGain = 33F;
+                HandWeightGain = 30F;
+                MinAc = 0;
+                MaxAc = 0;
+                MinMac = 0;
+                MaxMac = 0;
+                MinDc = 8;
+                MaxDc = 6;
+                MinMc = 0;
+                MaxMc = 0;
+                MinSc = 0;
+                MaxSc = 0;
+                StartAgility = 20;
+                StartAccuracy = 5;
+                StartCriticalRate = 0;
+                StartCriticalDamage = 0;
+                CritialRateGain = 0;
+                CriticalDamageGain = 0;
+                break;
+        }
+    }
+    public BaseStats(BinaryReader reader)
+    {
+        HpGain = reader.ReadSingle();
+        HpGainRate = reader.ReadSingle();
+        MpGainRate = reader.ReadSingle();
+        MinAc = reader.ReadByte();
+        MaxAc = reader.ReadByte();
+        MinMac = reader.ReadByte();
+        MaxMac = reader.ReadByte();
+        MinDc = reader.ReadByte();
+        MaxDc = reader.ReadByte();
+        MinMc = reader.ReadByte();
+        MaxMc = reader.ReadByte();
+        MinSc = reader.ReadByte();
+        MaxSc = reader.ReadByte();
+        StartAccuracy = reader.ReadByte();
+        StartAgility = reader.ReadByte();
+        StartCriticalRate = reader.ReadByte();
+        StartCriticalDamage = reader.ReadByte();
+        CritialRateGain = reader.ReadByte();
+        CriticalDamageGain = reader.ReadByte();
+        BagWeightGain = reader.ReadSingle();
+        WearWeightGain = reader.ReadSingle();
+        HandWeightGain = reader.ReadSingle();
+    }
+
+    public void Save(BinaryWriter writer)
+    {
+        writer.Write(HpGain);
+        writer.Write(HpGainRate);
+        writer.Write(MpGainRate);
+        writer.Write(MinAc);
+        writer.Write(MaxAc);
+        writer.Write(MinMac);
+        writer.Write(MaxMac);
+        writer.Write(MinDc);
+        writer.Write(MaxDc);
+        writer.Write(MinMc);
+        writer.Write(MaxMc);
+        writer.Write(MinSc);
+        writer.Write(MaxSc);
+        writer.Write(StartAccuracy);
+        writer.Write(StartAgility);
+        writer.Write(StartCriticalRate);
+        writer.Write(StartCriticalDamage);
+        writer.Write(CritialRateGain);
+        writer.Write(CriticalDamageGain);
+        writer.Write(BagWeightGain);
+        writer.Write(WearWeightGain);
+        writer.Write(HandWeightGain);
+    }
 }
 
+public class ChatItem
+{
+    public long RecievedTick = 0;
+    public ulong ID = 0;
+    public UserItem ItemStats;
+}
 
+public class UserId
+{
+    public long Id = 0;
+    public string UserName = "";
+}

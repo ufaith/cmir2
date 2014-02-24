@@ -124,6 +124,6 @@ namespace Server.MirObjects.Monsters
             return 1;
         }
 
-        public override void ApplyPoison(Poison p) { }
+        public override void ApplyPoison(Poison p, MapObject Caster = null, bool NoResist = false) { }
     }
 }

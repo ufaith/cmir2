@@ -61,6 +61,7 @@ namespace Server.MirObjects
         public ushort CurrentBagWeight,
                       MaxBagWeight;
 
+        public byte MagicResist, PoisonResist, HealthRecovery, SpellRecovery, PoisonRecovery, CriticalRate, CriticalDamage, Holy, Freezing, PoisonAttack;
 
         public long CellTime, BrownTime, PKPointTime, LastHitTime, EXPOwnerTime;
         public Color NameColour = Color.White;
@@ -340,7 +341,7 @@ namespace Server.MirObjects
 
         public virtual bool Harvest(PlayerObject player) { return false; }
 
-        public abstract void ApplyPoison(Poison p);
+        public abstract void ApplyPoison(Poison p, MapObject Caster = null, bool NoResist = false);
         public virtual void AddBuff(Buff b)
         {
 

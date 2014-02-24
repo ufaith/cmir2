@@ -45,7 +45,7 @@ namespace Server.MirObjects.Monsters
                     PType = PoisonType.Green,
                     Value = poison,
                     TickSpeed = 2000
-                });
+                }, this);
             }
         }
     }

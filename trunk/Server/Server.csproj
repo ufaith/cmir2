@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>Server\</OutputPath>
+    <OutputPath>C:\mirserver\Server\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -56,6 +56,12 @@
     </Compile>
     <Compile Include="..\ServerPackets.cs">
       <Link>MirNetwork\ServerPackets.cs</Link>
+    </Compile>
+    <Compile Include="BalanceConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BalanceConfigForm.Designer.cs">
+      <DependentUpon>BalanceConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DragonInfoForm.cs">
       <SubType>Form</SubType>
@@ -182,6 +188,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AccountInfoForm.resx">
       <DependentUpon>AccountInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BalanceConfigForm.resx">
+      <DependentUpon>BalanceConfigForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>

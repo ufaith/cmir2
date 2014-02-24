@@ -179,11 +179,11 @@ namespace Client.MirControls
         {
             switch (p.Index)
             {
-                case 2: // Disonnected
+                case (short)ServerPacketIds.Disconnect: // Disonnected
                     Disconnect((S.Disconnect) p);
                     Network.Disconnect();
                     break;
-                case 26:
+                case (short)ServerPacketIds.NewItemInfo:
                     NewItemInfo((S.NewItemInfo) p);
                     break;
             }

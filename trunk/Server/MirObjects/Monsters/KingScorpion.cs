@@ -97,7 +97,7 @@ namespace Server.MirObjects.Monsters
                         if (ob.Race == ObjectType.Monster || ob.Race == ObjectType.Player)
                         {
                             if (!ob.IsAttackTarget(this)) continue;
-                            Target.Attacked(this, damage, range ? DefenceType.MACAgility : DefenceType.ACAgility);
+                            ob.Attacked(this, damage, range ? DefenceType.MACAgility : DefenceType.ACAgility);
                         }
                         else continue;
 
