@@ -1831,7 +1831,7 @@ public class UserItem
         AttackSpeed = reader.ReadSByte();
         Luck = reader.ReadSByte();
 
-        if (version <= 18) return;
+        if (version <= 19) return;
         SoulBoundId = reader.ReadInt32();
         byte Bools = reader.ReadByte();        
         Identified = (Bools & 0x01) == 0x01;
