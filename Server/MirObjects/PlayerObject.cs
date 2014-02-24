@@ -2243,7 +2243,15 @@ namespace Server.MirObjects
                                 ReceiveChat((string.Format("Player {0} could not be found", parts[1])), ChatType.System);
                                 return;
                             }
+                            if (!player.EnableGroupRecall)
+                            {
+                                player.ReceiveChat("A recall was attempted without your permission",
+                                        ChatType.System);
+                                ReceiveChat((string.Format("{0} is blocking grouprecall", player.Name)), ChatType.System);
+                                return;
+                            }
                             LastRecallTime = Envir.Time + 60000;
+                            
                             if (!player.Teleport(CurrentMap, Front))
                                 player.Teleport(CurrentMap, CurrentLocation);
                         }
