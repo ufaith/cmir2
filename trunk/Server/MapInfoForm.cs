@@ -410,7 +410,7 @@ namespace Server
             MovementInfoPanel.Enabled = true;
 
             SourceXTextBox.Text = info.Source.X.ToString();
-            SourceYTextBox.Text = info.Destination.Y.ToString();
+            SourceYTextBox.Text = info.Source.Y.ToString();
             NeedHoleMCheckBox.Checked = info.NeedHole;
             DestMapComboBox.SelectedItem = Envir.MapInfoList.FirstOrDefault(x => x.Index == info.MapIndex);
             DestXTextBox.Text = info.Destination.X.ToString();
