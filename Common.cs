@@ -1406,7 +1406,7 @@ public static class Functions
         {
             ItemInfo info = ItemList[i];
             if (info.Name.StartsWith(Origin.Name))
-                if ((info.RequiredType == RequiredType.Level) && (info.RequiredAmount <= level) && (output.RequiredAmount < info.RequiredAmount))
+                if ((info.RequiredType == RequiredType.Level) && (info.RequiredAmount <= level) && (output.RequiredAmount < info.RequiredAmount) && (Origin.RequiredGender == info.RequiredGender))
                     output = info;
         }
         return output;
@@ -1417,7 +1417,7 @@ public static class Functions
         {
             ItemInfo info = ItemList[i];
             if (info.Name.StartsWith(Origin.Name))
-                if ((byte)info.RequiredClass == (1 << (byte)job))
+                if (((byte)info.RequiredClass == (1 << (byte)job)) && (Origin.RequiredGender == info.RequiredGender))
                     return info;
         }
         return Origin;
@@ -1431,7 +1431,7 @@ public static class Functions
             ItemInfo info = ItemList[i];
             if (info.Name.StartsWith(Origin.Name))
                 if ((byte)info.RequiredClass == (1 << (byte)job))
-                    if ((info.RequiredType == RequiredType.Level) && (info.RequiredAmount <= level) && (output.RequiredAmount < info.RequiredAmount))
+                    if ((info.RequiredType == RequiredType.Level) && (info.RequiredAmount <= level) && (output.RequiredAmount <= info.RequiredAmount) && (Origin.RequiredGender == info.RequiredGender))
                         output = info;
         }
         return output;
