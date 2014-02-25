@@ -1259,10 +1259,20 @@ namespace Server
             if (NFileNameTextBox.Text == string.Empty) return;
 
             var scriptPath = Settings.NPCPath + NFileNameTextBox.Text + ".txt";
+
             if (File.Exists(scriptPath))
                 Process.Start(scriptPath);
             else
-                MessageBox.Show("Script file could not be found"); 
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(scriptPath));
+                File.Create(scriptPath).Close();
+                Process.Start(scriptPath);
+            }
+        }
+
+        private void ClearHButton_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

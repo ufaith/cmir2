@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Drawing;
@@ -21,21 +22,22 @@ namespace Server.MirObjects
         }
 
         public const string
-            MainKey = "[Main]",
-            BuyKey = "[Buy]",
-            SellKey = "[Sell]",
-            RepairKey = "[Repair]",
-            SRepairKey = "[SRepair]",
-            TradeKey = "[Trade]",
-            BuyBackKey = "[BuyBack]",
-            StorageKey = "[Storage]",
-            TypeKey = "[Types]",
-            ConsignKey = "[Consign]",
-            MarketKey = "[Market]",
-            ConsignmentsKey = "[Consignments]";
+            MainKey = "[@MAIN]",
+            BuyKey = "[@BUY]",
+            SellKey = "[@SELL]",
+            RepairKey = "[@REPAIR]",
+            SRepairKey = "[@SREPAIR]",
+            BuyBackKey = "[@BUYBACK]",
+            StorageKey = "[@STORAGE]",
+            ConsignKey = "[@CONSIGN]",
+            MarketKey = "[@MARKET]",
+            ConsignmentsKey = "[@CONSIGNMENT]",
+            TradeKey = "[TRADE]",
+            TypeKey = "[TYPES]";
 
-        public static Regex Regex = new Regex(@"<.*?/(.*?)>");
 
+        //public static Regex Regex = new Regex(@"[^\{\}]<.*?/(.*?)>");
+        public static Regex Regex = new Regex(@"<.*?/(\@.*?)>");
         public NPCInfo Info;
         private const long TurnDelay = 10000;
         public long TurnTime;
@@ -125,7 +127,7 @@ namespace Server.MirObjects
                 GoodsIndex.Add(Goods[i].Index);
         }
 
-        private List<string> ParseSection(IList<string> lines, string sectionName)
+        private List<string> ParseSection(IEnumerable<string> scriptLines, string sectionName)
         {
             List<string>
                 checks = new List<string>(),
@@ -137,11 +139,15 @@ namespace Server.MirObjects
                 elseButtons = new List<string>(),
                 gotoButtons = new List<string>();
 
+            List<string> lines = scriptLines.ToList();
             List<string> currentSay = say, currentButtons = buttons;
+
+            //Used to fake page name
+            string tempSectionName = SectionArgumentParse(sectionName);
 
             for (int i = 0; i < lines.Count; i++)
             {
-                if (!lines[i].StartsWith(sectionName)) continue;
+                if (!lines[i].ToUpper().StartsWith(tempSectionName.ToUpper())) continue;
 
                 for (int x = i + 1; x < lines.Count; x++)
                 {
@@ -149,7 +155,8 @@ namespace Server.MirObjects
 
                     if (lines[x].StartsWith("#"))
                     {
-                        switch (lines[x].Remove(0, 1).ToUpper().Trim())
+                        string[] action = lines[x].Remove(0, 1).ToUpper().Trim().Split(' ');
+                        switch (action[0])
                         {
                             case "IF":
                                 currentSay = checks;
@@ -171,6 +178,9 @@ namespace Server.MirObjects
                                 currentSay = elseActs;
                                 currentButtons = gotoButtons;
                                 continue;
+                            case "INCLUDE":
+                                lines.InsertRange(x + 1, ParseInclude(lines[x]));
+                                continue;
                             default:
                                 throw new NotImplementedException();
                         }
@@ -183,18 +193,24 @@ namespace Server.MirObjects
                         Match match = Regex.Match(lines[x]);
                         while (match.Success)
                         {
-                            currentButtons.Add(string.Format("[{0}]", match.Groups[1].Captures[0].Value));
+                            currentButtons.Add(string.Format("[{0}]", match.Groups[1].Captures[0].Value.ToUpper()));
                             match = match.NextMatch();
                         }
 
                         //Check if line has a goto command
                         var parts = lines[x].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        if (parts.Count() > 1 && parts[0].ToLower() == "goto")
-                            gotoButtons.Add(string.Format("[{0}]", parts[1]));
+                        if (parts.Count() > 1 && parts[0].ToUpper() == "GOTO")
+                            gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
 
-                        if (parts.Count() > 1 && parts[0].ToLower() == "timerecallpage")
-                            gotoButtons.Add(string.Format("[{0}]", parts[1]));
+                        if (parts.Count() > 1 && parts[0].ToUpper() == "TIMERECALLPAGE")
+                            gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
+
+                        if (parts.Count() > 1 && parts[0].ToUpper() == "TIMERECALLGROUPPAGE")
+                            gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
+
+                        if (parts.Count() > 1 && parts[0].ToUpper() == "DELAYGOTO")
+                            gotoButtons.Add(string.Format("[{0}]", parts[2].ToUpper()));
                     }
 
                     currentSay.Add(lines[x].TrimEnd());
@@ -204,7 +220,7 @@ namespace Server.MirObjects
             }
 
 
-            NPCPage page = new NPCPage(sectionName, say, buttons, elseSay, elseButtons, gotoButtons);
+            NPCPage page = new NPCPage(sectionName, Info.Name, say, buttons, elseSay, elseButtons, gotoButtons);
 
             for (int i = 0; i < checks.Count; i++)
                 page.ParseCheck(checks[i]);
@@ -224,11 +240,77 @@ namespace Server.MirObjects
             return currentButtons;
         }
 
+        public static List<string> Args = new List<string>();
+
+        public string SectionArgumentParse(string key)
+        {
+            Regex r = new Regex(@"\((.*?)\)");
+
+            Match match = r.Match(key);
+            if (!match.Success) return key;
+
+            key = Regex.Replace(key, r.ToString(), "()");
+
+            string strValues = match.Groups[1].Value;
+            string[] arrValues = strValues.Split(',');
+
+            Args = new List<string>();
+
+            foreach (var t in arrValues)
+                Args.Add(t);
+
+            return key;
+        }
+
+        
+
+        private IEnumerable<string> ParseInclude(string line)
+        {
+            string[] split = line.Split(' ');
+
+            string path = Path.Combine(Settings.EnvirPath, split[1].Substring(1, split[1].Length - 2));
+            string page = "[" + split[2] + "]";
+
+            bool start = false, finish = false;
+
+            var parsedLines = new List<string>();
+
+            if (!File.Exists(path)) return parsedLines;
+            IList<string> lines = File.ReadAllLines(path);
+
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (!lines[i].ToUpper().StartsWith(page.ToUpper())) continue;
+
+                for (int x = i + 1; x < lines.Count; x++)
+                {
+                    if (lines[x].Trim() == ("{"))
+                    {
+                        start = true;
+                        continue;
+                    }
+
+                    if (lines[x].Trim() == ("}"))
+                    {
+                        finish = true;
+                        break;
+                    }
+
+                    parsedLines.Add(lines[x]);
+                }
+            }
+
+            if (start && finish)
+                return parsedLines;
+
+            return new List<string>();
+        } 
+
         private void ParseTypes(IList<string> lines)
         {
             for (int i = 0; i < lines.Count; i++)
             {
-                if (!lines[i].StartsWith(TypeKey)) continue;
+                if (!lines[i].ToUpper().StartsWith(TypeKey.ToUpper())) continue;
 
                 while (++i < lines.Count)
                 {
@@ -245,7 +327,7 @@ namespace Server.MirObjects
         {
             for (int i = 0; i < lines.Count; i++)
             {
-                if (!lines[i].StartsWith(TradeKey)) continue;
+                if (!lines[i].ToUpper().StartsWith(TradeKey.ToUpper())) continue;
 
                 while (++i < lines.Count)
                 {
@@ -406,7 +488,7 @@ namespace Server.MirObjects
 
         public void Call(PlayerObject player, string key)
         {
-            if (key != MainKey)
+            if (key != MainKey.ToUpper())
             {
                 if (player.NPCID != ObjectID) return;
 
@@ -414,11 +496,11 @@ namespace Server.MirObjects
                 {
                     if (player.NPCSuccess)
                     {
-                        if (!player.NPCPage.Buttons.Contains(key)) return;
+                        if (!player.NPCPage.Buttons.Contains(key.ToUpper())) return;
                     }
                     else
                     {
-                        if (!player.NPCPage.ElseButtons.Contains(key)) return;
+                        if (!player.NPCPage.ElseButtons.Contains(key.ToUpper())) return;
                     }
                 }
 
@@ -429,7 +511,7 @@ namespace Server.MirObjects
             {
 
                 NPCPage page = NPCSections[i];
-                if (page.Key != key) continue;
+                if (page.Key.ToUpper() != key) continue;
 
                 ProcessPage(player, page);
             }
@@ -525,9 +607,12 @@ namespace Server.MirObjects
         public string Param1;
         public int Param1Instance, Param2, Param3;
 
-        public NPCPage(string key, List<string> say, List<string> buttons, List<string> elseSay, List<string> elseButtons, List<string> gotoButtons)
+        public string NPCName;
+
+        public NPCPage(string key, string npcName, List<string> say, List<string> buttons, List<string> elseSay, List<string> elseButtons, List<string> gotoButtons)
         {
             Key = key;
+            NPCName = npcName;
 
             Say = say;
             Buttons = buttons;
@@ -546,65 +631,98 @@ namespace Server.MirObjects
             set { _sayCommandValue = value; _sayCommandFound = true; }
         }
 
+        public string[] ParseArguments(string[] words)
+        {
+            Regex r = new Regex(@"\%ARG\((\d+)\)$");
+
+            for (int i = 0; i < words.Length; i++)
+            {
+                Match match = r.Match(words[i]);
+
+                if (!match.Success) continue;
+
+                int sequence = Convert.ToInt32(match.Groups[1].Value);
+
+                if (NPCObject.Args.Count >= (sequence + 1)) words[i] = NPCObject.Args[sequence];
+            }
+
+            return words;
+        }
+
+        public void AddVariable(PlayerObject player, string key, string value)
+        {
+            Regex regex = new Regex(@"[A-Z][0-9]");
+
+            if (!regex.Match(key).Success) return;
+
+            for (int i = 0; i < player.kv.Count; i++)
+            {
+                if (player.kv[i].Key != key) continue;
+                player.kv[i] = new KeyValuePair<string, string>(player.kv[i].Key, value);
+                return;
+            }
+
+            player.kv.Add(new KeyValuePair<string, string>(key, value));
+        }
+
+        public string FindVariable(PlayerObject player, string key)
+        {
+            Regex regex = new Regex(@"[A-Z][0-9]");
+
+            if (!regex.Match(key).Success) return key;
+
+            foreach (KeyValuePair<string, string> t in player.kv)
+            {
+                if (t.Key == key) return t.Value;
+            }
+
+            return key;
+        }
+
         public void ParseCheck(string line)
         {
             var parts = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
 
+            parts = ParseArguments(parts);
+
             if (parts.Length == 0) return;
 
-            int temp;
-            uint temp2;
-            byte temp3;
+            string tempString;
+
             var regexFlag = new Regex(@"\[(.*?)\]");
 
             switch (parts[0].ToUpper())
             {
                 case "LEVEL":
                     if (parts.Length < 3) return;
-                    if (!byte.TryParse(parts[2], out temp3)) return;
-                    try
-                    {
-                        Compare(parts[1], 0, 0);
-                        CheckList.Add(new NPCChecks(CheckType.Level, parts[1], temp3));
-                    }
-                    catch (ArgumentException){}
+
+                    CheckList.Add(new NPCChecks(CheckType.Level, parts[1], parts[2]));
                     break;
 
                 case "CHECKGOLD":
-                    if (parts.Length < 2) return;
-                    if (!uint.TryParse(parts[1], out temp2)) return;
+                    if (parts.Length < 3) return;
 
-                    CheckList.Add(new NPCChecks(CheckType.CheckGold, temp2));
+                    CheckList.Add(new NPCChecks(CheckType.CheckGold, parts[1], parts[2]));
                     break;
 
                 case "CHECKITEM":
                     if (parts.Length < 2) return;
-                    var info = SMain.Envir.GetItemInfo(parts[1]);
 
-                    if (info == null)
-                    {
-                        SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", parts[1], Key));
-                        return;
-                    }
+                    tempString = parts.Length < 3 ? "1" : parts[2];
 
-                    if (parts.Length < 3 || !uint.TryParse(parts[2], out temp2)) temp2 = 1;
-                    CheckList.Add(new NPCChecks(CheckType.CheckItem, parts[1], temp2));
+                    CheckList.Add(new NPCChecks(CheckType.CheckItem, parts[1], tempString));
                     break;
 
                 case "CHECKGENDER":
                     if (parts.Length < 2) return;
-                    if (!Enum.IsDefined(typeof(MirGender), parts[1])) return;
 
-                    temp3 = (byte)Enum.Parse(typeof(MirGender), parts[1]);
-                    CheckList.Add(new NPCChecks(CheckType.CheckGender, temp3));
+                    CheckList.Add(new NPCChecks(CheckType.CheckGender, parts[1]));
                     break;
 
                 case "CHECKCLASS":
                     if (parts.Length < 2) return;
-                    if (!Enum.IsDefined(typeof(MirClass), parts[1])) return;
 
-                    temp3 = (byte)Enum.Parse(typeof(MirClass), parts[1]);
-                    CheckList.Add(new NPCChecks(CheckType.CheckClass, temp3));
+                    CheckList.Add(new NPCChecks(CheckType.CheckClass, parts[1]));
                     break;
 
                 case "DAYOFWEEK":
@@ -613,15 +731,15 @@ namespace Server.MirObjects
                     break;
 
                 case "HOUR":
-                    if (parts.Length < 2 || !uint.TryParse(parts[1], out temp2)) return;
+                    if (parts.Length < 2) return;
 
-                    CheckList.Add(new NPCChecks(CheckType.CheckHour, temp2));
+                    CheckList.Add(new NPCChecks(CheckType.CheckHour, parts[1]));
                     break;
 
                 case "MIN":
-                    if (parts.Length < 2 || !uint.TryParse(parts[1], out temp2)) return;
+                    if (parts.Length < 2) return;
 
-                    CheckList.Add(new NPCChecks(CheckType.CheckMinute, temp2));
+                    CheckList.Add(new NPCChecks(CheckType.CheckMinute, parts[1]));
                     break;
 
                 case "CHECKNAMELIST":
@@ -637,18 +755,15 @@ namespace Server.MirObjects
                     break;
 
                 case "CHECKPKPOINT":
-                    if (parts.Length < 2) return;
-                    if (!uint.TryParse(parts[1], out temp2)) return;
+                    if (parts.Length < 3) return;
 
-                    CheckList.Add(new NPCChecks(CheckType.CheckPkPoint));
+                    CheckList.Add(new NPCChecks(CheckType.CheckPkPoint, parts[1], parts[2]));
                     break;
 
                 case "CHECKRANGE":
                     if (parts.Length < 4) return;
 
-                    int x, y, distance;
-                    if (!int.TryParse(parts[1], out x) || !int.TryParse(parts[2], out y) || !int.TryParse(parts[3], out distance)) return;
-                    CheckList.Add(new NPCChecks(CheckType.CheckRange, x, y, distance));
+                    CheckList.Add(new NPCChecks(CheckType.CheckRange, parts[1], parts[2], parts[3]));
                     break;
 
                 case "CHECK":
@@ -656,39 +771,29 @@ namespace Server.MirObjects
                     var match = regexFlag.Match(parts[1]);
                     if (match.Success)
                     {
-                        uint flagIndex;
-                        uint onCheck;
-                        if (!uint.TryParse(match.Groups[1].Captures[0].Value, out flagIndex)) return;
-                        if (!uint.TryParse(parts[2], out onCheck)) return;
-                        if (flagIndex > Globals.FlagIndexCount) return;
-                        var flagIsOn = Convert.ToBoolean(onCheck);
-                        CheckList.Add(new NPCChecks(CheckType.Check, flagIndex, flagIsOn));
-                    }   
+                        string flagIndex = match.Groups[1].Captures[0].Value;
+                        CheckList.Add(new NPCChecks(CheckType.Check, flagIndex, parts[2]));
+                    }
                     break;
 
                 case "CHECKHUM":
                     if (parts.Length < 3) return;
 
-                    int humCount;
-                    int instanceId;
-                    if (!int.TryParse(parts[1], out humCount)) return;
-                    if (parts.Length < 4 || !int.TryParse(parts[3], out instanceId)) instanceId = 1;
-                    CheckList.Add(new NPCChecks(CheckType.CheckHum, humCount, parts[2], instanceId));
+                    tempString = parts.Length < 4 ? "1" : parts[3];
+                    CheckList.Add(new NPCChecks(CheckType.CheckHum, parts[1], parts[2], tempString));
                     break;
 
                 case "CHECKMON":
                     if (parts.Length < 3) return;
 
-                    int monCount;
-                    if (!int.TryParse(parts[1], out monCount)) return;
-                    if (parts.Length < 4 || !int.TryParse(parts[3], out instanceId)) instanceId = 1;
-                    CheckList.Add(new NPCChecks(CheckType.CheckMon, monCount, parts[2], instanceId));
+                    tempString = parts.Length < 4 ? "1" : parts[3];
+                    CheckList.Add(new NPCChecks(CheckType.CheckMon, parts[1], parts[2], tempString));
                     break;
 
                 case "RANDOM":
                     if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp)) return;
-                    CheckList.Add(new NPCChecks(CheckType.Random, temp));
+
+                    CheckList.Add(new NPCChecks(CheckType.Random, parts[1]));
                     break;
 
                 case "GROUPLEADER":
@@ -697,35 +802,25 @@ namespace Server.MirObjects
 
                 case "GROUPCOUNT":
                     if (parts.Length < 3) return;
-                    if (!int.TryParse(parts[2], out temp)) return;
-                    try
-                    {
-                        Compare(parts[1], 0, 0);
-                        CheckList.Add(new NPCChecks(CheckType.GroupCount, parts[1], temp));
-                    }
-                    catch (ArgumentException){}
+
+                    CheckList.Add(new NPCChecks(CheckType.GroupCount, parts[1], parts[2]));
                     break;
 
                 case "PETCOUNT":
                     if (parts.Length < 3) return;
-                    if (!int.TryParse(parts[2], out temp)) return;
-                    try
-                    {
-                        Compare(parts[1], 0, 0);
-                        CheckList.Add(new NPCChecks(CheckType.PetCount, parts[1], temp));
-                    }
-                    catch (ArgumentException){}
+
+                    CheckList.Add(new NPCChecks(CheckType.PetCount, parts[1], parts[2]));
                     break;
 
                 case "PETLEVEL":
                     if (parts.Length < 3) return;
-                    if (!int.TryParse(parts[2], out temp)) return;
-                    try
-                    {
-                        Compare(parts[1], 0, 0);
-                        CheckList.Add(new NPCChecks(CheckType.PetLevel, parts[1], temp));
-                    }
-                    catch (ArgumentException){}
+
+                    CheckList.Add(new NPCChecks(CheckType.PetLevel, parts[1], parts[2]));
+                    break;
+
+                case "TRYCALC":
+                    if (parts.Length < 4) return;
+                    CheckList.Add(new NPCChecks(CheckType.TryCalc, parts[1], parts[2], parts[3]));
                     break;
             }
 
@@ -734,13 +829,10 @@ namespace Server.MirObjects
         {
             var parts = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
 
+            parts = ParseArguments(parts);
+
             if (parts.Length == 0) return;
 
-            ItemInfo info;
-            uint temp;
-            int temp1;
-            byte temp2;
-            long temp3;
             string fileName;
             var regexMessage = new Regex("\"([^\"]*)\"");
             var regexFlag = new Regex(@"\[(.*?)\]");
@@ -748,95 +840,56 @@ namespace Server.MirObjects
             switch (parts[0].ToUpper())
             {
                 case "MOVE":
-                    int x = 0, y = 0;
                     if (parts.Length < 2) return;
 
-                    if (parts.Length > 3)
-                    {
-                        if (!int.TryParse(parts[2], out x)) return;
-                        if (!int.TryParse(parts[3], out y)) return;
-                    }
-
-                    acts.Add(new NPCActions(ActionType.Teleport, parts[1], new Point(x, y)));
+                    acts.Add(new NPCActions(ActionType.Teleport, parts[1], parts[2], parts[3]));
                     break;
 
                 case "INSTANCEMOVE":
-                    int instanceId;
                     if (parts.Length < 5) return;
-                    if (!int.TryParse(parts[2], out instanceId)) return;
-                    if (!int.TryParse(parts[3], out x)) return;
-                    if (!int.TryParse(parts[4], out y)) return;
 
-                    acts.Add(new NPCActions(ActionType.InstanceTeleport, parts[1], instanceId, new Point(x, y)));
+                    acts.Add(new NPCActions(ActionType.InstanceTeleport, parts[1], parts[2], parts[3], parts[4]));
                     break;
 
                 case "GIVEGOLD":
                     if (parts.Length < 2) return;
-                    if (!uint.TryParse(parts[1], out temp)) return;
 
-                    acts.Add(new NPCActions(ActionType.GiveGold, temp));
+                    acts.Add(new NPCActions(ActionType.GiveGold, parts[1]));
                     break;
 
                 case "TAKEGOLD":
                     if (parts.Length < 2) return;
-                    if (!uint.TryParse(parts[1], out temp)) return;
 
-                    acts.Add(new NPCActions(ActionType.TakeGold, temp));
+                    acts.Add(new NPCActions(ActionType.TakeGold, parts[1]));
                     break;
 
                 case "GIVEITEM":
                     if (parts.Length < 2) return;
 
-                    info = SMain.Envir.GetItemInfo(parts[1]);
-
-                    if (info == null)
-                    {
-                        SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", parts[1], Key));
-                        break;
-                    }
-
-                    if (parts.Length < 3 || !uint.TryParse(parts[2], out temp)) temp = 1;
-                    acts.Add(new NPCActions(ActionType.GiveItem, info, temp));
+                    string count = parts.Length < 3 ? string.Empty : parts[2];
+                    acts.Add(new NPCActions(ActionType.GiveItem, parts[1], count));
                     break;
 
                 case "TAKEITEM":
                     if (parts.Length < 3) return;
 
-                    info = SMain.Envir.GetItemInfo(parts[1]);
-
-                    if (info == null)
-                    {
-                        SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", parts[1], Key));
-                        break;
-                    }
-
-                    if (parts.Length < 3 || !uint.TryParse(parts[2], out temp)) temp = 1;
-                    acts.Add(new NPCActions(ActionType.TakeItem, info, temp));
+                    count = parts.Length < 3 ? string.Empty : parts[2];
+                    acts.Add(new NPCActions(ActionType.TakeItem, parts[1], count));
                     break;
 
                 case "GIVEEXP":
                     if (parts.Length < 2) return;
-                    if (!uint.TryParse(parts[1], out temp)) return;
 
-                    acts.Add(new NPCActions(ActionType.GiveExp, temp));
+                    acts.Add(new NPCActions(ActionType.GiveExp, parts[1]));
                     break;
 
                 case "GIVEPET":
                     if (parts.Length < 2) return;
 
-                    byte petcount = 0;
-                    byte petlevel = 0;
+                    string petcount = parts.Length > 2 ? parts[2] : "1";
+                    string petlevel = parts.Length > 2 ? parts[2] : "0";
 
-                    MonsterInfo mInfo2 = SMain.Envir.GetMonsterInfo(parts[1]);
-                    if (mInfo2 == null) return;
-
-                    if (parts.Length > 2)
-                       petcount = byte.TryParse(parts[2], out petcount) ? Math.Min((byte)5, petcount) : (byte)1;
-
-                    if(parts.Length > 3)
-                       petlevel = byte.TryParse(parts[3], out petlevel) ? Math.Min((byte)7, petlevel) : (byte)0;
-
-                    acts.Add(new NPCActions(ActionType.GivePet, mInfo2, petcount, petlevel));
+                    acts.Add(new NPCActions(ActionType.GivePet, parts[1], petcount, petlevel));
                     break;
 
                 case "GOTO":
@@ -845,6 +898,7 @@ namespace Server.MirObjects
                     acts.Add(new NPCActions(ActionType.Goto, parts[1]));
                     break;
 
+                //cant use stored var
                 case "ADDNAMELIST":
                     if (parts.Length < 2) return;
 
@@ -855,6 +909,7 @@ namespace Server.MirObjects
                         acts.Add(new NPCActions(ActionType.AddNameList, fileName));
                     break;
 
+                //cant use stored var
                 case "DELNAMELIST":
                     if (parts.Length < 2) return;
 
@@ -863,6 +918,7 @@ namespace Server.MirObjects
                         acts.Add(new NPCActions(ActionType.DelNameList, fileName));
                     break;
 
+                //cant use stored var
                 case "CLEARNAMELIST":
                     if (parts.Length < 2) return;
 
@@ -873,28 +929,25 @@ namespace Server.MirObjects
 
                 case "GIVEHP":
                     if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp1)) return;
-                    acts.Add(new NPCActions(ActionType.GiveHP, temp1));
+
+                    acts.Add(new NPCActions(ActionType.GiveHP, parts[1]));
                     break;
 
                 case "GIVEMP":
                     if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp1)) return;
-                    acts.Add(new NPCActions(ActionType.GiveMP, temp1));
+                    acts.Add(new NPCActions(ActionType.GiveMP, parts[1]));
                     break;
 
                 case "CHANGELEVEL":
                     if (parts.Length < 2) return;
-                    if (!byte.TryParse(parts[1], out temp2)) return;
 
-                    temp2 = Math.Min(byte.MaxValue, temp2);
-                    acts.Add(new NPCActions(ActionType.ChangeLevel, temp2));
+                    acts.Add(new NPCActions(ActionType.ChangeLevel, parts[1]));
                     break;
 
                 case "SETPKPOINT":
                     if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp1)) return;
-                    acts.Add(new NPCActions(ActionType.SetPkPoint, temp1));
+
+                    acts.Add(new NPCActions(ActionType.SetPkPoint, parts[1]));
                     break;
 
                 case "CHANGEGENDER":
@@ -902,12 +955,12 @@ namespace Server.MirObjects
                     break;
 
                 case "CHANGECLASS":
-                    if (!Enum.IsDefined(typeof(MirClass), parts[1])) return;
+                    if (parts.Length < 2) return;
 
-                    var type = (byte)Enum.Parse(typeof(MirClass), parts[1]);
-                    acts.Add(new NPCActions(ActionType.ChangeClass, type));
+                    acts.Add(new NPCActions(ActionType.ChangeClass, parts[1]));
                     break;
 
+                    //cant use stored var
                 case "LINEMESSAGE":
                     var match = regexMessage.Match(line);
                     if (match.Success)
@@ -915,76 +968,64 @@ namespace Server.MirObjects
                         var message = match.Groups[1].Captures[0].Value;
 
                         var last = parts.Count() - 1;
-                        if (!Enum.IsDefined(typeof(ChatType), parts[last])) return;
-
-                        var chatType = (byte)Enum.Parse(typeof(ChatType), parts[last]);
-                        acts.Add(new NPCActions(ActionType.LineMessage, message, chatType));
+                        acts.Add(new NPCActions(ActionType.LineMessage, message, parts[last]));
                     }
                     break;
 
                 case "GIVESKILL":
                     if (parts.Length < 3) return;
-                    if (!Enum.IsDefined(typeof(Spell), parts[1])) return;
-                    if (!byte.TryParse(parts[2], out temp2)) return;
 
-                    var spell = (byte)Enum.Parse(typeof(Spell), parts[1]);
-                    acts.Add(new NPCActions(ActionType.GiveSkill, spell, Math.Min(temp2, (byte)3)));
+                    string spelllevel = parts.Length > 2 ? parts[2] : "0";
+                    acts.Add(new NPCActions(ActionType.GiveSkill, parts[1], spelllevel));
                     break;
 
+                    //cant use stored var
                 case "SET":
                     if (parts.Length < 3) return;
                     match = regexFlag.Match(parts[1]);
                     if (match.Success)
                     {
-                        uint flagIndex;
-                        uint onCheck;
-                        if (!uint.TryParse(match.Groups[1].Captures[0].Value, out flagIndex)) return;
-                        if (!uint.TryParse(parts[2], out onCheck)) return;
-                        if (flagIndex > Globals.FlagIndexCount) return;
-                        var flagIsOn = Convert.ToBoolean(onCheck);
-                        acts.Add(new NPCActions(ActionType.Set, flagIndex, flagIsOn));
+                        string flagIndex = match.Groups[1].Captures[0].Value;
+                        acts.Add(new NPCActions(ActionType.Set, flagIndex, parts[2]));
                     }   
                     break;
 
                 case "PARAM1":
                     if (parts.Length < 2) return;
-                    if (parts.Length < 3 || !int.TryParse(parts[2], out temp1)) temp1 = 1;
-                    acts.Add(new NPCActions(ActionType.Param1, parts[1], temp1));
+
+                    string instanceId = parts.Length < 3 ? "1" : parts[2];
+                    acts.Add(new NPCActions(ActionType.Param1, parts[1], instanceId));
                     break;
 
                 case "PARAM2":
                     if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp1)) return;
-                    acts.Add(new NPCActions(ActionType.Param2, temp1));
+
+                    acts.Add(new NPCActions(ActionType.Param2, parts[1]));
                     break;
 
                 case "PARAM3":
                     if (parts.Length < 2) return;
-                    if (!int.TryParse(parts[1], out temp1)) return;
-                    acts.Add(new NPCActions(ActionType.Param3, temp1));
+
+                    acts.Add(new NPCActions(ActionType.Param3, parts[1]));
                     break;
 
                 case "MONGEN":
                     if (parts.Length < 2) return;
-                    if (parts.Length < 3 || !byte.TryParse(parts[2], out temp2)) temp2 = 1;
 
-                    mInfo2 = SMain.Envir.GetMonsterInfo(parts[1]);
-                    if (mInfo2 == null) return;
-                    acts.Add(new NPCActions(ActionType.Mongen, mInfo2, temp2));
+                    count = parts.Length < 3 ? "1" : parts[2];
+                    acts.Add(new NPCActions(ActionType.Mongen, parts[1], count));
                     break;
 
                 case "TIMERECALL":
                     if (parts.Length < 2) return;
-                    if (!long.TryParse(parts[1], out temp3)) return;
 
-                    acts.Add(new NPCActions(ActionType.TimeRecall, temp3));
+                    acts.Add(new NPCActions(ActionType.TimeRecall, parts[1]));
                     break;
 
                 case "TIMERECALLGROUP":
                     if (parts.Length < 2) return;
-                    if (!long.TryParse(parts[1], out temp3)) return;
 
-                    acts.Add(new NPCActions(ActionType.TimeRecallGroup, temp3));
+                    acts.Add(new NPCActions(ActionType.TimeRecallGroup, parts[1]));
                     break;
 
                 case "TIMERECALLPAGE":
@@ -1003,10 +1044,17 @@ namespace Server.MirObjects
                     acts.Add(new NPCActions(ActionType.BreakTimeRecall));
                     break;
 
+                case "DELAYGOTO":
+                    if (parts.Length < 3) return;
+
+                    acts.Add(new NPCActions(ActionType.DelayGoto, parts[1], parts[2]));
+                    break;
+
                 case "MONCLEAR":
                     if (parts.Length < 2) return;
-                    if (parts.Length < 3 || !int.TryParse(parts[2], out temp1)) temp1 = 1;
-                    acts.Add(new NPCActions(ActionType.MonClear, parts[1], temp1));
+
+                    instanceId = parts.Length < 3 ? "1" : parts[2];
+                    acts.Add(new NPCActions(ActionType.MonClear, parts[1], instanceId));
                     break;
 
                 case "GROUPRECALL":
@@ -1015,21 +1063,47 @@ namespace Server.MirObjects
 
                 case "GROUPTELEPORT":
                     if (parts.Length < 2) return;
-                    
+                    string x;
+                    string y;
+
                     if (parts.Length == 4)
                     {
-                        instanceId = 1;
-                        if (!int.TryParse(parts[2], out x)) x = 0;
-                        if (!int.TryParse(parts[3], out y)) y = 0;
+                        instanceId = "1";
+                        x = parts[2];
+                        y = parts[3];
                     }
                     else
                     {
-                        if (parts.Length < 3 || !int.TryParse(parts[2], out instanceId)) instanceId = 1;
-                        if (parts.Length < 4 || !int.TryParse(parts[3], out x)) x = 0;
-                        if (parts.Length < 5 || !int.TryParse(parts[4], out y)) y = 0;
+                        instanceId = parts.Length < 3 ? "1" : parts[2];
+                        x = parts.Length < 4 ? "0" : parts[3];
+                        y = parts.Length < 5 ? "0" : parts[4];
                     }
 
-                    acts.Add(new NPCActions(ActionType.GroupTeleport, parts[1], instanceId, new Point(x, y)));
+                    acts.Add(new NPCActions(ActionType.GroupTeleport, parts[1], instanceId, x, y));
+                    break;
+
+                case "MOV":
+                    if (parts.Length < 3) return;
+                    match = Regex.Match(parts[1], @"\%[A-Z][0-9]", RegexOptions.IgnoreCase);
+                    Match msgMatch = regexMessage.Match(line);
+
+                    string valueToStore = parts[2];
+
+                    if (msgMatch.Success)
+                        valueToStore = msgMatch.Groups[1].Captures[0].Value;
+
+                    if (match.Success)
+                        acts.Add(new NPCActions(ActionType.Mov, parts[1], valueToStore));
+
+                    break;
+                case "CALC":
+                    if (parts.Length < 4) return;
+
+                    match = Regex.Match(parts[1], @"[A-Z][0-9]", RegexOptions.IgnoreCase);
+
+                    if (match.Success)
+                        acts.Add(new NPCActions(ActionType.Calc, parts[1], parts[2], parts[3], parts[1].Insert(1, "-")));
+
                     break;
             }
 
@@ -1042,16 +1116,30 @@ namespace Server.MirObjects
 
                 if (parts.Length == 0) continue;
 
-                var regex = new Regex(@"<\$(.*?)>");
+                var regex = new Regex(@"\<\$(.*?)\>");
+                var varRegex = new Regex(@"(.*?)\(([A-Z][0-9])\)");
 
                 foreach (var part in parts)
                 {
                     var match = regex.Match(part);
 
                     if (!match.Success) continue;
+                    
+                    string innerMatch = match.Groups[1].Captures[0].Value.ToUpper();  
+ 
+                    Match varMatch = varRegex.Match(innerMatch);
 
-                    switch (match.Groups[1].Captures[0].Value.ToUpper())
+                    if (varRegex.Match(innerMatch).Success)
+                        innerMatch = innerMatch.Replace(varMatch.Groups[2].Captures[0].Value.ToUpper(), "");
+
+                    switch (innerMatch)
                     {
+                        case "OUTPUT()":
+                            SayCommandCheck = FindVariable(player, varMatch.Groups[2].Captures[0].Value.ToUpper());
+                            break;
+                        case "NPCNAME":
+                            SayCommandCheck = NPCName.Replace("_"," ");
+                            break;
                         case "USERNAME":
                             SayCommandCheck = player.Name;
                             break;
@@ -1144,7 +1232,7 @@ namespace Server.MirObjects
                     if (!_sayCommandFound) continue;
 
                     _sayCommandFound = false;
-                    speech[i] = speech[i].Replace(part, _sayCommandValue);
+                    speech[i] = speech[i].Replace(match.ToString(), _sayCommandValue);
                 }
             }
             return speech;
@@ -1154,23 +1242,62 @@ namespace Server.MirObjects
         {
             var failed = false;
 
-            foreach (NPCChecks check in CheckList)
+            for(int i = 0 ; i < CheckList.Count ; i++)
             {
+                NPCChecks check = CheckList[i];
+                List<string> param = check.Params.Select(t => FindVariable(player, t)).ToList();
+
+                byte tempByte;
+                uint tempUint;
+                int tempInt;
+                int tempInt2;
                 switch (check.Type)
                 {
                     case CheckType.Level:
-                        failed = !Compare((string)check.Params[0], player.Level, (byte)check.Params[1]);
+                        if (!byte.TryParse(param[1], out tempByte))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        try
+                        {
+                            failed = !Compare(param[0], player.Level, tempByte);
+                        }
+                        catch (ArgumentException)
+                        {
+                            SMain.Enqueue(string.Format("Incorrect operator: {0}, Page: {1}", param[0], Key));
+                            return true;
+                        }
                         break;
 
                     case CheckType.CheckGold:
-                        if (player.Account.Gold < (uint) check.Params[0])
+                        if (!uint.TryParse(param[1], out tempUint))
+                        {
                             failed = true;
+                            break;
+                        }
+
+                        try
+                        {
+                            failed = !Compare(param[0], player.Account.Gold, tempUint);
+                        }
+                        catch (ArgumentException)
+                        {
+                            SMain.Enqueue(string.Format("Incorrect operator: {0}, Page: {1}", param[0], Key));
+                            return true;
+                        }
                         break;
 
                     case CheckType.CheckItem:
-                        var info = SMain.Envir.GetItemInfo((string) check.Params[0]);
+                        uint count;
+                        if (!uint.TryParse(param[1], out count))
+                        {
+                            failed = true;
+                            break;
+                        }
 
-                        var count = (uint) check.Params[1];
+                        var info = SMain.Envir.GetItemInfo(param[0]);
 
                         foreach (var item in player.Info.Inventory.Where(item => item != null && item.Info == info))
                         {
@@ -1189,36 +1316,64 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.CheckGender:
-                        failed = (byte)player.Gender != (byte)check.Params[0];
+                        if (!Enum.IsDefined(typeof(MirGender), param[0]))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        tempByte = (byte)Enum.Parse(typeof(MirGender), param[0]);
+
+                        failed = (byte)player.Gender != tempByte;
                         break;
 
                     case CheckType.CheckClass:
-                        failed = (byte)player.Class != (byte)check.Params[0];
+                        if (!Enum.IsDefined(typeof(MirClass), param[0]))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        tempByte = (byte)Enum.Parse(typeof(MirClass), param[0]);
+
+                        failed = (byte)player.Class != tempByte;
                         break;
 
                     case CheckType.CheckDay:
                         var day = DateTime.Now.DayOfWeek.ToString().ToUpper();
-                        var dayToCheck = check.Params[0].ToString().ToUpper();
+                        var dayToCheck = param[0].ToUpper();
 
                         failed = day != dayToCheck;
                         break;
 
                     case CheckType.CheckHour:
+                        if (!uint.TryParse(param[0], out tempUint))
+                        {
+                            failed = true;
+                            break;
+                        }
+
                         var hour = DateTime.Now.Hour;
-                        var hourToCheck = (uint)check.Params[0];
+                        var hourToCheck = tempUint;
 
                         failed = hour != hourToCheck;
                         break;
 
                     case CheckType.CheckMinute:
+                        if (!uint.TryParse(param[0], out tempUint))
+                        {
+                            failed = true;
+                            break;
+                        }
+
                         var minute = DateTime.Now.Minute;
-                        var minuteToCheck = (uint)check.Params[0];
+                        var minuteToCheck = tempUint;
 
                         failed = minute != minuteToCheck;
                         break;
 
                     case CheckType.CheckNameList:
-                        var read = File.ReadAllLines((string) check.Params[0]);
+                        var read = File.ReadAllLines(param[0]);
                         failed = !read.Contains(player.Name);
                         break;
 
@@ -1227,45 +1382,95 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.CheckPkPoint:
-                        failed = player.PKPoints < (int) check.Params[0];      
+                        if (!int.TryParse(param[1], out tempInt))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        try
+                        {
+                            failed = !Compare(param[0], player.PKPoints, tempInt);
+                        }
+                        catch (ArgumentException)
+                        {
+                            SMain.Enqueue(string.Format("Incorrect operator: {0}, Page: {1}", param[0], Key));
+                            return true;
+                        }
+  
                         break;
 
                     case CheckType.CheckRange:
-                        var target = new Point {X = (int) check.Params[0], Y = (int) check.Params[1]};
+                        int x, y, range;
+                        if (!int.TryParse(param[0], out x) || !int.TryParse(param[1], out y) || !int.TryParse(param[2], out range))
+                        {
+                            failed = true;
+                            break;
+                        }
 
-                        failed = !Functions.InRange(player.CurrentLocation, target, (int)check.Params[2]);
+                        var target = new Point {X = x, Y = y};
+
+                        failed = !Functions.InRange(player.CurrentLocation, target, range);
                         break;
 
                     case CheckType.Check:
-                        var flag = player.Info.Flags[(uint)check.Params[0]];
+                        uint onCheck;
 
-                        failed = flag != (bool) check.Params[1];
+                        if (!uint.TryParse(param[0], out tempUint) || !uint.TryParse(param[1], out onCheck) || tempUint > Globals.FlagIndexCount)
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        bool tempBool = Convert.ToBoolean(onCheck);
+
+                        bool flag = player.Info.Flags[tempUint];
+
+                        failed = flag != tempBool;
                         break;
                         
                     case CheckType.CheckHum:
-                        var map = SMain.Envir.GetMapByNameAndInstance((string)check.Params[1], (int)check.Params[2]);
+                        if (!int.TryParse(param[0], out tempInt) || !int.TryParse(param[2], out tempInt2))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        var map = SMain.Envir.GetMapByNameAndInstance(param[1], tempInt2);
                         if (map == null)
                         {
                             failed = true;
                             break;
                         }
 
-                        failed = map.Players.Count() < (int)check.Params[0];
+                        failed = map.Players.Count() < tempInt;
                         break;
 
                     case CheckType.CheckMon:
-                        map = SMain.Envir.GetMapByNameAndInstance((string)check.Params[1], (int)check.Params[2]);
+                        if (!int.TryParse(param[0], out tempInt) || !int.TryParse(param[2], out tempInt2))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        map = SMain.Envir.GetMapByNameAndInstance(param[1], tempInt2);
                         if (map == null)
                         {
                             failed = true;
                             break;
                         }
 
-                        failed = map.MonsterCount < (int)check.Params[0];
+                        failed = map.MonsterCount < tempInt;
                         break;
 
                     case CheckType.Random:
-                        failed = 0 != SMain.Envir.Random.Next(0, (int) check.Params[0]);
+                        if (!int.TryParse(param[0], out tempInt))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        failed = 0 != SMain.Envir.Random.Next(0, tempInt);
                         break;
 
                     case CheckType.Groupleader:
@@ -1273,17 +1478,56 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.GroupCount:
-                        failed = (player.GroupMembers == null || !Compare((string)check.Params[0], player.GroupMembers.Count, (int)check.Params[1]));
+                        if (!int.TryParse(param[1], out tempInt))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        failed = (player.GroupMembers == null || !Compare(param[0], player.GroupMembers.Count, tempInt));
                         break;
 
                     case CheckType.PetCount:
-                        failed = !Compare((string) check.Params[0], player.Pets.Count(), (int) check.Params[1]);
+                        if (!int.TryParse(param[1], out tempInt))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        failed = !Compare(param[0], player.Pets.Count(), tempInt);
                         break;
 
                     case CheckType.PetLevel:
-                        for (int i = 0; i < player.Pets.Count(); i++)
+                        if (!int.TryParse(param[1], out tempInt))
                         {
-                            failed = !Compare((string)check.Params[0], player.Pets[i].PetLevel, (int)check.Params[1]);
+                            failed = true;
+                            break;
+                        }
+
+                        for (int p = 0; p < player.Pets.Count(); p++)
+                        {
+                            failed = !Compare(param[0], player.Pets[p].PetLevel, tempInt);
+                        }
+                        break;
+
+                    case CheckType.TryCalc:
+                        int left;
+                        int right;
+
+                        if (!int.TryParse(param[0], out left) || !int.TryParse(param[2], out right))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        try
+                        {
+                            failed = !Compare(param[1], left, right);
+                        }
+                        catch (ArgumentException)
+                        {
+                            SMain.Enqueue(string.Format("Incorrect operator: {0}, Page: {1}", param[1], Key));
+                            return true;
                         }
                         break;
                 }
@@ -1298,35 +1542,52 @@ namespace Server.MirObjects
             return true;
 
         }
+
         private void Act(IList<NPCActions> acts, PlayerObject player)
         {
             for (var i = 0; i < acts.Count; i++)
             {
-                NPCActions act = acts[i];
                 uint gold;
                 uint count;
                 string path;
+                int x, y;
+                int tempInt;
+                byte tempByte;
+                long tempLong;
+                ItemInfo info;
+                MonsterInfo monInfo;
+
+                NPCActions act = acts[i];
+                List<string> param = act.Params.Select(t => FindVariable(player, t)).ToList();
 
                 switch (act.Type)
                 {
                     case ActionType.Teleport:
-                        Map map = SMain.Envir.GetMapByNameAndInstance((string)act.Params[0]);
+                        Map map = SMain.Envir.GetMapByNameAndInstance(param[0]);
                         if (map == null) return;
 
-                        var coords = (Point)act.Params[1];
+                        if (!int.TryParse(param[1], out x)) return;
+                        if (!int.TryParse(param[2], out y)) return;
+
+                        var coords = new Point(x, y);
 
                         if (coords.X > 0 && coords.Y > 0) player.Teleport(map, coords);
                         else player.TeleportRandom(200, 0, map);
                         break;
 
                     case ActionType.InstanceTeleport:
-                        map = SMain.Envir.GetMapByNameAndInstance((string)act.Params[0], (int)act.Params[1]);
+                        int instanceId;
+                        if (!int.TryParse(param[1], out instanceId)) return;
+                        if (!int.TryParse(param[2], out x)) return;
+                        if (!int.TryParse(param[3], out y)) return;
+
+                        map = SMain.Envir.GetMapByNameAndInstance(param[0], instanceId);
                         if (map == null) return;
-                        player.Teleport(map, (Point)act.Params[2]);
+                        player.Teleport(map, new Point(x, y));
                         break;
 
                     case ActionType.GiveGold:
-                        gold = (uint)act.Params[0];
+                        if (!uint.TryParse(param[0], out gold)) return;
 
                         if (gold + player.Account.Gold >= uint.MaxValue)
                             gold = uint.MaxValue - player.Account.Gold;
@@ -1335,7 +1596,7 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.TakeGold:
-                        gold = (uint)act.Params[0];
+                        if (!uint.TryParse(param[0], out gold)) return;
 
                         if (gold >= player.Account.Gold) gold = player.Account.Gold;
 
@@ -1344,15 +1605,23 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.GiveItem:
-                        count = (uint)act.Params[1];
+                        if (param.Count < 2 || !uint.TryParse(param[1], out count)) count = 1;
+
+                        info = SMain.Envir.GetItemInfo(param[0]);
+
+                        if (info == null)
+                        {
+                            SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", param[0], Key));
+                            break;
+                        }
 
                         while (count > 0)
                         {
-                            UserItem item = SMain.Envir.CreateFreshItem((ItemInfo)act.Params[0]);
+                            UserItem item = SMain.Envir.CreateFreshItem(info);
 
                             if (item == null)
                             {
-                                SMain.Enqueue(string.Format("Failed to create UserItem: {0}, Page: {1}", act.Params[0], Key));
+                                SMain.Enqueue(string.Format("Failed to create UserItem: {0}, Page: {1}", param[0], Key));
                                 return;
                             }
 
@@ -1373,9 +1642,14 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.TakeItem:
-                        ItemInfo info = (ItemInfo)act.Params[0];
+                        if (param.Count < 2 || !uint.TryParse(param[1], out count)) count = 1;
+                        info = SMain.Envir.GetItemInfo(param[0]);
 
-                        count = (uint)act.Params[1];
+                        if (info == null)
+                        {
+                            SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", param[0], Key));
+                            break;
+                        }
 
                         for (int o = 0; o < player.Info.Inventory.Length; o++)
                         {
@@ -1403,15 +1677,29 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.GiveExp:
-                        player.GainExp((uint)act.Params[0]);
+                        uint tempUint;
+                        if (!uint.TryParse(param[0], out tempUint)) return;
+                        player.GainExp(tempUint);
                         break;
 
                     case ActionType.GivePet:
-                        for (var c = 0; c < (byte)act.Params[1]; c++)
+                        byte petcount = 0;
+                        byte petlevel = 0;
+
+                        monInfo = SMain.Envir.GetMonsterInfo(param[0]);
+                        if (monInfo == null) return;
+
+                        if (param.Count > 1)
+                            petcount = byte.TryParse(param[1], out petcount) ? Math.Min((byte)5, petcount) : (byte)1;
+
+                        if (param.Count > 2)
+                            petlevel = byte.TryParse(param[2], out petlevel) ? Math.Min((byte)7, petlevel) : (byte)0;
+
+                        for (var c = 0; c < petcount; c++)
                         {
-                            MonsterObject monster = MonsterObject.GetMonster((MonsterInfo)act.Params[0]);
+                            MonsterObject monster = MonsterObject.GetMonster(monInfo);
                             if (monster == null) return;
-                            monster.PetLevel = (byte)act.Params[2];
+                            monster.PetLevel = petlevel;
                             monster.Master = player;
                             monster.MaxPetLevel = 7;
                             monster.Direction = player.Direction;
@@ -1422,7 +1710,7 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.AddNameList:
-                        path = (string)act.Params[0];
+                        path = param[0];
                         if (File.ReadAllLines(path).All(t => player.Name != t))
                             {
                                 using (var line = File.AppendText(path))
@@ -1433,30 +1721,36 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.DelNameList:
-                        path = (string)act.Params[0];
+                        path = param[0];
                         File.WriteAllLines(path, File.ReadLines(path).Where(l => l != player.Name).ToList());
                         break;
 
                     case ActionType.ClearNameList:
-                        path = (string)act.Params[0];
+                        path = param[0];
                         File.WriteAllLines(path, new string[] { });
                         break;
 
                     case ActionType.GiveHP:
-                        player.ChangeHP((int)act.Params[0]);
+                        if (!int.TryParse(param[0], out tempInt)) return;
+                        player.ChangeHP(tempInt);
                         break;
 
                     case ActionType.GiveMP:
-                        player.ChangeMP((int)act.Params[0]);
+                        if (!int.TryParse(param[0], out tempInt)) return;
+                        player.ChangeMP(tempInt);
                         break;
 
                     case ActionType.ChangeLevel:
-                        player.Level = (byte) act.Params[0];
+                        if (!byte.TryParse(param[0], out tempByte)) return;
+                        tempByte = Math.Min(byte.MaxValue, tempByte);
+
+                        player.Level = tempByte;
                         player.LevelUp();
                         break;
 
                     case ActionType.SetPkPoint:
-                        player.PKPoints = (int) act.Params[0];
+                        if (!int.TryParse(param[0], out tempInt)) return;
+                        player.PKPoints = tempInt;
                         break;
 
                     case ActionType.ChangeGender:
@@ -1472,7 +1766,9 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.ChangeClass:
-                        var data = (MirClass)act.Params[0];
+                        if (!Enum.IsDefined(typeof(MirClass), param[0])) return;
+                        var data = (MirClass)((byte)Enum.Parse(typeof(MirClass), param[0]));
+
                         switch (data)
                         {
                             case MirClass.Warrior:
@@ -1491,11 +1787,21 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.LineMessage:
-                        player.ReceiveChat((string)act.Params[0], (ChatType)act.Params[1]);
+	                    if (!Enum.IsDefined(typeof(ChatType), param[1])) return;
+
+                        ChatType chatType = (ChatType)((byte)Enum.Parse(typeof(ChatType), param[1]));
+
+                        player.ReceiveChat(param[0], chatType);
                         break;
 
                     case ActionType.GiveSkill:
-                        var magic = new UserMagic((Spell)act.Params[0]) { Level = (byte)act.Params[1] };
+                        byte spellLevel = 0;
+                        if (!Enum.IsDefined(typeof(Spell), param[0])) return;
+
+                        if (param.Count > 1)
+                            spellLevel = byte.TryParse(param[1], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
+
+                        var magic = new UserMagic((Spell)(byte)Enum.Parse(typeof(Spell), param[0])) { Level = spellLevel };
 
                         player.Info.Magics.Add(magic);
                         player.Enqueue(magic.GetInfo());
@@ -1503,35 +1809,53 @@ namespace Server.MirObjects
 
                     case ActionType.Goto:
                         player.NPCGoto = true;
-                        player.NPCGotoPage = "[" + act.Params[0] + "]";
+                        player.NPCGotoPage = "[" + param[0] + "]";
                         break;
 
                     case ActionType.Set:
-                        player.Info.Flags[(uint) act.Params[0]] = (bool) act.Params[1];
+                        uint flagIndex;
+                        uint onCheck;
+                        if (!uint.TryParse(param[0], out flagIndex)) return;
+                        if (!uint.TryParse(param[1], out onCheck)) return;
+
+                        if (flagIndex > Globals.FlagIndexCount) return;
+                        var flagIsOn = Convert.ToBoolean(onCheck);
+
+                        player.Info.Flags[flagIndex] = flagIsOn;
                         break;
 
                     case ActionType.Param1:
-                        Param1 = (string)act.Params[0];
-                        Param1Instance = (int) act.Params[1];
+                        if (!int.TryParse(param[1], out tempInt)) return;
+
+                        Param1 = param[0];
+                        Param1Instance = tempInt;
                         break;
 
                     case ActionType.Param2:
-                        Param2 = (int)act.Params[0];
+                        if (!int.TryParse(param[0], out tempInt)) return;
+
+                        Param2 = tempInt;
                         break;
 
                     case ActionType.Param3:
-                        Param3 = (int)act.Params[0];
+                        if (!int.TryParse(param[0], out tempInt)) return;
+
+                        Param3 = tempInt;
                         break;
 
                     case ActionType.Mongen:
                         if (Param1 == null || Param2 == 0 || Param3 == 0) return;
+                        if (!byte.TryParse(param[1], out tempByte)) return;
 
                         map = SMain.Envir.GetMapByNameAndInstance(Param1, Param1Instance);
                         if (map == null) return;
 
-                        for (var c = 0; c < (byte)act.Params[1]; c++)
+                        monInfo = SMain.Envir.GetMonsterInfo(param[0]);
+                        if (monInfo == null) return;
+
+                        for (var c = 0; c < tempByte; c++)
                         {
-                            MonsterObject monster = MonsterObject.GetMonster((MonsterInfo)act.Params[0]);
+                            MonsterObject monster = MonsterObject.GetMonster(monInfo);
                             if (monster == null) return;
                             monster.Direction = 0;
                             monster.ActionTime = SMain.Envir.Time + 1000;
@@ -1540,23 +1864,27 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.TimeRecall:
+                        if (!long.TryParse(param[0], out tempLong)) return;
+
                         player.TimeRecall = new NPCTimeRecall
                         {
                             PlayerMap = player.CurrentMap,
                             PlayerCoords = player.CurrentLocation,
-                            TimePeriod = (long)act.Params[0]
+                            TimePeriod = tempLong
                         };
                         break;
 
                     case ActionType.TimeRecallGroup:
                         if (player.GroupMembers == null) return;
+                        if (!long.TryParse(param[0], out tempLong)) return;
+
                         for (i = 0; i < player.GroupMembers.Count(); i++)
                         {
                             player.GroupMembers[i].TimeRecall = new NPCTimeRecall
                             {
                                 PlayerMap = player.CurrentMap,
                                 PlayerCoords = player.CurrentLocation,
-                                TimePeriod = (long)act.Params[0]
+                                TimePeriod = tempLong
                             };
                         }
                         break;
@@ -1565,7 +1893,7 @@ namespace Server.MirObjects
                         if (player.TimeRecall == null) return;
 
                         player.TimeRecall.NPCID = player.NPCID;
-                        player.TimeRecall.NPCGotoPage = (string)act.Params[0];
+                        player.TimeRecall.NPCGotoPage = param[0];
                         break;
 
                     case ActionType.TimeRecallGroupPage:
@@ -1575,7 +1903,7 @@ namespace Server.MirObjects
                         {
                             if (player.GroupMembers[i].TimeRecall == null) continue;
                             player.GroupMembers[i].TimeRecall.NPCID = player.NPCID;
-                            player.GroupMembers[i].TimeRecall.NPCGotoPage = (string)act.Params[0];
+                            player.GroupMembers[i].TimeRecall.NPCGotoPage = param[0];
                         }
                         break;
 
@@ -1584,8 +1912,21 @@ namespace Server.MirObjects
                         player.TimeRecall = null;
                         break;
 
+                    case ActionType.DelayGoto:
+                        if (!long.TryParse(param[0], out tempLong)) return;
+
+                        player.TimeRecall = new NPCTimeRecall
+                        {
+                            NPCID = player.NPCID,
+                            TimePeriod = tempLong,
+                            NPCGotoPage = "[" + param[1] + "]"
+                        };
+                        break;
+
                     case ActionType.MonClear:
-                        map = SMain.Envir.GetMapByNameAndInstance((string)act.Params[0], (int)act.Params[1]);
+                        if (!int.TryParse(param[1], out tempInt)) return;
+
+                        map = SMain.Envir.GetMapByNameAndInstance(param[0], tempInt);
                         if (map == null) return;
 
                         foreach (var cell in map.Cells)
@@ -1613,20 +1954,46 @@ namespace Server.MirObjects
 
                     case ActionType.GroupTeleport:
                         if (player.GroupMembers == null) return;
+                        if (!int.TryParse(param[1], out tempInt)) return;
+                        if (!int.TryParse(param[2], out x)) return;
+                        if (!int.TryParse(param[3], out y)) return;
 
-                        map = SMain.Envir.GetMapByNameAndInstance((string)act.Params[0], (int)act.Params[1]);
+                        map = SMain.Envir.GetMapByNameAndInstance(param[0], tempInt);
                         if (map == null) return;
 
                         for (i = 0; i < player.GroupMembers.Count(); i++)
                         {
-                            if (((Point) act.Params[2]).X == 0 || ((Point) act.Params[2]).Y == 0)
+                            if (x == 0 || y == 0)
                             {
                                 player.GroupMembers[i].TeleportRandom(200, 0, map);
                             }
                             else
                             {
-                                player.GroupMembers[i].Teleport(map, (Point) act.Params[2]);
+                                player.GroupMembers[i].Teleport(map, new Point(x, y));
                             }
+                        }
+                        break;
+
+                    case ActionType.Mov:
+                        string value = param[0];
+                        value = value.Substring(1);
+                        AddVariable(player, value, param[1]);
+                        break;
+
+                    case ActionType.Calc:
+                        int left;
+                        int right;
+                        if (!int.TryParse(param[0], out left)) return;
+                        if (!int.TryParse(param[2], out right)) return;
+
+                        try
+                        {
+                            int result = Calculate(param[1], left, right);
+                            AddVariable(player,param[3].Replace("-",""),result.ToString());
+                        }
+                        catch (ArgumentException)
+                        {
+                            SMain.Enqueue(string.Format("Incorrect operator: {0}, Page: {1}", param[1], Key));
                         }
                         break;
                 }
@@ -1665,14 +2032,26 @@ namespace Server.MirObjects
                 default: throw new ArgumentException("Invalid comparison operator: {0}", op);
             }
         }
+
+        public static int Calculate(string op, int left, int right)
+        {
+            switch (op)
+            {
+                case "+": return left + right;
+                case "-": return left - right;
+                case "*": return left * right;
+                case "/": return left / right;
+                default: throw new ArgumentException("Invalid sum operator: {0}", op);
+            }
+        }
     }
 
     public class NPCChecks
     {
         public CheckType Type;
-        public List<object> Params = new List<object>();
+        public List<string> Params = new List<string>();
 
-        public NPCChecks(CheckType check, params object[] p)
+        public NPCChecks(CheckType check, params string[] p)
         {
             Type = check;
 
@@ -1683,9 +2062,9 @@ namespace Server.MirObjects
     public class NPCActions
     {
         public ActionType Type;
-        public List<object> Params = new List<object>();
+        public List<string> Params = new List<string>();
 
-        public NPCActions(ActionType action, params object[] p)
+        public NPCActions(ActionType action, params string[] p)
         {
             Type = action;
 
@@ -1728,6 +2107,9 @@ namespace Server.MirObjects
         MonClear,
         GroupRecall,
         GroupTeleport,
+        DelayGoto,
+        Mov,
+        Calc,
     }
     public enum CheckType
     {
@@ -1751,6 +2133,7 @@ namespace Server.MirObjects
         GroupCount,
         PetLevel,
         PetCount,
+        TryCalc,
     }
 
     public class NPCTimeRecall

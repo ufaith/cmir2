@@ -167,6 +167,8 @@ namespace Server.MirObjects
         public string NPCGotoPage;
         public NPCTimeRecall TimeRecall;
 
+        public List<KeyValuePair<string, string>> kv = new List<KeyValuePair<string, string>>();
+
         public bool UserMatch;
         public string MatchName;
         public ItemType MatchType;
@@ -331,7 +333,9 @@ namespace Server.MirObjects
             if (TimeRecall != null && Envir.Time > TimeRecall.TimePeriod && TimeRecall.Active)
             {
                 TimeRecall.Active = false;
-                Teleport(TimeRecall.PlayerMap, TimeRecall.PlayerCoords);
+
+                if(TimeRecall.PlayerMap != null)
+                    Teleport(TimeRecall.PlayerMap, TimeRecall.PlayerCoords);
 
                 if (TimeRecall.NPCGotoPage != null && !NPCGoto && TimeRecall.Interrupted == false)
                 {
@@ -2425,13 +2429,28 @@ namespace Server.MirObjects
                     case "GIVEGOLD":
                         if (!IsGM) return;
                         if (parts.Length < 2) return;
-                        if (!uint.TryParse(parts[1], out count)) return;
 
-                        if (count + Account.Gold >= uint.MaxValue)
-                            count = uint.MaxValue - Account.Gold;
+                        player = this;
 
-                        GainGold(count);
-                        SMain.Enqueue(string.Format("Player {0} has been given {1} gold", Name, count));
+                        if (parts.Length > 2)
+                        {
+                            if (!uint.TryParse(parts[2], out count)) return;
+                            player = Envir.GetPlayer(parts[1]);
+
+                            if (player == null)
+                            {
+                                ReceiveChat(string.Format("Player {0} was not found.", parts[1]), ChatType.System);
+                                return;
+                            }
+                        }
+
+                        else if (!uint.TryParse(parts[1], out count)) return;
+
+                        if (count + player.Account.Gold >= uint.MaxValue)
+                            count = uint.MaxValue - player.Account.Gold;
+
+                        player.GainGold(count);
+                        SMain.Enqueue(string.Format("Player {0} has been given {1} gold", player.Name, count));
                         break;
                     case "FIND":
                         if (!IsGM && !HasProbeNecklace) return;
@@ -4849,7 +4868,7 @@ namespace Server.MirObjects
                     array = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey)
+                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
                     {
                         Enqueue(p);
                         return;
@@ -4918,7 +4937,7 @@ namespace Server.MirObjects
                     array = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey)
+                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
                     {
                         Enqueue(p);
                         return;
@@ -4960,7 +4979,7 @@ namespace Server.MirObjects
         {
             S.StoreItem p = new S.StoreItem { From = from, To = to, Success = false };
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey)
+            if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
             {
                 Enqueue(p);
                 return;
@@ -5021,8 +5040,8 @@ namespace Server.MirObjects
         public void TakeBackItem(int from, int to)
         {
             S.TakeBackItem p = new S.TakeBackItem { From = from, To = to, Success = false };
-           
-            if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey)
+
+            if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
             {
                 Enqueue(p);
                 return;
@@ -5096,7 +5115,7 @@ namespace Server.MirObjects
                     array = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey)
+                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
                     {
                         Enqueue(p);
                         return;
@@ -5319,7 +5338,7 @@ namespace Server.MirObjects
                     array = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey)
+                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
                     {
                         Enqueue(p);
                         return;
@@ -5400,7 +5419,7 @@ namespace Server.MirObjects
                     arrayFrom = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey)
+                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
                     {
                         Enqueue(p);
                         return;
@@ -5436,7 +5455,7 @@ namespace Server.MirObjects
                     arrayTo = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey)
+                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
                     {
                         Enqueue(p);
                         return;
@@ -6126,7 +6145,7 @@ namespace Server.MirObjects
             {
                 NPCObject ob = CurrentMap.NPCs[i];
                 if (ob.ObjectID != objectID) continue;
-                ob.Call(this, NPCGoto ? NPCGotoPage : key);
+                ob.Call(this, NPCGoto ? NPCGotoPage.ToUpper() : key.ToUpper());
 
                 if(NPCGoto) i--;
                 else break;
@@ -6137,7 +6156,7 @@ namespace Server.MirObjects
         {
             if (Dead) return;
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.BuyKey) return;
+            if (NPCPage == null || NPCPage.Key != NPCObject.BuyKey.ToUpper()) return;
 
             for (int i = 0; i < CurrentMap.NPCs.Count; i++)
             {
@@ -6155,7 +6174,7 @@ namespace Server.MirObjects
                 return;
             }
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.SellKey)
+            if (NPCPage == null || NPCPage.Key != NPCObject.SellKey.ToUpper())
             {
                 Enqueue(p);
                 return;
@@ -6230,7 +6249,7 @@ namespace Server.MirObjects
 
             if (Dead) return;
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.RepairKey && !special) || (NPCPage.Key != NPCObject.SRepairKey && special)) return;
+            if (NPCPage == null || (NPCPage.Key != NPCObject.RepairKey.ToUpper() && !special) || (NPCPage.Key != NPCObject.SRepairKey.ToUpper() && special)) return;
 
             for (int n = 0; n < CurrentMap.NPCs.Count; n++)
             {
@@ -6303,7 +6322,7 @@ namespace Server.MirObjects
                 return;
             }
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.ConsignKey))
+            if (NPCPage == null || (NPCPage.Key != NPCObject.ConsignKey.ToUpper()))
             {
                 Enqueue(p);
                 return;
@@ -6382,7 +6401,7 @@ namespace Server.MirObjects
         {
             if (Dead || Envir.Time < SearchTime) return;
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey && NPCPage.Key != NPCObject.ConsignmentsKey) || page <= PageSent) return;
+            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey.ToUpper() && NPCPage.Key != NPCObject.ConsignmentsKey.ToUpper()) || page <= PageSent) return;
 
             SearchTime = Envir.Time + Globals.SearchDelay;
 
@@ -6442,7 +6461,7 @@ namespace Server.MirObjects
         {
             if (Dead || Envir.Time < SearchTime) return;
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey && NPCPage.Key != NPCObject.ConsignmentsKey)) return;
+            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey.ToUpper() && NPCPage.Key != NPCObject.ConsignmentsKey.ToUpper())) return;
 
             SearchTime = Envir.Time + Globals.SearchDelay;
 
@@ -6458,7 +6477,7 @@ namespace Server.MirObjects
         {
             if (Dead || Envir.Time < SearchTime) return;
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey && NPCPage.Key != NPCObject.ConsignmentsKey)) return;
+            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey.ToUpper() && NPCPage.Key != NPCObject.ConsignmentsKey.ToUpper())) return;
 
             SearchTime = Envir.Time + Globals.SearchDelay;
 
@@ -6479,7 +6498,7 @@ namespace Server.MirObjects
                 
             }
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.MarketKey)
+            if (NPCPage == null || NPCPage.Key != NPCObject.MarketKey.ToUpper())
             {
                 Enqueue(new S.MarketFail {Reason = 1});
                 return;
@@ -6547,7 +6566,7 @@ namespace Server.MirObjects
 
             }
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.ConsignmentsKey)
+            if (NPCPage == null || NPCPage.Key != NPCObject.ConsignmentsKey.ToUpper())
             {
                 Enqueue(new S.MarketFail { Reason = 1 });
                 return;

@@ -192,7 +192,7 @@
             this.ItemInfoPanel.Enabled = false;
             this.ItemInfoPanel.Location = new System.Drawing.Point(174, 41);
             this.ItemInfoPanel.Name = "ItemInfoPanel";
-            this.ItemInfoPanel.Size = new System.Drawing.Size(626, 576);
+            this.ItemInfoPanel.Size = new System.Drawing.Size(626, 422);
             this.ItemInfoPanel.TabIndex = 11;
             // 
             // tabControl1
@@ -204,7 +204,7 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(609, 558);
+            this.tabControl1.Size = new System.Drawing.Size(609, 416);
             this.tabControl1.TabIndex = 117;
             // 
             // tabPage1
@@ -249,9 +249,9 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(601, 532);
+            this.tabPage1.Size = new System.Drawing.Size(601, 390);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "general";
+            this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // NeedIdentifycheckbox
@@ -669,9 +669,9 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(601, 532);
+            this.tabPage2.Size = new System.Drawing.Size(601, 390);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "basic stats";
+            this.tabPage2.Text = "Basic Stats";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // groupBox1
@@ -684,9 +684,9 @@
             this.groupBox1.Controls.Add(this.CriticalDamagetextBox);
             this.groupBox1.Controls.Add(this.CriticalRatetextBox);
             this.groupBox1.Controls.Add(this.label51);
-            this.groupBox1.Location = new System.Drawing.Point(20, 270);
+            this.groupBox1.Location = new System.Drawing.Point(16, 277);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(431, 245);
+            this.groupBox1.Size = new System.Drawing.Size(304, 94);
             this.groupBox1.TabIndex = 123;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "New Stats";
@@ -703,7 +703,7 @@
             // label52
             // 
             this.label52.AutoSize = true;
-            this.label52.Location = new System.Drawing.Point(5, 65);
+            this.label52.Location = new System.Drawing.Point(26, 65);
             this.label52.Name = "label52";
             this.label52.Size = new System.Drawing.Size(44, 13);
             this.label52.TabIndex = 122;
@@ -909,7 +909,7 @@
             // 
             // PoisonAttacktextbox
             // 
-            this.PoisonAttacktextbox.Location = new System.Drawing.Point(166, 184);
+            this.PoisonAttacktextbox.Location = new System.Drawing.Point(166, 173);
             this.PoisonAttacktextbox.MaxLength = 3;
             this.PoisonAttacktextbox.Name = "PoisonAttacktextbox";
             this.PoisonAttacktextbox.Size = new System.Drawing.Size(30, 20);
@@ -928,7 +928,7 @@
             // label47
             // 
             this.label47.AutoSize = true;
-            this.label47.Location = new System.Drawing.Point(84, 187);
+            this.label47.Location = new System.Drawing.Point(84, 176);
             this.label47.Name = "label47";
             this.label47.Size = new System.Drawing.Size(76, 13);
             this.label47.TabIndex = 98;
@@ -964,11 +964,11 @@
             // label46
             // 
             this.label46.AutoSize = true;
-            this.label46.Location = new System.Drawing.Point(102, 214);
+            this.label46.Location = new System.Drawing.Point(110, 214);
             this.label46.Name = "label46";
-            this.label46.Size = new System.Drawing.Size(47, 13);
+            this.label46.Size = new System.Drawing.Size(50, 13);
             this.label46.TabIndex = 96;
-            this.label46.Text = "Freezing";
+            this.label46.Text = "Freezing:";
             // 
             // label23
             // 
@@ -1353,9 +1353,9 @@
             this.tabPage3.Controls.Add(this.Bind_donttradecheckbox);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(601, 532);
+            this.tabPage3.Size = new System.Drawing.Size(601, 390);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "bind config";
+            this.tabPage3.Text = "Binding";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // Bind_DontSpecialRepaircheckBox
@@ -1483,15 +1483,15 @@
             this.tabPage4.Controls.Add(this.ParalysischeckBox);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(601, 532);
+            this.tabPage4.Size = new System.Drawing.Size(601, 390);
             this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "special stats";
+            this.tabPage4.Text = "Special Stats";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
             // NoDuraLosscheckBox
             // 
             this.NoDuraLosscheckBox.AutoSize = true;
-            this.NoDuraLosscheckBox.Location = new System.Drawing.Point(12, 242);
+            this.NoDuraLosscheckBox.Location = new System.Drawing.Point(22, 244);
             this.NoDuraLosscheckBox.Name = "NoDuraLosscheckBox";
             this.NoDuraLosscheckBox.Size = new System.Drawing.Size(85, 17);
             this.NoDuraLosscheckBox.TabIndex = 10;
@@ -1502,7 +1502,7 @@
             // SkillcheckBox
             // 
             this.SkillcheckBox.AutoSize = true;
-            this.SkillcheckBox.Location = new System.Drawing.Point(12, 219);
+            this.SkillcheckBox.Location = new System.Drawing.Point(22, 221);
             this.SkillcheckBox.Name = "SkillcheckBox";
             this.SkillcheckBox.Size = new System.Drawing.Size(92, 17);
             this.SkillcheckBox.TabIndex = 9;
@@ -1513,7 +1513,7 @@
             // ProbecheckBox
             // 
             this.ProbecheckBox.AutoSize = true;
-            this.ProbecheckBox.Location = new System.Drawing.Point(12, 196);
+            this.ProbecheckBox.Location = new System.Drawing.Point(22, 198);
             this.ProbecheckBox.Name = "ProbecheckBox";
             this.ProbecheckBox.Size = new System.Drawing.Size(101, 17);
             this.ProbecheckBox.TabIndex = 8;
@@ -1524,7 +1524,7 @@
             // HealingcheckBox
             // 
             this.HealingcheckBox.AutoSize = true;
-            this.HealingcheckBox.Location = new System.Drawing.Point(12, 173);
+            this.HealingcheckBox.Location = new System.Drawing.Point(22, 175);
             this.HealingcheckBox.Name = "HealingcheckBox";
             this.HealingcheckBox.Size = new System.Drawing.Size(82, 17);
             this.HealingcheckBox.TabIndex = 7;
@@ -1535,7 +1535,7 @@
             // FlamecheckBox
             // 
             this.FlamecheckBox.AutoSize = true;
-            this.FlamecheckBox.Location = new System.Drawing.Point(12, 150);
+            this.FlamecheckBox.Location = new System.Drawing.Point(22, 152);
             this.FlamecheckBox.Name = "FlamecheckBox";
             this.FlamecheckBox.Size = new System.Drawing.Size(74, 17);
             this.FlamecheckBox.TabIndex = 6;
@@ -1546,7 +1546,7 @@
             // MusclecheckBox
             // 
             this.MusclecheckBox.AutoSize = true;
-            this.MusclecheckBox.Location = new System.Drawing.Point(12, 127);
+            this.MusclecheckBox.Location = new System.Drawing.Point(22, 129);
             this.MusclecheckBox.Name = "MusclecheckBox";
             this.MusclecheckBox.Size = new System.Drawing.Size(80, 17);
             this.MusclecheckBox.TabIndex = 5;
@@ -1557,7 +1557,7 @@
             // RevivalcheckBox
             // 
             this.RevivalcheckBox.AutoSize = true;
-            this.RevivalcheckBox.Location = new System.Drawing.Point(12, 104);
+            this.RevivalcheckBox.Location = new System.Drawing.Point(22, 106);
             this.RevivalcheckBox.Name = "RevivalcheckBox";
             this.RevivalcheckBox.Size = new System.Drawing.Size(82, 17);
             this.RevivalcheckBox.TabIndex = 4;
@@ -1568,7 +1568,7 @@
             // ProtectioncheckBox
             // 
             this.ProtectioncheckBox.AutoSize = true;
-            this.ProtectioncheckBox.Location = new System.Drawing.Point(12, 81);
+            this.ProtectioncheckBox.Location = new System.Drawing.Point(22, 83);
             this.ProtectioncheckBox.Name = "ProtectioncheckBox";
             this.ProtectioncheckBox.Size = new System.Drawing.Size(94, 17);
             this.ProtectioncheckBox.TabIndex = 3;
@@ -1579,7 +1579,7 @@
             // ClearcheckBox
             // 
             this.ClearcheckBox.AutoSize = true;
-            this.ClearcheckBox.Location = new System.Drawing.Point(12, 58);
+            this.ClearcheckBox.Location = new System.Drawing.Point(22, 60);
             this.ClearcheckBox.Name = "ClearcheckBox";
             this.ClearcheckBox.Size = new System.Drawing.Size(70, 17);
             this.ClearcheckBox.TabIndex = 2;
@@ -1590,7 +1590,7 @@
             // TeleportcheckBox
             // 
             this.TeleportcheckBox.AutoSize = true;
-            this.TeleportcheckBox.Location = new System.Drawing.Point(12, 35);
+            this.TeleportcheckBox.Location = new System.Drawing.Point(22, 37);
             this.TeleportcheckBox.Name = "TeleportcheckBox";
             this.TeleportcheckBox.Size = new System.Drawing.Size(85, 17);
             this.TeleportcheckBox.TabIndex = 1;
@@ -1601,7 +1601,7 @@
             // ParalysischeckBox
             // 
             this.ParalysischeckBox.AutoSize = true;
-            this.ParalysischeckBox.Location = new System.Drawing.Point(12, 12);
+            this.ParalysischeckBox.Location = new System.Drawing.Point(22, 14);
             this.ParalysischeckBox.Name = "ParalysischeckBox";
             this.ParalysischeckBox.Size = new System.Drawing.Size(87, 17);
             this.ParalysischeckBox.TabIndex = 0;
@@ -1637,7 +1637,7 @@
             this.ItemInfoListBox.Location = new System.Drawing.Point(12, 40);
             this.ItemInfoListBox.Name = "ItemInfoListBox";
             this.ItemInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.ItemInfoListBox.Size = new System.Drawing.Size(156, 576);
+            this.ItemInfoListBox.Size = new System.Drawing.Size(156, 420);
             this.ItemInfoListBox.TabIndex = 10;
             this.ItemInfoListBox.SelectedIndexChanged += new System.EventHandler(this.ItemInfoListBox_SelectedIndexChanged);
             // 
@@ -1705,7 +1705,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(812, 629);
+            this.ClientSize = new System.Drawing.Size(812, 479);
             this.Controls.Add(this.ImportButton);
             this.Controls.Add(this.ExportSelectedButton);
             this.Controls.Add(this.ExportAllButton);

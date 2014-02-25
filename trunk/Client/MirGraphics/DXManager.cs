@@ -98,7 +98,7 @@ namespace Client.MirGraphics
 
             CreateLights();
         }
-        
+        //FAR
         private unsafe static void CreateLights()
         {
             for (int i = Lights.Count - 1; i >= 0; i--)
@@ -108,8 +108,10 @@ namespace Client.MirGraphics
 
             for (int i = 1; i < 15; i++)
             {
-                int width = 65*i;
-                int height = 50*i;
+                //int width = 125 * i;
+                //int height = 110 * i;
+                int width = 125 + (57 *i);
+                int height = 110 + (57 * i);
                 Texture light = new Texture(Device, width, height, 1, Usage.None, Format.A8R8G8B8, Pool.Managed);
 
                 using (GraphicsStream stream = light.LockRectangle(0, LockFlags.Discard))
@@ -123,8 +125,8 @@ namespace Client.MirGraphics
                             using (PathGradientBrush brush = new PathGradientBrush(path))
                             {
                                 graphics.Clear(Color.FromArgb(0, 0, 0, 0));
-                                brush.SurroundColors = new[] {Color.FromArgb(0, 0, 0, 0)};
-                                brush.CenterColor = Color.White;
+                                brush.SurroundColors = new[] {Color.FromArgb(0, 255, 255, 255)};
+                                brush.CenterColor = Color.FromArgb(255, 255, 255, 255);
                                 graphics.FillPath(brush, path);
                                 graphics.Save();
                             }

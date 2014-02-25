@@ -65,7 +65,7 @@ namespace Server.MirEnvir
         public List<MapInfo> MapInfoList = new List<MapInfo>();
         public List<ItemInfo> ItemInfoList = new List<ItemInfo>();
         public List<MonsterInfo> MonsterInfoList = new List<MonsterInfo>();
-        public DragonInfo DragonInfo;
+        public DragonInfo DragonInfo = new DragonInfo();
 
         //User DB
         public int NextAccountID, NextCharacterID;
@@ -78,7 +78,7 @@ namespace Server.MirEnvir
         public List<Map> MapList = new List<Map>();
         public List<SafeZoneInfo> StartPoints = new List<SafeZoneInfo>(); 
         public List<ItemInfo> StartItems = new List<ItemInfo>(); 
-        public List<PlayerObject> Players = new List<PlayerObject>();//farril
+        public List<PlayerObject> Players = new List<PlayerObject>();
         public bool Saving = false;
         public LightSetting Lights;
         public LinkedList<MapObject> Objects = new LinkedList<MapObject>();

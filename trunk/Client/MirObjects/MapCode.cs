@@ -404,8 +404,8 @@ namespace Client.MirObjects
                         MapCells[x, y].FrontAnimationFrame = Bytes[offset] == 255? (byte)0 : Bytes[offset];
                         MapCells[x, y].FrontAnimationFrame &= 0x8F;
                         offset++;
-                        MapCells[x, y].MiddleAnimationTick = 1;
-                        MapCells[x, y].FrontAnimationTick = 1;
+                        MapCells[x, y].MiddleAnimationTick = 0;
+                        MapCells[x, y].FrontAnimationTick = 0;
                         MapCells[x,y].FrontIndex = (short)(Bytes[offset] != 255 ? Bytes[offset] + 200 : -1);
                         offset++;
                         MapCells[x,y].MiddleIndex = (short)(Bytes[offset] != 255 ? Bytes[offset] + 200 : -1);

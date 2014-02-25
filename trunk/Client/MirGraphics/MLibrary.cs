@@ -436,6 +436,7 @@ namespace Client.MirGraphics
 
             mi.CleanTime = CMain.Time + Settings.CleanDelay;
         }
+
         public void Draw(int index, Point point, Color colour, bool offSet, float opacity)
         {
             if (!CheckImage(index))
@@ -456,6 +457,7 @@ namespace Client.MirGraphics
             DXManager.SetOpacity(oldOpacity);
             mi.CleanTime = CMain.Time + Settings.CleanDelay;
         }
+
         public void DrawBlend(int index, Point point, Color colour, bool offSet = false, float rate = 1)
         {
             if (!CheckImage(index))

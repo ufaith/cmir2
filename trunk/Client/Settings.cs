@@ -80,7 +80,6 @@ namespace Client
             //Graphics
             FullScreen = Reader.ReadBoolean("Graphics", "FullScreen", FullScreen);
             TopMost = Reader.ReadBoolean("Graphics", "AlwaysOnTop", TopMost);
-            FontName = Reader.ReadString("Graphics", "FontName", FontName);
             FPSCap = Reader.ReadBoolean("Graphics", "FPSCap", FPSCap);
             HighResolution = Reader.ReadBoolean("Graphics", "HighResolution", HighResolution);
 
@@ -110,6 +109,7 @@ namespace Client
             DropView = Reader.ReadBoolean("Game", "DropView", DropView);
             NameView = Reader.ReadBoolean("Game", "NameView", NameView);
             HPView = Reader.ReadBoolean("Game", "HPMPView", HPView);
+            FontName = Reader.ReadString("Game", "FontName", FontName);
         }
 
         public static void Save()
@@ -117,7 +117,6 @@ namespace Client
             //Graphics
             Reader.Write("Graphics", "FullScreen", FullScreen);
             Reader.Write("Graphics", "AlwaysOnTop", TopMost);
-            Reader.Write("Graphics", "FontName", FontName);
             Reader.Write("Graphics", "FPSCap", FPSCap);
             Reader.Write("Graphics", "HighResolution", HighResolution);
 

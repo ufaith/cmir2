@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Client.MirControls;
@@ -303,6 +304,7 @@ namespace Client.MirScenes
                     BigMapDialog.Visible = false;
                     break;
                 case Keys.O:
+                    break;
                 case Keys.F12:
                     if (!OptionDialog.Visible) OptionDialog.Show();
                     else OptionDialog.Hide();
@@ -404,6 +406,24 @@ namespace Client.MirScenes
                     break;
                 case Keys.D:
                     MapControl.AutoRun = !MapControl.AutoRun;
+                    break;
+                case Keys.Insert:
+                    if (!MainDialog.Visible)
+                    {
+                        MainDialog.Show();
+                        ChatDialog.Show();
+                        BeltDialog.Show();
+                        ChatControl.Show();
+                        MiniMapDialog.Show();
+                    }
+                    else
+                    {
+                        MainDialog.Hide();
+                        ChatDialog.Hide();
+                        BeltDialog.Hide();
+                        ChatControl.Hide();
+                        MiniMapDialog.Hide();
+                    }
                     break;
 
             }
@@ -4250,10 +4270,10 @@ namespace Client.MirScenes
                             blend = false;
                             if ((animation > 0) && (animation < 255))
                             {
-                                if ((animation & 0x0F) > 0)
+                                if ((animation & 0x0f) > 0)
                                 {
                                     blend = true;
-                                    animation &= 0x0F;
+                                    animation &= 0x0f;
                                 }
                                 if (animation > 0)
                                 {
@@ -4355,7 +4375,7 @@ namespace Client.MirScenes
                 Effects[i].Draw();
 
         }
-        
+        //FAR
         private void DrawLights(LightSetting setting)
         {
             if (DXManager.Lights == null || DXManager.Lights.Count == 0) return;
@@ -4371,8 +4391,7 @@ namespace Client.MirScenes
             Surface oldSurface = DXManager.CurrentSurface;
             DXManager.SetSurface(_lightSurface);
 
-            DXManager.Device.Clear(ClearFlags.Target, setting == LightSetting.Night ? Color.Black : Color.FromArgb(255, 50, 50, 50), 0, 0);
-
+            DXManager.Device.Clear(ClearFlags.Target, setting == LightSetting.Night ? Color.FromArgb(255, 20, 20, 20) : Color.FromArgb(255, 50, 50, 50), 0, 0);
 
             int light;
             Point p;
@@ -4392,11 +4411,36 @@ namespace Client.MirScenes
                         light = DXManager.Lights.Count - 1;
 
                     p = ob.DrawLocation;
-                    p.Offset(((light + 1)*-65 + CellWidth)/2, ((light + 1)*-50 + CellHeight)/2);
+                    p.Offset((((light + 1) * -57) - 125 + CellWidth) / 2, (((light + 1) * -57) - 110 + CellHeight) / 2);
 
+                    Color lightIntensity;
+
+                    switch ((light - 1) / 3)
+                    {
+                        case 0://no light source
+                            lightIntensity = Color.FromArgb(255, 60, 60, 60);
+                            break;
+                        case 1:
+                            lightIntensity = Color.FromArgb(255, 120, 120, 120);
+                            break;
+                        case 2://Candle
+                            lightIntensity = Color.FromArgb(255, 180, 180, 180);
+                            break;
+                        case 3://Torch
+                            lightIntensity = Color.FromArgb(255, 240, 240, 240);
+                            break;
+                        default://Peddler Torch
+                            lightIntensity = Color.FromArgb(255, 255, 255, 255);
+                            break;
+                    }
+
+                    //NPCs use wider light width, but low source
+                    if (ob.Race == ObjectType.Merchant)
+                        lightIntensity = Color.FromArgb(255, 60, 60, 60);
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
-                        DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : Color.White);
+                        DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : lightIntensity);
+               
                 }
                 
                 if (!Settings.Effect) continue;
@@ -4408,7 +4452,7 @@ namespace Client.MirScenes
                     light = effect.Light;
 
                     p = effect.DrawLocation;
-                    p.Offset(((light + 1)*-65 + CellWidth)/2, ((light + 1)*-50 + CellHeight)/2);
+                    p.Offset((((light + 1) * -57) - 125 + CellWidth) / 2, (((light + 1) * -57) - 125 + CellHeight) / 2);
 
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
@@ -4427,7 +4471,7 @@ namespace Client.MirScenes
                     light = effect.Light;
 
                     p = effect.DrawLocation;
-                    p.Offset(((light + 1)*-65 + CellWidth)/2, ((light + 1)*-50 + CellHeight)/2);
+                    p.Offset((((light + 1) * -57) - 125 + CellWidth) / 2, (((light + 1) * -57) - 125 + CellHeight) / 2);
 
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
@@ -4435,23 +4479,23 @@ namespace Client.MirScenes
                 }
 
 
-            for (int y = MapObject.User.Movement.Y - ViewRangeY - 10; y <= MapObject.User.Movement.Y + ViewRangeY + 10; y++)
+            for (int y = MapObject.User.Movement.Y - ViewRangeY - 24; y <= MapObject.User.Movement.Y + ViewRangeY + 24; y++)
             {
                 if (y < 0) continue;
                 if (y >= Height) break;
-                for (int x = MapObject.User.Movement.X - ViewRangeX - 10; x < MapObject.User.Movement.X + ViewRangeX + 10; x++)
+                for (int x = MapObject.User.Movement.X - ViewRangeX - 24; x < MapObject.User.Movement.X + ViewRangeX + 24; x++)
                 {
                     if (x < 0) continue;
                     if (x >= Width) break;
                     int imageIndex = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
                     if (M2CellInfo[x, y].Light <= 0 || M2CellInfo[x, y].Light >= 10) continue;
-                    light = M2CellInfo[x, y].Light*3;
+                    light = M2CellInfo[x, y].Light*12;
                     int fileIndex = M2CellInfo[x, y].FrontIndex;
 
                     p = new Point(
                         (x + OffSetX - MapObject.User.Movement.X) * CellWidth + MapObject.User.OffSetMove.X,
                         (y + OffSetY - MapObject.User.Movement.Y) * CellHeight + MapObject.User.OffSetMove.Y + 32);
-                    p.Offset(((light + 1)*-65 + CellWidth)/2, ((light + 1)*-50 + CellHeight)/2);
+                    p.Offset((((light + 1) * -57) - 125 + CellWidth) / 2, (((light + 1) * -57) - 125 + CellHeight) / 2);
 
                     if (M2CellInfo[x, y].FrontAnimationFrame > 0)
                         p.Offset(Libraries.MapLibs[fileIndex].GetOffSet(imageIndex));
@@ -4460,7 +4504,7 @@ namespace Client.MirScenes
                         light = DXManager.Lights.Count - 1;
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
-                        DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
+                        DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.FromArgb(255, 97, 200, 200));
                 }
             }
             DXManager.SetBlend(false);
@@ -4495,7 +4539,7 @@ namespace Client.MirScenes
 
                             GameScene.NPCTime = CMain.Time + 5000;
                             GameScene.NPCID = npc.ObjectID;
-                            Network.Enqueue(new C.CallNPC {ObjectID = npc.ObjectID, Key = "[Main]"});
+                            Network.Enqueue(new C.CallNPC {ObjectID = npc.ObjectID, Key = "[@Main]"});
                         }
                     }
                     break;
@@ -5284,6 +5328,16 @@ namespace Client.MirScenes
             };
         }
 
+        public void Show()
+        {
+            Visible = true;
+        }
+
+        public void Hide()
+        {
+            Visible = false;
+        }
+
         public void Process()
         {
             switch (GameScene.Scene.AMode)
@@ -5531,6 +5585,16 @@ namespace Client.MirScenes
                     Sound = SoundList.None,
                 };
             PositionBar.OnMoving += PositionBar_OnMoving;
+        }
+
+        public void Show()
+        {
+            Visible = true;
+        }
+
+        public void Hide()
+        {
+            Visible = false;
         }
 
         private void ChatTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -5996,6 +6060,15 @@ namespace Client.MirScenes
 
         }
 
+        public void Show()
+        {
+            Visible = true;
+        }
+
+        public void Hide()
+        {
+            Visible = false;
+        }
     }
     public sealed class InventoryDialog : MirImageControl
     {
@@ -6986,6 +7059,16 @@ namespace Client.MirScenes
             }
         }
 
+        public void Show()
+        {
+            Visible = true;
+        }
+
+        public void Hide()
+        {
+            Visible = false;
+        }
+
         public void Toggle()
         {
             if (_fade == 0F)
@@ -7883,7 +7966,8 @@ namespace Client.MirScenes
     }
     public sealed class NPCDialog : MirImageControl
     {
-        public static Regex R = new Regex(@"<(.*?/.*?)>");
+        public static Regex R = new Regex(@"<(.*?/\@.*?)>");
+        public static Regex C = new Regex(@"{(.*?/.*?)}");
 
         public MirButton CloseButton;
         public MirLabel[] TextLabel;
@@ -7939,22 +8023,28 @@ namespace Client.MirScenes
                     continue;
                 }
 
-                Match match = R.Match(lines[i]);
+                List<Match> matchList = R.Matches(lines[i]).Cast<Match>().ToList();
+                matchList.AddRange(C.Matches(lines[i]).Cast<Match>());
 
-                while (match.Success)
+                int oldLength = lines[i].Length;
+
+                foreach (Match match in matchList.OrderBy(o => o.Index).ToList())
                 {
+                    int offSet = oldLength - lines[i].Length;
+
                     Capture capture = match.Groups[1].Captures[0];
                     string[] values = capture.Value.Split('/');
-
-                    lines[i] = lines[i].Remove(capture.Index - 1, capture.Length + 2).Insert(capture.Index - 1, values[0]);
-                    string text = lines[i].Substring(0, capture.Index - 1) + " ";
+                    lines[i] = lines[i].Remove(capture.Index - 1 - offSet, capture.Length + 2).Insert(capture.Index - 1 - offSet, values[0]);
+                    string text = lines[i].Substring(0, capture.Index - 1 - offSet) + " ";
                     Size size = TextRenderer.MeasureText(CMain.Graphics, text, TextLabel[i].Font, TextLabel[i].Size, TextFormatFlags.TextBoxControl);
 
-                    NewButton(values[0], values[1], TextLabel[i].Location.Add(new Point(size.Width - 10, 0)));
+                    if (R.Match(match.Value).Success)
+                        NewButton(values[0], values[1], TextLabel[i].Location.Add(new Point(size.Width - 10, 0)));
 
-                    match = R.Match(lines[i]);
+                    if (C.Match(match.Value).Success)
+                        NewColour(values[0], values[1], TextLabel[i].Location.Add(new Point(size.Width - 10, 0)));
                 }
-
+                
                 TextLabel[i].Text = lines[i];
             }
         }
@@ -7962,7 +8052,7 @@ namespace Client.MirScenes
         private void NewButton(string text, string key, Point p)
         {
             key = string.Format("[{0}]", key);
-
+            
             MirLabel temp = new MirLabel
                 {
                     AutoSize = true,
@@ -7972,10 +8062,10 @@ namespace Client.MirScenes
                     Text = text,
                     ForeColour = Color.Yellow,
                     Sound = SoundList.ButtonC,
-                    Font = new Font(Settings.FontName, 8F, FontStyle.Underline)
+                    Font = new Font(Settings.FontName, 8F)
                 };
-
-
+            //Fontstyle.Underline;
+            
             temp.MouseEnter += (o, e) => temp.ForeColour = Color.Red;
             temp.MouseLeave += (o, e) => temp.ForeColour = Color.Yellow;
             temp.MouseDown += (o, e) => temp.ForeColour = Color.Yellow;
@@ -7994,6 +8084,24 @@ namespace Client.MirScenes
                     GameScene.NPCTime = CMain.Time + 5000;
                     Network.Enqueue(new C.CallNPC {ObjectID = GameScene.NPCID, Key = key});
                 };
+            TextButtons.Add(temp);
+        }
+
+        private void NewColour(string text, string colour, Point p)
+        {
+            Color textColour = Color.FromName(colour);
+
+            MirLabel temp = new MirLabel
+            {
+                AutoSize = true,
+                Visible = true,
+                Parent = this,
+                Location = p,
+                Text = text,
+                ForeColour = textColour,
+                Font = new Font(Settings.FontName, 8F)
+            };
+
             TextButtons.Add(temp);
         }
 

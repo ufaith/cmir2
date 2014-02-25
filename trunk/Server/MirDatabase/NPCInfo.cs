@@ -47,7 +47,7 @@ namespace Server.MirDatabase
 
         public override string ToString()
         {
-            return string.Format("{0}: - {1}", Name, Functions.PointToString(Location));
+            return string.Format("{0}:   {1}", FileName, Functions.PointToString(Location));
         }
     }
 }
