@@ -139,6 +139,7 @@ namespace Server
                 Bind_destroyondropcheckbox.Checked = false;
                 Bind_dontdeathdropcheckbox.Checked = false;
                 Bind_dontdropcheckbox.Checked = false;
+                Bind_DontSpecialRepaircheckBox.Checked = false;
 
                 NeedIdentifycheckbox.Checked = false;
                 ShowGroupPickupcheckbox.Checked = false;
@@ -231,6 +232,8 @@ namespace Server
             Bind_destroyondropcheckbox.Checked = info.Bind.HasFlag(BindMode.DestroyOnDrop);
             Bind_dontdeathdropcheckbox.Checked = info.Bind.HasFlag(BindMode.DontDeathdrop);
             Bind_dontdropcheckbox.Checked = info.Bind.HasFlag(BindMode.DontDrop);
+            Bind_DontSpecialRepaircheckBox.Checked = info.BindNoSRepair;
+
 
             NeedIdentifycheckbox.Checked = info.NeedIdentify;
             ShowGroupPickupcheckbox.Checked = info.ShowGroupPickup;
@@ -320,6 +323,7 @@ namespace Server
                 if (Bind_destroyondropcheckbox.Checked != info.Bind.HasFlag(BindMode.DestroyOnDrop)) Bind_destroyondropcheckbox.CheckState = CheckState.Indeterminate;
                 if (Bind_dontdeathdropcheckbox.Checked != info.Bind.HasFlag(BindMode.DontDeathdrop)) Bind_dontdeathdropcheckbox.CheckState = CheckState.Indeterminate;
                 if (Bind_dontdropcheckbox.Checked != info.Bind.HasFlag(BindMode.DontDrop)) Bind_dontdropcheckbox.CheckState = CheckState.Indeterminate;
+                if (Bind_DontSpecialRepaircheckBox.Checked != info.BindNoSRepair) Bind_DontSpecialRepaircheckBox.CheckState = CheckState.Indeterminate;
                 if (NeedIdentifycheckbox.Checked != info.NeedIdentify) NeedIdentifycheckbox.CheckState = CheckState.Indeterminate;
                 if (ShowGroupPickupcheckbox.Checked != info.ShowGroupPickup) ShowGroupPickupcheckbox.CheckState = CheckState.Indeterminate;
                 if (BindOnEquipcheckbox.Checked != info.BindOnEquip) BindOnEquipcheckbox.CheckState = CheckState.Indeterminate;
@@ -1512,6 +1516,14 @@ namespace Server
 
             for (int i = 0; i < _selectedItemInfos.Count; i++)
                 _selectedItemInfos[i].Reflect = temp;
+        }
+
+        private void Bind_DontSpecialRepaircheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].BindNoSRepair = Bind_DontSpecialRepaircheckBox.Checked;
         }
     }
 }
