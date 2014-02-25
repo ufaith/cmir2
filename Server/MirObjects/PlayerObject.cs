@@ -5273,7 +5273,7 @@ namespace Server.MirObjects
                                 Enqueue(p);
                                 return;
                             }
-                            if (temp.Info.Bind.HasFlag(BindMode.DontRepair))
+                            if (temp.Info.Bind.HasFlag(BindMode.DontRepair) || temp.Info.BindNoSRepair)
                             {
                                 Enqueue(p);
                                 return;
@@ -6250,7 +6250,7 @@ namespace Server.MirObjects
 
                 if (temp == null || index == -1) return;
 
-                if (temp.Info.Bind.HasFlag(BindMode.DontRepair))
+                if ((temp.Info.Bind.HasFlag(BindMode.DontRepair)) || (temp.Info.BindNoSRepair && special))
                 {
                     ReceiveChat("You cannot Repair this item.", ChatType.System);
                     return;

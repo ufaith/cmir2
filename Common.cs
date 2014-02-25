@@ -1496,12 +1496,12 @@ public class ItemInfo
     public byte Strong;
     public byte MagicResist, PoisonResist, HealthRecovery, SpellRecovery, PoisonRecovery, HPrate, MPrate;
     public byte CriticalRate, CriticalDamage;
-    public bool NeedIdentify, ShowGroupPickup, BindOnEquip;
+    public bool NeedIdentify, ShowGroupPickup, BindOnEquip, BindNoSRepair;
     public bool ClassBased;
     public bool LevelBased;
     public byte MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, HpDrainRate;
     
-    public BindMode Bind = BindMode.none;
+    public BindMode Bind = BindMode.none;//due to lack of space in bindmodes > bindonequip and srepair are seperate bools for now, if anyone adds 2/3 more bindmodes then it'd be more suitable to upgrade bindmode to short!
     public byte Reflect;
     public SpecialItemMode Unique = SpecialItemMode.none;
 
@@ -1577,6 +1577,7 @@ public class ItemInfo
             BindOnEquip = (bools & 0x04) == 0x04;
             ClassBased = (bools & 0x08) == 0x08;
             LevelBased = (bools & 0x10) == 0x10;
+            BindNoSRepair = (bools & 0x20) == 0x20;
             MaxAcRate = reader.ReadByte();
             MaxMacRate = reader.ReadByte();
             Holy = reader.ReadByte();
@@ -1655,6 +1656,7 @@ public class ItemInfo
         if (BindOnEquip) bools |= 0x04;
         if (ClassBased) bools |= 0x08;
         if (LevelBased) bools |= 0x10;
+        if (BindNoSRepair) bools |= 0x20;
         writer.Write(bools);
         writer.Write(MaxAcRate);
         writer.Write(MaxMacRate);
@@ -1741,6 +1743,7 @@ public class ItemInfo
         if (!byte.TryParse(data[55], out info.Reflect)) return null;
         if (!byte.TryParse(data[56], out info.HpDrainRate)) return null;
         if (!Enum.TryParse(data[57], out info.Unique)) return null;
+        if (!bool.TryParse(data[58], out info.BindNoSRepair)) return null;
 
         return info;
 
@@ -1749,11 +1752,11 @@ public class ItemInfo
     public string ToText()
     {
         return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},{25},{26}," +
-                             "{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57}",
+                             "{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57},{58}",
             Name, (byte)Type, (byte)RequiredType, (byte)RequiredClass, (byte)RequiredGender, Shape, Weight, Light, RequiredAmount, MinAC, MaxAC, MinMAC, MaxMAC, MinDC, MaxDC,
             MinMC, MaxMC, MinSC, MaxSC, Accuracy, Agility, HP, MP, AttackSpeed, Luck, BagWeight, HandWeight, WearWeight, StartItem, Image, Durability, Price, 
             StackSize, Effect, Strong, MagicResist, PoisonResist, HealthRecovery, SpellRecovery, PoisonRecovery, HPrate, MPrate, CriticalRate, CriticalDamage, NeedIdentify, 
-            ShowGroupPickup, MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, ClassBased, LevelBased, (byte)Bind, BindOnEquip, Reflect, HpDrainRate,(short)Unique);
+            ShowGroupPickup, MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, ClassBased, LevelBased, (byte)Bind, BindOnEquip, Reflect, HpDrainRate,(short)Unique,BindNoSRepair);
     }
 
     

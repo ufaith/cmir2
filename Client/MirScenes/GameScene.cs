@@ -2909,7 +2909,7 @@ namespace Client.MirScenes
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontUpgrade))
                 {
-                    text = (text == "")? "can't upgrade": ", can't upgrade";
+                    text += (text == "")? "can't upgrade": ", can't upgrade";
                     count += 1;
                 }
                 if (count > 2)
@@ -2926,11 +2926,12 @@ namespace Client.MirScenes
                     ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
                     count = 0;
+                    text = "";
                 }
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontSell))
                 {
-                    text = (text == "") ? "can't sell" : ", can't sell";
+                    text += (text == "") ? "can't sell" : ", can't sell";
                     count += 1;
                 }
                 if (count > 2)
@@ -2947,11 +2948,12 @@ namespace Client.MirScenes
                     ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
                     count = 0;
+                    text = "";
                 }
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontTrade))
                 {
-                    text = (text == "") ? "can't trade" : ", can't trade";
+                    text += (text == "") ? "can't trade" : ", can't trade";
                     count += 1;
                 }
                 if (count > 2)
@@ -2968,11 +2970,12 @@ namespace Client.MirScenes
                     ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
                     count = 0;
+                    text = "";
                 }
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontStore))
                 {
-                    text = (text == "") ? "can't store" : ", can't store";
+                    text += (text == "") ? "can't store" : ", can't store";
                     count += 1;
                 }
                 if (count > 1)
@@ -2989,11 +2992,12 @@ namespace Client.MirScenes
                     ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
                     count = 0;
+                    text = "";
                 }
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontRepair))
                 {
-                    text = (text == "") ? "can't repair" : ", can't repair";
+                    text += (text == "") ? "can't repair" : ", can't repair";
                     count += 1;
                 }
                 if (count > 1)
@@ -3010,7 +3014,44 @@ namespace Client.MirScenes
                     ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
                     count = 0;
+                    text = "";
                 }
+                if (HoverItem.Info.BindNoSRepair)
+                {
+                    text += (text == "") ? "can't  special repair" : ", can't special repair";
+                    count += 1;
+                }
+                if (count > 1)
+                {
+                    MirLabel label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = text
+                    };
+                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    count = 0;
+                    text = "";
+                }
+                if (HoverItem.Info.Bind.HasFlag(BindMode.DestroyOnDrop))
+                {
+                    MirLabel label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = "destroyed when dropped"
+                    };
+                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                }
+                
             }
             
             #endregion
@@ -4497,6 +4538,8 @@ namespace Client.MirScenes
                 if (cell.Item.Info.Bind.HasFlag(BindMode.DontDrop))
                 {
                     MirMessageBox messageBox = new MirMessageBox(string.Format("You cannot drop {0}?", cell.Item.Name), MirMessageBoxButtons.OK);
+                    messageBox.Show();
+                    GameScene.SelectedCell = null;
                     return;
                 }
                 if (cell.Item.Count == 1)

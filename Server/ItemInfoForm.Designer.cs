@@ -69,10 +69,17 @@
             this.ISetComboBox = new System.Windows.Forms.ComboBox();
             this.label35 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.label37 = new System.Windows.Forms.Label();
-            this.HpDrainRatetextBox = new System.Windows.Forms.TextBox();
-            this.label14 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label50 = new System.Windows.Forms.Label();
+            this.label52 = new System.Windows.Forms.Label();
             this.label49 = new System.Windows.Forms.Label();
+            this.ReflecttextBox = new System.Windows.Forms.TextBox();
+            this.HpDrainRatetextBox = new System.Windows.Forms.TextBox();
+            this.CriticalDamagetextBox = new System.Windows.Forms.TextBox();
+            this.CriticalRatetextBox = new System.Windows.Forms.TextBox();
+            this.label51 = new System.Windows.Forms.Label();
+            this.label37 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
             this.MinACTextBox = new System.Windows.Forms.TextBox();
             this.MPratetextbox = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
@@ -136,6 +143,7 @@
             this.label32 = new System.Windows.Forms.Label();
             this.WWeightTextBox = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.Bind_DontSpecialRepaircheckBox = new System.Windows.Forms.CheckBox();
             this.Bind_dontdropcheckbox = new System.Windows.Forms.CheckBox();
             this.BindOnEquipcheckbox = new System.Windows.Forms.CheckBox();
             this.Bind_dontdeathdropcheckbox = new System.Windows.Forms.CheckBox();
@@ -166,20 +174,13 @@
             this.ExportAllButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
-            this.label50 = new System.Windows.Forms.Label();
-            this.CriticalRatetextBox = new System.Windows.Forms.TextBox();
-            this.label51 = new System.Windows.Forms.Label();
-            this.CriticalDamagetextBox = new System.Windows.Forms.TextBox();
-            this.ReflecttextBox = new System.Windows.Forms.TextBox();
-            this.label52 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.ItemInfoPanel.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tabPage4.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // ItemInfoPanel
@@ -673,14 +674,58 @@
             this.tabPage2.Text = "basic stats";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // label37
+            // groupBox1
             // 
-            this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(488, 14);
-            this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(57, 13);
-            this.label37.TabIndex = 78;
-            this.label37.Text = "Mac Rate:";
+            this.groupBox1.Controls.Add(this.label50);
+            this.groupBox1.Controls.Add(this.label52);
+            this.groupBox1.Controls.Add(this.label49);
+            this.groupBox1.Controls.Add(this.ReflecttextBox);
+            this.groupBox1.Controls.Add(this.HpDrainRatetextBox);
+            this.groupBox1.Controls.Add(this.CriticalDamagetextBox);
+            this.groupBox1.Controls.Add(this.CriticalRatetextBox);
+            this.groupBox1.Controls.Add(this.label51);
+            this.groupBox1.Location = new System.Drawing.Point(20, 270);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(431, 245);
+            this.groupBox1.TabIndex = 123;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "New Stats";
+            // 
+            // label50
+            // 
+            this.label50.AutoSize = true;
+            this.label50.Location = new System.Drawing.Point(8, 39);
+            this.label50.Name = "label50";
+            this.label50.Size = new System.Drawing.Size(62, 13);
+            this.label50.TabIndex = 119;
+            this.label50.Text = "Critical rate:";
+            // 
+            // label52
+            // 
+            this.label52.AutoSize = true;
+            this.label52.Location = new System.Drawing.Point(5, 65);
+            this.label52.Name = "label52";
+            this.label52.Size = new System.Drawing.Size(44, 13);
+            this.label52.TabIndex = 122;
+            this.label52.Text = "Reflect:";
+            // 
+            // label49
+            // 
+            this.label49.AutoSize = true;
+            this.label49.Location = new System.Drawing.Point(204, 65);
+            this.label49.Name = "label49";
+            this.label49.Size = new System.Drawing.Size(53, 13);
+            this.label49.TabIndex = 115;
+            this.label49.Text = "HP Drain:";
+            // 
+            // ReflecttextBox
+            // 
+            this.ReflecttextBox.Location = new System.Drawing.Point(76, 62);
+            this.ReflecttextBox.MaxLength = 3;
+            this.ReflecttextBox.Name = "ReflecttextBox";
+            this.ReflecttextBox.Size = new System.Drawing.Size(30, 20);
+            this.ReflecttextBox.TabIndex = 121;
+            this.ReflecttextBox.TextChanged += new System.EventHandler(this.ReflecttextBox_TextChanged);
             // 
             // HpDrainRatetextBox
             // 
@@ -691,6 +736,42 @@
             this.HpDrainRatetextBox.TabIndex = 116;
             this.HpDrainRatetextBox.TextChanged += new System.EventHandler(this.HpDrainRatetextBox_TextChanged);
             // 
+            // CriticalDamagetextBox
+            // 
+            this.CriticalDamagetextBox.Location = new System.Drawing.Point(260, 36);
+            this.CriticalDamagetextBox.MaxLength = 3;
+            this.CriticalDamagetextBox.Name = "CriticalDamagetextBox";
+            this.CriticalDamagetextBox.Size = new System.Drawing.Size(30, 20);
+            this.CriticalDamagetextBox.TabIndex = 118;
+            this.CriticalDamagetextBox.TextChanged += new System.EventHandler(this.CriticalDamagetextBox_TextChanged);
+            // 
+            // CriticalRatetextBox
+            // 
+            this.CriticalRatetextBox.Location = new System.Drawing.Point(76, 36);
+            this.CriticalRatetextBox.MaxLength = 3;
+            this.CriticalRatetextBox.Name = "CriticalRatetextBox";
+            this.CriticalRatetextBox.Size = new System.Drawing.Size(30, 20);
+            this.CriticalRatetextBox.TabIndex = 117;
+            this.CriticalRatetextBox.TextChanged += new System.EventHandler(this.CriticalRatetextBox_TextChanged);
+            // 
+            // label51
+            // 
+            this.label51.AutoSize = true;
+            this.label51.Location = new System.Drawing.Point(188, 39);
+            this.label51.Name = "label51";
+            this.label51.Size = new System.Drawing.Size(66, 13);
+            this.label51.TabIndex = 120;
+            this.label51.Text = "Critical Dmg:";
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(488, 14);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(57, 13);
+            this.label37.TabIndex = 78;
+            this.label37.Text = "Mac Rate:";
+            // 
             // label14
             // 
             this.label14.AutoSize = true;
@@ -699,15 +780,6 @@
             this.label14.Size = new System.Drawing.Size(44, 13);
             this.label14.TabIndex = 32;
             this.label14.Text = "Min AC:";
-            // 
-            // label49
-            // 
-            this.label49.AutoSize = true;
-            this.label49.Location = new System.Drawing.Point(204, 65);
-            this.label49.Name = "label49";
-            this.label49.Size = new System.Drawing.Size(53, 13);
-            this.label49.TabIndex = 115;
-            this.label49.Text = "HP Drain:";
             // 
             // MinACTextBox
             // 
@@ -1269,6 +1341,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.Bind_DontSpecialRepaircheckBox);
             this.tabPage3.Controls.Add(this.Bind_dontdropcheckbox);
             this.tabPage3.Controls.Add(this.BindOnEquipcheckbox);
             this.tabPage3.Controls.Add(this.Bind_dontdeathdropcheckbox);
@@ -1285,6 +1358,17 @@
             this.tabPage3.Text = "bind config";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // Bind_DontSpecialRepaircheckBox
+            // 
+            this.Bind_DontSpecialRepaircheckBox.AutoSize = true;
+            this.Bind_DontSpecialRepaircheckBox.Location = new System.Drawing.Point(21, 160);
+            this.Bind_DontSpecialRepaircheckBox.Name = "Bind_DontSpecialRepaircheckBox";
+            this.Bind_DontSpecialRepaircheckBox.Size = new System.Drawing.Size(121, 17);
+            this.Bind_DontSpecialRepaircheckBox.TabIndex = 113;
+            this.Bind_DontSpecialRepaircheckBox.Text = "Dont Special Repair";
+            this.Bind_DontSpecialRepaircheckBox.UseVisualStyleBackColor = true;
+            this.Bind_DontSpecialRepaircheckBox.CheckedChanged += new System.EventHandler(this.Bind_DontSpecialRepaircheckBox_CheckedChanged);
+            // 
             // Bind_dontdropcheckbox
             // 
             this.Bind_dontdropcheckbox.AutoSize = true;
@@ -1299,7 +1383,7 @@
             // BindOnEquipcheckbox
             // 
             this.BindOnEquipcheckbox.AutoSize = true;
-            this.BindOnEquipcheckbox.Location = new System.Drawing.Point(21, 206);
+            this.BindOnEquipcheckbox.Location = new System.Drawing.Point(21, 228);
             this.BindOnEquipcheckbox.Name = "BindOnEquipcheckbox";
             this.BindOnEquipcheckbox.Size = new System.Drawing.Size(92, 17);
             this.BindOnEquipcheckbox.TabIndex = 112;
@@ -1321,7 +1405,7 @@
             // Bind_dontstorecheckbox
             // 
             this.Bind_dontstorecheckbox.AutoSize = true;
-            this.Bind_dontstorecheckbox.Location = new System.Drawing.Point(21, 160);
+            this.Bind_dontstorecheckbox.Location = new System.Drawing.Point(21, 182);
             this.Bind_dontstorecheckbox.Name = "Bind_dontstorecheckbox";
             this.Bind_dontstorecheckbox.Size = new System.Drawing.Size(77, 17);
             this.Bind_dontstorecheckbox.TabIndex = 109;
@@ -1343,7 +1427,7 @@
             // Bind_dontupgradecheckbox
             // 
             this.Bind_dontupgradecheckbox.AutoSize = true;
-            this.Bind_dontupgradecheckbox.Location = new System.Drawing.Point(21, 183);
+            this.Bind_dontupgradecheckbox.Location = new System.Drawing.Point(21, 205);
             this.Bind_dontupgradecheckbox.Name = "Bind_dontupgradecheckbox";
             this.Bind_dontupgradecheckbox.Size = new System.Drawing.Size(93, 17);
             this.Bind_dontupgradecheckbox.TabIndex = 108;
@@ -1617,77 +1701,6 @@
             this.ImportButton.UseVisualStyleBackColor = true;
             this.ImportButton.Click += new System.EventHandler(this.ImportButton_Click);
             // 
-            // label50
-            // 
-            this.label50.AutoSize = true;
-            this.label50.Location = new System.Drawing.Point(8, 39);
-            this.label50.Name = "label50";
-            this.label50.Size = new System.Drawing.Size(62, 13);
-            this.label50.TabIndex = 119;
-            this.label50.Text = "Critical rate:";
-            // 
-            // CriticalRatetextBox
-            // 
-            this.CriticalRatetextBox.Location = new System.Drawing.Point(76, 36);
-            this.CriticalRatetextBox.MaxLength = 3;
-            this.CriticalRatetextBox.Name = "CriticalRatetextBox";
-            this.CriticalRatetextBox.Size = new System.Drawing.Size(30, 20);
-            this.CriticalRatetextBox.TabIndex = 117;
-            this.CriticalRatetextBox.TextChanged += new System.EventHandler(this.CriticalRatetextBox_TextChanged);
-            // 
-            // label51
-            // 
-            this.label51.AutoSize = true;
-            this.label51.Location = new System.Drawing.Point(188, 39);
-            this.label51.Name = "label51";
-            this.label51.Size = new System.Drawing.Size(66, 13);
-            this.label51.TabIndex = 120;
-            this.label51.Text = "Critical Dmg:";
-            // 
-            // CriticalDamagetextBox
-            // 
-            this.CriticalDamagetextBox.Location = new System.Drawing.Point(260, 36);
-            this.CriticalDamagetextBox.MaxLength = 3;
-            this.CriticalDamagetextBox.Name = "CriticalDamagetextBox";
-            this.CriticalDamagetextBox.Size = new System.Drawing.Size(30, 20);
-            this.CriticalDamagetextBox.TabIndex = 118;
-            this.CriticalDamagetextBox.TextChanged += new System.EventHandler(this.CriticalDamagetextBox_TextChanged);
-            // 
-            // ReflecttextBox
-            // 
-            this.ReflecttextBox.Location = new System.Drawing.Point(76, 62);
-            this.ReflecttextBox.MaxLength = 3;
-            this.ReflecttextBox.Name = "ReflecttextBox";
-            this.ReflecttextBox.Size = new System.Drawing.Size(30, 20);
-            this.ReflecttextBox.TabIndex = 121;
-            this.ReflecttextBox.TextChanged += new System.EventHandler(this.ReflecttextBox_TextChanged);
-            // 
-            // label52
-            // 
-            this.label52.AutoSize = true;
-            this.label52.Location = new System.Drawing.Point(5, 65);
-            this.label52.Name = "label52";
-            this.label52.Size = new System.Drawing.Size(44, 13);
-            this.label52.TabIndex = 122;
-            this.label52.Text = "Reflect:";
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.label50);
-            this.groupBox1.Controls.Add(this.label52);
-            this.groupBox1.Controls.Add(this.label49);
-            this.groupBox1.Controls.Add(this.ReflecttextBox);
-            this.groupBox1.Controls.Add(this.HpDrainRatetextBox);
-            this.groupBox1.Controls.Add(this.CriticalDamagetextBox);
-            this.groupBox1.Controls.Add(this.CriticalRatetextBox);
-            this.groupBox1.Controls.Add(this.label51);
-            this.groupBox1.Location = new System.Drawing.Point(20, 270);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(431, 245);
-            this.groupBox1.TabIndex = 123;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "New Stats";
-            // 
             // ItemInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1712,12 +1725,12 @@
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1869,6 +1882,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label52;
         private System.Windows.Forms.TextBox ReflecttextBox;
+        private System.Windows.Forms.CheckBox Bind_DontSpecialRepaircheckBox;
 
     }
 }
