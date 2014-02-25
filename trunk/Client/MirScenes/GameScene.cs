@@ -4110,7 +4110,6 @@ namespace Client.MirScenes
                     if (x <= 0 || x%2 == 1) continue;
                     if (x >= Width) break;
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
-
                     if ((M2CellInfo[x, y].BackImage == 0) || (M2CellInfo[x, y].BackIndex == -1)) continue;
                     index = (M2CellInfo[x, y].BackImage & 0x1FFFF) - 1;
                     Libraries.MapLibs[M2CellInfo[x, y].BackIndex].Draw(index, drawX, drawY);
@@ -4154,11 +4153,13 @@ namespace Client.MirScenes
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
 
                     index = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
+                    if (index == -1) continue;
                     int fileIndex = M2CellInfo[x, y].FrontIndex;
                     if (fileIndex == -1) continue;
                     Size s = Libraries.MapLibs[fileIndex].GetSize(index);
-
-                    if (index < 0 || s.Width != CellWidth || s.Height != CellHeight) continue;
+                    if (fileIndex == 200) //could break maps i have no clue anymore :( fixes random bad spots on old school 4.map tho
+                        continue;
+                    if (index < 0 || ((s.Width != CellWidth || s.Height != CellHeight) && ((s.Width != CellWidth *2) || (s.Height != CellHeight * 2)))) continue;
                     Libraries.MapLibs[fileIndex].Draw(index, drawX, drawY);
                 }
             }
@@ -4200,6 +4201,7 @@ namespace Client.MirScenes
                     #region draw mir3 middle layer
                     if ((M2CellInfo[x, y].MiddleIndex > 199) && (M2CellInfo[x, y].MiddleIndex != -1))
                     {
+                        
                         index = M2CellInfo[x, y].MiddleImage - 1;
                         if (index > 0)
                         {
@@ -4219,8 +4221,7 @@ namespace Client.MirScenes
                                 }
                             }
                             s = Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].GetSize(index);
-
-                            if (s.Width != CellWidth || s.Height != CellHeight)
+                            if ((s.Width != CellWidth || s.Height != CellHeight) && (s.Width != (CellWidth*2) || s.Height != (CellHeight*2)))
                             {
                                 Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].DrawUp(index, drawX, drawY);
                             }
@@ -4251,8 +4252,9 @@ namespace Client.MirScenes
                         index += (AnimationCount%(animation + (animation*animationTick)))/(1 + animationTick);
                     }
                     s = Libraries.MapLibs[fileIndex].GetSize(index);
-
                     if (s.Width == CellWidth && s.Height == CellHeight && animation == 0) continue;
+                    if ((s.Width == CellWidth * 2) && (s.Height == CellHeight * 2) && (animation == 0))
+                        continue;
                     if (blend)
                     {
                         if ((fileIndex > 99) & (fileIndex < 199))
