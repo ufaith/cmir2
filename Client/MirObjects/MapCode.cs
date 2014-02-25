@@ -398,11 +398,11 @@ namespace Client.MirObjects
                 for (int x = 0; x < Width; x++)
                     for (int y = 0; y < Height; y++)
                     {
+                        
                         flag = Bytes[offset++];
                         MapCells[x, y].MiddleAnimationFrame = Bytes[offset++];
                         MapCells[x, y].FrontAnimationFrame = Bytes[offset] == 255? (byte)0 : Bytes[offset];
-                        if (MapCells[x, y].FrontAnimationFrame > 0x0F)
-                            MapCells[x, y].FrontAnimationFrame = (byte)(/*0x80 ^*/ (MapCells[x, y].FrontAnimationFrame & 0x0F));
+                        MapCells[x, y].FrontAnimationFrame &= 0x8F;
                         offset++;
                         MapCells[x, y].MiddleAnimationTick = 1;
                         MapCells[x, y].FrontAnimationTick = 1;
