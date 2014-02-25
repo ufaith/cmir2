@@ -1190,7 +1190,7 @@ public static class Globals
 
         FlagIndexCount = 999,
 
-        DataRange = 14;
+        DataRange = 24;
 
     public static float Commission = 0.05F;
 

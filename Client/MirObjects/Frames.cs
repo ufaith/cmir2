@@ -46,16 +46,15 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Harvest, new Frame(12, 10, 0, 200));
 
             NPCs.Add(frame = new FrameSet());
-            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 450));
-            frame.Frames.Add(MirAction.Harvest, new Frame(12, 10, 0, 200));
+            frame.Frames.Add(MirAction.Standing, new Frame(4, 4, 0, 450));
+            frame.Frames.Add(MirAction.Harvest, new Frame(22, 10, 0, 200));
+
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(8, 4, 0, 450));
+            frame.Frames.Add(MirAction.Harvest, new Frame(32, 20, 0, 200));
 
             NPCs.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 450));
-            frame.Frames.Add(MirAction.Harvest, new Frame(12, 20, 0, 200));
-
-            NPCs.Add(frame = new FrameSet());
-            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 450));
-
 
             /*
              * MONSTERS             

@@ -52,3 +52,4 @@ C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.csproj.Gen
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.exe
 C:\Users\Dan\Documents\C# MIR Source\Source\Server\obj\Release\Server.pdb
 C:\Users\Dan\Documents\C# MIR Source\Release\Server\Server.pdb
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.BalanceConfigForm.resources

@@ -165,7 +165,7 @@ namespace Server
             this.MapTabs.Location = new System.Drawing.Point(207, 41);
             this.MapTabs.Name = "MapTabs";
             this.MapTabs.SelectedIndex = 0;
-            this.MapTabs.Size = new System.Drawing.Size(527, 228);
+            this.MapTabs.Size = new System.Drawing.Size(540, 218);
             this.MapTabs.TabIndex = 8;
             // 
             // tabPage1
@@ -185,7 +185,7 @@ namespace Server
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(519, 202);
+            this.tabPage1.Size = new System.Drawing.Size(532, 192);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Info";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -318,7 +318,7 @@ namespace Server
             this.tabPage6.Location = new System.Drawing.Point(4, 22);
             this.tabPage6.Name = "tabPage6";
             this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage6.Size = new System.Drawing.Size(519, 202);
+            this.tabPage6.Size = new System.Drawing.Size(532, 192);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "Attributes";
             this.tabPage6.UseVisualStyleBackColor = true;
@@ -509,7 +509,7 @@ namespace Server
             this.tabPage3.Controls.Add(this.SafeZoneInfoListBox);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(519, 202);
+            this.tabPage3.Size = new System.Drawing.Size(532, 192);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Safe Zones";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -539,7 +539,6 @@ namespace Server
             this.SafeZoneInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SafeZoneInfoPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.SafeZoneInfoPanel.Controls.Add(this.label12);
             this.SafeZoneInfoPanel.Controls.Add(this.SZYTextBox);
             this.SafeZoneInfoPanel.Controls.Add(this.label14);
@@ -550,7 +549,7 @@ namespace Server
             this.SafeZoneInfoPanel.Enabled = false;
             this.SafeZoneInfoPanel.Location = new System.Drawing.Point(189, 35);
             this.SafeZoneInfoPanel.Name = "SafeZoneInfoPanel";
-            this.SafeZoneInfoPanel.Size = new System.Drawing.Size(197, 149);
+            this.SafeZoneInfoPanel.Size = new System.Drawing.Size(197, 139);
             this.SafeZoneInfoPanel.TabIndex = 10;
             // 
             // label12
@@ -626,7 +625,7 @@ namespace Server
             this.SafeZoneInfoListBox.Location = new System.Drawing.Point(6, 35);
             this.SafeZoneInfoListBox.Name = "SafeZoneInfoListBox";
             this.SafeZoneInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.SafeZoneInfoListBox.Size = new System.Drawing.Size(177, 147);
+            this.SafeZoneInfoListBox.Size = new System.Drawing.Size(177, 134);
             this.SafeZoneInfoListBox.TabIndex = 9;
             this.SafeZoneInfoListBox.SelectedIndexChanged += new System.EventHandler(this.SafeZoneInfoListBox_SelectedIndexChanged);
             // 
@@ -641,7 +640,7 @@ namespace Server
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(519, 202);
+            this.tabPage2.Size = new System.Drawing.Size(532, 192);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Respawns";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -693,7 +692,7 @@ namespace Server
             this.RespawnInfoListBox.Location = new System.Drawing.Point(6, 35);
             this.RespawnInfoListBox.Name = "RespawnInfoListBox";
             this.RespawnInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.RespawnInfoListBox.Size = new System.Drawing.Size(260, 147);
+            this.RespawnInfoListBox.Size = new System.Drawing.Size(260, 134);
             this.RespawnInfoListBox.TabIndex = 14;
             this.RespawnInfoListBox.SelectedIndexChanged += new System.EventHandler(this.RespawnInfoListBox_SelectedIndexChanged);
             // 
@@ -719,7 +718,7 @@ namespace Server
             this.RespawnInfoPanel.Enabled = false;
             this.RespawnInfoPanel.Location = new System.Drawing.Point(272, 35);
             this.RespawnInfoPanel.Name = "RespawnInfoPanel";
-            this.RespawnInfoPanel.Size = new System.Drawing.Size(223, 149);
+            this.RespawnInfoPanel.Size = new System.Drawing.Size(205, 139);
             this.RespawnInfoPanel.TabIndex = 11;
             // 
             // label24
@@ -859,7 +858,7 @@ namespace Server
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(519, 202);
+            this.tabPage4.Size = new System.Drawing.Size(532, 192);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Movements";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -889,7 +888,6 @@ namespace Server
             this.MovementInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.MovementInfoPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.MovementInfoPanel.Controls.Add(this.NeedHoleMCheckBox);
             this.MovementInfoPanel.Controls.Add(this.label22);
             this.MovementInfoPanel.Controls.Add(this.DestMapComboBox);
@@ -904,7 +902,7 @@ namespace Server
             this.MovementInfoPanel.Enabled = false;
             this.MovementInfoPanel.Location = new System.Drawing.Point(239, 35);
             this.MovementInfoPanel.Name = "MovementInfoPanel";
-            this.MovementInfoPanel.Size = new System.Drawing.Size(256, 149);
+            this.MovementInfoPanel.Size = new System.Drawing.Size(256, 139);
             this.MovementInfoPanel.TabIndex = 14;
             // 
             // NeedHoleMCheckBox
@@ -1018,7 +1016,7 @@ namespace Server
             this.MovementInfoListBox.Location = new System.Drawing.Point(6, 35);
             this.MovementInfoListBox.Name = "MovementInfoListBox";
             this.MovementInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.MovementInfoListBox.Size = new System.Drawing.Size(227, 147);
+            this.MovementInfoListBox.Size = new System.Drawing.Size(227, 134);
             this.MovementInfoListBox.TabIndex = 13;
             this.MovementInfoListBox.SelectedIndexChanged += new System.EventHandler(this.MovementInfoListBox_SelectedIndexChanged);
             // 
@@ -1032,14 +1030,14 @@ namespace Server
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage5.Size = new System.Drawing.Size(519, 202);
+            this.tabPage5.Size = new System.Drawing.Size(532, 192);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "NPCs";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
             // OpenNButton
             // 
-            this.OpenNButton.Location = new System.Drawing.Point(239, 6);
+            this.OpenNButton.Location = new System.Drawing.Point(254, 6);
             this.OpenNButton.Name = "OpenNButton";
             this.OpenNButton.Size = new System.Drawing.Size(75, 23);
             this.OpenNButton.TabIndex = 19;
@@ -1072,7 +1070,6 @@ namespace Server
             this.NPCInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.NPCInfoPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.NPCInfoPanel.Controls.Add(this.label11);
             this.NPCInfoPanel.Controls.Add(this.NFileNameTextBox);
             this.NPCInfoPanel.Controls.Add(this.label29);
@@ -1087,9 +1084,9 @@ namespace Server
             this.NPCInfoPanel.Controls.Add(this.label28);
             this.NPCInfoPanel.Controls.Add(this.NXTextBox);
             this.NPCInfoPanel.Enabled = false;
-            this.NPCInfoPanel.Location = new System.Drawing.Point(239, 35);
+            this.NPCInfoPanel.Location = new System.Drawing.Point(254, 35);
             this.NPCInfoPanel.Name = "NPCInfoPanel";
-            this.NPCInfoPanel.Size = new System.Drawing.Size(256, 149);
+            this.NPCInfoPanel.Size = new System.Drawing.Size(260, 139);
             this.NPCInfoPanel.TabIndex = 18;
             // 
             // label11
@@ -1104,9 +1101,9 @@ namespace Server
             // NFileNameTextBox
             // 
             this.NFileNameTextBox.Location = new System.Drawing.Point(71, 3);
-            this.NFileNameTextBox.MaxLength = 20;
+            this.NFileNameTextBox.MaxLength = 50;
             this.NFileNameTextBox.Name = "NFileNameTextBox";
-            this.NFileNameTextBox.Size = new System.Drawing.Size(92, 20);
+            this.NFileNameTextBox.Size = new System.Drawing.Size(180, 20);
             this.NFileNameTextBox.TabIndex = 22;
             this.NFileNameTextBox.TextChanged += new System.EventHandler(this.NFileNameTextBox_TextChanged);
             // 
@@ -1137,12 +1134,13 @@ namespace Server
             this.ClearHButton.TabIndex = 19;
             this.ClearHButton.Text = "Clear History";
             this.ClearHButton.UseVisualStyleBackColor = true;
+            this.ClearHButton.Click += new System.EventHandler(this.ClearHButton_Click);
             // 
             // NNameTextBox
             // 
             this.NNameTextBox.Location = new System.Drawing.Point(71, 29);
             this.NNameTextBox.Name = "NNameTextBox";
-            this.NNameTextBox.Size = new System.Drawing.Size(92, 20);
+            this.NNameTextBox.Size = new System.Drawing.Size(180, 20);
             this.NNameTextBox.TabIndex = 14;
             this.NNameTextBox.TextChanged += new System.EventHandler(this.NNameTextBox_TextChanged);
             // 
@@ -1218,7 +1216,7 @@ namespace Server
             this.NPCInfoListBox.Location = new System.Drawing.Point(6, 35);
             this.NPCInfoListBox.Name = "NPCInfoListBox";
             this.NPCInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.NPCInfoListBox.Size = new System.Drawing.Size(227, 147);
+            this.NPCInfoListBox.Size = new System.Drawing.Size(242, 134);
             this.NPCInfoListBox.TabIndex = 17;
             this.NPCInfoListBox.SelectedIndexChanged += new System.EventHandler(this.NPCInfoListBox_SelectedIndexChanged);
             // 
@@ -1277,7 +1275,7 @@ namespace Server
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(746, 281);
+            this.ClientSize = new System.Drawing.Size(759, 271);
             this.Controls.Add(this.PasteMapButton);
             this.Controls.Add(this.CopyMapButton);
             this.Controls.Add(this.MapTabs);
