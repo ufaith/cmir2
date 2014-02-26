@@ -2706,13 +2706,7 @@ namespace Client.MirScenes
             byte level = Inspect ? InspectDialog.Level: MapObject.User.Level;
             MirClass job = Inspect ? InspectDialog.Class: MapObject.User.Class;
             HoverItem = item;
-            ItemInfo RealItem = item.Info;
-            if (RealItem.LevelBased & RealItem.ClassBased) RealItem = Functions.GetClassAndLevelBasedItem(RealItem, job, level, ItemInfoList);
-                else
-                {
-                    if (RealItem.LevelBased) RealItem = Functions.GetLevelBasedItem(RealItem, level, ItemInfoList);
-                    if (RealItem.ClassBased) RealItem = Functions.GetClassBasedItem(RealItem, job, ItemInfoList);
-                }
+            ItemInfo RealItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
 
             ItemLabel = new MirControl
                 {
@@ -6353,12 +6347,17 @@ namespace Client.MirScenes
             CharacterPage.AfterDraw += (o, e) =>
                 {
                     if (Libraries.StateItems == null) return;
-
+                    ItemInfo RealItem = null;
                     if (Grid[(int)EquipmentSlot.Armour].Item != null)
-                        Libraries.StateItems.Draw(Grid[(int)EquipmentSlot.Armour].Item.Info.Image, DisplayLocation, Color.White, true, 1F);
-
+                    {
+                        RealItem = Functions.GetRealItem(Grid[(int)EquipmentSlot.Armour].Item.Info, MapObject.User.Level, MapObject.User.Class, GameScene.ItemInfoList);
+                        Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+                    }
                     if (Grid[(int)EquipmentSlot.Weapon].Item != null)
-                        Libraries.StateItems.Draw(Grid[(int)EquipmentSlot.Weapon].Item.Info.Image, DisplayLocation, Color.White, true, 1F);
+                    {
+                        RealItem = Functions.GetRealItem(Grid[(int)EquipmentSlot.Weapon].Item.Info, MapObject.User.Level, MapObject.User.Class, GameScene.ItemInfoList);
+                        Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+                    }
 
                     if (Grid[(int)EquipmentSlot.Helmet].Item != null)
                         Libraries.StateItems.Draw(Grid[(int)EquipmentSlot.Helmet].Item.Info.Image, DisplayLocation, Color.White, true, 1F);
@@ -7167,11 +7166,18 @@ namespace Client.MirScenes
                 {
                     if (Libraries.StateItems == null) return;
 
+                    ItemInfo RealItem;
                     if (ArmorCell.Item != null)
-                        Libraries.StateItems.Draw(ArmorCell.Item.Info.Image, DisplayLocation, Color.White, true, 1F);
+                    {
+                        RealItem = Functions.GetRealItem(ArmorCell.Item.Info, Level, Class, GameScene.ItemInfoList);
+                        Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+                    }
 
                     if (WeaponCell.Item != null)
-                        Libraries.StateItems.Draw(WeaponCell.Item.Info.Image, DisplayLocation, Color.White, true, 1F);
+                    {
+                        RealItem = Functions.GetRealItem(WeaponCell.Item.Info, Level, Class, GameScene.ItemInfoList);                     
+                        Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+                    }
 
                     if (HelmetCell.Item != null)
                         Libraries.StateItems.Draw(HelmetCell.Item.Info.Image, DisplayLocation, Color.White, true, 1F);

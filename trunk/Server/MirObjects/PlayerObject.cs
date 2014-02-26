@@ -20,6 +20,9 @@ namespace Server.MirObjects
 
         public long LastRecallTime, LastRevivalTime, LastTeleportTime, LastProbeTime;
 
+        public sbyte Looks_Armour = 0, Looks_Weapon = -1;
+        public byte Looks_Wings = 0;
+
         public override ObjectType Race
         {
             get { return ObjectType.Player; }
@@ -1351,7 +1354,6 @@ namespace Server.MirObjects
             MaxHandWeight = 0;
             ASpeed = 0;
             Luck = 0;
-            Light = 0;
             LifeOnHit = 0;
             HpDrainRate = 0;
             Reflect = 0;
@@ -1414,6 +1416,14 @@ namespace Server.MirObjects
         }
         private void RefreshEquipmentStats()
         {
+            sbyte OldLooks_Weapon = Looks_Weapon;
+            sbyte OldLooks_Armour = Looks_Armour;
+            byte OldLooks_Wings = Looks_Wings;
+            byte OldLight = Light;
+            Looks_Armour = 0;
+            Looks_Weapon = -1;
+            Looks_Wings = 0;
+            Light = 0;
             CurrentWearWeight = 0;
             CurrentHandWeight = 0;
 
@@ -1437,14 +1447,7 @@ namespace Server.MirObjects
             {
                 UserItem temp = Info.Equipment[i];
                 if (temp == null) continue;
-                ItemInfo RealItem = temp.Info;
-                if (RealItem.LevelBased & RealItem.ClassBased) RealItem = Functions.GetClassAndLevelBasedItem(RealItem, Info.Class, Info.Level, Envir.ItemInfoList);
-                else
-                {
-                    if (RealItem.LevelBased) RealItem = Functions.GetLevelBasedItem(RealItem, Info.Level, Envir.ItemInfoList);
-                    if (RealItem.ClassBased) RealItem = Functions.GetClassBasedItem(RealItem, Info.Class, Envir.ItemInfoList);
-                }
-
+                ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
                 if (RealItem.Type == ItemType.Weapon || RealItem.Type == ItemType.Torch)
                     CurrentHandWeight = (byte) Math.Min(byte.MaxValue, CurrentHandWeight + temp.Weight);
                 else
@@ -1517,6 +1520,15 @@ namespace Server.MirObjects
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Skill)) HasSkillNecklace = true;
                     if (RealItem.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLoss = true;
                 }
+
+                if (RealItem.Type == ItemType.Armour)
+                {
+                    Looks_Armour = RealItem.Shape;
+                    Looks_Wings = RealItem.Effect;
+                }
+                if (RealItem.Type == ItemType.Weapon)
+                    Looks_Weapon = RealItem.Shape;
+
                 if (RealItem.Set == ItemSet.None) continue;
 
                 //Normal Sets
@@ -1553,7 +1565,10 @@ namespace Server.MirObjects
                 MaxWearWeight = Math.Min(byte.MaxValue, (byte)(MaxWearWeight * 2));
                 MaxHandWeight = Math.Min(byte.MaxValue, (byte)(MaxHandWeight * 2));
             }
-
+            if ((OldLooks_Armour != Looks_Armour) || (OldLooks_Weapon != Looks_Weapon) || (OldLooks_Wings != Looks_Wings) || (OldLight != Light))
+            {
+                Broadcast(GetUpdateInfo());
+            }
         }
 
         private void RefreshItemSetStats()
@@ -4556,10 +4571,10 @@ namespace Server.MirObjects
             return new S.PlayerUpdate
                 {
                     ObjectID = ObjectID,
-                    Weapon = (sbyte)(Info.Equipment[(int)EquipmentSlot.Weapon] != null ? Info.Equipment[(int)EquipmentSlot.Weapon].Info.Shape : -1),
-                    Armour = (sbyte)(Info.Equipment[(int)EquipmentSlot.Armour] != null ? Info.Equipment[(int)EquipmentSlot.Armour].Info.Shape : 0),
+                    Weapon = Looks_Weapon,
+                    Armour = Looks_Armour,
                     Light = Light,
-                    WingEffect = (byte)(Info.Equipment[(int)EquipmentSlot.Armour] != null ? Info.Equipment[(int)EquipmentSlot.Armour].Info.Effect : 0)
+                    WingEffect = Looks_Wings
                 };
 
 
@@ -4576,14 +4591,14 @@ namespace Server.MirObjects
                 Location = CurrentLocation,
                 Direction = Direction,
                 Hair = Hair,
-                Weapon = (sbyte)(Info.Equipment[(int)EquipmentSlot.Weapon] != null ? Info.Equipment[(int)EquipmentSlot.Weapon].Info.Shape : -1),
-                Armour = (sbyte)(Info.Equipment[(int)EquipmentSlot.Armour] != null ? Info.Equipment[(int)EquipmentSlot.Armour].Info.Shape : 0),
+                Weapon = Looks_Weapon,
+                Armour = Looks_Armour,
                 Light = Light,
                 Poison = CurrentPoison,
                 Dead = Dead,
                 Hidden = Hidden,
                 Effect = MagicShield ? SpellEffect.MagicShieldUp : SpellEffect.None,
-                WingEffect = (byte)(Info.Equipment[(int)EquipmentSlot.Armour] != null ? Info.Equipment[(int)EquipmentSlot.Armour].Info.Effect : 0),
+                WingEffect = Looks_Wings
             };
         }
         
@@ -5187,7 +5202,7 @@ namespace Server.MirObjects
                 p.Success = true;
                 Enqueue(p);
                 RefreshStats();
-                Broadcast(GetUpdateInfo());
+                //Broadcast(GetUpdateInfo());
                 return;
             }
             Enqueue(p);
