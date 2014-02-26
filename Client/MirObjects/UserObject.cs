@@ -37,6 +37,7 @@ namespace Client.MirObjects
         public byte MagicResist, PoisonResist, HealthRecovery, SpellRecovery, PoisonRecovery, CriticalRate, CriticalDamage, Holy, Freezing, PoisonAttack, HpDrainRate;
         public BaseStats CoreStats = new BaseStats(0);
 
+
         public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14];
         public List<ClientMagic> Magics = new List<ClientMagic>();
         public List<ItemSets> ItemSets = new List<ItemSets>();
@@ -89,10 +90,10 @@ namespace Client.MirObjects
 
         public override void SetLibraries()
         {
+            /*
             Weapon = -1;
             Armour = 0;
-            WingEffect = 0;
-
+            WingEffect = 0; 
             if (Equipment != null)
             {
                 if (Equipment[(int) EquipmentSlot.Weapon] != null)
@@ -103,6 +104,7 @@ namespace Client.MirObjects
                     WingEffect = Equipment[(int)EquipmentSlot.Armour].Info.Effect;
                 }
             }
+            */
             base.SetLibraries();
         }
 
@@ -204,6 +206,9 @@ namespace Client.MirObjects
         }
         private void RefreshEquipmentStats()
         {
+            Weapon = -1;
+            Armour = 0;
+            WingEffect = 0;
             CurrentWearWeight = 0;
             CurrentHandWeight = 0;
 
@@ -224,14 +229,8 @@ namespace Client.MirObjects
                 UserItem temp = Equipment[i];
 
                 if (temp == null) continue;
-                ItemInfo RealItem = temp.Info;
-                if (RealItem.LevelBased & RealItem.ClassBased) RealItem = Functions.GetClassAndLevelBasedItem(RealItem, Class, Level, GameScene.ItemInfoList);
-                else
-                {
-                    if (RealItem.LevelBased) RealItem = Functions.GetLevelBasedItem(RealItem, Level, GameScene.ItemInfoList);
-                    if (RealItem.ClassBased) RealItem = Functions.GetClassBasedItem(RealItem, Class, GameScene.ItemInfoList);
-                }
-
+                ItemInfo RealItem = Functions.GetRealItem(temp.Info, Level, Class, GameScene.ItemInfoList);
+                
                 if (RealItem.Type == ItemType.Weapon || RealItem.Type == ItemType.Torch)
                     CurrentHandWeight = (byte)Math.Min(byte.MaxValue, CurrentHandWeight + temp.Weight);
                 else
@@ -294,6 +293,13 @@ namespace Client.MirObjects
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Skill)) HasSkillNecklace = true;
                     if (RealItem.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLoss = true;
                 }
+                if (RealItem.Type == ItemType.Armour)
+                {
+                    Armour = RealItem.Shape;
+                    WingEffect = RealItem.Effect;
+                }
+                if (RealItem.Type == ItemType.Weapon)
+                    Weapon = RealItem.Shape;
                 if (RealItem.Set == ItemSet.None) continue;
 
                 bool sameSetFound = false;
@@ -325,6 +331,7 @@ namespace Client.MirObjects
                 MaxWearWeight = Math.Min(byte.MaxValue, (byte)(MaxWearWeight * 2));
                 MaxHandWeight = Math.Min(byte.MaxValue, (byte)(MaxHandWeight * 2));
             }
+
         }
 
         private void RefreshItemSetStats()

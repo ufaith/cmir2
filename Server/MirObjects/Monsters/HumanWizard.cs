@@ -167,9 +167,9 @@ namespace Server.MirObjects.Monsters
             if (Master != null && Master is PlayerObject) master = (PlayerObject)Master;
             if (master != null)
             {
-                weapon = (sbyte)(master.Info.Equipment[(int)EquipmentSlot.Weapon] != null ? master.Info.Equipment[(int)EquipmentSlot.Weapon].Info.Shape : -1);
-                armour = (sbyte)(master.Info.Equipment[(int)EquipmentSlot.Armour] != null ? master.Info.Equipment[(int)EquipmentSlot.Armour].Info.Shape : 0);
-                wing = (byte)(master.Info.Equipment[(int)EquipmentSlot.Armour] != null ? master.Info.Equipment[(int)EquipmentSlot.Armour].Info.Effect : 0);
+                weapon = master.Looks_Weapon;
+                armour = master.Looks_Armour;
+                wing = master.Looks_Wings;
             }
             return new S.ObjectPlayer
             {

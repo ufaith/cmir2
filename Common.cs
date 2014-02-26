@@ -1399,6 +1399,16 @@ public static class Functions
                 return dir;
         }
     }
+    public static ItemInfo GetRealItem(ItemInfo Origin, byte Level, MirClass job, List<ItemInfo> ItemList)
+    {
+        if (Origin.ClassBased && Origin.LevelBased)
+            return GetClassAndLevelBasedItem(Origin, job, Level, ItemList);
+        if (Origin.ClassBased)
+            return GetClassBasedItem(Origin, job, ItemList);
+        if (Origin.LevelBased)
+            return GetLevelBasedItem(Origin, Level, ItemList);
+        return Origin;
+    }
     public static ItemInfo GetLevelBasedItem(ItemInfo Origin, byte level, List<ItemInfo> ItemList)
     {
         ItemInfo output = Origin;
