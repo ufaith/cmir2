@@ -667,13 +667,15 @@ namespace Server.MirObjects
 
         public string FindVariable(PlayerObject player, string key)
         {
-            Regex regex = new Regex(@"[A-Z][0-9]");
+            Regex regex = new Regex(@"\%[A-Z][0-9]");
 
             if (!regex.Match(key).Success) return key;
 
+            string tempKey = key.Substring(1);
+
             foreach (KeyValuePair<string, string> t in player.kv)
             {
-                if (t.Key == key) return t.Value;
+                if (t.Key == tempKey) return t.Value;
             }
 
             return key;
@@ -742,6 +744,7 @@ namespace Server.MirObjects
                     CheckList.Add(new NPCChecks(CheckType.CheckMinute, parts[1]));
                     break;
 
+                //cant use stored var
                 case "CHECKNAMELIST":
                     if (parts.Length < 2) return;
 
@@ -766,6 +769,7 @@ namespace Server.MirObjects
                     CheckList.Add(new NPCChecks(CheckType.CheckRange, parts[1], parts[2], parts[3]));
                     break;
 
+                //cant use stored var
                 case "CHECK":
                     if (parts.Length < 3) return;
                     var match = regexFlag.Match(parts[1]);
@@ -818,9 +822,9 @@ namespace Server.MirObjects
                     CheckList.Add(new NPCChecks(CheckType.PetLevel, parts[1], parts[2]));
                     break;
 
-                case "TRYCALC":
+                case "CHECKCALC":
                     if (parts.Length < 4) return;
-                    CheckList.Add(new NPCChecks(CheckType.TryCalc, parts[1], parts[2], parts[3]));
+                    CheckList.Add(new NPCChecks(CheckType.CheckCalc, parts[1], parts[2], parts[3]));
                     break;
             }
 
@@ -960,7 +964,7 @@ namespace Server.MirObjects
                     acts.Add(new NPCActions(ActionType.ChangeClass, parts[1]));
                     break;
 
-                    //cant use stored var
+                //cant use stored var
                 case "LINEMESSAGE":
                     var match = regexMessage.Match(line);
                     if (match.Success)
@@ -979,7 +983,7 @@ namespace Server.MirObjects
                     acts.Add(new NPCActions(ActionType.GiveSkill, parts[1], spelllevel));
                     break;
 
-                    //cant use stored var
+                //cant use stored var
                 case "SET":
                     if (parts.Length < 3) return;
                     match = regexFlag.Match(parts[1]);
@@ -1084,7 +1088,7 @@ namespace Server.MirObjects
 
                 case "MOV":
                     if (parts.Length < 3) return;
-                    match = Regex.Match(parts[1], @"\%[A-Z][0-9]", RegexOptions.IgnoreCase);
+                    match = Regex.Match(parts[1], @"[A-Z][0-9]", RegexOptions.IgnoreCase);
                     Match msgMatch = regexMessage.Match(line);
 
                     string valueToStore = parts[2];
@@ -1101,8 +1105,15 @@ namespace Server.MirObjects
 
                     match = Regex.Match(parts[1], @"[A-Z][0-9]", RegexOptions.IgnoreCase);
 
+                    msgMatch = regexMessage.Match(line);
+
+                    valueToStore = parts[3];
+
+                    if (msgMatch.Success)
+                        valueToStore = msgMatch.Groups[1].Captures[0].Value;
+
                     if (match.Success)
-                        acts.Add(new NPCActions(ActionType.Calc, parts[1], parts[2], parts[3], parts[1].Insert(1, "-")));
+                        acts.Add(new NPCActions(ActionType.Calc, "%" + parts[1], parts[2], valueToStore, parts[1].Insert(1, "-")));
 
                     break;
             }
@@ -1135,7 +1146,7 @@ namespace Server.MirObjects
                     switch (innerMatch)
                     {
                         case "OUTPUT()":
-                            SayCommandCheck = FindVariable(player, varMatch.Groups[2].Captures[0].Value.ToUpper());
+                            SayCommandCheck = FindVariable(player, "%" + varMatch.Groups[2].Captures[0].Value.ToUpper());
                             break;
                         case "NPCNAME":
                             SayCommandCheck = NPCName.Replace("_"," ");
@@ -1510,7 +1521,7 @@ namespace Server.MirObjects
                         }
                         break;
 
-                    case CheckType.TryCalc:
+                    case CheckType.CheckCalc:
                         int left;
                         int right;
 
@@ -1976,24 +1987,31 @@ namespace Server.MirObjects
 
                     case ActionType.Mov:
                         string value = param[0];
-                        value = value.Substring(1);
                         AddVariable(player, value, param[1]);
                         break;
 
                     case ActionType.Calc:
                         int left;
                         int right;
-                        if (!int.TryParse(param[0], out left)) return;
-                        if (!int.TryParse(param[2], out right)) return;
 
-                        try
+                        bool resultLeft = int.TryParse(param[0], out left);
+                        bool resultRight = int.TryParse(param[2], out right);
+
+                        if (resultLeft && resultRight)
                         {
-                            int result = Calculate(param[1], left, right);
-                            AddVariable(player,param[3].Replace("-",""),result.ToString());
+                            try
+                            {
+                                int result = Calculate(param[1], left, right);
+                                AddVariable(player, param[3].Replace("-", ""), result.ToString());
+                            }
+                            catch (ArgumentException)
+                            {
+                                SMain.Enqueue(string.Format("Incorrect operator: {0}, Page: {1}", param[1], Key));
+                            }
                         }
-                        catch (ArgumentException)
+                        else
                         {
-                            SMain.Enqueue(string.Format("Incorrect operator: {0}, Page: {1}", param[1], Key));
+                            AddVariable(player, param[3].Replace("-", ""), param[0] + param[2]);
                         }
                         break;
                 }
@@ -2133,7 +2151,7 @@ namespace Server.MirObjects
         GroupCount,
         PetLevel,
         PetCount,
-        TryCalc,
+        CheckCalc,
     }
 
     public class NPCTimeRecall
