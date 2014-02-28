@@ -86,6 +86,7 @@ namespace Server
                 NoReconnectTextbox.Text = string.Empty;
                 FireTextbox.Text = string.Empty;
                 LightningTextbox.Text = string.Empty;
+                MapDarkLighttextBox.Text = string.Empty;
                 return;
             }
 
@@ -119,6 +120,7 @@ namespace Server
             FireTextbox.Text = mi.FireDamage.ToString();
             LightningCheckbox.Checked = mi.Lightning;                      
             LightningTextbox.Text = mi.LightningDamage.ToString();
+            MapDarkLighttextBox.Text = mi.MapDarkLight.ToString();
 
             for (int i = 1; i < _selectedMapInfos.Count; i++)
             {
@@ -149,6 +151,7 @@ namespace Server
                 if (FireTextbox.Text != mi.FireDamage.ToString()) FireTextbox.Text = string.Empty;
                 if (LightningCheckbox.Checked != mi.Lightning) LightningCheckbox.Checked = false;                             
                 if (LightningTextbox.Text != mi.LightningDamage.ToString()) LightningTextbox.Text = string.Empty;
+                if (MapDarkLighttextBox.Text != mi.MapDarkLight.ToString()) MapDarkLighttextBox.Text = string.Empty;
             }
 
             UpdateSafeZoneInterface();
@@ -1274,5 +1277,24 @@ namespace Server
         {
 
         }
+
+        private void MapDarkLighttextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].MapDarkLight = temp;
+        }
+
     }
 }

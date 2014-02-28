@@ -32,7 +32,24 @@ namespace Client.MirGraphics
 
         public static Texture RadarTexture;
         public static List<Texture> Lights = new List<Texture>();
-    
+
+        public static Point[] LightSizes = new Point[] 
+                {
+                    new Point(125,110),
+                    new Point(240,160),
+                    new Point(336,224),
+                    new Point(432,228),
+                    new Point(528,352),
+                    new Point(581,566),
+                    new Point(624,384),//default mir2 effect light ?(6)
+                    new Point (638,623),
+                    new Point (695,680),
+                    new Point (752,737),
+                    new Point(809,794),
+                    new Point(866,851),
+                    new Point(923,908),
+
+                };
 
         public static void Create()
         {
@@ -101,17 +118,18 @@ namespace Client.MirGraphics
         //FAR
         private unsafe static void CreateLights()
         {
+            
             for (int i = Lights.Count - 1; i >= 0; i--)
                 Lights[i].Dispose();
 
             Lights.Clear();
 
-            for (int i = 1; i < 15; i++)
+            for (int i = 1; i < LightSizes.Length; i++)
             {
-                //int width = 125 * i;
-                //int height = 110 * i;
-                int width = 125 + (57 *i);
-                int height = 110 + (57 * i);
+                // int width = 125 + (57 *i);
+                //int height = 110 + (57 * i);
+                int width = LightSizes[i].X;
+                int height = LightSizes[i].Y;
                 Texture light = new Texture(Device, width, height, 1, Usage.None, Format.A8R8G8B8, Pool.Managed);
 
                 using (GraphicsStream stream = light.LockRectangle(0, LockFlags.Discard))

@@ -418,6 +418,7 @@ namespace Client.MirObjects
                         offset += 2;
                         offset += 3;//mir3 maps dont have doors so dont bother reading the info
                         MapCells[x, y].Light = (byte)(Bytes[offset] & 0x0F);
+                        MapCells[x, y].Light *= 4;//far wants all light on mir3 maps to be maxed :p
                         offset += 2;
                         if ((flag & 0x01) != 1) MapCells[x, y].BackImage |= 0x20000000;
                         if ((flag & 0x02) != 2) MapCells[x, y].FrontImage = (short)((UInt16)MapCells[x, y].FrontImage | 0x8000);
@@ -466,6 +467,7 @@ namespace Client.MirObjects
                         MapCells[x, y].MiddleAnimationTick = 1;
                         MapCells[x, y].FrontAnimationTick = 1;
                         MapCells[x, y].Light = (byte)(Bytes[offset] & 0x0F);
+                        MapCells[x, y].Light *= 4;//far wants all light on mir3 maps to be maxed :p
                         offset += 8;
                         if ((flag & 0x01) != 1) MapCells[x, y].BackImage |= 0x20000000;
                         if ((flag & 0x02) != 2) MapCells[x, y].FrontImage = (short)((UInt16)MapCells[x, y].FrontImage | 0x8000);

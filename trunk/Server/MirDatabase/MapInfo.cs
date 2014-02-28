@@ -13,6 +13,7 @@ namespace Server.MirDatabase
         public string FileName = string.Empty, Title = string.Empty;
         public ushort MiniMap, BigMap;
         public LightSetting Light;
+        public byte MapDarkLight = 0;
 
         public bool NoTeleport, NoReconnect, NoRandom, NoEscape, NoRecall, NoDrug, NoPosition, 
             NoThrowItem, NoDropPlayer, NoDropMonster, NoNames, Fight, NeedHole, Fire, Lightning;
@@ -76,6 +77,8 @@ namespace Server.MirDatabase
             FireDamage = reader.ReadInt32();
             Lightning = reader.ReadBoolean();
             LightningDamage = reader.ReadInt32();
+            if (Envir.LoadVersion < 23) return;
+            MapDarkLight = reader.ReadByte();
         }
 
         public void Save(BinaryWriter writer)
@@ -120,6 +123,7 @@ namespace Server.MirDatabase
             writer.Write(FireDamage);
             writer.Write(Lightning);
             writer.Write(LightningDamage);
+            writer.Write(MapDarkLight);
         }
 
 

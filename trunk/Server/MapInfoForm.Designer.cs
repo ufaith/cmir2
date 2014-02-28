@@ -138,6 +138,8 @@ namespace Server
             this.MapInfoListBox = new System.Windows.Forms.ListBox();
             this.PasteMapButton = new System.Windows.Forms.Button();
             this.CopyMapButton = new System.Windows.Forms.Button();
+            this.MapDarkLighttextBox = new System.Windows.Forms.TextBox();
+            this.label19 = new System.Windows.Forms.Label();
             this.MapTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage6.SuspendLayout();
@@ -298,6 +300,8 @@ namespace Server
             // 
             // tabPage6
             // 
+            this.tabPage6.Controls.Add(this.label19);
+            this.tabPage6.Controls.Add(this.MapDarkLighttextBox);
             this.tabPage6.Controls.Add(this.NoNamesCheckbox);
             this.tabPage6.Controls.Add(this.NoDropMonsterCheckbox);
             this.tabPage6.Controls.Add(this.NoDropPlayerCheckbox);
@@ -1271,6 +1275,23 @@ namespace Server
             this.CopyMapButton.Text = "Copy";
             this.CopyMapButton.UseVisualStyleBackColor = true;
             // 
+            // MapDarkLighttextBox
+            // 
+            this.MapDarkLighttextBox.Location = new System.Drawing.Point(443, 91);
+            this.MapDarkLighttextBox.Name = "MapDarkLighttextBox";
+            this.MapDarkLighttextBox.Size = new System.Drawing.Size(49, 20);
+            this.MapDarkLighttextBox.TabIndex = 39;
+            this.MapDarkLighttextBox.TextChanged += new System.EventHandler(this.MapDarkLighttextBox_TextChanged);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(338, 94);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(80, 13);
+            this.label19.TabIndex = 40;
+            this.label19.Text = "Map Dark Light";
+            // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1413,6 +1434,8 @@ namespace Server
         private CheckBox NoRandomCheckbox;
         private Button OpenNButton;
         private CheckBox NeedHoleMCheckBox;
+        private Label label19;
+        private TextBox MapDarkLighttextBox;
 
     }
 }
