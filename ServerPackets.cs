@@ -392,6 +392,7 @@ namespace ServerPackets
         public ushort MiniMap, BigMap;
         public LightSetting Lights;
         public bool Lightning, Fire;
+        public byte MapDarkLight;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -400,8 +401,10 @@ namespace ServerPackets
             MiniMap = reader.ReadUInt16();
             BigMap = reader.ReadUInt16();
             Lights = (LightSetting) reader.ReadByte();
-            Lightning = reader.ReadBoolean();
-            Fire = reader.ReadBoolean();
+            byte bools = reader.ReadByte();
+            if ((bools & 0x01) == 0x01) Lightning = true;
+            if ((bools & 0x02) == 0x02) Fire = true;
+            MapDarkLight = reader.ReadByte();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -411,8 +414,11 @@ namespace ServerPackets
             writer.Write(MiniMap);
             writer.Write(BigMap);
             writer.Write((byte) Lights);
-            writer.Write(Lightning);
-            writer.Write(Fire);
+            byte bools = 0;
+            bools |= (byte)(Lightning ? 0x01 : 0);
+            bools |= (byte)(Fire ? 0x02 : 0);
+            writer.Write(bools);
+            writer.Write(MapDarkLight);
         }
     }
     public sealed class UserInformation : Packet
@@ -1883,6 +1889,7 @@ namespace ServerPackets
         public LightSetting Lights;
         public Point Location;
         public MirDirection Direction;
+        public byte MapDarkLight;
 
 
         protected override void ReadPacket(BinaryReader reader)
@@ -1894,6 +1901,7 @@ namespace ServerPackets
             Lights = (LightSetting)reader.ReadByte();
             Location = new Point(reader.ReadInt32(), reader.ReadInt32());
             Direction = (MirDirection)reader.ReadByte();
+            MapDarkLight = reader.ReadByte();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
@@ -1905,6 +1913,7 @@ namespace ServerPackets
             writer.Write(Location.X);
             writer.Write(Location.Y);
             writer.Write((byte)Direction);
+            writer.Write(MapDarkLight);
         }
     }
     public sealed class ObjectTeleportOut : Packet

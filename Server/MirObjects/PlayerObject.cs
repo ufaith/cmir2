@@ -1176,6 +1176,7 @@ namespace Server.MirObjects
                 Lights = CurrentMap.Info.Light,
                 Location = CurrentLocation,
                 Direction = Direction,
+                MapDarkLight = CurrentMap.Info.MapDarkLight
             });
 
             GetObjects();
@@ -1248,7 +1249,8 @@ namespace Server.MirObjects
                     Lights = CurrentMap.Info.Light,
                     BigMap = CurrentMap.Info.BigMap,
                     Lightning = CurrentMap.Info.Lightning,
-                    Fire = CurrentMap.Info.Fire
+                    Fire = CurrentMap.Info.Fire,
+                    MapDarkLight = CurrentMap.Info.MapDarkLight
                 });
         }
         private void GetObjects()
@@ -4500,6 +4502,7 @@ namespace Server.MirObjects
                 Lights = CurrentMap.Info.Light,
                 Location = CurrentLocation,
                 Direction = Direction,
+                MapDarkLight = CurrentMap.Info.MapDarkLight
             });
 
             GetObjects();
@@ -4529,6 +4532,7 @@ namespace Server.MirObjects
                 Lights = CurrentMap.Info.Light,
                 Location = CurrentLocation,
                 Direction = Direction,
+                MapDarkLight = CurrentMap.Info.MapDarkLight
             });
 
             if (effects) Enqueue(new S.TeleportIn());

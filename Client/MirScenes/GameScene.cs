@@ -1033,7 +1033,7 @@ namespace Client.MirScenes
             if (MapControl != null && !MapControl.IsDisposed)
                 MapControl.Dispose();
 
-            MapControl = new MapControl { FileName = Path.Combine(Settings.MapPath, p.FileName + ".map"), Title = p.Title, MiniMap = p.MiniMap, BigMap = p.BigMap, Lights = p.Lights, Lightning = p.Lightning, Fire = p.Fire };
+            MapControl = new MapControl { FileName = Path.Combine(Settings.MapPath, p.FileName + ".map"), Title = p.Title, MiniMap = p.MiniMap, BigMap = p.BigMap, Lights = p.Lights, Lightning = p.Lightning, Fire = p.Fire, MapDarkLight = p.MapDarkLight};
             MapControl.LoadMap();
             InsertControl(0, MapControl);
         }
@@ -1882,6 +1882,7 @@ namespace Client.MirScenes
             MapControl.MiniMap = p.MiniMap;
             MapControl.BigMap = p.BigMap;
             MapControl.Lights = p.Lights;
+            MapControl.MapDarkLight = p.MapDarkLight;
             MapControl.LoadMap();
 
             MapControl.NextAction = 0;
@@ -3889,6 +3890,7 @@ namespace Client.MirScenes
         public ushort MiniMap, BigMap;
         public LightSetting Lights;
         public bool Lightning, Fire;
+        public byte MapDarkLight;
         public long LightningTime, FireTime;
 
         public bool FloorValid, LightsValid;
@@ -4384,8 +4386,27 @@ namespace Client.MirScenes
 
             Surface oldSurface = DXManager.CurrentSurface;
             DXManager.SetSurface(_lightSurface);
-
-            DXManager.Device.Clear(ClearFlags.Target, setting == LightSetting.Night ? Color.FromArgb(255, 20, 20, 20) : Color.FromArgb(255, 50, 50, 50), 0, 0);
+            Color Darkness = Color.Black;
+            switch (MapDarkLight)//todo fill these with more usefull values :p
+            {
+                case 1:
+                    Darkness = Color.FromArgb(255, 20, 20, 20);
+                    break;
+                case 2:
+                    Darkness = Color.LightSlateGray;
+                    break;
+                case 3:
+                    Darkness = Color.SkyBlue;
+                    break;
+                case 4:
+                    Darkness = Color.Goldenrod;
+                    break;
+                default:
+                    Darkness = Color.Black;
+                    break;
+            }
+            
+            DXManager.Device.Clear(ClearFlags.Target, setting == LightSetting.Night ? Darkness : Color.FromArgb(255, 50, 50, 50), 0, 0);
 
             int light;
             Point p;
@@ -4398,18 +4419,17 @@ namespace Client.MirScenes
                 MapObject ob = Objects[i];
                 if (ob.Light > 0 && (!ob.Dead || ob == MapObject.User || ob.Race == ObjectType.Spell))
                 {
-
+                    
                     light = ob.Light;
-
-                    if (light >= DXManager.Lights.Count)
-                        light = DXManager.Lights.Count - 1;
+                    int LightRange = light % 15;
+                    if (LightRange >= DXManager.Lights.Count)
+                        LightRange = DXManager.Lights.Count - 1;
 
                     p = ob.DrawLocation;
-                    p.Offset((((light + 1) * -57) - 125 + CellWidth) / 2, (((light + 1) * -57) - 110 + CellHeight) / 2);
 
                     Color lightIntensity;
 
-                    switch ((light - 1) / 3)
+                    switch (light / 15)
                     {
                         case 0://no light source
                             lightIntensity = Color.FromArgb(255, 60, 60, 60);
@@ -4432,8 +4452,11 @@ namespace Client.MirScenes
                     if (ob.Race == ObjectType.Merchant)
                         lightIntensity = Color.FromArgb(255, 60, 60, 60);
 
-                    if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
-                        DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : lightIntensity);
+                    if (DXManager.Lights[LightRange] != null && !DXManager.Lights[LightRange].Disposed)
+                    {
+                        p.Offset(-(DXManager.LightSizes[LightRange].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[LightRange].Y / 2) - CellHeight);
+                        DXManager.Sprite.Draw2D(DXManager.Lights[LightRange], PointF.Empty, 0, p, ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : lightIntensity);
+                    }
                
                 }
                 
@@ -4446,11 +4469,13 @@ namespace Client.MirScenes
                     light = effect.Light;
 
                     p = effect.DrawLocation;
-                    p.Offset((((light + 1) * -57) - 125 + CellWidth) / 2, (((light + 1) * -57) - 125 + CellHeight) / 2);
 
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
+                    {
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - CellHeight);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
+                    }
 
                 }
             }
@@ -4465,11 +4490,12 @@ namespace Client.MirScenes
                     light = effect.Light;
 
                     p = effect.DrawLocation;
-                    p.Offset((((light + 1) * -57) - 125 + CellWidth) / 2, (((light + 1) * -57) - 125 + CellHeight) / 2);
-
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
+                    {
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - CellHeight);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
+                    }
                 }
 
 
@@ -4483,13 +4509,13 @@ namespace Client.MirScenes
                     if (x >= Width) break;
                     int imageIndex = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
                     if (M2CellInfo[x, y].Light <= 0 || M2CellInfo[x, y].Light >= 10) continue;
-                    light = M2CellInfo[x, y].Light*12;
+                    light = M2CellInfo[x, y].Light*3;
                     int fileIndex = M2CellInfo[x, y].FrontIndex;
 
                     p = new Point(
                         (x + OffSetX - MapObject.User.Movement.X) * CellWidth + MapObject.User.OffSetMove.X,
                         (y + OffSetY - MapObject.User.Movement.Y) * CellHeight + MapObject.User.OffSetMove.Y + 32);
-                    p.Offset((((light + 1) * -57) - 125 + CellWidth) / 2, (((light + 1) * -57) - 125 + CellHeight) / 2);
+                    
 
                     if (M2CellInfo[x, y].FrontAnimationFrame > 0)
                         p.Offset(Libraries.MapLibs[fileIndex].GetOffSet(imageIndex));
@@ -4498,7 +4524,10 @@ namespace Client.MirScenes
                         light = DXManager.Lights.Count - 1;
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
+                    {
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - CellHeight);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.FromArgb(255, 97, 200, 200));
+                    }
                 }
             }
             DXManager.SetBlend(false);
@@ -5053,6 +5082,7 @@ namespace Client.MirScenes
                 Lights = 0;
                 FloorValid = false;
                 LightsValid = false;
+                MapDarkLight = 0;
 
                 if (_floorSurface != null && !_floorSurface.Disposed)
                     _floorSurface.Dispose();

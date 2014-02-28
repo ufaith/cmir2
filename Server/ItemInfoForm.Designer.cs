@@ -174,6 +174,8 @@
             this.ExportAllButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
+            this.LightIntensitytextBox = new System.Windows.Forms.TextBox();
+            this.label53 = new System.Windows.Forms.Label();
             this.ItemInfoPanel.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -209,6 +211,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.LightIntensitytextBox);
+            this.tabPage1.Controls.Add(this.label53);
             this.tabPage1.Controls.Add(this.NeedIdentifycheckbox);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.ItemIndexTextBox);
@@ -474,11 +478,11 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(56, 291);
+            this.label9.Location = new System.Drawing.Point(20, 291);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(33, 13);
+            this.label9.Size = new System.Drawing.Size(68, 13);
             this.label9.TabIndex = 22;
-            this.label9.Text = "Light:";
+            this.label9.Text = "Light Range:";
             // 
             // RAmountTextBox
             // 
@@ -1701,6 +1705,24 @@
             this.ImportButton.UseVisualStyleBackColor = true;
             this.ImportButton.Click += new System.EventHandler(this.ImportButton_Click);
             // 
+            // LightIntensitytextBox
+            // 
+            this.LightIntensitytextBox.Location = new System.Drawing.Point(199, 288);
+            this.LightIntensitytextBox.MaxLength = 3;
+            this.LightIntensitytextBox.Name = "LightIntensitytextBox";
+            this.LightIntensitytextBox.Size = new System.Drawing.Size(30, 20);
+            this.LightIntensitytextBox.TabIndex = 112;
+            this.LightIntensitytextBox.TextChanged += new System.EventHandler(this.LightIntensitytextBox_TextChanged);
+            // 
+            // label53
+            // 
+            this.label53.AutoSize = true;
+            this.label53.Location = new System.Drawing.Point(152, 291);
+            this.label53.Name = "label53";
+            this.label53.Size = new System.Drawing.Size(49, 13);
+            this.label53.TabIndex = 113;
+            this.label53.Text = "Intensity:";
+            // 
             // ItemInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1883,6 +1905,8 @@
         private System.Windows.Forms.Label label52;
         private System.Windows.Forms.TextBox ReflecttextBox;
         private System.Windows.Forms.CheckBox Bind_DontSpecialRepaircheckBox;
+        private System.Windows.Forms.TextBox LightIntensitytextBox;
+        private System.Windows.Forms.Label label53;
 
     }
 }

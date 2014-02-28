@@ -21,7 +21,7 @@ namespace Client.MirObjects
         public Point Source;
         public MapObject Owner;
 
-        public int Light = 5;
+        public int Light = 6;
         public bool Blend = true;
         public float Rate = 1F;
         public Point DrawLocation;
