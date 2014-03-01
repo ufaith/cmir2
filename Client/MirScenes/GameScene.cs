@@ -4454,7 +4454,7 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[LightRange] != null && !DXManager.Lights[LightRange].Disposed)
                     {
-                        p.Offset(-(DXManager.LightSizes[LightRange].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[LightRange].Y / 2) - CellHeight);
+                        p.Offset(-(DXManager.LightSizes[LightRange].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[LightRange].Y / 2) - 68);
                         DXManager.Sprite.Draw2D(DXManager.Lights[LightRange], PointF.Empty, 0, p, ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : lightIntensity);
                     }
                
@@ -4520,7 +4520,7 @@ namespace Client.MirScenes
                     if (M2CellInfo[x, y].FrontAnimationFrame > 0)
                         p.Offset(Libraries.MapLibs[fileIndex].GetOffSet(imageIndex));
 
-                    if (light > DXManager.Lights.Count)
+                    if (light >= DXManager.Lights.Count)
                         light = DXManager.Lights.Count - 1;
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
