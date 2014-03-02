@@ -1496,7 +1496,8 @@ public class ItemInfo
 
     public uint Price, StackSize = 1;
 
-    public byte MinAC, MaxAC, MinMAC, MaxMAC, MinDC, MaxDC, MinMC, MaxMC, MinSC, MaxSC, Accuracy, Agility, HP, MP;
+    public byte MinAC, MaxAC, MinMAC, MaxMAC, MinDC, MaxDC, MinMC, MaxMC, MinSC, MaxSC, Accuracy, Agility;
+    public ushort HP, MP;
     public sbyte AttackSpeed, Luck;
     public byte BagWeight, HandWeight, WearWeight;
 
@@ -1556,8 +1557,16 @@ public class ItemInfo
         MaxMC = reader.ReadByte();
         MinSC = reader.ReadByte();
         MaxSC = reader.ReadByte();
-        HP = reader.ReadByte();
-        MP = reader.ReadByte();
+        if (version < 25)
+        {
+            HP = reader.ReadByte();
+            MP = reader.ReadByte();
+        }
+        else
+        {
+            HP = reader.ReadUInt16();
+            MP = reader.ReadUInt16();
+        }
         Accuracy = reader.ReadByte();
         Agility = reader.ReadByte();
 
@@ -1725,8 +1734,8 @@ public class ItemInfo
         if (!byte.TryParse(data[18], out info.MaxSC)) return null;
         if (!byte.TryParse(data[19], out info.Accuracy)) return null;
         if (!byte.TryParse(data[20], out info.Agility)) return null;
-        if (!byte.TryParse(data[21], out info.HP)) return null;
-        if (!byte.TryParse(data[22], out info.MP)) return null;
+        if (!ushort.TryParse(data[21], out info.HP)) return null;
+        if (!ushort.TryParse(data[22], out info.MP)) return null;
 
         if (!sbyte.TryParse(data[23], out info.AttackSpeed)) return null;
         if (!sbyte.TryParse(data[24], out info.Luck)) return null;

@@ -460,7 +460,8 @@ namespace Server.MirObjects
 
             if (Envir.Time > PotTime)
             {
-                PotTime = Envir.Time + Math.Max(50,Math.Min(PotDelay, 600 - (Level * 10)));
+                //PotTime = Envir.Time + Math.Max(50,Math.Min(PotDelay, 600 - (Level * 10)));
+                PotTime = Envir.Time + PotDelay;
                 int PerTickRegen = 5 + (Level / 10);
                 if (PotHealthAmount > PerTickRegen)
                 {
@@ -5251,8 +5252,8 @@ namespace Server.MirObjects
                     switch (item.Info.Shape)
                     {
                         case 0:
-                            PotHealthAmount += item.Info.HP;
-                            PotManaAmount += item.Info.MP;
+                            PotHealthAmount = (ushort)Math.Min(ushort.MaxValue,PotHealthAmount + item.Info.HP);
+                            PotManaAmount = (ushort)Math.Min(ushort.MaxValue, PotManaAmount + item.Info.MP);
                             break;
                         case 1: //Sun Potion
                             ChangeHP(item.Info.HP);
