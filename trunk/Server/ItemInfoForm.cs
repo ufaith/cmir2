@@ -156,6 +156,7 @@ namespace Server
                 ProbecheckBox.Checked = false;
                 SkillcheckBox.Checked = false;
                 NoDuraLosscheckBox.Checked = false;
+                RandomStatstextBox.Text = string.Empty;
                 return;
             }
 
@@ -252,6 +253,7 @@ namespace Server
             ProbecheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Probe);
             SkillcheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Skill);
             NoDuraLosscheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.NoDuraLoss);
+            RandomStatstextBox.Text = info.RandomStatsId.ToString();
 
             for (int i = 1; i < _selectedItemInfos.Count; i++)
             {
@@ -342,6 +344,7 @@ namespace Server
                 if (ProbecheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Probe)) ProbecheckBox.CheckState = CheckState.Indeterminate;
                 if (SkillcheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Skill)) SkillcheckBox.CheckState = CheckState.Indeterminate;
                 if (NoDuraLosscheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLosscheckBox.CheckState = CheckState.Indeterminate;
+                if (RandomStatstextBox.Text != info.RandomStatsId.ToString()) RandomStatstextBox.Text = string.Empty;
             }
         }
 
@@ -1554,6 +1557,35 @@ namespace Server
 
             for (int i = 0; i < _selectedItemInfos.Count; i++)
                 _selectedItemInfos[i].Light = (byte)((_selectedItemInfos[i].Light % 15) + (15 * temp));
+        }
+
+        private void RandomStatstextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if (!byte.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            if ((temp >= Settings.RandomItemStatsList.Count) && (temp != 255))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+            {
+                _selectedItemInfos[i].RandomStatsId = temp;
+                if (temp != 255)
+                    _selectedItemInfos[i].RandomStats = Settings.RandomItemStatsList[temp];
+                else
+                    _selectedItemInfos[i].RandomStats = null;
+            }
         }
     }
 }

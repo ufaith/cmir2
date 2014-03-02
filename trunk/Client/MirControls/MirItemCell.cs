@@ -469,11 +469,6 @@ namespace Client.MirControls
                                     GameScene.SelectedCell = null;
                                     return;
                                 }
-                                if (GameScene.SelectedCell.Item.Cursed)
-                                {
-                                    return;
-                                }
-
                                 if (Item == null)
                                 {
                                     Network.Enqueue(new C.RemoveItem { Grid = GridType, UniqueID = GameScene.SelectedCell.Item.UniqueID, To = ItemSlot });

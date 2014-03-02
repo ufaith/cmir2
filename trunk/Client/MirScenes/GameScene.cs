@@ -4473,7 +4473,7 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
                     {
-                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - CellHeight);
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - 68);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
                     }
 

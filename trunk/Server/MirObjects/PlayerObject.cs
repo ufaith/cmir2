@@ -184,7 +184,7 @@ namespace Server.MirObjects
         public long FlamingSwordTime;
         public bool ActiveBlizzard;
         public byte Reflect;
-        
+        public bool UnlockCurse = false;
         public override bool Blocking
         {
             get
@@ -4930,10 +4930,16 @@ namespace Server.MirObjects
                 Enqueue(p);
                 return;
             }
+            if (temp.Cursed && !UnlockCurse)
+            {
+                Enqueue(p);
+                return;
+            }
 
             if (!CanRemoveItem(grid, temp)) return;
             Info.Equipment[index] = null;
-
+            if (temp.Cursed)
+                UnlockCurse = false;
             if (array[to] == null)
             {
                 array[to] = temp;
@@ -5177,7 +5183,7 @@ namespace Server.MirObjects
                 Enqueue(p);
                 return;
             }
-            if ((Info.Equipment[to] != null) && (Info.Equipment[to].Cursed))
+            if ((Info.Equipment[to] != null) && (Info.Equipment[to].Cursed) && (!UnlockCurse))
             {
                 Enqueue(p);
                 return;
@@ -5201,6 +5207,8 @@ namespace Server.MirObjects
                     temp.SoulBoundId = Info.Index;
                     Enqueue(new S.RefreshItem { Item = temp });   
                 }
+                if (UnlockCurse && Info.Equipment[to].Cursed)
+                    UnlockCurse = false;
                 array[index] = Info.Equipment[to];
                 Info.Equipment[to] = temp;
                 p.Success = true;
@@ -5249,6 +5257,16 @@ namespace Server.MirObjects
                         case 1: //Sun Potion
                             ChangeHP(item.Info.HP);
                             ChangeMP(item.Info.MP);
+                            break;
+                        case 2:
+                            if (UnlockCurse)
+                            {
+                                ReceiveChat("You can already unequip a cursed item.", ChatType.Hint);
+                                Enqueue(p);
+                                return;
+                            }
+                            ReceiveChat("You can now unequip a cursed item.", ChatType.Hint);
+                            UnlockCurse = true;
                             break;
                     }
                     break;

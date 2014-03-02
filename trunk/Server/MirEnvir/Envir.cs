@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 23;
+        public const int Version = 24;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -358,8 +358,13 @@ namespace Server.MirEnvir
                     count = reader.ReadInt32();
                     ItemInfoList.Clear();
                     for (int i = 0; i < count; i++)
+                    {
                         ItemInfoList.Add(new ItemInfo(reader, LoadVersion));
-
+                        if ((ItemInfoList[i] != null) && (ItemInfoList[i].RandomStatsId < Settings.RandomItemStatsList.Count))
+                        {
+                            ItemInfoList[i].RandomStats = Settings.RandomItemStatsList[ItemInfoList[i].RandomStatsId];
+                        }
+                    }
                     count = reader.ReadInt32();
                     MonsterInfoList.Clear();
                     for (int i = 0; i < count; i++)
@@ -851,7 +856,7 @@ namespace Server.MirEnvir
 
         public void CreateItemInfo(ItemType type = ItemType.Nothing)
         {
-            ItemInfoList.Add(new ItemInfo { Index = ++ItemIndex, Type = type });
+            ItemInfoList.Add(new ItemInfo { Index = ++ItemIndex, Type = type, RandomStatsId = 255});
         }
 
         public void CreateMonsterInfo()
@@ -898,169 +903,44 @@ namespace Server.MirEnvir
                     MaxDura = info.Durability,
                     CurrentDura = (ushort) Math.Min(info.Durability, Random.Next(info.Durability) + 1000)
                 };
-
-            switch (info.Type)
-            {
-                case ItemType.Weapon:
-                    UpgradeWeapon(item);
-                    break;
-                case ItemType.Armour:
-                    UpgradeArmour(item);
-                    break;
-                case ItemType.Helmet:
-                    UpgradeHelmet(item);
-                    break;
-                case ItemType.Belt:
-                case ItemType.Boots:
-                    UpgradeBeltBoot(item);
-                    break;
-                case ItemType.Necklace:
-                    UpgradeNecklace(item);
-                    break;
-                case ItemType.Bracelet:
-                    UpgradeBracelet(item);
-                    break;
-                case ItemType.Ring:
-                    UpgradeRing(item);
-                    break;
-            }
+            UpgradeItem(item);
             if (!info.NeedIdentify) item.Identified = true;
             return item;
         }
 
-        public void UpgradeArmour(UserItem item)
+        public void UpgradeItem(UserItem item)
         {
-            if (Random.Next(15) == 0) item.AC = (byte)(RandomomRange(6, 15) + 1);
-            if (Random.Next(15) == 0) item.MAC = (byte)(RandomomRange(6, 15) + 1);
-
-            if (Random.Next(20) == 0) item.DC = (byte)(RandomomRange(6, 20) + 1);
-            if (Random.Next(20) == 0) item.MC = (byte)(RandomomRange(6, 20) + 1);
-            if (Random.Next(20) == 0) item.SC = (byte)(RandomomRange(6, 20) + 1);
-
-            if (Random.Next(60) == 0) item.AttackSpeed = (sbyte)(RandomomRange(3, 30) + 1);
-
-            if (Random.Next(2) == 0)
+            if (item.Info.RandomStats == null) return;
+            RandomItemStat stat = item.Info.RandomStats;
+            if ((stat.MaxDuraChance > 0) && (Random.Next(stat.MaxDuraChance) == 0))
             {
-                int dura = RandomomRange(6, 10);
-
+                int dura = RandomomRange(stat.MaxDuraMaxStat, stat.MaxDuraStatChance);
                 item.MaxDura = (ushort)Math.Min(ushort.MaxValue, item.MaxDura + dura * 1000);
                 item.CurrentDura = (ushort)Math.Min(ushort.MaxValue, item.CurrentDura + dura * 1000);
             }
-        }
-        public void UpgradeBeltBoot(UserItem item)
-        {
-            if (Random.Next(15) == 0) item.AC = (byte)(RandomomRange(6, 15) + 1);
-            if (Random.Next(15) == 0) item.MAC = (byte)(RandomomRange(6, 15) + 1);
 
-            if (Random.Next(20) == 0) item.DC = (byte)(RandomomRange(6, 20) + 1);
-            if (Random.Next(20) == 0) item.MC = (byte)(RandomomRange(6, 20) + 1);
-            if (Random.Next(20) == 0) item.SC = (byte)(RandomomRange(6, 20) + 1);
-
-            if (Random.Next(60) == 0) item.Agility = (byte)(RandomomRange(3, 30) + 1);
-
-            if (Random.Next(2) == 0)
-            {
-                int dura = RandomomRange(6, 10);
-
-                item.MaxDura = (ushort)Math.Min(ushort.MaxValue, item.MaxDura + dura * 1000);
-                item.CurrentDura = (ushort)Math.Min(ushort.MaxValue, item.CurrentDura + dura * 1000);
-            }
-        }
-        public void UpgradeHelmet(UserItem item)
-        {
-            if (Random.Next(15) == 0) item.AC = (byte)(RandomomRange(6, 15) + 1);
-            if (Random.Next(15) == 0) item.MAC = (byte)(RandomomRange(6, 15) + 1);
-
-            if (Random.Next(20) == 0) item.DC = (byte)(RandomomRange(6, 20) + 1);
-            if (Random.Next(20) == 0) item.MC = (byte)(RandomomRange(6, 20) + 1);
-            if (Random.Next(20) == 0) item.SC = (byte)(RandomomRange(6, 20) + 1);
-
-            if (Random.Next(60) == 0) item.Accuracy = (byte)(RandomomRange(3, 30) + 1);
-
-            if (Random.Next(2) == 0)
-            {
-                int dura = RandomomRange(6, 10);
-
-                item.MaxDura = (ushort)Math.Min(ushort.MaxValue, item.MaxDura + dura * 1000);
-                item.CurrentDura = (ushort)Math.Min(ushort.MaxValue, item.CurrentDura + dura * 1000);
-            }
-        }
-        public void UpgradeWeapon(UserItem item)
-        {
-            if (Random.Next(15) == 0) item.DC = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.MC = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.SC = (byte)(RandomomRange(12, 15) + 1);
-
-            if (Random.Next(30) == 0) item.Accuracy = (byte)(RandomomRange(3, 20) + 1);
-            if (Random.Next(60) == 0) item.AttackSpeed = (sbyte)(RandomomRange(3, 30) + 1);
-
-            if (Random.Next(2) == 0)
-            {
-                int dura = RandomomRange(6, 10);
-
-                item.MaxDura = (ushort)Math.Min(ushort.MaxValue, item.MaxDura + dura * 2000);
-                item.CurrentDura = (ushort)Math.Min(ushort.MaxValue, item.CurrentDura + dura * 2000);
-            }
-        }
-        public void UpgradeRing(UserItem item)
-        {
-            if (Random.Next(25) == 0) item.AC = (byte)(RandomomRange(6, 20) + 1);
-            if (Random.Next(25) == 0) item.MAC = (byte)(RandomomRange(6, 20) + 1);
-
-            if (Random.Next(15) == 0) item.DC = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.MC = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.SC = (byte)(RandomomRange(12, 15) + 1);
-
-            if (Random.Next(60) == 0) item.Accuracy = (byte)(RandomomRange(3, 30) + 1);
-
-            if (Random.Next(2) == 0)
-            {
-                int dura = RandomomRange(3, 10);
-
-                item.MaxDura = (ushort)Math.Min(ushort.MaxValue, item.MaxDura + dura * 1000);
-                item.CurrentDura = (ushort)Math.Min(ushort.MaxValue, item.CurrentDura + dura * 1000);
-            }
-        }
-        public void UpgradeBracelet(UserItem item)
-        {
-            if (Random.Next(25) == 0) item.AC = (byte)(RandomomRange(6, 20) + 1);
-            if (Random.Next(25) == 0) item.MAC = (byte)(RandomomRange(6, 20) + 1);
-
-            if (Random.Next(15) == 0) item.DC = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.MC = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.SC = (byte)(RandomomRange(12, 15) + 1);
-
-            if (Random.Next(15) == 0) item.Accuracy = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.Agility = (byte)(RandomomRange(12, 15) + 1);
-
-            if (Random.Next(60) == 0) item.HP = (byte)(RandomomRange(100, 5) + 5);
-
-            if (Random.Next(2) == 0)
-            {
-                int dura = RandomomRange(3, 10);
-
-                item.MaxDura = (ushort)Math.Min(ushort.MaxValue, item.MaxDura + dura * 1000);
-                item.CurrentDura = (ushort)Math.Min(ushort.MaxValue, item.CurrentDura + dura * 1000);
-            }
-        }
-        public void UpgradeNecklace(UserItem item)
-        {
-            if (Random.Next(15) == 0) item.DC = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.MC = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.SC = (byte)(RandomomRange(12, 15) + 1);
-
-            if (Random.Next(15) == 0) item.Accuracy = (byte)(RandomomRange(12, 15) + 1);
-            if (Random.Next(15) == 0) item.Agility = (byte)(RandomomRange(12, 15) + 1);
-
-            if (Random.Next(60) == 0) item.Luck = (sbyte)(RandomomRange(3, 45) + 1);
-
-            if (Random.Next(2) == 0)
-            {
-                int dura = RandomomRange(3, 10);
-
-                item.MaxDura = (ushort)Math.Min(ushort.MaxValue, item.MaxDura + dura * 1000);
-                item.CurrentDura = (ushort)Math.Min(ushort.MaxValue, item.CurrentDura + dura * 1000);
-            }
+            if ((stat.MaxAcChance > 0) && (Random.Next(stat.MaxAcChance) == 0)) item.AC = (byte)(RandomomRange(stat.MaxAcMaxStat-1, stat.MaxAcStatChance)+1);
+            if ((stat.MaxMacChance > 0) && (Random.Next(stat.MaxMacChance) == 0)) item.MAC = (byte)(RandomomRange(stat.MaxMacMaxStat-1, stat.MaxMacStatChance)+1);
+            if ((stat.MaxDcChance > 0) && (Random.Next(stat.MaxDcChance) == 0)) item.DC = (byte)(RandomomRange(stat.MaxDcMaxStat-1, stat.MaxDcStatChance)+1);
+            if ((stat.MaxMcChance > 0) && (Random.Next(stat.MaxScChance) == 0)) item.MC = (byte)(RandomomRange(stat.MaxMcMaxStat-1, stat.MaxMcStatChance)+1);
+            if ((stat.MaxScChance > 0) && (Random.Next(stat.MaxMcChance) == 0)) item.SC = (byte)(RandomomRange(stat.MaxScMaxStat-1, stat.MaxScStatChance)+1);
+            if ((stat.AccuracyChance > 0) && (Random.Next(stat.AccuracyChance) == 0)) item.Accuracy = (byte)(RandomomRange(stat.AccuracyMaxStat-1, stat.AccuracyStatChance)+1);
+            if ((stat.AgilityChance > 0) && (Random.Next(stat.AgilityChance) == 0)) item.Agility = (byte)(RandomomRange(stat.AgilityMaxStat-1, stat.AgilityStatChance)+1);
+            if ((stat.HpChance > 0) && (Random.Next(stat.HpChance) == 0)) item.HP = (byte)(RandomomRange(stat.HpMaxStat-1, stat.HpStatChance)+1);
+            if ((stat.MpChance > 0) && (Random.Next(stat.MpChance) == 0)) item.MP = (byte)(RandomomRange(stat.MpMaxStat-1, stat.MpStatChance)+1);
+            if ((stat.StrongChance > 0) && (Random.Next(stat.StrongChance) == 0)) item.Strong = (byte)(RandomomRange(stat.StrongMaxStat-1, stat.StrongStatChance)+1);
+            if ((stat.MagicResistChance > 0) && (Random.Next(stat.MagicResistChance) == 0)) item.MagicResist = (byte)(RandomomRange(stat.MagicResistMaxStat-1, stat.MagicResistStatChance)+1);
+            if ((stat.PoisonResistChance > 0) && (Random.Next(stat.PoisonResistChance) == 0)) item.PoisonResist = (byte)(RandomomRange(stat.PoisonResistMaxStat-1, stat.PoisonResistStatChance)+1);
+            if ((stat.HpRecovChance > 0) && (Random.Next(stat.HpRecovChance) == 0)) item.HealthRecovery = (byte)(RandomomRange(stat.HpRecovMaxStat-1, stat.HpRecovStatChance)+1);
+            if ((stat.MpRecovChance > 0) && (Random.Next(stat.MpRecovChance) == 0)) item.ManaRecovery = (byte)(RandomomRange(stat.MpRecovMaxStat-1, stat.MpRecovStatChance)+1);
+            if ((stat.PoisonRecovChance > 0) && (Random.Next(stat.PoisonRecovChance) == 0)) item.PoisonRecovery = (byte)(RandomomRange(stat.PoisonRecovMaxStat-1, stat.PoisonRecovStatChance)+1);
+            if ((stat.CriticalRateChance > 0) && (Random.Next(stat.CriticalRateChance) == 0)) item.CriticalRate = (byte)(RandomomRange(stat.CriticalRateMaxStat-1, stat.CriticalRateStatChance)+1);
+            if ((stat.CriticalDamageChance > 0) && (Random.Next(stat.CriticalDamageChance) == 0)) item.CriticalDamage = (byte)(RandomomRange(stat.CriticalDamageMaxStat-1, stat.CriticalDamageStatChance)+1);
+            if ((stat.FreezeChance > 0) && (Random.Next(stat.FreezeChance) == 0)) item.Freezing = (byte)(RandomomRange(stat.FreezeMaxStat-1, stat.FreezeStatChance)+1);
+            if ((stat.PoisonAttackChance > 0) && (Random.Next(stat.PoisonAttackChance) == 0)) item.PoisonAttack = (byte)(RandomomRange(stat.PoisonAttackMaxStat-1, stat.PoisonAttackStatChance)+1);
+            if ((stat.AttackSpeedChance > 0) && (Random.Next(stat.AttackSpeedChance) == 0)) item.AttackSpeed = (sbyte)(RandomomRange(stat.AttackSpeedMaxStat-1, stat.AttackSpeedStatChance)+1);
+            if ((stat.LuckChance > 0) && (Random.Next(stat.LuckChance) == 0)) item.Luck = (sbyte)(RandomomRange(stat.LuckMaxStat-1, stat.LuckStatChance)+1);
+            if ((stat.CurseChance > 0) && (Random.Next(100) <= stat.CurseChance)) item.Cursed = true;
         }
 
         public int RandomomRange(int count, int rate)
