@@ -84,6 +84,7 @@ namespace Server
         //character settings
         private static String[] BaseStatClassNames = { "Warrior", "Wizard", "Taoist", "Assasin" };
         public static BaseStats[] ClassBaseStats = new BaseStats[4]{new BaseStats(MirClass.Warrior),new BaseStats(MirClass.Wizard), new BaseStats(MirClass.Taoist), new BaseStats(MirClass.Assassin)};
+        public static List<RandomItemStat> RandomItemStatsList = new List<RandomItemStat>();
         
         //item related settings
         public static byte MaxMagicResist = 6,
@@ -235,6 +236,7 @@ namespace Server
 
             LoadVersion();
             LoadEXP();
+            LoadRandomItemStats();
         }
 
         public static void LoadVersion()
@@ -362,6 +364,177 @@ namespace Server
             {
                 exp = reader.ReadInt64("Exp", "Level" + i, exp);
                 ExperienceList.Add(exp);
+            }
+        }
+        public static void LoadRandomItemStats()
+        {
+            //note: i could have used a flat file system for this which would be faster, 
+            //BUT: it's only loaded @ server startup so speed isnt vital.
+            //and i think settings should be available outside the exe for ppl to edit it easyer + lets ppl share config without forcing ppl to run it in an exe
+            if (!File.Exists(@".\RandomItemStats.ini"))
+            {
+                RandomItemStatsList.Add(new RandomItemStat());
+                RandomItemStatsList.Add(new RandomItemStat(ItemType.Weapon));
+                RandomItemStatsList.Add(new RandomItemStat(ItemType.Armour));
+                RandomItemStatsList.Add(new RandomItemStat(ItemType.Helmet));
+                RandomItemStatsList.Add(new RandomItemStat(ItemType.Necklace));
+                RandomItemStatsList.Add(new RandomItemStat(ItemType.Bracelet));
+                RandomItemStatsList.Add(new RandomItemStat(ItemType.Ring));
+                RandomItemStatsList.Add(new RandomItemStat(ItemType.Belt));
+                SaveRandomItemStats();
+                return;
+            }
+            InIReader reader = new InIReader(@".\RandomItemStats.ini");
+            int i = 0;
+            RandomItemStat stat;
+            while (reader.ReadByte("Item" + i.ToString(),"MaxDuraChance",255) != 255)
+            {
+                stat = new RandomItemStat();
+                stat.MaxDuraChance = reader.ReadByte("Item" + i.ToString(), "MaxDuraChance", 0);
+                stat.MaxDuraStatChance = reader.ReadByte("Item" + i.ToString(), "MaxDuraStatChance", 1);
+                stat.MaxDuraMaxStat = reader.ReadByte("Item" + i.ToString(), "MaxDuraMaxStat", 1);
+                stat.MaxAcChance = reader.ReadByte("Item" + i.ToString(), "MaxAcChance", 0);
+                stat.MaxAcStatChance = reader.ReadByte("Item" + i.ToString(), "MaxAcStatChance", 1);
+                stat.MaxAcMaxStat = reader.ReadByte("Item" + i.ToString(), "MaxAcMaxStat", 1);
+                stat.MaxMacChance = reader.ReadByte("Item" + i.ToString(), "MaxMacChance", 0);
+                stat.MaxMacStatChance = reader.ReadByte("Item" + i.ToString(), "MaxMacStatChance", 1);
+                stat.MaxMacMaxStat = reader.ReadByte("Item" + i.ToString(), "MaxMACMaxStat", 1);
+                stat.MaxDcChance = reader.ReadByte("Item" + i.ToString(), "MaxDcChance", 0);
+                stat.MaxDcStatChance = reader.ReadByte("Item" + i.ToString(), "MaxDcStatChance", 1);
+                stat.MaxDcMaxStat = reader.ReadByte("Item" + i.ToString(), "MaxDcMaxStat", 1);
+                stat.MaxMcChance = reader.ReadByte("Item" + i.ToString(), "MaxMcChance", 0);
+                stat.MaxMcStatChance = reader.ReadByte("Item" + i.ToString(), "MaxMcStatChance", 1);
+                stat.MaxMcMaxStat = reader.ReadByte("Item" + i.ToString(), "MaxMcMaxStat", 1);
+                stat.MaxScChance = reader.ReadByte("Item" + i.ToString(), "MaxScChance", 0);
+                stat.MaxScStatChance = reader.ReadByte("Item" + i.ToString(), "MaxScStatChance", 1);
+                stat.MaxScMaxStat = reader.ReadByte("Item" + i.ToString(), "MaxScMaxStat", 1);
+                stat.AccuracyChance = reader.ReadByte("Item" + i.ToString(), "AccuracyChance", 0);
+                stat.AccuracyStatChance = reader.ReadByte("Item" + i.ToString(), "AccuracyStatChance", 1);
+                stat.AccuracyMaxStat = reader.ReadByte("Item" + i.ToString(), "AccuracyMaxStat", 1);
+                stat.AgilityChance = reader.ReadByte("Item" + i.ToString(), "AgilityChance", 0);
+                stat.AgilityStatChance = reader.ReadByte("Item" + i.ToString(), "AgilityStatChance", 1);
+                stat.AgilityMaxStat = reader.ReadByte("Item" + i.ToString(), "AgilityMaxStat", 1);
+                stat.HpChance = reader.ReadByte("Item" + i.ToString(), "HpChance", 0);
+                stat.HpStatChance = reader.ReadByte("Item" + i.ToString(), "HpStatChance", 1);
+                stat.HpMaxStat = reader.ReadByte("Item" + i.ToString(), "HpMaxStat", 1);
+                stat.MpChance = reader.ReadByte("Item" + i.ToString(), "MpChance", 0);
+                stat.MpStatChance = reader.ReadByte("Item" + i.ToString(), "MpStatChance", 1);
+                stat.MpMaxStat = reader.ReadByte("Item" + i.ToString(), "MpMaxStat", 1);
+                stat.StrongChance = reader.ReadByte("Item" + i.ToString(), "StrongChance", 0);
+                stat.StrongStatChance = reader.ReadByte("Item" + i.ToString(), "StrongStatChance", 1);
+                stat.StrongMaxStat = reader.ReadByte("Item" + i.ToString(), "StrongMaxStat", 1);
+                stat.MagicResistChance = reader.ReadByte("Item" + i.ToString(), "MagicResistChance", 0);
+                stat.MagicResistStatChance = reader.ReadByte("Item" + i.ToString(), "MagicResistStatChance", 1);
+                stat.MagicResistMaxStat = reader.ReadByte("Item" + i.ToString(), "MagicResistMaxStat", 1);
+                stat.PoisonResistChance = reader.ReadByte("Item" + i.ToString(), "PoisonResistChance", 0);
+                stat.PoisonResistStatChance = reader.ReadByte("Item" + i.ToString(), "PoisonResistStatChance", 1);
+                stat.PoisonResistMaxStat = reader.ReadByte("Item" + i.ToString(), "PoisonResistMaxStat", 1);
+                stat.HpRecovChance = reader.ReadByte("Item" + i.ToString(), "HpRecovChance", 0);
+                stat.HpRecovStatChance = reader.ReadByte("Item" + i.ToString(), "HpRecovStatChance", 1);
+                stat.HpRecovMaxStat = reader.ReadByte("Item" + i.ToString(), "HpRecovMaxStat", 1);
+                stat.MpRecovChance = reader.ReadByte("Item" + i.ToString(), "MpRecovChance", 0);
+                stat.MpRecovStatChance = reader.ReadByte("Item" + i.ToString(), "MpRecovStatChance", 1);
+                stat.MpRecovMaxStat = reader.ReadByte("Item" + i.ToString(), "MpRecovMaxStat", 1);
+                stat.PoisonRecovChance = reader.ReadByte("Item" + i.ToString(), "PoisonRecovChance", 0);
+                stat.PoisonRecovStatChance = reader.ReadByte("Item" + i.ToString(), "PoisonRecovStatChance", 1);
+                stat.PoisonRecovMaxStat = reader.ReadByte("Item" + i.ToString(), "PoisonRecovMaxStat", 1);
+                stat.CriticalRateChance = reader.ReadByte("Item" + i.ToString(), "CriticalRateChance", 0);
+                stat.CriticalRateStatChance = reader.ReadByte("Item" + i.ToString(), "CriticalRateStatChance", 1);
+                stat.CriticalRateMaxStat = reader.ReadByte("Item" + i.ToString(), "CriticalRateMaxStat", 1);
+                stat.CriticalDamageChance = reader.ReadByte("Item" + i.ToString(), "CriticalDamageChance", 0);
+                stat.CriticalDamageStatChance = reader.ReadByte("Item" + i.ToString(), "CriticalDamageStatChance", 1);
+                stat.CriticalDamageMaxStat = reader.ReadByte("Item" + i.ToString(), "CriticalDamageMaxStat", 1);
+                stat.FreezeChance = reader.ReadByte("Item" + i.ToString(), "FreezeChance", 0);
+                stat.FreezeStatChance = reader.ReadByte("Item" + i.ToString(), "FreezeStatChance", 1);
+                stat.FreezeMaxStat = reader.ReadByte("Item" + i.ToString(), "FreezeMaxStat", 1);
+                stat.PoisonAttackChance = reader.ReadByte("Item" + i.ToString(), "PoisonAttackChance", 0);
+                stat.PoisonAttackStatChance = reader.ReadByte("Item" + i.ToString(), "PoisonAttackStatChance", 1);
+                stat.PoisonAttackMaxStat = reader.ReadByte("Item" + i.ToString(), "PoisonAttackMaxStat", 1);
+                stat.AttackSpeedChance = reader.ReadByte("Item" + i.ToString(), "AttackSpeedChance", 0);
+                stat.AttackSpeedStatChance = reader.ReadByte("Item" + i.ToString(), "AttackSpeedStatChance", 1);
+                stat.AttackSpeedMaxStat = reader.ReadByte("Item" + i.ToString(), "AttackSpeedMaxStat", 1);
+                stat.LuckChance = reader.ReadByte("Item" + i.ToString(), "LuckChance", 0);
+                stat.LuckStatChance = reader.ReadByte("Item" + i.ToString(), "LuckStatChance", 1);
+                stat.LuckMaxStat = reader.ReadByte("Item" + i.ToString(), "LuckMaxStat", 1);
+                stat.CurseChance = reader.ReadByte("Item" + i.ToString(), "CurseChance", 0);
+                RandomItemStatsList.Add(stat);
+                i++;
+            }
+        }
+        public static void SaveRandomItemStats()
+        {
+            InIReader reader = new InIReader(@".\RandomItemStats.ini");
+            RandomItemStat stat;
+            for (int i = 0; i < RandomItemStatsList.Count; i++)
+            {
+                stat = RandomItemStatsList[i];
+                reader.Write("Item" + i.ToString(), "MaxDuraChance", stat.MaxDuraChance);
+                reader.Write("Item" + i.ToString(), "MaxDuraStatChance", stat.MaxDuraStatChance);
+                reader.Write("Item" + i.ToString(), "MaxDuraMaxStat", stat.MaxDuraMaxStat);
+                reader.Write("Item" + i.ToString(), "MaxAcChance", stat.MaxAcChance);
+                reader.Write("Item" + i.ToString(), "MaxAcStatChance", stat.MaxAcStatChance);
+                reader.Write("Item" + i.ToString(), "MaxAcMaxStat", stat.MaxAcMaxStat);
+                reader.Write("Item" + i.ToString(), "MaxMacChance", stat.MaxMacChance);
+                reader.Write("Item" + i.ToString(), "MaxMacStatChance", stat.MaxMacStatChance);
+                reader.Write("Item" + i.ToString(), "MaxMACMaxStat", stat.MaxMacMaxStat);
+                reader.Write("Item" + i.ToString(), "MaxDcChance", stat.MaxDcChance);
+                reader.Write("Item" + i.ToString(), "MaxDcStatChance", stat.MaxDcStatChance);
+                reader.Write("Item" + i.ToString(), "MaxDcMaxStat", stat.MaxDcMaxStat);
+                reader.Write("Item" + i.ToString(), "MaxMcChance", stat.MaxMcChance);
+                reader.Write("Item" + i.ToString(), "MaxMcStatChance",  stat.MaxMcStatChance);
+                reader.Write("Item" + i.ToString(), "MaxMcMaxStat", stat.MaxMcMaxStat);
+                reader.Write("Item" + i.ToString(), "MaxScChance", stat.MaxScChance);
+                reader.Write("Item" + i.ToString(), "MaxScStatChance", stat.MaxScStatChance);
+                reader.Write("Item" + i.ToString(), "MaxScMaxStat", stat.MaxScMaxStat);
+                reader.Write("Item" + i.ToString(), "AccuracyChance", stat.AccuracyChance);
+                reader.Write("Item" + i.ToString(), "AccuracyStatChance", stat.AccuracyStatChance);
+                reader.Write("Item" + i.ToString(), "AccuracyMaxStat", stat.AccuracyMaxStat);
+                reader.Write("Item" + i.ToString(), "AgilityChance", stat.AgilityChance);
+                reader.Write("Item" + i.ToString(), "AgilityStatChance", stat.AgilityStatChance);
+                reader.Write("Item" + i.ToString(), "AgilityMaxStat", stat.AgilityMaxStat);
+                reader.Write("Item" + i.ToString(), "HpChance", stat.HpChance);
+                reader.Write("Item" + i.ToString(), "HpStatChance", stat.HpStatChance);
+                reader.Write("Item" + i.ToString(), "HpMaxStat", stat.HpMaxStat);
+                reader.Write("Item" + i.ToString(), "MpChance", stat.MpChance);
+                reader.Write("Item" + i.ToString(), "MpStatChance", stat.MpStatChance);
+                reader.Write("Item" + i.ToString(), "MpMaxStat", stat.MpMaxStat);
+                reader.Write("Item" + i.ToString(), "StrongChance", stat.StrongChance);
+                reader.Write("Item" + i.ToString(), "StrongStatChance", stat.StrongStatChance);
+                reader.Write("Item" + i.ToString(), "StrongMaxStat", stat.StrongMaxStat);
+                reader.Write("Item" + i.ToString(), "MagicResistChance", stat.MagicResistChance);
+                reader.Write("Item" + i.ToString(), "MagicResistStatChance", stat.MagicResistStatChance);
+                reader.Write("Item" + i.ToString(), "MagicResistMaxStat", stat.MagicResistMaxStat);
+                reader.Write("Item" + i.ToString(), "PoisonResistChance", stat.PoisonResistChance);
+                reader.Write("Item" + i.ToString(), "PoisonResistStatChance", stat.PoisonResistStatChance);
+                reader.Write("Item" + i.ToString(), "PoisonResistMaxStat", stat.PoisonResistMaxStat);
+                reader.Write("Item" + i.ToString(), "HpRecovChance", stat.HpRecovChance);
+                reader.Write("Item" + i.ToString(), "HpRecovStatChance", stat.HpRecovStatChance);
+                reader.Write("Item" + i.ToString(), "HpRecovMaxStat", stat.HpRecovMaxStat);
+                reader.Write("Item" + i.ToString(), "MpRecovChance", stat.MpRecovChance);
+                reader.Write("Item" + i.ToString(), "MpRecovStatChance", stat.MpRecovStatChance);
+                reader.Write("Item" + i.ToString(), "MpRecovMaxStat", stat.MpRecovMaxStat);
+                reader.Write("Item" + i.ToString(), "PoisonRecovChance", stat.PoisonRecovChance);
+                reader.Write("Item" + i.ToString(), "PoisonRecovStatChance", stat.PoisonRecovStatChance);
+                reader.Write("Item" + i.ToString(), "PoisonRecovMaxStat", stat.PoisonRecovMaxStat);
+                reader.Write("Item" + i.ToString(), "CriticalRateChance", stat.CriticalRateChance);
+                reader.Write("Item" + i.ToString(), "CriticalRateStatChance", stat.CriticalRateStatChance);
+                reader.Write("Item" + i.ToString(), "CriticalRateMaxStat", stat.CriticalRateMaxStat);
+                reader.Write("Item" + i.ToString(), "CriticalDamageChance", stat.CriticalDamageChance);
+                reader.Write("Item" + i.ToString(), "CriticalDamageStatChance", stat.CriticalDamageStatChance);
+                reader.Write("Item" + i.ToString(), "CriticalDamageMaxStat", stat.CriticalDamageMaxStat);
+                reader.Write("Item" + i.ToString(), "FreezeChance", stat.FreezeChance);
+                reader.Write("Item" + i.ToString(), "FreezeStatChance", stat.FreezeStatChance);
+                reader.Write("Item" + i.ToString(), "FreezeMaxStat", stat.FreezeMaxStat);
+                reader.Write("Item" + i.ToString(), "PoisonAttackChance", stat.PoisonAttackChance);
+                reader.Write("Item" + i.ToString(), "PoisonAttackStatChance", stat.PoisonAttackStatChance);
+                reader.Write("Item" + i.ToString(), "PoisonAttackMaxStat", stat.PoisonAttackMaxStat);
+                reader.Write("Item" + i.ToString(), "AttackSpeedChance", stat.AttackSpeedChance);
+                reader.Write("Item" + i.ToString(), "AttackSpeedStatChance", stat.AttackSpeedStatChance);
+                reader.Write("Item" + i.ToString(), "AttackSpeedMaxStat", stat.AttackSpeedMaxStat);
+                reader.Write("Item" + i.ToString(), "LuckChance", stat.LuckChance);
+                reader.Write("Item" + i.ToString(), "LuckStatChance", stat.LuckStatChance);
+                reader.Write("Item" + i.ToString(), "LuckMaxStat", stat.LuckMaxStat);
+                reader.Write("Item" + i.ToString(), "CurseChance", stat.CurseChance);
             }
         }
     }

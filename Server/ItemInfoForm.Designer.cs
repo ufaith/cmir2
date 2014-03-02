@@ -31,6 +31,8 @@
             this.ItemInfoPanel = new System.Windows.Forms.Panel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.LightIntensitytextBox = new System.Windows.Forms.TextBox();
+            this.label53 = new System.Windows.Forms.Label();
             this.NeedIdentifycheckbox = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.ItemIndexTextBox = new System.Windows.Forms.TextBox();
@@ -174,8 +176,8 @@
             this.ExportAllButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
-            this.LightIntensitytextBox = new System.Windows.Forms.TextBox();
-            this.label53 = new System.Windows.Forms.Label();
+            this.label54 = new System.Windows.Forms.Label();
+            this.RandomStatstextBox = new System.Windows.Forms.TextBox();
             this.ItemInfoPanel.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -211,6 +213,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.RandomStatstextBox);
+            this.tabPage1.Controls.Add(this.label54);
             this.tabPage1.Controls.Add(this.LightIntensitytextBox);
             this.tabPage1.Controls.Add(this.label53);
             this.tabPage1.Controls.Add(this.NeedIdentifycheckbox);
@@ -258,14 +262,32 @@
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // LightIntensitytextBox
+            // 
+            this.LightIntensitytextBox.Location = new System.Drawing.Point(199, 288);
+            this.LightIntensitytextBox.MaxLength = 3;
+            this.LightIntensitytextBox.Name = "LightIntensitytextBox";
+            this.LightIntensitytextBox.Size = new System.Drawing.Size(30, 20);
+            this.LightIntensitytextBox.TabIndex = 112;
+            this.LightIntensitytextBox.TextChanged += new System.EventHandler(this.LightIntensitytextBox_TextChanged);
+            // 
+            // label53
+            // 
+            this.label53.AutoSize = true;
+            this.label53.Location = new System.Drawing.Point(152, 291);
+            this.label53.Name = "label53";
+            this.label53.Size = new System.Drawing.Size(49, 13);
+            this.label53.TabIndex = 113;
+            this.label53.Text = "Intensity:";
+            // 
             // NeedIdentifycheckbox
             // 
             this.NeedIdentifycheckbox.AutoSize = true;
             this.NeedIdentifycheckbox.Location = new System.Drawing.Point(273, 363);
             this.NeedIdentifycheckbox.Name = "NeedIdentifycheckbox";
-            this.NeedIdentifycheckbox.Size = new System.Drawing.Size(86, 17);
+            this.NeedIdentifycheckbox.Size = new System.Drawing.Size(89, 17);
             this.NeedIdentifycheckbox.TabIndex = 110;
-            this.NeedIdentifycheckbox.Text = "NeedIdentify";
+            this.NeedIdentifycheckbox.Text = "Mystery Stats";
             this.NeedIdentifycheckbox.UseVisualStyleBackColor = true;
             this.NeedIdentifycheckbox.CheckedChanged += new System.EventHandler(this.NeedIdentifycheckbox_CheckedChanged);
             // 
@@ -1705,23 +1727,23 @@
             this.ImportButton.UseVisualStyleBackColor = true;
             this.ImportButton.Click += new System.EventHandler(this.ImportButton_Click);
             // 
-            // LightIntensitytextBox
+            // label54
             // 
-            this.LightIntensitytextBox.Location = new System.Drawing.Point(199, 288);
-            this.LightIntensitytextBox.MaxLength = 3;
-            this.LightIntensitytextBox.Name = "LightIntensitytextBox";
-            this.LightIntensitytextBox.Size = new System.Drawing.Size(30, 20);
-            this.LightIntensitytextBox.TabIndex = 112;
-            this.LightIntensitytextBox.TextChanged += new System.EventHandler(this.LightIntensitytextBox_TextChanged);
+            this.label54.AutoSize = true;
+            this.label54.Location = new System.Drawing.Point(209, 70);
+            this.label54.Name = "label54";
+            this.label54.Size = new System.Drawing.Size(77, 13);
+            this.label54.TabIndex = 114;
+            this.label54.Text = "Random Stats:";
             // 
-            // label53
+            // RandomStatstextBox
             // 
-            this.label53.AutoSize = true;
-            this.label53.Location = new System.Drawing.Point(152, 291);
-            this.label53.Name = "label53";
-            this.label53.Size = new System.Drawing.Size(49, 13);
-            this.label53.TabIndex = 113;
-            this.label53.Text = "Intensity:";
+            this.RandomStatstextBox.Location = new System.Drawing.Point(292, 67);
+            this.RandomStatstextBox.MaxLength = 3;
+            this.RandomStatstextBox.Name = "RandomStatstextBox";
+            this.RandomStatstextBox.Size = new System.Drawing.Size(30, 20);
+            this.RandomStatstextBox.TabIndex = 115;
+            this.RandomStatstextBox.TextChanged += new System.EventHandler(this.RandomStatstextBox_TextChanged);
             // 
             // ItemInfoForm
             // 
@@ -1907,6 +1929,8 @@
         private System.Windows.Forms.CheckBox Bind_DontSpecialRepaircheckBox;
         private System.Windows.Forms.TextBox LightIntensitytextBox;
         private System.Windows.Forms.Label label53;
+        private System.Windows.Forms.TextBox RandomStatstextBox;
+        private System.Windows.Forms.Label label54;
 
     }
 }
