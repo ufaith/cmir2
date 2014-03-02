@@ -764,9 +764,9 @@ namespace Server
         {
             if (ActiveControl != sender) return;
 
-            byte temp;
+            ushort temp;
 
-            if (!byte.TryParse(ActiveControl.Text, out temp))
+            if (!ushort.TryParse(ActiveControl.Text, out temp))
             {
                 ActiveControl.BackColor = Color.Red;
                 return;
@@ -782,9 +782,9 @@ namespace Server
 
             if (ActiveControl != sender) return;
 
-            byte temp;
+            ushort temp;
 
-            if (!byte.TryParse(ActiveControl.Text, out temp))
+            if (!ushort.TryParse(ActiveControl.Text, out temp))
             {
                 ActiveControl.BackColor = Color.Red;
                 return;
