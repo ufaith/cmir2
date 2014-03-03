@@ -8109,7 +8109,7 @@ namespace Client.MirScenes
 
             temp.Click += (o, e) =>
                 {
-                    if (key == "[Exit]")
+                    if (key == "[@Exit]")
                     {
                         Hide();
                         return;

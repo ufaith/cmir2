@@ -110,6 +110,7 @@
     <Compile Include="MapInfoForm.Designer.cs">
       <DependentUpon>MapInfoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MirForms\MapForm.cs" />
     <Compile Include="MirNetwork\MirConnection.cs" />
     <Compile Include="MirObjects\DelayedAction.cs" />
     <Compile Include="MirObjects\ItemObject.cs" />

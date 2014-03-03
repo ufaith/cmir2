@@ -138,6 +138,8 @@ namespace Server
             this.MapInfoListBox = new System.Windows.Forms.ListBox();
             this.PasteMapButton = new System.Windows.Forms.Button();
             this.CopyMapButton = new System.Windows.Forms.Button();
+            this.ImportMapInfoButton = new System.Windows.Forms.Button();
+            this.ExportMapInfoButton = new System.Windows.Forms.Button();
             this.MapDarkLighttextBox = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
             this.MapTabs.SuspendLayout();
@@ -1275,9 +1277,29 @@ namespace Server
             this.CopyMapButton.Text = "Copy";
             this.CopyMapButton.UseVisualStyleBackColor = true;
             // 
+            // ImportMapInfoButton
+            // 
+            this.ImportMapInfoButton.Location = new System.Drawing.Point(533, 12);
+            this.ImportMapInfoButton.Name = "ImportMapInfoButton";
+            this.ImportMapInfoButton.Size = new System.Drawing.Size(108, 23);
+            this.ImportMapInfoButton.TabIndex = 25;
+            this.ImportMapInfoButton.Text = "Import MapInfo";
+            this.ImportMapInfoButton.UseVisualStyleBackColor = true;
+            this.ImportMapInfoButton.Click += new System.EventHandler(this.ImportMapInfoButton_Click);
+            // 
+            // ExportMapInfoButton
+            // 
+            this.ExportMapInfoButton.Location = new System.Drawing.Point(647, 12);
+            this.ExportMapInfoButton.Name = "ExportMapInfoButton";
+            this.ExportMapInfoButton.Size = new System.Drawing.Size(100, 23);
+            this.ExportMapInfoButton.TabIndex = 26;
+            this.ExportMapInfoButton.Text = "Export MapInfo";
+            this.ExportMapInfoButton.UseVisualStyleBackColor = true;
+            this.ExportMapInfoButton.Click += new System.EventHandler(this.ExportMapInfoButton_Click);
+            // 
             // MapDarkLighttextBox
             // 
-            this.MapDarkLighttextBox.Location = new System.Drawing.Point(443, 91);
+            this.MapDarkLighttextBox.Location = new System.Drawing.Point(443, 90);
             this.MapDarkLighttextBox.Name = "MapDarkLighttextBox";
             this.MapDarkLighttextBox.Size = new System.Drawing.Size(49, 20);
             this.MapDarkLighttextBox.TabIndex = 39;
@@ -1286,17 +1308,19 @@ namespace Server
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(338, 94);
+            this.label19.Location = new System.Drawing.Point(356, 93);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(80, 13);
+            this.label19.Size = new System.Drawing.Size(54, 13);
             this.label19.TabIndex = 40;
-            this.label19.Text = "Map Dark Light";
+            this.label19.Text = "Map Light";
             // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(759, 271);
+            this.Controls.Add(this.ExportMapInfoButton);
+            this.Controls.Add(this.ImportMapInfoButton);
             this.Controls.Add(this.PasteMapButton);
             this.Controls.Add(this.CopyMapButton);
             this.Controls.Add(this.MapTabs);
@@ -1434,6 +1458,8 @@ namespace Server
         private CheckBox NoRandomCheckbox;
         private Button OpenNButton;
         private CheckBox NeedHoleMCheckBox;
+        private Button ImportMapInfoButton;
+        private Button ExportMapInfoButton;
         private Label label19;
         private TextBox MapDarkLighttextBox;
 

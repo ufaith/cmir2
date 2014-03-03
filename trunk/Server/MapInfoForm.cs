@@ -152,6 +152,7 @@ namespace Server
                 if (LightningCheckbox.Checked != mi.Lightning) LightningCheckbox.Checked = false;                             
                 if (LightningTextbox.Text != mi.LightningDamage.ToString()) LightningTextbox.Text = string.Empty;
                 if (MapDarkLighttextBox.Text != mi.MapDarkLight.ToString()) MapDarkLighttextBox.Text = string.Empty;
+
             }
 
             UpdateSafeZoneInterface();
@@ -1296,5 +1297,148 @@ namespace Server
                 _selectedMapInfos[i].MapDarkLight = temp;
         }
 
+        private void ImportMapInfoButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.ShowDialog();
+            MirForms.ConvertMapInfo.Path = ofd.FileName;
+
+            MirForms.ConvertMapInfo.Start(Envir.MapIndex);
+
+            for (int i = 0; i < MirForms.ConvertMapInfo.MapInfo.Count; i++)
+            {
+                MapInfo mi = new MapInfo
+                {
+                    Index = ++Envir.MapIndex,
+                    FileName = MirForms.ConvertMapInfo.MapInfo[i].MapFile,
+                    Title = MirForms.ConvertMapInfo.MapInfo[i].MapName,
+                    NoTeleport = MirForms.ConvertMapInfo.MapInfo[i].NoTeleport,
+                    NoReconnect = MirForms.ConvertMapInfo.MapInfo[i].NoReconnect,
+                    NoRandom = MirForms.ConvertMapInfo.MapInfo[i].NoRandom,
+                    NoEscape = MirForms.ConvertMapInfo.MapInfo[i].NoEscape,
+                    NoRecall = MirForms.ConvertMapInfo.MapInfo[i].NoRecall,
+                    NoDrug = MirForms.ConvertMapInfo.MapInfo[i].NoDrug,
+                    NoPosition = MirForms.ConvertMapInfo.MapInfo[i].NoPositionMove,
+                    NoThrowItem = MirForms.ConvertMapInfo.MapInfo[i].NoThrowItem,
+                    NoDropPlayer = MirForms.ConvertMapInfo.MapInfo[i].NoPlayerDrop,
+                    NoDropMonster = MirForms.ConvertMapInfo.MapInfo[i].NoMonsterDrop,
+                    NoNames = MirForms.ConvertMapInfo.MapInfo[i].NoNames,
+                    Fight = MirForms.ConvertMapInfo.MapInfo[i].Fight,
+                    Fire = MirForms.ConvertMapInfo.MapInfo[i].Fire,
+                    Lightning = MirForms.ConvertMapInfo.MapInfo[i].Lightning,
+                    Light = MirForms.ConvertMapInfo.MapInfo[i].Light,
+                    MiniMap = MirForms.ConvertMapInfo.MapInfo[i].MiniMapNumber,
+                    BigMap = MirForms.ConvertMapInfo.MapInfo[i].BigMapNumber
+                };
+
+                // mi.Mine = MirForms.ConvertMapInfo.mapInfo[i].mine;
+
+                if (mi.NoReconnect == true)
+                    mi.NoReconnectMap = MirForms.ConvertMapInfo.MapInfo[i].ReconnectMap;
+                if (mi.Fire == true)
+                    mi.FireDamage = MirForms.ConvertMapInfo.MapInfo[i].FireDamage;
+                if (mi.Lightning == true)
+                    mi.LightningDamage = MirForms.ConvertMapInfo.MapInfo[i].LightningDamage;
+
+                Envir.MapInfoList.Add(mi);
+            }
+
+
+            for (int j = 0; j < MirForms.ConvertMapInfo.MapMovements.Count; j++)
+            {
+                try
+                {
+
+                    MovementInfo newmoveinfo = new MovementInfo();
+
+                    newmoveinfo.MapIndex = Convert.ToInt16(MirForms.ConvertMapInfo.MapMovements[j].toMap);
+
+                    newmoveinfo.Source = new Point
+                        (Convert.ToInt16(MirForms.ConvertMapInfo.MapMovements[j].fromX),
+                        (Convert.ToInt16(MirForms.ConvertMapInfo.MapMovements[j].fromY)));
+
+                    newmoveinfo.Destination = new Point
+                        (Convert.ToInt16(MirForms.ConvertMapInfo.MapMovements[j].toX),
+                        (Convert.ToInt16(MirForms.ConvertMapInfo.MapMovements[j].toY)));
+
+                    newmoveinfo.NeedHole = false;
+
+                    Envir.MapInfoList[Convert.ToInt16(MirForms.ConvertMapInfo.MapMovements[j].fromIndex) - 1].Movements.Add(newmoveinfo);
+                    //mi.Movements.Add(newmoveinfo);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
+
+
+            MirForms.ConvertMapInfo.End();
+            UpdateInterface();
+
+            MessageBox.Show("Import Complete");
+        }
+
+        private void ExportMapInfoButton_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.ShowDialog();
+
+            if (_selectedMapInfos.Count == 0) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+            {
+                using (StreamWriter sw = File.AppendText(sfd.FileNames[0]))
+                {
+                    string attributes = string.Empty;
+
+                    attributes += " LIGHT(" + _selectedMapInfos[i].Light + ")";
+                    attributes = attributes + " MINIMAP(" + _selectedMapInfos[i].MiniMap + ")";
+                    attributes = attributes + " BIGMAP(" + _selectedMapInfos[i].BigMap + ")";
+
+                    if (_selectedMapInfos[i].NoTeleport)
+                        attributes = attributes + " NOTELEPORT";
+                    if (_selectedMapInfos[i].NoReconnect)
+                        attributes = attributes + " NORECONNECT(" + _selectedMapInfos[i].NoReconnectMap + ")";
+                    if (_selectedMapInfos[i].NoRandom)
+                        attributes = attributes + " NORANDOMMOVE";
+                    if (_selectedMapInfos[i].NoEscape)
+                        attributes = attributes + " NOESCAPE";
+                    if (_selectedMapInfos[i].NoRecall)
+                        attributes = attributes + " NORECALL";
+                    if (_selectedMapInfos[i].NoDrug)
+                        attributes = attributes + " NODRUG";
+                    if (_selectedMapInfos[i].NoPosition)
+                        attributes = attributes + " NOPOSITIONMOVE";
+                    if (_selectedMapInfos[i].NoThrowItem)
+                        attributes = attributes + " NOTHROWITEM";
+                    if (_selectedMapInfos[i].NoDropPlayer)
+                        attributes = attributes + " NOPLAYERDROP";
+                    if (_selectedMapInfos[i].NoDropMonster)
+                        attributes = attributes + " NOMONSTERDROP";
+                    if (_selectedMapInfos[i].NoNames)
+                        attributes = attributes + " NONAMES";
+                    if (_selectedMapInfos[i].Fire)
+                        attributes = attributes + " FIRE(" + _selectedMapInfos[i].FireDamage + ")";
+                    if (_selectedMapInfos[i].Lightning)
+                        attributes = attributes + " LIGHTNING(" + _selectedMapInfos[i].LightningDamage + ")";
+
+                    sw.WriteLine("[{0} {1}]{2}", _selectedMapInfos[i].FileName, _selectedMapInfos[i].Title, attributes);
+
+                    for (int j = 0; j < _selectedMapInfos[i].Movements.Count; j++)
+                    {
+                        string movement = string.Format("{0} {1} {2} {3} {4}", // 0 1,1 -> 1 2,2
+                           _selectedMapInfos[i].FileName,
+                           _selectedMapInfos[i].Movements[j].Source.X + "," + _selectedMapInfos[i].Movements[j].Source.Y,
+                           "->",
+                           Envir.MapInfoList[_selectedMapInfos[i].Movements[j].MapIndex - 1].FileName,
+                           _selectedMapInfos[i].Movements[j].Destination.X + "," + _selectedMapInfos[i].Movements[j].Destination.Y);
+
+                        sw.WriteLine(movement);
+                    }
+                }
+            }
+            MessageBox.Show("Export Complete");
+        }
     }
 }

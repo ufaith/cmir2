@@ -168,9 +168,11 @@ namespace Server.MirObjects
 
         public bool NPCGoto;
         public string NPCGotoPage;
-        public NPCTimeRecall TimeRecall;
+        public NPCJumpPage NPCJumpPage;
 
-        public List<KeyValuePair<string, string>> kv = new List<KeyValuePair<string, string>>();
+        public NPCListener NPCListener;
+
+        public List<KeyValuePair<string, string>> NPCVar = new List<KeyValuePair<string, string>>();
 
         public bool UserMatch;
         public string MatchName;
@@ -333,18 +335,18 @@ namespace Server.MirObjects
                 AddBuff(new Buff { Type = BuffType.Hiding, Caster = this, ExpireTime = Envir.Time + 1, Infinite = true });
 
             //NPC Time Recall
-            if (TimeRecall != null && Envir.Time > TimeRecall.TimePeriod && TimeRecall.Active)
+            if (NPCJumpPage != null && Envir.Time > NPCJumpPage.TimePeriod && NPCJumpPage.Active)
             {
-                TimeRecall.Active = false;
+                NPCJumpPage.Active = false;
 
-                if(TimeRecall.PlayerMap != null)
-                    Teleport(TimeRecall.PlayerMap, TimeRecall.PlayerCoords);
+                if (NPCJumpPage.PlayerMap != null)
+                    Teleport(NPCJumpPage.PlayerMap, NPCJumpPage.PlayerCoords);
 
-                if (TimeRecall.NPCGotoPage != null && !NPCGoto && TimeRecall.Interrupted == false)
+                if (NPCJumpPage.NPCGotoPage != null && !NPCGoto && NPCJumpPage.Interrupted == false)
                 {
                     NPCGoto = true;
-                    NPCGotoPage = TimeRecall.NPCGotoPage;
-                    CallNPC(TimeRecall.NPCID, NPCGotoPage);
+                    NPCGotoPage = NPCJumpPage.NPCGotoPage;
+                    CallNPC(NPCJumpPage.NPCID, NPCGotoPage);
                 }
             }
 
@@ -2496,6 +2498,27 @@ namespace Server.MirObjects
             }
             else
             {
+                //FAR - NPC Listener code
+                //if (NPCListener != null && NPCListener.Active)
+                //{
+                //    if (NPCID == NPCListener.NPCID)
+                //    {
+                //        NPCPage.AddVariable(this, NPCListener.NPCVariable, message);
+                //        NPCListener.Active = false;
+
+                //        NPCJumpPage = new NPCJumpPage
+                //        {
+                //            NPCID = NPCListener.NPCID,
+                //            TimePeriod = 0,
+                //            NPCGotoPage = "[" + NPCListener.NPCGotoPage + "]"
+                //        };
+                //    }
+                //    else
+                //    {
+                //        NPCListener.Active = false;
+                //    }
+                //}
+
                 message = String.Format("{0}:{1}", CurrentMap.Info.NoNames ? "?????" : Name, message);
 
                 p = new S.ObjectChat {ObjectID = ObjectID, Text = message, Type = ChatType.Normal};
@@ -6176,7 +6199,7 @@ namespace Server.MirObjects
 
         public void CallNPC(uint objectID, string key)
         {
-            if (TimeRecall != null) TimeRecall.Interrupted = true;
+            if (NPCJumpPage != null) NPCJumpPage.Interrupted = true;
 
             if (Dead) return;
             for (int i = 0; i < CurrentMap.NPCs.Count; i++)

@@ -16,7 +16,7 @@ namespace Server
                             NPCPath = EnvirPath + @".\NPCs\",
                             QuestPath = EnvirPath + @".\Quests\",
                             DropPath = EnvirPath + @".\Drops\",
-                            NameListPath = EnvirPath + @"\NameLists\";
+                            NameListPath = EnvirPath + @".\NameLists\";
 
         private static readonly InIReader Reader = new InIReader(@".\Setup.ini");
 
