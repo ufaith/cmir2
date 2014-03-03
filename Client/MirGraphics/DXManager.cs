@@ -33,23 +33,23 @@ namespace Client.MirGraphics
         public static Texture RadarTexture;
         public static List<Texture> Lights = new List<Texture>();
 
-        public static Point[] LightSizes = new Point[] 
-                {
-                    new Point(125,110),
-                    new Point(240,160),
-                    new Point(336,224),
-                    new Point(432,228),
-                    new Point(528,352),
-                    new Point(581,566),
-                    new Point(624,384),//default mir2 effect light ?(6)
-                    new Point (638,623),
-                    new Point (695,680),
-                    new Point (752,737),
-                    new Point(809,794),
-                    new Point(866,851),
-                    new Point(923,908),
+        public static Point[] LightSizes =
+        {
+            new Point(125,110),
+            new Point(240,160),
+            new Point(336,224),
+            new Point(432,228),
+            new Point(528,352),
+            new Point(581,566),
+            new Point(624,384),//default mir2 effect light ?(6)
+            new Point (638,623),
+            new Point (695,680),
+            new Point (752,737),
+            new Point(809,794),
+            new Point(866,851),
+            new Point(923,908),
 
-                };
+        };
 
         public static void Create()
         {

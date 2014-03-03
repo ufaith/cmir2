@@ -200,17 +200,25 @@ namespace Server.MirObjects
                         //Check if line has a goto command
                         var parts = lines[x].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        if (parts.Count() > 1 && parts[0].ToUpper() == "GOTO")
-                            gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
-
-                        if (parts.Count() > 1 && parts[0].ToUpper() == "TIMERECALLPAGE")
-                            gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
-
-                        if (parts.Count() > 1 && parts[0].ToUpper() == "TIMERECALLGROUPPAGE")
-                            gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
-
-                        if (parts.Count() > 1 && parts[0].ToUpper() == "DELAYGOTO")
-                            gotoButtons.Add(string.Format("[{0}]", parts[2].ToUpper()));
+                        if (parts.Count() > 1)
+                        switch (parts[0].ToUpper())
+                        {
+                            case "GOTO":
+                                gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
+                                break;
+                            case "TIMERECALLPAGE":
+                                gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
+                                break;
+                            case "TIMERECALLGROUPPAGE":
+                                gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
+                                break;
+                            case "DELAYGOTO":
+                                gotoButtons.Add(string.Format("[{0}]", parts[2].ToUpper()));
+                                break;
+                            case "LISTEN":
+                                gotoButtons.Add(string.Format("[{0}]", parts[2].ToUpper()));
+                                break;
+                        }
                     }
 
                     currentSay.Add(lines[x].TrimEnd());
@@ -655,14 +663,14 @@ namespace Server.MirObjects
 
             if (!regex.Match(key).Success) return;
 
-            for (int i = 0; i < player.kv.Count; i++)
+            for (int i = 0; i < player.NPCVar.Count; i++)
             {
-                if (player.kv[i].Key != key) continue;
-                player.kv[i] = new KeyValuePair<string, string>(player.kv[i].Key, value);
+                if (player.NPCVar[i].Key != key) continue;
+                player.NPCVar[i] = new KeyValuePair<string, string>(player.NPCVar[i].Key, value);
                 return;
             }
 
-            player.kv.Add(new KeyValuePair<string, string>(key, value));
+            player.NPCVar.Add(new KeyValuePair<string, string>(key, value));
         }
 
         public string FindVariable(PlayerObject player, string key)
@@ -673,7 +681,7 @@ namespace Server.MirObjects
 
             string tempKey = key.Substring(1);
 
-            foreach (KeyValuePair<string, string> t in player.kv)
+            foreach (KeyValuePair<string, string> t in player.NPCVar)
             {
                 if (t.Key == tempKey) return t.Value;
             }
@@ -689,7 +697,7 @@ namespace Server.MirObjects
 
             if (parts.Length == 0) return;
 
-            string tempString;
+            string tempString, tempString2;
 
             var regexFlag = new Regex(@"\[(.*?)\]");
 
@@ -711,8 +719,9 @@ namespace Server.MirObjects
                     if (parts.Length < 2) return;
 
                     tempString = parts.Length < 3 ? "1" : parts[2];
+                    tempString2 = parts.Length > 3 ? parts[3] : "";
 
-                    CheckList.Add(new NPCChecks(CheckType.CheckItem, parts[1], tempString));
+                    CheckList.Add(new NPCChecks(CheckType.CheckItem, parts[1], tempString, tempString2));
                     break;
 
                 case "CHECKGENDER":
@@ -749,8 +758,8 @@ namespace Server.MirObjects
                     if (parts.Length < 2) return;
 
                     var fileName = Path.Combine(Settings.NameListPath, parts[1] + ".txt");
-                    if (File.Exists(fileName))
-                        CheckList.Add(new NPCChecks(CheckType.CheckNameList, fileName));
+                    
+                    CheckList.Add(new NPCChecks(CheckType.CheckNameList, fileName));
                     break;
 
                 case "ISADMIN":
@@ -846,7 +855,10 @@ namespace Server.MirObjects
                 case "MOVE":
                     if (parts.Length < 2) return;
 
-                    acts.Add(new NPCActions(ActionType.Teleport, parts[1], parts[2], parts[3]));
+                    string tempx = parts.Length > 3 ? parts[2] : "0";
+                    string tempy = parts.Length > 3 ? parts[3] : "0";
+
+                    acts.Add(new NPCActions(ActionType.Teleport, parts[1], tempx, tempy));
                     break;
 
                 case "INSTANCEMOVE":
@@ -878,7 +890,9 @@ namespace Server.MirObjects
                     if (parts.Length < 3) return;
 
                     count = parts.Length < 3 ? string.Empty : parts[2];
-                    acts.Add(new NPCActions(ActionType.TakeItem, parts[1], count));
+                    string dura = parts.Length > 3 ? parts[3] : "";
+
+                    acts.Add(new NPCActions(ActionType.TakeItem, parts[1], count, dura));
                     break;
 
                 case "GIVEEXP":
@@ -1116,6 +1130,16 @@ namespace Server.MirObjects
                         acts.Add(new NPCActions(ActionType.Calc, "%" + parts[1], parts[2], valueToStore, parts[1].Insert(1, "-")));
 
                     break;
+
+                case "LISTEN":
+                    if (parts.Length < 3) return;
+
+                    match = Regex.Match(parts[1], @"[A-Z][0-9]", RegexOptions.IgnoreCase);
+
+                    if (match.Success)
+                        acts.Add(new NPCActions(ActionType.Listen, parts[1], parts[2]));
+
+                    break;
             }
 
         }
@@ -1302,16 +1326,23 @@ namespace Server.MirObjects
 
                     case CheckType.CheckItem:
                         uint count;
+                        ushort dura;
+
                         if (!uint.TryParse(param[1], out count))
                         {
                             failed = true;
                             break;
                         }
 
+                        bool checkDura = ushort.TryParse(param[2], out dura);
+
                         var info = SMain.Envir.GetItemInfo(param[0]);
 
                         foreach (var item in player.Info.Inventory.Where(item => item != null && item.Info == info))
                         {
+                            if(checkDura)
+                                if (item.CurrentDura < dura * 1000) continue;
+
                             if (count > item.Count)
                             {
                                 count -= item.Count;
@@ -1384,6 +1415,8 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.CheckNameList:
+                        if (!File.Exists(param[0])) return true;
+
                         var read = File.ReadAllLines(param[0]);
                         failed = !read.Contains(player.Name);
                         break;
@@ -1656,6 +1689,9 @@ namespace Server.MirObjects
                         if (param.Count < 2 || !uint.TryParse(param[1], out count)) count = 1;
                         info = SMain.Envir.GetItemInfo(param[0]);
 
+                        ushort dura;
+                        bool checkDura = ushort.TryParse(param[2], out dura);
+
                         if (info == null)
                         {
                             SMain.Enqueue(string.Format("Failed to get ItemInfo: {0}, Page: {1}", param[0], Key));
@@ -1667,6 +1703,9 @@ namespace Server.MirObjects
                             UserItem item = player.Info.Inventory[o];
                             if (item == null) continue;
                             if (item.Info != info) continue;
+
+                            if(checkDura)
+                                if (item.CurrentDura < dura) continue;
 
                             if (count > item.Count)
                             {
@@ -1877,7 +1916,7 @@ namespace Server.MirObjects
                     case ActionType.TimeRecall:
                         if (!long.TryParse(param[0], out tempLong)) return;
 
-                        player.TimeRecall = new NPCTimeRecall
+                        player.NPCJumpPage = new NPCJumpPage
                         {
                             PlayerMap = player.CurrentMap,
                             PlayerCoords = player.CurrentLocation,
@@ -1891,7 +1930,7 @@ namespace Server.MirObjects
 
                         for (i = 0; i < player.GroupMembers.Count(); i++)
                         {
-                            player.GroupMembers[i].TimeRecall = new NPCTimeRecall
+                            player.GroupMembers[i].NPCJumpPage = new NPCJumpPage
                             {
                                 PlayerMap = player.CurrentMap,
                                 PlayerCoords = player.CurrentLocation,
@@ -1901,32 +1940,32 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.TimeRecallPage:
-                        if (player.TimeRecall == null) return;
+                        if (player.NPCJumpPage == null) return;
 
-                        player.TimeRecall.NPCID = player.NPCID;
-                        player.TimeRecall.NPCGotoPage = param[0];
+                        player.NPCJumpPage.NPCID = player.NPCID;
+                        player.NPCJumpPage.NPCGotoPage = param[0];
                         break;
 
                     case ActionType.TimeRecallGroupPage:
-                        if (player.TimeRecall == null) return;
+                        if (player.NPCJumpPage == null) return;
                         if (player.GroupMembers == null) return;
                         for (i = 0; i < player.GroupMembers.Count(); i++)
                         {
-                            if (player.GroupMembers[i].TimeRecall == null) continue;
-                            player.GroupMembers[i].TimeRecall.NPCID = player.NPCID;
-                            player.GroupMembers[i].TimeRecall.NPCGotoPage = param[0];
+                            if (player.GroupMembers[i].NPCJumpPage == null) continue;
+                            player.GroupMembers[i].NPCJumpPage.NPCID = player.NPCID;
+                            player.GroupMembers[i].NPCJumpPage.NPCGotoPage = param[0];
                         }
                         break;
 
                     case ActionType.BreakTimeRecall:
-                        if (player.TimeRecall == null) return;
-                        player.TimeRecall = null;
+                        if (player.NPCJumpPage == null) return;
+                        player.NPCJumpPage = null;
                         break;
 
                     case ActionType.DelayGoto:
                         if (!long.TryParse(param[0], out tempLong)) return;
 
-                        player.TimeRecall = new NPCTimeRecall
+                        player.NPCJumpPage = new NPCJumpPage
                         {
                             NPCID = player.NPCID,
                             TimePeriod = tempLong,
@@ -2013,6 +2052,16 @@ namespace Server.MirObjects
                         {
                             AddVariable(player, param[3].Replace("-", ""), param[0] + param[2]);
                         }
+                        break;
+
+                    case ActionType.Listen:
+                        player.NPCListener = new NPCListener
+                        {
+                            Active = true,
+                            NPCGotoPage = param[1],
+                            NPCVariable = param[0],
+                            NPCID = player.NPCID
+                        };
                         break;
                 }
             }
@@ -2128,6 +2177,7 @@ namespace Server.MirObjects
         DelayGoto,
         Mov,
         Calc,
+        Listen,
     }
     public enum CheckType
     {
@@ -2154,7 +2204,7 @@ namespace Server.MirObjects
         CheckCalc,
     }
 
-    public class NPCTimeRecall
+    public class NPCJumpPage
     {
         public Map PlayerMap;
         public Point PlayerCoords;
@@ -2177,5 +2227,13 @@ namespace Server.MirObjects
                 Active = true;
             }
         }
+    }
+
+    public class NPCListener
+    {
+        public uint NPCID;
+        public string NPCGotoPage;
+        public bool Active;
+        public string NPCVariable;
     }
 }
