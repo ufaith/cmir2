@@ -20,7 +20,6 @@ namespace Client.MirObjects
         public abstract ObjectType Race { get; }
         public abstract bool Blocking { get; }
 
-
         public uint ObjectID;
         public string Name = string.Empty;
         public Point CurrentLocation, MapLocation;

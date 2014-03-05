@@ -30,7 +30,6 @@ namespace Client.MirObjects
 
         public byte Light;
         public byte Unknown;
-
         public List<MapObject> CellObjects;
 
         public void AddObject(MapObject ob)

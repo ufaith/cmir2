@@ -120,6 +120,8 @@
             this.RISDeleteIndexbutton = new System.Windows.Forms.Button();
             this.RISAddIndexbutton = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.RISCurseChancetextBox = new System.Windows.Forms.TextBox();
+            this.label63 = new System.Windows.Forms.Label();
             this.label62 = new System.Windows.Forms.Label();
             this.label61 = new System.Windows.Forms.Label();
             this.label60 = new System.Windows.Forms.Label();
@@ -213,8 +215,42 @@
             this.RISMaxDuraChancetextBox = new System.Windows.Forms.TextBox();
             this.label40 = new System.Windows.Forms.Label();
             this.RISIndexcomboBox = new System.Windows.Forms.ComboBox();
-            this.label63 = new System.Windows.Forms.Label();
-            this.RISCurseChancetextBox = new System.Windows.Forms.TextBox();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.label78 = new System.Windows.Forms.Label();
+            this.MineDropsIndexcomboBox = new System.Windows.Forms.ComboBox();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.MineMaxBonustextBox = new System.Windows.Forms.TextBox();
+            this.label77 = new System.Windows.Forms.Label();
+            this.MineBonusChancetextBox = new System.Windows.Forms.TextBox();
+            this.label76 = new System.Windows.Forms.Label();
+            this.MineMaxQualitytextBox = new System.Windows.Forms.TextBox();
+            this.label75 = new System.Windows.Forms.Label();
+            this.MineMinQualitytextBox = new System.Windows.Forms.TextBox();
+            this.label74 = new System.Windows.Forms.Label();
+            this.MineMaxSlottextBox = new System.Windows.Forms.TextBox();
+            this.label73 = new System.Windows.Forms.Label();
+            this.MineMinSlottextBox = new System.Windows.Forms.TextBox();
+            this.label72 = new System.Windows.Forms.Label();
+            this.MineItemNametextBox = new System.Windows.Forms.TextBox();
+            this.label71 = new System.Windows.Forms.Label();
+            this.MineRemoveDropbutton = new System.Windows.Forms.Button();
+            this.MineSlotstextBox = new System.Windows.Forms.TextBox();
+            this.MineAddDropbutton = new System.Windows.Forms.Button();
+            this.label70 = new System.Windows.Forms.Label();
+            this.label69 = new System.Windows.Forms.Label();
+            this.label68 = new System.Windows.Forms.Label();
+            this.MineDropRatetextBox = new System.Windows.Forms.TextBox();
+            this.MineHitRatetextBox = new System.Windows.Forms.TextBox();
+            this.MineAttemptstextBox = new System.Windows.Forms.TextBox();
+            this.MineRegenDelaytextBox = new System.Windows.Forms.TextBox();
+            this.label67 = new System.Windows.Forms.Label();
+            this.label66 = new System.Windows.Forms.Label();
+            this.label65 = new System.Windows.Forms.Label();
+            this.MineRemoveIndexbutton = new System.Windows.Forms.Button();
+            this.MineAddIndexbutton = new System.Windows.Forms.Button();
+            this.label64 = new System.Windows.Forms.Label();
+            this.MineIndexcomboBox = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -225,6 +261,9 @@
             this.groupBox6.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.tabPage5.SuspendLayout();
+            this.groupBox7.SuspendLayout();
+            this.groupBox8.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -377,6 +416,7 @@
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
+            this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -1185,6 +1225,24 @@
             this.groupBox3.TabIndex = 9;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Random settings";
+            // 
+            // RISCurseChancetextBox
+            // 
+            this.RISCurseChancetextBox.Location = new System.Drawing.Point(88, 607);
+            this.RISCurseChancetextBox.MaxLength = 3;
+            this.RISCurseChancetextBox.Name = "RISCurseChancetextBox";
+            this.RISCurseChancetextBox.Size = new System.Drawing.Size(38, 20);
+            this.RISCurseChancetextBox.TabIndex = 31;
+            this.RISCurseChancetextBox.TextChanged += new System.EventHandler(this.RISCurseChancetextBox_TextChanged);
+            // 
+            // label63
+            // 
+            this.label63.AutoSize = true;
+            this.label63.Location = new System.Drawing.Point(6, 610);
+            this.label63.Name = "label63";
+            this.label63.Size = new System.Drawing.Size(76, 13);
+            this.label63.TabIndex = 39;
+            this.label63.Text = "Curse chance:";
             // 
             // label62
             // 
@@ -2090,23 +2148,358 @@
             this.RISIndexcomboBox.TabIndex = 7;
             this.RISIndexcomboBox.SelectedIndexChanged += new System.EventHandler(this.RISIndexcomboBox_SelectedIndexChanged);
             // 
-            // label63
+            // tabPage5
             // 
-            this.label63.AutoSize = true;
-            this.label63.Location = new System.Drawing.Point(6, 610);
-            this.label63.Name = "label63";
-            this.label63.Size = new System.Drawing.Size(76, 13);
-            this.label63.TabIndex = 39;
-            this.label63.Text = "Curse chance:";
+            this.tabPage5.Controls.Add(this.groupBox7);
+            this.tabPage5.Controls.Add(this.MineRemoveIndexbutton);
+            this.tabPage5.Controls.Add(this.MineAddIndexbutton);
+            this.tabPage5.Controls.Add(this.label64);
+            this.tabPage5.Controls.Add(this.MineIndexcomboBox);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage5.Size = new System.Drawing.Size(624, 663);
+            this.tabPage5.TabIndex = 4;
+            this.tabPage5.Text = "Mines";
+            this.tabPage5.UseVisualStyleBackColor = true;
             // 
-            // RISCurseChancetextBox
+            // groupBox7
             // 
-            this.RISCurseChancetextBox.Location = new System.Drawing.Point(88, 607);
-            this.RISCurseChancetextBox.MaxLength = 3;
-            this.RISCurseChancetextBox.Name = "RISCurseChancetextBox";
-            this.RISCurseChancetextBox.Size = new System.Drawing.Size(38, 20);
-            this.RISCurseChancetextBox.TabIndex = 31;
-            this.RISCurseChancetextBox.TextChanged += new System.EventHandler(this.RISCurseChancetextBox_TextChanged);
+            this.groupBox7.Controls.Add(this.label78);
+            this.groupBox7.Controls.Add(this.MineDropsIndexcomboBox);
+            this.groupBox7.Controls.Add(this.groupBox8);
+            this.groupBox7.Controls.Add(this.MineRemoveDropbutton);
+            this.groupBox7.Controls.Add(this.MineSlotstextBox);
+            this.groupBox7.Controls.Add(this.MineAddDropbutton);
+            this.groupBox7.Controls.Add(this.label70);
+            this.groupBox7.Controls.Add(this.label69);
+            this.groupBox7.Controls.Add(this.label68);
+            this.groupBox7.Controls.Add(this.MineDropRatetextBox);
+            this.groupBox7.Controls.Add(this.MineHitRatetextBox);
+            this.groupBox7.Controls.Add(this.MineAttemptstextBox);
+            this.groupBox7.Controls.Add(this.MineRegenDelaytextBox);
+            this.groupBox7.Controls.Add(this.label67);
+            this.groupBox7.Controls.Add(this.label66);
+            this.groupBox7.Controls.Add(this.label65);
+            this.groupBox7.Location = new System.Drawing.Point(11, 33);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(408, 332);
+            this.groupBox7.TabIndex = 17;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Mine Base Stat";
+            // 
+            // label78
+            // 
+            this.label78.AutoSize = true;
+            this.label78.Location = new System.Drawing.Point(6, 136);
+            this.label78.Name = "label78";
+            this.label78.Size = new System.Drawing.Size(38, 13);
+            this.label78.TabIndex = 21;
+            this.label78.Text = "Drops:";
+            // 
+            // MineDropsIndexcomboBox
+            // 
+            this.MineDropsIndexcomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.MineDropsIndexcomboBox.FormattingEnabled = true;
+            this.MineDropsIndexcomboBox.Location = new System.Drawing.Point(48, 108);
+            this.MineDropsIndexcomboBox.Name = "MineDropsIndexcomboBox";
+            this.MineDropsIndexcomboBox.Size = new System.Drawing.Size(92, 21);
+            this.MineDropsIndexcomboBox.TabIndex = 18;
+            this.MineDropsIndexcomboBox.SelectedIndexChanged += new System.EventHandler(this.MineDropsIndexcomboBox_SelectedIndexChanged);
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.MineMaxBonustextBox);
+            this.groupBox8.Controls.Add(this.label77);
+            this.groupBox8.Controls.Add(this.MineBonusChancetextBox);
+            this.groupBox8.Controls.Add(this.label76);
+            this.groupBox8.Controls.Add(this.MineMaxQualitytextBox);
+            this.groupBox8.Controls.Add(this.label75);
+            this.groupBox8.Controls.Add(this.MineMinQualitytextBox);
+            this.groupBox8.Controls.Add(this.label74);
+            this.groupBox8.Controls.Add(this.MineMaxSlottextBox);
+            this.groupBox8.Controls.Add(this.label73);
+            this.groupBox8.Controls.Add(this.MineMinSlottextBox);
+            this.groupBox8.Controls.Add(this.label72);
+            this.groupBox8.Controls.Add(this.MineItemNametextBox);
+            this.groupBox8.Controls.Add(this.label71);
+            this.groupBox8.Location = new System.Drawing.Point(9, 135);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(188, 188);
+            this.groupBox8.TabIndex = 20;
+            this.groupBox8.TabStop = false;
+            // 
+            // MineMaxBonustextBox
+            // 
+            this.MineMaxBonustextBox.Location = new System.Drawing.Point(99, 151);
+            this.MineMaxBonustextBox.Name = "MineMaxBonustextBox";
+            this.MineMaxBonustextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineMaxBonustextBox.TabIndex = 34;
+            this.MineMaxBonustextBox.TextChanged += new System.EventHandler(this.MineMaxBonustextBox_TextChanged);
+            // 
+            // label77
+            // 
+            this.label77.AutoSize = true;
+            this.label77.Location = new System.Drawing.Point(10, 154);
+            this.label77.Name = "label77";
+            this.label77.Size = new System.Drawing.Size(84, 13);
+            this.label77.TabIndex = 33;
+            this.label77.Text = "Maximum Bonus";
+            // 
+            // MineBonusChancetextBox
+            // 
+            this.MineBonusChancetextBox.Location = new System.Drawing.Point(99, 127);
+            this.MineBonusChancetextBox.Name = "MineBonusChancetextBox";
+            this.MineBonusChancetextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineBonusChancetextBox.TabIndex = 32;
+            this.MineBonusChancetextBox.TextChanged += new System.EventHandler(this.MineBonusChancetextBox_TextChanged);
+            // 
+            // label76
+            // 
+            this.label76.AutoSize = true;
+            this.label76.Location = new System.Drawing.Point(10, 130);
+            this.label76.Name = "label76";
+            this.label76.Size = new System.Drawing.Size(77, 13);
+            this.label76.TabIndex = 31;
+            this.label76.Text = "Bonus Chance";
+            // 
+            // MineMaxQualitytextBox
+            // 
+            this.MineMaxQualitytextBox.Location = new System.Drawing.Point(99, 104);
+            this.MineMaxQualitytextBox.Name = "MineMaxQualitytextBox";
+            this.MineMaxQualitytextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineMaxQualitytextBox.TabIndex = 30;
+            this.MineMaxQualitytextBox.TextChanged += new System.EventHandler(this.MineMaxQualitytextBox_TextChanged);
+            // 
+            // label75
+            // 
+            this.label75.AutoSize = true;
+            this.label75.Location = new System.Drawing.Point(10, 107);
+            this.label75.Name = "label75";
+            this.label75.Size = new System.Drawing.Size(86, 13);
+            this.label75.TabIndex = 29;
+            this.label75.Text = "Maximum Quality";
+            // 
+            // MineMinQualitytextBox
+            // 
+            this.MineMinQualitytextBox.Location = new System.Drawing.Point(99, 81);
+            this.MineMinQualitytextBox.Name = "MineMinQualitytextBox";
+            this.MineMinQualitytextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineMinQualitytextBox.TabIndex = 28;
+            this.MineMinQualitytextBox.TextChanged += new System.EventHandler(this.MineMinQualitytextBox_TextChanged);
+            // 
+            // label74
+            // 
+            this.label74.AutoSize = true;
+            this.label74.Location = new System.Drawing.Point(10, 84);
+            this.label74.Name = "label74";
+            this.label74.Size = new System.Drawing.Size(83, 13);
+            this.label74.TabIndex = 27;
+            this.label74.Text = "Minimum Quality";
+            // 
+            // MineMaxSlottextBox
+            // 
+            this.MineMaxSlottextBox.Location = new System.Drawing.Point(99, 59);
+            this.MineMaxSlottextBox.Name = "MineMaxSlottextBox";
+            this.MineMaxSlottextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineMaxSlottextBox.TabIndex = 26;
+            this.MineMaxSlottextBox.TextChanged += new System.EventHandler(this.MineMaxSlottextBox_TextChanged);
+            // 
+            // label73
+            // 
+            this.label73.AutoSize = true;
+            this.label73.Location = new System.Drawing.Point(10, 62);
+            this.label73.Name = "label73";
+            this.label73.Size = new System.Drawing.Size(51, 13);
+            this.label73.TabIndex = 25;
+            this.label73.Text = "Max Slot:";
+            // 
+            // MineMinSlottextBox
+            // 
+            this.MineMinSlottextBox.Location = new System.Drawing.Point(99, 36);
+            this.MineMinSlottextBox.Name = "MineMinSlottextBox";
+            this.MineMinSlottextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineMinSlottextBox.TabIndex = 24;
+            this.MineMinSlottextBox.TextChanged += new System.EventHandler(this.MineMinSlottextBox_TextChanged);
+            // 
+            // label72
+            // 
+            this.label72.AutoSize = true;
+            this.label72.Location = new System.Drawing.Point(10, 39);
+            this.label72.Name = "label72";
+            this.label72.Size = new System.Drawing.Size(48, 13);
+            this.label72.TabIndex = 23;
+            this.label72.Text = "Min Slot:";
+            // 
+            // MineItemNametextBox
+            // 
+            this.MineItemNametextBox.Location = new System.Drawing.Point(99, 13);
+            this.MineItemNametextBox.Name = "MineItemNametextBox";
+            this.MineItemNametextBox.Size = new System.Drawing.Size(83, 20);
+            this.MineItemNametextBox.TabIndex = 22;
+            this.MineItemNametextBox.TextChanged += new System.EventHandler(this.MineItemNametextBox_TextChanged);
+            // 
+            // label71
+            // 
+            this.label71.AutoSize = true;
+            this.label71.Location = new System.Drawing.Point(10, 16);
+            this.label71.Name = "label71";
+            this.label71.Size = new System.Drawing.Size(58, 13);
+            this.label71.TabIndex = 21;
+            this.label71.Text = "ItemName:";
+            // 
+            // MineRemoveDropbutton
+            // 
+            this.MineRemoveDropbutton.Location = new System.Drawing.Point(176, 108);
+            this.MineRemoveDropbutton.Name = "MineRemoveDropbutton";
+            this.MineRemoveDropbutton.Size = new System.Drawing.Size(21, 21);
+            this.MineRemoveDropbutton.TabIndex = 19;
+            this.MineRemoveDropbutton.Text = "-";
+            this.MineRemoveDropbutton.UseVisualStyleBackColor = true;
+            this.MineRemoveDropbutton.Click += new System.EventHandler(this.MineRemoveDropbutton_Click);
+            // 
+            // MineSlotstextBox
+            // 
+            this.MineSlotstextBox.Location = new System.Drawing.Point(95, 68);
+            this.MineSlotstextBox.Name = "MineSlotstextBox";
+            this.MineSlotstextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineSlotstextBox.TabIndex = 10;
+            this.MineSlotstextBox.TextChanged += new System.EventHandler(this.MineSlotstextBox_TextChanged);
+            // 
+            // MineAddDropbutton
+            // 
+            this.MineAddDropbutton.Location = new System.Drawing.Point(147, 108);
+            this.MineAddDropbutton.Name = "MineAddDropbutton";
+            this.MineAddDropbutton.Size = new System.Drawing.Size(21, 21);
+            this.MineAddDropbutton.TabIndex = 18;
+            this.MineAddDropbutton.Text = "+";
+            this.MineAddDropbutton.UseVisualStyleBackColor = true;
+            this.MineAddDropbutton.Click += new System.EventHandler(this.MineAddDropbutton_Click);
+            // 
+            // label70
+            // 
+            this.label70.AutoSize = true;
+            this.label70.Location = new System.Drawing.Point(6, 95);
+            this.label70.Name = "label70";
+            this.label70.Size = new System.Drawing.Size(33, 13);
+            this.label70.TabIndex = 9;
+            this.label70.Text = "Slots:";
+            // 
+            // label69
+            // 
+            this.label69.AutoSize = true;
+            this.label69.Location = new System.Drawing.Point(286, 45);
+            this.label69.Name = "label69";
+            this.label69.Size = new System.Drawing.Size(56, 13);
+            this.label69.TabIndex = 8;
+            this.label69.Text = "DropRate:";
+            // 
+            // label68
+            // 
+            this.label68.AutoSize = true;
+            this.label68.Location = new System.Drawing.Point(286, 19);
+            this.label68.Name = "label68";
+            this.label68.Size = new System.Drawing.Size(46, 13);
+            this.label68.TabIndex = 7;
+            this.label68.Text = "HitRate:";
+            // 
+            // MineDropRatetextBox
+            // 
+            this.MineDropRatetextBox.Location = new System.Drawing.Point(362, 42);
+            this.MineDropRatetextBox.Name = "MineDropRatetextBox";
+            this.MineDropRatetextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineDropRatetextBox.TabIndex = 6;
+            this.MineDropRatetextBox.TextChanged += new System.EventHandler(this.MineDropRatetextBox_TextChanged);
+            // 
+            // MineHitRatetextBox
+            // 
+            this.MineHitRatetextBox.Location = new System.Drawing.Point(362, 16);
+            this.MineHitRatetextBox.Name = "MineHitRatetextBox";
+            this.MineHitRatetextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineHitRatetextBox.TabIndex = 5;
+            this.MineHitRatetextBox.TextChanged += new System.EventHandler(this.MineHitRatetextBox_TextChanged);
+            // 
+            // MineAttemptstextBox
+            // 
+            this.MineAttemptstextBox.Location = new System.Drawing.Point(95, 42);
+            this.MineAttemptstextBox.Name = "MineAttemptstextBox";
+            this.MineAttemptstextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineAttemptstextBox.TabIndex = 4;
+            this.MineAttemptstextBox.TextChanged += new System.EventHandler(this.MineAttemptstextBox_TextChanged);
+            // 
+            // MineRegenDelaytextBox
+            // 
+            this.MineRegenDelaytextBox.Location = new System.Drawing.Point(95, 16);
+            this.MineRegenDelaytextBox.Name = "MineRegenDelaytextBox";
+            this.MineRegenDelaytextBox.Size = new System.Drawing.Size(34, 20);
+            this.MineRegenDelaytextBox.TabIndex = 3;
+            this.MineRegenDelaytextBox.TextChanged += new System.EventHandler(this.MineRegenDelaytextBox_TextChanged);
+            // 
+            // label67
+            // 
+            this.label67.AutoSize = true;
+            this.label67.Location = new System.Drawing.Point(6, 45);
+            this.label67.Name = "label67";
+            this.label67.Size = new System.Drawing.Size(83, 13);
+            this.label67.TabIndex = 2;
+            this.label67.Text = "Attempts/regen:";
+            // 
+            // label66
+            // 
+            this.label66.AutoSize = true;
+            this.label66.Location = new System.Drawing.Point(156, 19);
+            this.label66.Name = "label66";
+            this.label66.Size = new System.Drawing.Size(49, 13);
+            this.label66.TabIndex = 1;
+            this.label66.Text = "(minutes)";
+            // 
+            // label65
+            // 
+            this.label65.AutoSize = true;
+            this.label65.Location = new System.Drawing.Point(6, 19);
+            this.label65.Name = "label65";
+            this.label65.Size = new System.Drawing.Size(70, 13);
+            this.label65.TabIndex = 0;
+            this.label65.Text = "Regen delay:";
+            // 
+            // MineRemoveIndexbutton
+            // 
+            this.MineRemoveIndexbutton.Location = new System.Drawing.Point(216, 6);
+            this.MineRemoveIndexbutton.Name = "MineRemoveIndexbutton";
+            this.MineRemoveIndexbutton.Size = new System.Drawing.Size(21, 21);
+            this.MineRemoveIndexbutton.TabIndex = 16;
+            this.MineRemoveIndexbutton.Text = "-";
+            this.MineRemoveIndexbutton.UseVisualStyleBackColor = true;
+            this.MineRemoveIndexbutton.Click += new System.EventHandler(this.MineRemoveIndexbutton_Click);
+            // 
+            // MineAddIndexbutton
+            // 
+            this.MineAddIndexbutton.Location = new System.Drawing.Point(187, 6);
+            this.MineAddIndexbutton.Name = "MineAddIndexbutton";
+            this.MineAddIndexbutton.Size = new System.Drawing.Size(21, 21);
+            this.MineAddIndexbutton.TabIndex = 15;
+            this.MineAddIndexbutton.Text = "+";
+            this.MineAddIndexbutton.UseVisualStyleBackColor = true;
+            this.MineAddIndexbutton.Click += new System.EventHandler(this.MineAddIndexbutton_Click);
+            // 
+            // label64
+            // 
+            this.label64.AutoSize = true;
+            this.label64.Location = new System.Drawing.Point(8, 9);
+            this.label64.Name = "label64";
+            this.label64.Size = new System.Drawing.Size(62, 13);
+            this.label64.TabIndex = 14;
+            this.label64.Text = "Mine Index:";
+            // 
+            // MineIndexcomboBox
+            // 
+            this.MineIndexcomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.MineIndexcomboBox.FormattingEnabled = true;
+            this.MineIndexcomboBox.Location = new System.Drawing.Point(89, 6);
+            this.MineIndexcomboBox.Name = "MineIndexcomboBox";
+            this.MineIndexcomboBox.Size = new System.Drawing.Size(92, 21);
+            this.MineIndexcomboBox.TabIndex = 13;
+            this.MineIndexcomboBox.SelectedIndexChanged += new System.EventHandler(this.MineIndexcomboBox_SelectedIndexChanged);
             // 
             // BalanceConfigForm
             // 
@@ -2135,6 +2528,12 @@
             this.groupBox5.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.tabPage5.ResumeLayout(false);
+            this.tabPage5.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2328,5 +2727,41 @@
         private System.Windows.Forms.Button RISAddIndexbutton;
         private System.Windows.Forms.TextBox RISCurseChancetextBox;
         private System.Windows.Forms.Label label63;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.Button MineRemoveIndexbutton;
+        private System.Windows.Forms.Button MineAddIndexbutton;
+        private System.Windows.Forms.Label label64;
+        private System.Windows.Forms.ComboBox MineIndexcomboBox;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.ComboBox MineDropsIndexcomboBox;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.Button MineRemoveDropbutton;
+        private System.Windows.Forms.TextBox MineSlotstextBox;
+        private System.Windows.Forms.Button MineAddDropbutton;
+        private System.Windows.Forms.Label label70;
+        private System.Windows.Forms.Label label69;
+        private System.Windows.Forms.Label label68;
+        private System.Windows.Forms.TextBox MineDropRatetextBox;
+        private System.Windows.Forms.TextBox MineHitRatetextBox;
+        private System.Windows.Forms.TextBox MineAttemptstextBox;
+        private System.Windows.Forms.TextBox MineRegenDelaytextBox;
+        private System.Windows.Forms.Label label67;
+        private System.Windows.Forms.Label label66;
+        private System.Windows.Forms.Label label65;
+        private System.Windows.Forms.TextBox MineMaxBonustextBox;
+        private System.Windows.Forms.Label label77;
+        private System.Windows.Forms.TextBox MineBonusChancetextBox;
+        private System.Windows.Forms.Label label76;
+        private System.Windows.Forms.TextBox MineMaxQualitytextBox;
+        private System.Windows.Forms.Label label75;
+        private System.Windows.Forms.TextBox MineMinQualitytextBox;
+        private System.Windows.Forms.Label label74;
+        private System.Windows.Forms.TextBox MineMaxSlottextBox;
+        private System.Windows.Forms.Label label73;
+        private System.Windows.Forms.TextBox MineMinSlottextBox;
+        private System.Windows.Forms.Label label72;
+        private System.Windows.Forms.TextBox MineItemNametextBox;
+        private System.Windows.Forms.Label label71;
+        private System.Windows.Forms.Label label78;
     }
 }

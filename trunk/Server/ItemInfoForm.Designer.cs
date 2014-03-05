@@ -31,6 +31,8 @@
             this.ItemInfoPanel = new System.Windows.Forms.Panel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.RandomStatstextBox = new System.Windows.Forms.TextBox();
+            this.label54 = new System.Windows.Forms.Label();
             this.LightIntensitytextBox = new System.Windows.Forms.TextBox();
             this.label53 = new System.Windows.Forms.Label();
             this.NeedIdentifycheckbox = new System.Windows.Forms.CheckBox();
@@ -176,8 +178,7 @@
             this.ExportAllButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
-            this.label54 = new System.Windows.Forms.Label();
-            this.RandomStatstextBox = new System.Windows.Forms.TextBox();
+            this.PickaxecheckBox = new System.Windows.Forms.CheckBox();
             this.ItemInfoPanel.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -261,6 +262,24 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // RandomStatstextBox
+            // 
+            this.RandomStatstextBox.Location = new System.Drawing.Point(292, 67);
+            this.RandomStatstextBox.MaxLength = 3;
+            this.RandomStatstextBox.Name = "RandomStatstextBox";
+            this.RandomStatstextBox.Size = new System.Drawing.Size(30, 20);
+            this.RandomStatstextBox.TabIndex = 115;
+            this.RandomStatstextBox.TextChanged += new System.EventHandler(this.RandomStatstextBox_TextChanged);
+            // 
+            // label54
+            // 
+            this.label54.AutoSize = true;
+            this.label54.Location = new System.Drawing.Point(209, 70);
+            this.label54.Name = "label54";
+            this.label54.Size = new System.Drawing.Size(77, 13);
+            this.label54.TabIndex = 114;
+            this.label54.Text = "Random Stats:";
             // 
             // LightIntensitytextBox
             // 
@@ -1496,6 +1515,7 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.PickaxecheckBox);
             this.tabPage4.Controls.Add(this.NoDuraLosscheckBox);
             this.tabPage4.Controls.Add(this.SkillcheckBox);
             this.tabPage4.Controls.Add(this.ProbecheckBox);
@@ -1727,23 +1747,16 @@
             this.ImportButton.UseVisualStyleBackColor = true;
             this.ImportButton.Click += new System.EventHandler(this.ImportButton_Click);
             // 
-            // label54
+            // PickaxecheckBox
             // 
-            this.label54.AutoSize = true;
-            this.label54.Location = new System.Drawing.Point(209, 70);
-            this.label54.Name = "label54";
-            this.label54.Size = new System.Drawing.Size(77, 13);
-            this.label54.TabIndex = 114;
-            this.label54.Text = "Random Stats:";
-            // 
-            // RandomStatstextBox
-            // 
-            this.RandomStatstextBox.Location = new System.Drawing.Point(292, 67);
-            this.RandomStatstextBox.MaxLength = 3;
-            this.RandomStatstextBox.Name = "RandomStatstextBox";
-            this.RandomStatstextBox.Size = new System.Drawing.Size(30, 20);
-            this.RandomStatstextBox.TabIndex = 115;
-            this.RandomStatstextBox.TextChanged += new System.EventHandler(this.RandomStatstextBox_TextChanged);
+            this.PickaxecheckBox.AutoSize = true;
+            this.PickaxecheckBox.Location = new System.Drawing.Point(22, 267);
+            this.PickaxecheckBox.Name = "PickaxecheckBox";
+            this.PickaxecheckBox.Size = new System.Drawing.Size(64, 17);
+            this.PickaxecheckBox.TabIndex = 11;
+            this.PickaxecheckBox.Text = "Pickaxe";
+            this.PickaxecheckBox.UseVisualStyleBackColor = true;
+            this.PickaxecheckBox.CheckedChanged += new System.EventHandler(this.PickaxecheckBox_CheckedChanged);
             // 
             // ItemInfoForm
             // 
@@ -1931,6 +1944,7 @@
         private System.Windows.Forms.Label label53;
         private System.Windows.Forms.TextBox RandomStatstextBox;
         private System.Windows.Forms.Label label54;
+        private System.Windows.Forms.CheckBox PickaxecheckBox;
 
     }
 }

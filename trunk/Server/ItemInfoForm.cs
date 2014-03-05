@@ -157,6 +157,7 @@ namespace Server
                 SkillcheckBox.Checked = false;
                 NoDuraLosscheckBox.Checked = false;
                 RandomStatstextBox.Text = string.Empty;
+                PickaxecheckBox.Checked = false;
                 return;
             }
 
@@ -254,6 +255,7 @@ namespace Server
             SkillcheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.Skill);
             NoDuraLosscheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.NoDuraLoss);
             RandomStatstextBox.Text = info.RandomStatsId.ToString();
+            PickaxecheckBox.Checked = info.CanMine;
 
             for (int i = 1; i < _selectedItemInfos.Count; i++)
             {
@@ -345,6 +347,7 @@ namespace Server
                 if (SkillcheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.Skill)) SkillcheckBox.CheckState = CheckState.Indeterminate;
                 if (NoDuraLosscheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLosscheckBox.CheckState = CheckState.Indeterminate;
                 if (RandomStatstextBox.Text != info.RandomStatsId.ToString()) RandomStatstextBox.Text = string.Empty;
+                if (PickaxecheckBox.Checked != info.CanMine) PickaxecheckBox.CheckState = CheckState.Indeterminate;
             }
         }
 
@@ -1586,6 +1589,14 @@ namespace Server
                 else
                     _selectedItemInfos[i].RandomStats = null;
             }
+        }
+
+        private void PickaxecheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].CanMine = PickaxecheckBox.Checked;
         }
     }
 }

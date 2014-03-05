@@ -599,6 +599,9 @@ namespace Server.MirObjects
                 case DelayedType.MapMovement:
                     CompleteMapMovement(action.Params);
                     break;
+                case DelayedType.Mine:
+                    CompleteMine(action.Params);
+                    break;
             }
         }
 
@@ -2871,7 +2874,7 @@ namespace Server.MirObjects
 
         public void Attack(MirDirection dir, Spell spell)
         {
-
+            bool Mined = false;
             if (!CanAttack)
             {
                 switch (spell)
@@ -2981,6 +2984,9 @@ namespace Server.MirObjects
                         goto HalfMoon;
                     case Spell.CrossHalfMoon:
                         goto CrossHalfMoon;
+                    case Spell.None:
+                        Mined = true;
+                        goto Mining;
                 }
                 return;
             }
@@ -3191,7 +3197,93 @@ namespace Server.MirObjects
                     }
                 }
             }
+            Mining:
+            if (Mined)
+            {
+                if(Info.Equipment[(int)EquipmentSlot.Weapon] == null) return;
+                if(!Info.Equipment[(int)EquipmentSlot.Weapon].Info.CanMine) return;
+                if (CurrentMap.Mine == null) return;
+                MineSpot Mine = CurrentMap.Mine[target.X, target.Y];
+                if ((Mine == null) || (Mine.Mine == null)) return;
+                if (Mine.StonesLeft > 0)
+                {
+                    Mine.StonesLeft--;
+                    if (Envir.Random.Next(100) <= (Mine.Mine.HitRate + (Info.Equipment[(int)EquipmentSlot.Weapon].Info.Accuracy + Info.Equipment[(int)EquipmentSlot.Weapon].Accuracy)*10))
+                    {
+                        //CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Mine},CurrentLocation);
 
+                        //create some rubble on the floor (or increase whats there)
+                        SpellObject Rubble = null;
+                        Cell minecell = CurrentMap.GetCell(CurrentLocation);
+                        for (int i = 0; i < minecell.Objects.Count; i++)
+                        {
+                            if (minecell.Objects[i].Race != ObjectType.Spell) continue;
+                            SpellObject ob = (SpellObject)minecell.Objects[i];
+
+                            if (ob.Spell != Spell.Rubble) continue;
+                            Rubble = ob;
+                            Rubble.ExpireTime = Envir.Time + (5 * 60 * 1000);
+                            break;
+                        }
+                        if (Rubble == null)
+                        {
+                            Rubble = new SpellObject
+                            {
+                                Spell = Spell.Rubble,
+                                Value = 1,
+                                ExpireTime = Envir.Time + (5 * 60 * 1000),
+                                TickSpeed = 2000,
+                                Caster = null,
+                                CurrentLocation = CurrentLocation,
+                                CurrentMap = this.CurrentMap,
+                                Direction = MirDirection.Up
+                            };
+                            CurrentMap.AddObject(Rubble);
+                            Rubble.Spawned();
+                        }
+                        if (Rubble != null)
+                            ActionList.Add(new DelayedAction(DelayedType.Mine, Envir.Time + 400,Rubble));
+                        //check if we get a payout
+                        if (Envir.Random.Next(100) <= Mine.Mine.DropRate)
+                        {
+                            GetMinePayout(Mine.Mine);
+                        }
+                        DamageItem(Info.Equipment[(int)EquipmentSlot.Weapon], 5 + Envir.Random.Next(15));
+                    }
+                }
+                else
+                {
+                    if (Envir.Time > Mine.LastRegenTick)
+                    {
+                        Mine.LastRegenTick = Envir.Time + Mine.Mine.SpotRegenRate * 60 * 1000;
+                        Mine.StonesLeft = (byte)Envir.Random.Next(Mine.Mine.MaxStones);
+                    }
+                }
+            }
+        }
+
+        public void GetMinePayout(MineSet Mine)
+        {
+            if ((Mine.Drops == null) || (Mine.Drops.Count == 0)) return;
+            if (FreeSpace(Info.Inventory) == 0) return;
+            byte Slot = (byte)Envir.Random.Next(Mine.TotalSlots);
+            for (int i = 0; i < Mine.Drops.Count; i++)
+            {
+                MineDrop Drop = Mine.Drops[i];
+                if ((Drop.MinSlot <= Slot) && (Drop.MaxSlot >= Slot) && (Drop.Item != null))
+                {
+                    UserItem item = Envir.CreateDropItem(Drop.Item);
+                    if (item.Info.Type == ItemType.Ore)
+                    {
+                        item.CurrentDura = (ushort)Math.Min(ushort.MaxValue,(Drop.MinDura + Envir.Random.Next(Math.Max(0,Drop.MaxDura - Drop.MinDura))) * 1000);
+                        if ((Drop.BonusChance > 0) && (Envir.Random.Next(100) <= Drop.BonusChance))
+                            item.CurrentDura = (ushort)Math.Min(ushort.MaxValue,item.CurrentDura + (Envir.Random.Next(Drop.MaxBonusDura) * 1000));
+                    }
+                    if (CanGainItem(item, false)) GainItem(item);
+                    return;
+                }
+            }
+            
         }
 
         public void Magic(Spell spell, MirDirection dir, uint targetID, Point location)
@@ -4366,6 +4458,16 @@ namespace Server.MirObjects
 
 
         }
+        private void CompleteMine(IList<object> data)
+        {
+            MapObject target = (MapObject)data[0];
+            if (target == null) return;
+            target.Broadcast(new S.MapEffect{ Effect = SpellEffect.Mine, Location = target.CurrentLocation, Value = (byte)Direction});
+            //target.Broadcast(new S.ObjectEffect { ObjectID = target.ObjectID, Effect = SpellEffect.Mine });
+            if ((byte)target.Direction < 6)
+                target.Direction++;
+            target.Broadcast(target.GetInfo());
+        }
         private void CompleteAttack(IList<object> data)
         {
             MapObject target = (MapObject) data[0];
@@ -4754,15 +4856,15 @@ namespace Server.MirObjects
                 attacker.DamageWeapon();
 
             if ((attacker.CriticalRate * Settings.CriticalRateWeight) > Envir.Random.Next(100))
-            {
-                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Critical });
+            {   
+                CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Critical },CurrentLocation);
                 damage = Math.Min(int.MaxValue, damage + (int)Math.Floor(damage * (((double)attacker.CriticalDamage / (double)Settings.CriticalDamageWeight) * 10)));
             }
 
             if (Envir.Random.Next(100) < Reflect)
             {
                 attacker.Attacked(this, damage, type, false);
-                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Reflect });
+                CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Reflect },CurrentLocation);
                 return 0;
             }
 
@@ -4845,7 +4947,7 @@ namespace Server.MirObjects
             if (Envir.Random.Next(100) < Reflect)
             {
                 attacker.Attacked(this, damage, type, false);
-                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Reflect });
+                CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Reflect },CurrentLocation);
                 return 0;
             }
 

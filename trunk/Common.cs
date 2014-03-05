@@ -185,6 +185,7 @@ public enum MirAction : byte
     Appear,
     Revive,
     SitDown,
+    Mine,
 }
 
 public enum CellAttribute : byte
@@ -507,7 +508,8 @@ public enum Spell : byte
     CrescentSlash = 105,
 
     //Map Events
-    DigOutZombie = 200
+    DigOutZombie = 200,
+    Rubble = 201
 }
 
 public enum SpellEffect : byte
@@ -528,6 +530,7 @@ public enum SpellEffect : byte
     Entrapment,
     Reflect,
     Critical,
+    Mine,
 }
 
 public enum BuffType : byte
@@ -679,7 +682,7 @@ public enum ServerPacketIds : short
     InTrapRock,
     BaseStatsInfo,
     UserName,
-    ChatItemStats
+    ChatItemStats,
 }
 
 public enum ClientPacketIds : short
@@ -735,7 +738,7 @@ public enum ClientPacketIds : short
     MarketBuy,
     MarketGetBack,
     RequestUserName,
-    RequestChatItem
+    RequestChatItem,
 }
 
 public class InIReader
@@ -1510,6 +1513,7 @@ public class ItemInfo
     public bool NeedIdentify, ShowGroupPickup, BindOnEquip, BindNoSRepair;
     public bool ClassBased;
     public bool LevelBased;
+    public bool CanMine;
     public byte MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, HpDrainRate;
     
     public BindMode Bind = BindMode.none;//due to lack of space in bindmodes > bindonequip and srepair are seperate bools for now, if anyone adds 2/3 more bindmodes then it'd be more suitable to upgrade bindmode to short!
@@ -1599,6 +1603,7 @@ public class ItemInfo
             ClassBased = (bools & 0x08) == 0x08;
             LevelBased = (bools & 0x10) == 0x10;
             BindNoSRepair = (bools & 0x20) == 0x20;
+            CanMine = (bools & 0x40) == 0x40;
             MaxAcRate = reader.ReadByte();
             MaxMacRate = reader.ReadByte();
             Holy = reader.ReadByte();
@@ -1690,6 +1695,7 @@ public class ItemInfo
         if (ClassBased) bools |= 0x08;
         if (LevelBased) bools |= 0x10;
         if (BindNoSRepair) bools |= 0x20;
+        if (CanMine) bools |= 0x40;
         writer.Write(bools);
         writer.Write(MaxAcRate);
         writer.Write(MaxMacRate);
@@ -1779,6 +1785,7 @@ public class ItemInfo
         if (!Enum.TryParse(data[57], out info.Unique)) return null;
         if (!bool.TryParse(data[58], out info.BindNoSRepair)) return null;
         if (!byte.TryParse(data[59], out info.RandomStatsId)) return null;
+        if (!bool.TryParse(data[60], out info.CanMine)) return null;
 
         return info;
 
@@ -1787,11 +1794,11 @@ public class ItemInfo
     public string ToText()
     {
         return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},{25},{26}," +
-                             "{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57},{58},{59}",
+                             "{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57},{58},{59},{60}",
             Name, (byte)Type, (byte)RequiredType, (byte)RequiredClass, (byte)RequiredGender, Shape, Weight, Light, RequiredAmount, MinAC, MaxAC, MinMAC, MaxMAC, MinDC, MaxDC,
             MinMC, MaxMC, MinSC, MaxSC, Accuracy, Agility, HP, MP, AttackSpeed, Luck, BagWeight, HandWeight, WearWeight, StartItem, Image, Durability, Price, 
             StackSize, Effect, Strong, MagicResist, PoisonResist, HealthRecovery, SpellRecovery, PoisonRecovery, HPrate, MPrate, CriticalRate, CriticalDamage, NeedIdentify, 
-            ShowGroupPickup, MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, ClassBased, LevelBased, (byte)Bind, BindOnEquip, Reflect, HpDrainRate,(short)Unique,BindNoSRepair,RandomStatsId);
+            ShowGroupPickup, MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, ClassBased, LevelBased, (byte)Bind, BindOnEquip, Reflect, HpDrainRate,(short)Unique,BindNoSRepair,RandomStatsId, CanMine);
     }
 
     
@@ -2935,4 +2942,101 @@ public class UserId
 {
     public long Id = 0;
     public string UserName = "";
+}
+
+public class MineSet
+{
+    public byte SpotRegenRate = 5;
+    public byte MaxStones = 80;
+    public byte HitRate = 25;
+    public byte DropRate = 10;
+    public byte TotalSlots = 100;
+    public List<MineDrop> Drops = new List<MineDrop>();
+    private bool DropsSet = false;
+
+    public MineSet(byte MineType = 0)
+    {
+        switch (MineType)
+        {
+            case 1:
+                TotalSlots = 120;
+                Drops.Add(new MineDrop(){ItemName = "GoldOre", MinSlot = 1, MaxSlot = 2, MinDura = 3, MaxDura = 16, BonusChance = 20, MaxBonusDura = 10});
+                Drops.Add(new MineDrop() { ItemName = "SilverOre", MinSlot = 3, MaxSlot = 20, MinDura = 3, MaxDura = 16, BonusChance = 20, MaxBonusDura = 10 });
+                Drops.Add(new MineDrop() { ItemName = "CopperOre", MinSlot = 21, MaxSlot = 45, MinDura = 3, MaxDura = 16, BonusChance = 20, MaxBonusDura = 10 });
+                Drops.Add(new MineDrop() { ItemName = "BlackIronOre", MinSlot = 46, MaxSlot = 56, MinDura = 3, MaxDura = 16, BonusChance = 20, MaxBonusDura = 10 });
+                break;
+            case 2:
+                TotalSlots = 100;
+                Drops.Add(new MineDrop(){ItemName = "PlatinumOre", MinSlot = 1, MaxSlot = 2, MinDura = 3, MaxDura = 16, BonusChance = 20, MaxBonusDura = 10});
+                Drops.Add(new MineDrop() { ItemName = "RubyOre", MinSlot = 3, MaxSlot = 20, MinDura = 3, MaxDura = 16, BonusChance = 20, MaxBonusDura = 10 });
+                Drops.Add(new MineDrop() { ItemName = "NephriteOre", MinSlot = 21, MaxSlot = 45, MinDura = 3, MaxDura = 16, BonusChance = 20, MaxBonusDura = 10 });
+                Drops.Add(new MineDrop() { ItemName = "AmethystOre", MinSlot = 46, MaxSlot = 56, MinDura = 3, MaxDura = 16, BonusChance = 20, MaxBonusDura = 10 });
+                break;
+        }
+    }
+
+    public void SetDrops(List<ItemInfo> items)
+    {
+        if (DropsSet) return;
+        for (int i = 0; i < Drops.Count; i++)
+        {
+            for (int j = 0; j < items.Count; j++)
+            {
+                ItemInfo info = items[j];
+                if (String.Compare(info.Name.Replace(" ", ""), Drops[i].ItemName, StringComparison.OrdinalIgnoreCase) != 0) continue;
+                Drops[i].Item = info;
+                break;
+            }
+        }
+        DropsSet = true;
+    }
+}
+
+public class MineSpot
+{
+    public byte StonesLeft = 0;
+    public long LastRegenTick = 0;
+    public MineSet Mine;
+}
+
+public class MineDrop
+{
+    public string ItemName;
+    public ItemInfo Item;
+    public byte MinSlot = 0;
+    public byte MaxSlot = 0;
+    public byte MinDura = 1;
+    public byte MaxDura = 1;
+    public byte BonusChance = 0;
+    public byte MaxBonusDura = 1;
+}
+
+public class MineZone
+{
+    public byte Mine;
+    public Point Location;
+    public ushort Size;
+
+    public MineZone()
+    {
+    }
+
+    public MineZone(BinaryReader reader)
+    {
+        Location = new Point(reader.ReadInt32(), reader.ReadInt32());
+        Size = reader.ReadUInt16();
+        Mine = reader.ReadByte();
+    }
+
+    public void Save(BinaryWriter writer)
+    {
+        writer.Write(Location.X);
+        writer.Write(Location.Y);
+        writer.Write(Size);
+        writer.Write(Mine);
+    }
+    public override string ToString()
+    {
+        return string.Format("Map: {0}- {1}", Functions.PointToString(Location), Mine);
+    }
 }
