@@ -13,7 +13,7 @@ namespace Server.MirDatabase
         public string FileName = string.Empty, Title = string.Empty;
         public ushort MiniMap, BigMap;
         public LightSetting Light;
-        public byte MapDarkLight = 0;
+        public byte MapDarkLight = 0, MineIndex = 0;
 
         public bool NoTeleport, NoReconnect, NoRandom, NoEscape, NoRecall, NoDrug, NoPosition, 
             NoThrowItem, NoDropPlayer, NoDropMonster, NoNames, Fight, NeedHole, Fire, Lightning;
@@ -25,6 +25,7 @@ namespace Server.MirDatabase
         public List<MovementInfo> Movements = new List<MovementInfo>();
         public List<RespawnInfo> Respawns = new List<RespawnInfo>();
         public List<NPCInfo> NPCs = new List<NPCInfo>();
+        public List<MineZone> MineZones = new List<MineZone>();
         
 
         public MapInfo()
@@ -79,6 +80,12 @@ namespace Server.MirDatabase
             LightningDamage = reader.ReadInt32();
             if (Envir.LoadVersion < 23) return;
             MapDarkLight = reader.ReadByte();
+            if (Envir.LoadVersion < 26) return;
+            count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+                MineZones.Add(new MineZone(reader));
+            if (Envir.LoadVersion < 27) return;
+            MineIndex = reader.ReadByte();
         }
 
         public void Save(BinaryWriter writer)
@@ -124,6 +131,10 @@ namespace Server.MirDatabase
             writer.Write(Lightning);
             writer.Write(LightningDamage);
             writer.Write(MapDarkLight);
+            writer.Write(MineZones.Count);
+            for (int i = 0; i < MineZones.Count; i++)
+                MineZones[i].Save(writer);
+            writer.Write(MineIndex);
         }
 
 

@@ -48,6 +48,10 @@ namespace Server
             this.FileNameTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.label27 = new System.Windows.Forms.Label();
+            this.MineIndextextBox = new System.Windows.Forms.TextBox();
+            this.label19 = new System.Windows.Forms.Label();
+            this.MapDarkLighttextBox = new System.Windows.Forms.TextBox();
             this.NoNamesCheckbox = new System.Windows.Forms.CheckBox();
             this.NoDropMonsterCheckbox = new System.Windows.Forms.CheckBox();
             this.NoDropPlayerCheckbox = new System.Windows.Forms.CheckBox();
@@ -133,6 +137,19 @@ namespace Server
             this.label28 = new System.Windows.Forms.Label();
             this.NXTextBox = new System.Windows.Forms.TextBox();
             this.NPCInfoListBox = new System.Windows.Forms.ListBox();
+            this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.MZDeletebutton = new System.Windows.Forms.Button();
+            this.MZAddbutton = new System.Windows.Forms.Button();
+            this.MineZonepanel = new System.Windows.Forms.Panel();
+            this.label33 = new System.Windows.Forms.Label();
+            this.MZMineIndextextBox = new System.Windows.Forms.TextBox();
+            this.label30 = new System.Windows.Forms.Label();
+            this.MZYtextBox = new System.Windows.Forms.TextBox();
+            this.label31 = new System.Windows.Forms.Label();
+            this.MZSizetextBox = new System.Windows.Forms.TextBox();
+            this.label32 = new System.Windows.Forms.Label();
+            this.MZXtextBox = new System.Windows.Forms.TextBox();
+            this.MZListlistBox = new System.Windows.Forms.ListBox();
             this.RemoveButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
             this.MapInfoListBox = new System.Windows.Forms.ListBox();
@@ -140,8 +157,6 @@ namespace Server
             this.CopyMapButton = new System.Windows.Forms.Button();
             this.ImportMapInfoButton = new System.Windows.Forms.Button();
             this.ExportMapInfoButton = new System.Windows.Forms.Button();
-            this.MapDarkLighttextBox = new System.Windows.Forms.TextBox();
-            this.label19 = new System.Windows.Forms.Label();
             this.MapTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage6.SuspendLayout();
@@ -153,6 +168,8 @@ namespace Server
             this.MovementInfoPanel.SuspendLayout();
             this.tabPage5.SuspendLayout();
             this.NPCInfoPanel.SuspendLayout();
+            this.tabPage7.SuspendLayout();
+            this.MineZonepanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // MapTabs
@@ -166,6 +183,7 @@ namespace Server
             this.MapTabs.Controls.Add(this.tabPage2);
             this.MapTabs.Controls.Add(this.tabPage4);
             this.MapTabs.Controls.Add(this.tabPage5);
+            this.MapTabs.Controls.Add(this.tabPage7);
             this.MapTabs.Location = new System.Drawing.Point(207, 41);
             this.MapTabs.Name = "MapTabs";
             this.MapTabs.SelectedIndex = 0;
@@ -302,6 +320,8 @@ namespace Server
             // 
             // tabPage6
             // 
+            this.tabPage6.Controls.Add(this.label27);
+            this.tabPage6.Controls.Add(this.MineIndextextBox);
             this.tabPage6.Controls.Add(this.label19);
             this.tabPage6.Controls.Add(this.MapDarkLighttextBox);
             this.tabPage6.Controls.Add(this.NoNamesCheckbox);
@@ -328,6 +348,40 @@ namespace Server
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "Attributes";
             this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(338, 120);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(59, 13);
+            this.label27.TabIndex = 42;
+            this.label27.Text = "Mine Index";
+            // 
+            // MineIndextextBox
+            // 
+            this.MineIndextextBox.Location = new System.Drawing.Point(443, 117);
+            this.MineIndextextBox.Name = "MineIndextextBox";
+            this.MineIndextextBox.Size = new System.Drawing.Size(49, 20);
+            this.MineIndextextBox.TabIndex = 41;
+            this.MineIndextextBox.TextChanged += new System.EventHandler(this.MineIndextextBox_TextChanged);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(338, 94);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(80, 13);
+            this.label19.TabIndex = 40;
+            this.label19.Text = "Map Dark Light";
+            // 
+            // MapDarkLighttextBox
+            // 
+            this.MapDarkLighttextBox.Location = new System.Drawing.Point(443, 91);
+            this.MapDarkLighttextBox.Name = "MapDarkLighttextBox";
+            this.MapDarkLighttextBox.Size = new System.Drawing.Size(49, 20);
+            this.MapDarkLighttextBox.TabIndex = 39;
+            this.MapDarkLighttextBox.TextChanged += new System.EventHandler(this.MapDarkLighttextBox_TextChanged);
             // 
             // NoNamesCheckbox
             // 
@@ -1226,6 +1280,143 @@ namespace Server
             this.NPCInfoListBox.TabIndex = 17;
             this.NPCInfoListBox.SelectedIndexChanged += new System.EventHandler(this.NPCInfoListBox_SelectedIndexChanged);
             // 
+            // tabPage7
+            // 
+            this.tabPage7.Controls.Add(this.MZDeletebutton);
+            this.tabPage7.Controls.Add(this.MZAddbutton);
+            this.tabPage7.Controls.Add(this.MineZonepanel);
+            this.tabPage7.Controls.Add(this.MZListlistBox);
+            this.tabPage7.Location = new System.Drawing.Point(4, 22);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage7.Size = new System.Drawing.Size(532, 192);
+            this.tabPage7.TabIndex = 6;
+            this.tabPage7.Text = "MineZones";
+            this.tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // MZDeletebutton
+            // 
+            this.MZDeletebutton.Location = new System.Drawing.Point(108, 6);
+            this.MZDeletebutton.Name = "MZDeletebutton";
+            this.MZDeletebutton.Size = new System.Drawing.Size(75, 23);
+            this.MZDeletebutton.TabIndex = 12;
+            this.MZDeletebutton.Text = "Remove";
+            this.MZDeletebutton.UseVisualStyleBackColor = true;
+            this.MZDeletebutton.Click += new System.EventHandler(this.MZDeletebutton_Click);
+            // 
+            // MZAddbutton
+            // 
+            this.MZAddbutton.Location = new System.Drawing.Point(6, 6);
+            this.MZAddbutton.Name = "MZAddbutton";
+            this.MZAddbutton.Size = new System.Drawing.Size(75, 23);
+            this.MZAddbutton.TabIndex = 11;
+            this.MZAddbutton.Text = "Add";
+            this.MZAddbutton.UseVisualStyleBackColor = true;
+            this.MZAddbutton.Click += new System.EventHandler(this.MZAddbutton_Click);
+            // 
+            // MineZonepanel
+            // 
+            this.MineZonepanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.MineZonepanel.Controls.Add(this.label33);
+            this.MineZonepanel.Controls.Add(this.MZMineIndextextBox);
+            this.MineZonepanel.Controls.Add(this.label30);
+            this.MineZonepanel.Controls.Add(this.MZYtextBox);
+            this.MineZonepanel.Controls.Add(this.label31);
+            this.MineZonepanel.Controls.Add(this.MZSizetextBox);
+            this.MineZonepanel.Controls.Add(this.label32);
+            this.MineZonepanel.Controls.Add(this.MZXtextBox);
+            this.MineZonepanel.Enabled = false;
+            this.MineZonepanel.Location = new System.Drawing.Point(189, 35);
+            this.MineZonepanel.Name = "MineZonepanel";
+            this.MineZonepanel.Size = new System.Drawing.Size(197, 139);
+            this.MineZonepanel.TabIndex = 14;
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(21, 29);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(62, 13);
+            this.label33.TabIndex = 12;
+            this.label33.Text = "Mine Index:";
+            // 
+            // MZMineIndextextBox
+            // 
+            this.MZMineIndextextBox.Location = new System.Drawing.Point(89, 26);
+            this.MZMineIndextextBox.MaxLength = 5;
+            this.MZMineIndextextBox.Name = "MZMineIndextextBox";
+            this.MZMineIndextextBox.Size = new System.Drawing.Size(37, 20);
+            this.MZMineIndextextBox.TabIndex = 11;
+            this.MZMineIndextextBox.TextChanged += new System.EventHandler(this.MZMineIndextextBox_TextChanged);
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(109, 60);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(17, 13);
+            this.label30.TabIndex = 10;
+            this.label30.Text = "Y:";
+            // 
+            // MZYtextBox
+            // 
+            this.MZYtextBox.Location = new System.Drawing.Point(132, 57);
+            this.MZYtextBox.MaxLength = 5;
+            this.MZYtextBox.Name = "MZYtextBox";
+            this.MZYtextBox.Size = new System.Drawing.Size(37, 20);
+            this.MZYtextBox.TabIndex = 3;
+            this.MZYtextBox.TextChanged += new System.EventHandler(this.MZYtextBox_TextChanged);
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(53, 82);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(30, 13);
+            this.label31.TabIndex = 8;
+            this.label31.Text = "Size:";
+            // 
+            // MZSizetextBox
+            // 
+            this.MZSizetextBox.Location = new System.Drawing.Point(89, 79);
+            this.MZSizetextBox.MaxLength = 5;
+            this.MZSizetextBox.Name = "MZSizetextBox";
+            this.MZSizetextBox.Size = new System.Drawing.Size(37, 20);
+            this.MZSizetextBox.TabIndex = 4;
+            this.MZSizetextBox.TextChanged += new System.EventHandler(this.MZSizetextBox_TextChanged);
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(23, 60);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(17, 13);
+            this.label32.TabIndex = 3;
+            this.label32.Text = "X:";
+            // 
+            // MZXtextBox
+            // 
+            this.MZXtextBox.Location = new System.Drawing.Point(46, 57);
+            this.MZXtextBox.MaxLength = 5;
+            this.MZXtextBox.Name = "MZXtextBox";
+            this.MZXtextBox.Size = new System.Drawing.Size(37, 20);
+            this.MZXtextBox.TabIndex = 2;
+            this.MZXtextBox.TextChanged += new System.EventHandler(this.MZXtextBox_TextChanged);
+            // 
+            // MZListlistBox
+            // 
+            this.MZListlistBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.MZListlistBox.FormattingEnabled = true;
+            this.MZListlistBox.Location = new System.Drawing.Point(6, 35);
+            this.MZListlistBox.Name = "MZListlistBox";
+            this.MZListlistBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.MZListlistBox.Size = new System.Drawing.Size(177, 134);
+            this.MZListlistBox.TabIndex = 13;
+            this.MZListlistBox.SelectedIndexChanged += new System.EventHandler(this.MZListlistBox_SelectedIndexChanged);
+            // 
             // RemoveButton
             // 
             this.RemoveButton.Location = new System.Drawing.Point(126, 12);
@@ -1297,23 +1488,6 @@ namespace Server
             this.ExportMapInfoButton.UseVisualStyleBackColor = true;
             this.ExportMapInfoButton.Click += new System.EventHandler(this.ExportMapInfoButton_Click);
             // 
-            // MapDarkLighttextBox
-            // 
-            this.MapDarkLighttextBox.Location = new System.Drawing.Point(443, 90);
-            this.MapDarkLighttextBox.Name = "MapDarkLighttextBox";
-            this.MapDarkLighttextBox.Size = new System.Drawing.Size(49, 20);
-            this.MapDarkLighttextBox.TabIndex = 39;
-            this.MapDarkLighttextBox.TextChanged += new System.EventHandler(this.MapDarkLighttextBox_TextChanged);
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(356, 93);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(54, 13);
-            this.label19.TabIndex = 40;
-            this.label19.Text = "Map Light";
-            // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1347,6 +1521,9 @@ namespace Server
             this.tabPage5.ResumeLayout(false);
             this.NPCInfoPanel.ResumeLayout(false);
             this.NPCInfoPanel.PerformLayout();
+            this.tabPage7.ResumeLayout(false);
+            this.MineZonepanel.ResumeLayout(false);
+            this.MineZonepanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1462,6 +1639,21 @@ namespace Server
         private Button ExportMapInfoButton;
         private Label label19;
         private TextBox MapDarkLighttextBox;
+        private Label label27;
+        private TextBox MineIndextextBox;
+        private TabPage tabPage7;
+        private Button MZDeletebutton;
+        private Button MZAddbutton;
+        private Panel MineZonepanel;
+        private Label label33;
+        private TextBox MZMineIndextextBox;
+        private Label label30;
+        private TextBox MZYtextBox;
+        private Label label31;
+        private TextBox MZSizetextBox;
+        private Label label32;
+        private TextBox MZXtextBox;
+        private ListBox MZListlistBox;
 
     }
 }

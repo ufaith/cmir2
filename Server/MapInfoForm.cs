@@ -22,6 +22,7 @@ namespace Server
         private List<RespawnInfo> _selectedRespawnInfos;
         private List<NPCInfo> _selectedNPCInfos;
         private List<MovementInfo> _selectedMovementInfos;
+        private List<MineZone> _selectedMineZones;
         private MapInfo _info;
 
         public MapInfoForm()
@@ -87,6 +88,7 @@ namespace Server
                 FireTextbox.Text = string.Empty;
                 LightningTextbox.Text = string.Empty;
                 MapDarkLighttextBox.Text = string.Empty;
+                MineIndextextBox.Text = string.Empty;
                 return;
             }
 
@@ -121,6 +123,7 @@ namespace Server
             LightningCheckbox.Checked = mi.Lightning;                      
             LightningTextbox.Text = mi.LightningDamage.ToString();
             MapDarkLighttextBox.Text = mi.MapDarkLight.ToString();
+            MineIndextextBox.Text = mi.MineIndex.ToString();
 
             for (int i = 1; i < _selectedMapInfos.Count; i++)
             {
@@ -152,13 +155,14 @@ namespace Server
                 if (LightningCheckbox.Checked != mi.Lightning) LightningCheckbox.Checked = false;                             
                 if (LightningTextbox.Text != mi.LightningDamage.ToString()) LightningTextbox.Text = string.Empty;
                 if (MapDarkLighttextBox.Text != mi.MapDarkLight.ToString()) MapDarkLighttextBox.Text = string.Empty;
-
+                if (MineIndextextBox.Text != mi.MineIndex.ToString()) MineIndextextBox.Text = string.Empty;
             }
 
             UpdateSafeZoneInterface();
             UpdateRespawnInterface();
             UpdateNPCInterface();
             UpdateMovementInterface();
+            UpdateMineZoneInterface();
         }
         private void UpdateSafeZoneInterface()
         {
@@ -442,6 +446,64 @@ namespace Server
 
         }
 
+        private void UpdateMineZoneInterface()
+        {
+            if (_selectedMapInfos.Count != 1)
+            {
+                MZListlistBox.Items.Clear();
+                
+                if (_selectedMineZones != null && _selectedMineZones.Count > 0)
+                    _selectedMineZones.Clear();
+                _info = null;
+                
+                MineZonepanel.Enabled = false;
+                MZXtextBox.Text = string.Empty;
+                MZYtextBox.Text = string.Empty;
+                MZMineIndextextBox.Text = string.Empty;
+                MZSizetextBox.Text = string.Empty;
+                return;
+            }
+
+            if (_info != _selectedMapInfos[0])
+            {
+                MZListlistBox.Items.Clear();
+                _info = _selectedMapInfos[0];
+            }
+            if (MZListlistBox.Items.Count != _info.MineZones.Count)
+            {
+                MZListlistBox.Items.Clear();
+                for (int i = 0; i < _info.MineZones.Count; i++) MZListlistBox.Items.Add(_info.MineZones[i]);
+            }
+            _selectedMineZones = MZListlistBox.SelectedItems.Cast<MineZone>().ToList();
+            if (_selectedMineZones.Count == 0)
+            {
+                MineZonepanel.Enabled = false;
+                MZXtextBox.Text = string.Empty;
+                MZYtextBox.Text = string.Empty;
+                MZMineIndextextBox.Text = string.Empty;
+                MZSizetextBox.Text = string.Empty;
+                return;
+            }
+            MineZone info = _selectedMineZones[0];
+            MineZonepanel.Enabled = true;
+
+            MZXtextBox.Text = info.Location.X.ToString();
+            MZYtextBox.Text = info.Location.Y.ToString();
+            MZMineIndextextBox.Text = info.Mine.ToString();
+            MZSizetextBox.Text = info.Size.ToString();
+
+
+            for (int i = 1; i < _selectedMineZones.Count; i++)
+            {
+                info = _selectedMineZones[i];
+
+                if (MZXtextBox.Text != info.Location.X.ToString()) MZXtextBox.Text = string.Empty;
+                if (MZYtextBox.Text != info.Location.Y.ToString()) MZYtextBox.Text = string.Empty;
+                if (MZMineIndextextBox.Text != info.Mine.ToString()) MZMineIndextextBox.Text = string.Empty;
+                if (MZSizetextBox.Text != info.Size.ToString()) MZSizetextBox.Text = string.Empty;
+            }
+        }
+
         private void RefreshMapList()
         {
             MapInfoListBox.SelectedIndexChanged -= MapInfoListBox_SelectedIndexChanged;
@@ -508,6 +570,20 @@ namespace Server
             MovementInfoListBox.SelectedIndexChanged += MovementInfoListBox_SelectedIndexChanged;
         }
 
+        private void RefreshMineZoneList()
+        {
+
+            MZListlistBox.SelectedIndexChanged -= MZListlistBox_SelectedIndexChanged;
+
+            List<bool> selected = new List<bool>();
+
+            for (int i = 0; i < MZListlistBox.Items.Count; i++) selected.Add(MZListlistBox.GetSelected(i));
+            MZListlistBox.Items.Clear();
+            for (int i = 0; i < _info.MineZones.Count; i++) MZListlistBox.Items.Add(_info.MineZones[i]);
+            for (int i = 0; i < selected.Count; i++) MZListlistBox.SetSelected(i, selected[i]);
+            MZListlistBox.SelectedIndexChanged += MZListlistBox_SelectedIndexChanged;
+        }
+
         private void AddButton_Click(object sender, EventArgs e)
         {
             Envir.CreateMapInfo();
@@ -533,6 +609,7 @@ namespace Server
             RespawnInfoListBox.Items.Clear();
             MovementInfoListBox.Items.Clear();
             NPCInfoListBox.Items.Clear();
+            MZListlistBox.Items.Clear();
             UpdateInterface();
         }
         private void FileNameTextBox_TextChanged(object sender, EventArgs e)
@@ -1295,6 +1372,122 @@ namespace Server
 
             for (int i = 0; i < _selectedMapInfos.Count; i++)
                 _selectedMapInfos[i].MapDarkLight = temp;
+        }
+
+        private void MZDeletebutton_Click(object sender, EventArgs e)
+        {
+            if (_selectedMineZones.Count == 0) return;
+
+            if (MessageBox.Show("Are you sure you want to remove the selected MineZones?", "Remove MineZones?", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+
+            for (int i = 0; i < _selectedMineZones.Count; i++) _info.MineZones.Remove(_selectedMineZones[i]);
+            UpdateMineZoneInterface();
+        }
+
+        private void MZAddbutton_Click(object sender, EventArgs e)
+        {
+            if (_info == null) return;
+
+            _info.MineZones.Add(new MineZone());
+            UpdateMineZoneInterface();
+        }
+
+        private void MZListlistBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateMineZoneInterface();
+        }
+
+        private void MZMineIndextextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if ((!byte.TryParse(ActiveControl.Text, out temp)) || (Settings.MineSetList.Count < temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedMineZones.Count; i++)
+                _selectedMineZones[i].Mine = temp;
+            RefreshMineZoneList();
+        }
+
+        private void MZXtextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            int temp;
+
+            if (!int.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedMineZones.Count; i++)
+                _selectedMineZones[i].Location.X = temp;
+            RefreshMineZoneList();
+        }
+
+        private void MZYtextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            int temp;
+
+            if (!int.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedMineZones.Count; i++)
+                _selectedMineZones[i].Location.Y = temp;
+            RefreshMineZoneList();
+        }
+
+        private void MZSizetextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            ushort temp;
+
+            if (!ushort.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+
+            for (int i = 0; i < _selectedMineZones.Count; i++)
+                _selectedMineZones[i].Size = temp;
+            RefreshMineZoneList();
+        }
+
+        private void MineIndextextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            byte temp;
+
+            if ((!byte.TryParse(ActiveControl.Text, out temp)) || (Settings.MineSetList.Count < temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].MineIndex = temp;
         }
 
         private void ImportMapInfoButton_Click(object sender, EventArgs e)

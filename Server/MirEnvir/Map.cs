@@ -19,6 +19,7 @@ namespace Server.MirEnvir
 
         public int Width, Height;
         public Cell[,] Cells;
+        public MineSpot[,] Mine;
         public long LightningTime, FireTime;
         public int MonsterCount;
 
@@ -332,7 +333,7 @@ namespace Server.MirEnvir
 
                     for (int i = 0; i < Info.SafeZones.Count; i++)
                         CreateSafeZone(Info.SafeZones[i]);
-
+                    CreateMine();
                     return true;
                 }
             }
@@ -401,6 +402,37 @@ namespace Server.MirEnvir
             }
 
 
+        }
+
+        private void CreateMine()
+        {
+            if ((Info.MineIndex == 0) && (Info.MineZones.Count == 0)) return;
+            Mine = new MineSpot[Width, Height];
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    Mine[i, j] = new MineSpot();
+            if ((Info.MineIndex != 0) && (Settings.MineSetList.Count > Info.MineIndex - 1))
+            {
+                Settings.MineSetList[Info.MineIndex - 1].SetDrops(Envir.ItemInfoList);
+                for (int i = 0; i < Width; i++)
+                    for (int j = 0; j < Height; j++)
+                        Mine[i,j].Mine = Settings.MineSetList[Info.MineIndex - 1];
+            }
+            if (Info.MineZones.Count > 0)
+            {
+                for (int i = 0; i < Info.MineZones.Count; i++)
+                {
+                    MineZone Zone = Info.MineZones[i];
+                    Settings.MineSetList[Zone.Mine].SetDrops(Envir.ItemInfoList);
+                    if (Settings.MineSetList.Count > Zone.Mine) continue;
+                    for (int x =  Zone.Location.X - Zone.Size; x < Zone.Location.X + Zone.Size; x++)
+                        for (int y = Zone.Location.Y - Zone.Size; y < Zone.Location.Y + Zone.Size; y++)
+                        {
+                            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height)) continue;
+                            Mine[x, y].Mine = Settings.MineSetList[Zone.Mine];
+                        }
+                }
+            }
         }
 
         public Cell GetCell(Point location)

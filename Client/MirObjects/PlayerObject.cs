@@ -480,6 +480,11 @@ namespace Client.MirObjects
                             GameScene.Scene.MapControl.FloorValid = false;
                             //CanSetAction = false;
                             break;
+                        case MirAction.Mine:
+                            Network.Enqueue(new C.Attack { Direction = Direction, Spell = Spell.None });
+                            GameScene.AttackTime = CMain.Time + (1400 - Math.Min(370,(User.Level * 5)));
+                            MapControl.NextAction = CMain.Time + 2500;
+                            break;
                         case MirAction.Attack1:
                             ClientMagic magic;
                             if (GameScene.Slaying && TargetObject != null)
@@ -1255,6 +1260,7 @@ namespace Client.MirObjects
                 case MirAction.Attack2:
                 case MirAction.Attack3:
                 case MirAction.Attack4:
+                case MirAction.Mine:
                     if (CMain.Time >= NextMotion)
                     {
                         GameScene.Scene.MapControl.TextureValid = false;

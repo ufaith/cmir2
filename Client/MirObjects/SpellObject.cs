@@ -91,6 +91,17 @@ namespace Client.MirObjects
                     Blend = true;
                     Repeat = false;
                     break;
+                case Spell.Rubble:
+                    if (Direction == 0)
+                        BodyLibrary = null;
+                    else
+                    {
+                        BodyLibrary = Libraries.Effect;
+                        DrawFrame = 64 + Math.Min(4, (int)(Direction - 1));
+                        FrameCount = 1;
+                        FrameInterval = 10000;
+                    }
+                    break;
             }
 
 
@@ -128,8 +139,7 @@ namespace Client.MirObjects
         }
 
         public override void DrawEffects()
-        {
-            
+        { 
         }
     }
 }

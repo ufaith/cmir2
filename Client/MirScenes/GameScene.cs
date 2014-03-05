@@ -103,6 +103,7 @@ namespace Client.MirScenes
         public GameScene()
         {
             MapControl.AutoRun = false;
+            MapControl.AutoHit = false;
             Slaying = false;
             Thrusting = false;
             HalfMoon = false;
@@ -2340,7 +2341,14 @@ namespace Client.MirScenes
         }
         private void MapEffect(S.MapEffect p)
         {
-
+            switch (p.Effect)
+            {
+                case SpellEffect.Mine:
+                    SoundManager.PlaySound(10091);
+                    Effect HitWall = new Effect(Libraries.Effect, 8 * p.Value, 3, 240, p.Location) { Light = 0};
+                    MapControl.Effects.Add(HitWall);
+                    break;
+            }
         }
         private void ObjectRangeAttack(S.ObjectRangeAttack p)
         {
@@ -3181,6 +3189,24 @@ namespace Client.MirScenes
         {
             if (HoverItem.Info.Durability > 0)
             {
+                string text = "";
+                switch (HoverItem.Info.Type)
+                {
+                    case ItemType.Amulet:
+                        text = string.Format("Useage: {0}/{1}", HoverItem.CurrentDura, HoverItem.MaxDura);
+                        break;
+                    case ItemType.Ore:
+                        text = string.Format("Purity: {0}", Math.Round(HoverItem.CurrentDura/1000M));
+                        break;
+                    case ItemType.Meat:
+                        text = string.Format("Quality: {0}", Math.Round(HoverItem.CurrentDura/1000M));
+                                break;
+                    default:
+                        text = string.Format("Durability: {0}/{1}", Math.Round(HoverItem.CurrentDura/1000M),
+                                                   Math.Round(HoverItem.MaxDura/1000M));
+                        break;
+
+                }
                 MirLabel label = new MirLabel
                     {
                         AutoSize = true,
@@ -3188,10 +3214,7 @@ namespace Client.MirScenes
                         Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
                         OutLine = false,
                         Parent = ItemLabel,
-                        Text = HoverItem.Info.Type == ItemType.Amulet
-                                   ? string.Format("Useage: {0}/{1}", HoverItem.CurrentDura, HoverItem.MaxDura)
-                                   : string.Format("Durability: {0}/{1}", Math.Round(HoverItem.CurrentDura/1000M),
-                                                   Math.Round(HoverItem.MaxDura/1000M)),
+                        Text = text
                     };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
@@ -3913,6 +3936,7 @@ namespace Client.MirScenes
             }
 
         }
+        public static bool AutoHit;
 
         public int AnimationCount;
         public static List<Effect> Effects = new List<Effect>();
@@ -4480,7 +4504,7 @@ namespace Client.MirScenes
                 }
             }
 
-
+            
             if (Settings.Effect)
                 for (int e = 0; e < Effects.Count; e++)
                 {
@@ -4488,6 +4512,7 @@ namespace Client.MirScenes
                     if (!effect.Blend || CMain.Time < effect.Start) continue;
 
                     light = effect.Light;
+                    if (light == 0) continue;
 
                     p = effect.DrawLocation;
 
@@ -4497,7 +4522,7 @@ namespace Client.MirScenes
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
                     }
                 }
-
+            
 
             for (int y = MapObject.User.Movement.Y - ViewRangeY - 24; y <= MapObject.User.Movement.Y + ViewRangeY + 24; y++)
             {
@@ -4674,6 +4699,7 @@ namespace Client.MirScenes
 
         private void CheckInput()
         {
+            if ((MouseControl == this) && (MapButtons != MouseButtons.None)) AutoHit = false;//mouse actions stop mining even when frozen!
             if (CMain.Time < InputDelay || CMain.Time < User.BlizzardFreezeTime || User.Poison == PoisonType.Paralysis || User.Poison == PoisonType.Frozen) return;
 
             if (User.NextMagic != null)
@@ -4681,7 +4707,6 @@ namespace Client.MirScenes
                 UseMagic(User.NextMagic);
                 return;
             }
-
             if (MapObject.TargetObject != null && !MapObject.TargetObject.Dead)
             {
                 if (((MapObject.TargetObject.Name.EndsWith(")") || MapObject.TargetObject is PlayerObject) && CMain.Shift) ||
@@ -4695,6 +4720,14 @@ namespace Client.MirScenes
                             return;
                         }
                     }
+                }
+            }
+            if (AutoHit)
+            {
+                if (CMain.Time > GameScene.AttackTime)
+                {
+                    User.QueuedAction = new QueuedAction { Action = MirAction.Mine, Direction = User.Direction, Location = User.CurrentLocation };
+                    return;
                 }
             }
 
@@ -4721,7 +4754,7 @@ namespace Client.MirScenes
                     }
                     return;
                 }
-
+                
                 switch (MapButtons)
                 {
                     case MouseButtons.Left:
@@ -4748,6 +4781,19 @@ namespace Client.MirScenes
                                 Network.Enqueue(new C.PickUp());
                             }
                             return;
+                        }//mine
+                        if (!ValidPoint(Functions.PointMove(User.CurrentLocation, direction, 1)))
+                        {
+                            if ((MapObject.User.Equipment[(int)EquipmentSlot.Weapon] != null) && (MapObject.User.Equipment[(int)EquipmentSlot.Weapon].Info.CanMine))
+                            {
+                                if (direction != User.Direction)
+                                {
+                                    User.QueuedAction = new QueuedAction { Action = MirAction.Standing, Direction = direction, Location = User.CurrentLocation };
+                                    return;
+                                }
+                                AutoHit = true;
+                                return;
+                            }
                         }
                         if (CanWalk(direction))
                         {
