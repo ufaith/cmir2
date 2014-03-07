@@ -251,6 +251,7 @@
             this.MineAddIndexbutton = new System.Windows.Forms.Button();
             this.label64 = new System.Windows.Forms.Label();
             this.MineIndexcomboBox = new System.Windows.Forms.ComboBox();
+            this.MineNametextBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -2165,6 +2166,7 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.MineNametextBox);
             this.groupBox7.Controls.Add(this.label78);
             this.groupBox7.Controls.Add(this.MineDropsIndexcomboBox);
             this.groupBox7.Controls.Add(this.groupBox8);
@@ -2360,7 +2362,7 @@
             // 
             // MineSlotstextBox
             // 
-            this.MineSlotstextBox.Location = new System.Drawing.Point(95, 68);
+            this.MineSlotstextBox.Location = new System.Drawing.Point(138, 68);
             this.MineSlotstextBox.Name = "MineSlotstextBox";
             this.MineSlotstextBox.Size = new System.Drawing.Size(34, 20);
             this.MineSlotstextBox.TabIndex = 10;
@@ -2421,7 +2423,7 @@
             // 
             // MineAttemptstextBox
             // 
-            this.MineAttemptstextBox.Location = new System.Drawing.Point(95, 42);
+            this.MineAttemptstextBox.Location = new System.Drawing.Point(97, 68);
             this.MineAttemptstextBox.Name = "MineAttemptstextBox";
             this.MineAttemptstextBox.Size = new System.Drawing.Size(34, 20);
             this.MineAttemptstextBox.TabIndex = 4;
@@ -2429,7 +2431,7 @@
             // 
             // MineRegenDelaytextBox
             // 
-            this.MineRegenDelaytextBox.Location = new System.Drawing.Point(95, 16);
+            this.MineRegenDelaytextBox.Location = new System.Drawing.Point(97, 42);
             this.MineRegenDelaytextBox.Name = "MineRegenDelaytextBox";
             this.MineRegenDelaytextBox.Size = new System.Drawing.Size(34, 20);
             this.MineRegenDelaytextBox.TabIndex = 3;
@@ -2438,7 +2440,7 @@
             // label67
             // 
             this.label67.AutoSize = true;
-            this.label67.Location = new System.Drawing.Point(6, 45);
+            this.label67.Location = new System.Drawing.Point(8, 71);
             this.label67.Name = "label67";
             this.label67.Size = new System.Drawing.Size(83, 13);
             this.label67.TabIndex = 2;
@@ -2447,7 +2449,7 @@
             // label66
             // 
             this.label66.AutoSize = true;
-            this.label66.Location = new System.Drawing.Point(156, 19);
+            this.label66.Location = new System.Drawing.Point(158, 45);
             this.label66.Name = "label66";
             this.label66.Size = new System.Drawing.Size(49, 13);
             this.label66.TabIndex = 1;
@@ -2456,7 +2458,7 @@
             // label65
             // 
             this.label65.AutoSize = true;
-            this.label65.Location = new System.Drawing.Point(6, 19);
+            this.label65.Location = new System.Drawing.Point(8, 45);
             this.label65.Name = "label65";
             this.label65.Size = new System.Drawing.Size(70, 13);
             this.label65.TabIndex = 0;
@@ -2500,6 +2502,14 @@
             this.MineIndexcomboBox.Size = new System.Drawing.Size(92, 21);
             this.MineIndexcomboBox.TabIndex = 13;
             this.MineIndexcomboBox.SelectedIndexChanged += new System.EventHandler(this.MineIndexcomboBox_SelectedIndexChanged);
+            // 
+            // MineNametextBox
+            // 
+            this.MineNametextBox.Location = new System.Drawing.Point(97, 16);
+            this.MineNametextBox.Name = "MineNametextBox";
+            this.MineNametextBox.Size = new System.Drawing.Size(100, 20);
+            this.MineNametextBox.TabIndex = 22;
+            this.MineNametextBox.TextChanged += new System.EventHandler(this.MineNametextBox_TextChanged);
             // 
             // BalanceConfigForm
             // 
@@ -2763,5 +2773,6 @@
         private System.Windows.Forms.TextBox MineItemNametextBox;
         private System.Windows.Forms.Label label71;
         private System.Windows.Forms.Label label78;
+        private System.Windows.Forms.TextBox MineNametextBox;
     }
 }

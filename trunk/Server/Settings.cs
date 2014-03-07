@@ -465,6 +465,7 @@ namespace Server
         }
         public static void SaveRandomItemStats()
         {
+            File.Delete(@".\RandomItemStats.ini");
             InIReader reader = new InIReader(@".\RandomItemStats.ini");
             RandomItemStat stat;
             for (int i = 0; i < RandomItemStatsList.Count; i++)
@@ -555,6 +556,7 @@ namespace Server
             while (reader.ReadByte("Mine" + i.ToString(), "SpotRegenRate", 255) != 255)
             {
                 Mine = new MineSet();
+                Mine.Name = reader.ReadString("Mine" + i.ToString(), "Name", Mine.Name);
                 Mine.SpotRegenRate = reader.ReadByte("Mine" + i.ToString(), "SpotRegenRate", Mine.SpotRegenRate);
                 Mine.MaxStones = reader.ReadByte("Mine" + i.ToString(), "MaxStones", Mine.MaxStones);
                 Mine.HitRate = reader.ReadByte("Mine" + i.ToString(), "HitRate", Mine.HitRate);
@@ -582,16 +584,19 @@ namespace Server
         }
         public static void SaveMines()
         {
+            File.Delete(@".\Mines.ini");
             InIReader reader = new InIReader(@".\Mines.ini");
             MineSet Mine;
             for (int i = 0; i < MineSetList.Count; i++)
             {
                 Mine = MineSetList[i];
+                reader.Write("Mine" + i.ToString(), "Name", Mine.Name);
                 reader.Write("Mine" + i.ToString(), "SpotRegenRate", Mine.SpotRegenRate);
                 reader.Write("Mine" + i.ToString(), "MaxStones", Mine.MaxStones);
                 reader.Write("Mine" + i.ToString(), "HitRate", Mine.HitRate);
                 reader.Write("Mine" + i.ToString(), "DropRate", Mine.DropRate);
                 reader.Write("Mine" + i.ToString(), "TotalSlots", Mine.TotalSlots);
+                
                 for (int j = 0; j < Mine.Drops.Count; j++)
                 {
                     MineDrop Drop = Mine.Drops[j];

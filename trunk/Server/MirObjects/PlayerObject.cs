@@ -2475,6 +2475,7 @@ namespace Server.MirObjects
                         player.GainGold(count);
                         SMain.Enqueue(string.Format("Player {0} has been given {1} gold", player.Name, count));
                         break;
+
                     case "FIND":
                         if (!IsGM && !HasProbeNecklace) return;
 
