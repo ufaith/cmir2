@@ -423,14 +423,16 @@ namespace Server.MirEnvir
                 for (int i = 0; i < Info.MineZones.Count; i++)
                 {
                     MineZone Zone = Info.MineZones[i];
-                    if (Zone.Mine == 0) continue; //FAR - start on excluding zones
                     Settings.MineSetList[Zone.Mine - 1].SetDrops(Envir.ItemInfoList);
                     if (Settings.MineSetList.Count < Zone.Mine) continue;
                     for (int x =  Zone.Location.X - Zone.Size; x < Zone.Location.X + Zone.Size; x++)
                         for (int y = Zone.Location.Y - Zone.Size; y < Zone.Location.Y + Zone.Size; y++)
                         {
                             if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height)) continue;
-                            Mine[x, y].Mine = Settings.MineSetList[Zone.Mine - 1];
+                            if (Zone.Mine == 0)
+                                Mine[x, y].Mine = null;
+                            else
+                                Mine[x, y].Mine = Settings.MineSetList[Zone.Mine - 1];
                         }
                 }
             }

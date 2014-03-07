@@ -217,6 +217,7 @@
             this.RISIndexcomboBox = new System.Windows.Forms.ComboBox();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.MineNametextBox = new System.Windows.Forms.TextBox();
             this.label78 = new System.Windows.Forms.Label();
             this.MineDropsIndexcomboBox = new System.Windows.Forms.ComboBox();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
@@ -251,7 +252,6 @@
             this.MineAddIndexbutton = new System.Windows.Forms.Button();
             this.label64 = new System.Windows.Forms.Label();
             this.MineIndexcomboBox = new System.Windows.Forms.ComboBox();
-            this.MineNametextBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -2185,15 +2185,23 @@
             this.groupBox7.Controls.Add(this.label65);
             this.groupBox7.Location = new System.Drawing.Point(11, 33);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(408, 332);
+            this.groupBox7.Size = new System.Drawing.Size(408, 425);
             this.groupBox7.TabIndex = 17;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Mine Base Stat";
             // 
+            // MineNametextBox
+            // 
+            this.MineNametextBox.Location = new System.Drawing.Point(97, 16);
+            this.MineNametextBox.Name = "MineNametextBox";
+            this.MineNametextBox.Size = new System.Drawing.Size(100, 20);
+            this.MineNametextBox.TabIndex = 22;
+            this.MineNametextBox.TextChanged += new System.EventHandler(this.MineNametextBox_TextChanged);
+            // 
             // label78
             // 
             this.label78.AutoSize = true;
-            this.label78.Location = new System.Drawing.Point(6, 136);
+            this.label78.Location = new System.Drawing.Point(6, 147);
             this.label78.Name = "label78";
             this.label78.Size = new System.Drawing.Size(38, 13);
             this.label78.TabIndex = 21;
@@ -2203,7 +2211,7 @@
             // 
             this.MineDropsIndexcomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.MineDropsIndexcomboBox.FormattingEnabled = true;
-            this.MineDropsIndexcomboBox.Location = new System.Drawing.Point(48, 108);
+            this.MineDropsIndexcomboBox.Location = new System.Drawing.Point(48, 119);
             this.MineDropsIndexcomboBox.Name = "MineDropsIndexcomboBox";
             this.MineDropsIndexcomboBox.Size = new System.Drawing.Size(92, 21);
             this.MineDropsIndexcomboBox.TabIndex = 18;
@@ -2225,7 +2233,7 @@
             this.groupBox8.Controls.Add(this.label72);
             this.groupBox8.Controls.Add(this.MineItemNametextBox);
             this.groupBox8.Controls.Add(this.label71);
-            this.groupBox8.Location = new System.Drawing.Point(9, 135);
+            this.groupBox8.Location = new System.Drawing.Point(9, 146);
             this.groupBox8.Name = "groupBox8";
             this.groupBox8.Size = new System.Drawing.Size(188, 188);
             this.groupBox8.TabIndex = 20;
@@ -2352,7 +2360,7 @@
             // 
             // MineRemoveDropbutton
             // 
-            this.MineRemoveDropbutton.Location = new System.Drawing.Point(176, 108);
+            this.MineRemoveDropbutton.Location = new System.Drawing.Point(176, 119);
             this.MineRemoveDropbutton.Name = "MineRemoveDropbutton";
             this.MineRemoveDropbutton.Size = new System.Drawing.Size(21, 21);
             this.MineRemoveDropbutton.TabIndex = 19;
@@ -2362,7 +2370,7 @@
             // 
             // MineSlotstextBox
             // 
-            this.MineSlotstextBox.Location = new System.Drawing.Point(138, 68);
+            this.MineSlotstextBox.Location = new System.Drawing.Point(97, 92);
             this.MineSlotstextBox.Name = "MineSlotstextBox";
             this.MineSlotstextBox.Size = new System.Drawing.Size(34, 20);
             this.MineSlotstextBox.TabIndex = 10;
@@ -2370,7 +2378,7 @@
             // 
             // MineAddDropbutton
             // 
-            this.MineAddDropbutton.Location = new System.Drawing.Point(147, 108);
+            this.MineAddDropbutton.Location = new System.Drawing.Point(147, 119);
             this.MineAddDropbutton.Name = "MineAddDropbutton";
             this.MineAddDropbutton.Size = new System.Drawing.Size(21, 21);
             this.MineAddDropbutton.TabIndex = 18;
@@ -2502,14 +2510,6 @@
             this.MineIndexcomboBox.Size = new System.Drawing.Size(92, 21);
             this.MineIndexcomboBox.TabIndex = 13;
             this.MineIndexcomboBox.SelectedIndexChanged += new System.EventHandler(this.MineIndexcomboBox_SelectedIndexChanged);
-            // 
-            // MineNametextBox
-            // 
-            this.MineNametextBox.Location = new System.Drawing.Point(97, 16);
-            this.MineNametextBox.Name = "MineNametextBox";
-            this.MineNametextBox.Size = new System.Drawing.Size(100, 20);
-            this.MineNametextBox.TabIndex = 22;
-            this.MineNametextBox.TextChanged += new System.EventHandler(this.MineNametextBox_TextChanged);
             // 
             // BalanceConfigForm
             // 

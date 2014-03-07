@@ -3211,8 +3211,6 @@ namespace Server.MirObjects
                     Mine.StonesLeft--;
                     if (Envir.Random.Next(100) <= (Mine.Mine.HitRate + (Info.Equipment[(int)EquipmentSlot.Weapon].Info.Accuracy + Info.Equipment[(int)EquipmentSlot.Weapon].Accuracy)*10))
                     {
-                        //CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Mine},CurrentLocation);
-
                         //create some rubble on the floor (or increase whats there)
                         SpellObject Rubble = null;
                         Cell minecell = CurrentMap.GetCell(CurrentLocation);
@@ -5828,7 +5826,7 @@ namespace Server.MirObjects
 
         public override bool CanGainGold(uint gold)
         {
-            return gold + Account.Gold <= uint.MaxValue;
+            return (UInt64)gold + Account.Gold <= uint.MaxValue;
         }
         public override void WinGold(uint gold)
         {
@@ -5863,6 +5861,9 @@ namespace Server.MirObjects
         }
         public void GainGold(uint gold)
         {
+            if (((UInt64)Account.Gold + gold) > uint.MaxValue)
+                gold = uint.MaxValue - Account.Gold;
+            
             Account.Gold += gold;
 
             Enqueue(new S.GainedGold { Gold = gold });
