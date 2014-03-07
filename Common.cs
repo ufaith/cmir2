@@ -2946,6 +2946,7 @@ public class UserId
 
 public class MineSet
 {
+    public string Name = string.Empty;
     public byte SpotRegenRate = 5;
     public byte MaxStones = 80;
     public byte HitRate = 25;
@@ -3037,6 +3038,6 @@ public class MineZone
     }
     public override string ToString()
     {
-        return string.Format("Map: {0}- {1}", Functions.PointToString(Location), Mine);
+        return string.Format("Mine: {0}- {1}", Functions.PointToString(Location), Mine);
     }
 }

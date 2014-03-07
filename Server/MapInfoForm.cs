@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using Server.MirDatabase;
 using Server.MirEnvir;
@@ -29,8 +30,15 @@ namespace Server
         {
             InitializeComponent();
 
+            MineComboBox.Items.Add(new ListItem {Text = "Disabled", Value = "0"});
+            for (int i = 0; i < Settings.MineSetList.Count; i++) MineComboBox.Items.Add(new ListItem(Settings.MineSetList[i].Name, (i + 1).ToString()));
+
+            MineZoneComboBox.Items.Add(new ListItem ("Disabled", "0"));
+            for (int i = 0; i < Settings.MineSetList.Count; i++) MineZoneComboBox.Items.Add(new ListItem(Settings.MineSetList[i].Name, (i + 1).ToString()));
+
             LightsComboBox.Items.AddRange(Enum.GetValues(typeof(LightSetting)).Cast<object>().ToArray());
             for (int i = 0; i < Envir.MonsterInfoList.Count; i++) MonsterInfoComboBox.Items.Add(Envir.MonsterInfoList[i]);
+            
             UpdateInterface();
         }
         private void MapInfoForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -67,6 +75,7 @@ namespace Server
                 MiniMapTextBox.Text = string.Empty;
                 BigMapTextBox.Text = string.Empty;
                 LightsComboBox.SelectedItem = null;
+                MineComboBox.SelectedItem = null;
 
                 NoTeleportCheckbox.Checked = false;
                 NoReconnectCheckbox.Checked = false;
@@ -88,7 +97,7 @@ namespace Server
                 FireTextbox.Text = string.Empty;
                 LightningTextbox.Text = string.Empty;
                 MapDarkLighttextBox.Text = string.Empty;
-                MineIndextextBox.Text = string.Empty;
+                //MineIndextextBox.Text = string.Empty;
                 return;
             }
 
@@ -103,7 +112,8 @@ namespace Server
             MiniMapTextBox.Text = mi.MiniMap.ToString();
             BigMapTextBox.Text = mi.BigMap.ToString();
             LightsComboBox.SelectedItem = mi.Light;
-
+            MineComboBox.SelectedIndex = mi.MineIndex;
+            
             //map attributes
             NoTeleportCheckbox.Checked = mi.NoTeleport;
             NoReconnectCheckbox.Checked = mi.NoReconnect;
@@ -123,7 +133,7 @@ namespace Server
             LightningCheckbox.Checked = mi.Lightning;                      
             LightningTextbox.Text = mi.LightningDamage.ToString();
             MapDarkLighttextBox.Text = mi.MapDarkLight.ToString();
-            MineIndextextBox.Text = mi.MineIndex.ToString();
+            //MineIndextextBox.Text = mi.MineIndex.ToString();
 
             for (int i = 1; i < _selectedMapInfos.Count; i++)
             {
@@ -135,7 +145,7 @@ namespace Server
                 if (MiniMapTextBox.Text != mi.MiniMap.ToString()) MiniMapTextBox.Text = string.Empty;
                 if (BigMapTextBox.Text != mi.BigMap.ToString()) BigMapTextBox.Text = string.Empty;
                 if (LightsComboBox.SelectedItem == null || (LightSetting)LightsComboBox.SelectedItem != mi.Light) LightsComboBox.SelectedItem = null;
-
+                if (MineComboBox.SelectedItem == null || MineComboBox.SelectedIndex != mi.MineIndex) MineComboBox.SelectedIndex = 1;
                 //map attributes
                 if (NoTeleportCheckbox.Checked != mi.NoTeleport) NoTeleportCheckbox.Checked = false;
                 if (NoReconnectCheckbox.Checked != mi.NoReconnect) NoReconnectCheckbox.Checked = false;
@@ -155,7 +165,6 @@ namespace Server
                 if (LightningCheckbox.Checked != mi.Lightning) LightningCheckbox.Checked = false;                             
                 if (LightningTextbox.Text != mi.LightningDamage.ToString()) LightningTextbox.Text = string.Empty;
                 if (MapDarkLighttextBox.Text != mi.MapDarkLight.ToString()) MapDarkLighttextBox.Text = string.Empty;
-                if (MineIndextextBox.Text != mi.MineIndex.ToString()) MineIndextextBox.Text = string.Empty;
             }
 
             UpdateSafeZoneInterface();
@@ -455,11 +464,11 @@ namespace Server
                 if (_selectedMineZones != null && _selectedMineZones.Count > 0)
                     _selectedMineZones.Clear();
                 _info = null;
-                
+
                 MineZonepanel.Enabled = false;
                 MZXtextBox.Text = string.Empty;
                 MZYtextBox.Text = string.Empty;
-                MZMineIndextextBox.Text = string.Empty;
+                MineZoneComboBox.SelectedItem = null;
                 MZSizetextBox.Text = string.Empty;
                 return;
             }
@@ -480,7 +489,7 @@ namespace Server
                 MineZonepanel.Enabled = false;
                 MZXtextBox.Text = string.Empty;
                 MZYtextBox.Text = string.Empty;
-                MZMineIndextextBox.Text = string.Empty;
+                MineZoneComboBox.SelectedItem = null;
                 MZSizetextBox.Text = string.Empty;
                 return;
             }
@@ -489,9 +498,8 @@ namespace Server
 
             MZXtextBox.Text = info.Location.X.ToString();
             MZYtextBox.Text = info.Location.Y.ToString();
-            MZMineIndextextBox.Text = info.Mine.ToString();
-            MZSizetextBox.Text = info.Size.ToString();
-
+            MineZoneComboBox.SelectedIndex = info.Mine;
+            MZSizetextBox.Text = info.Size.ToString();   
 
             for (int i = 1; i < _selectedMineZones.Count; i++)
             {
@@ -499,7 +507,7 @@ namespace Server
 
                 if (MZXtextBox.Text != info.Location.X.ToString()) MZXtextBox.Text = string.Empty;
                 if (MZYtextBox.Text != info.Location.Y.ToString()) MZYtextBox.Text = string.Empty;
-                if (MZMineIndextextBox.Text != info.Mine.ToString()) MZMineIndextextBox.Text = string.Empty;
+                if (MineComboBox.SelectedIndex != info.Mine) MineComboBox.SelectedIndex = 1;
                 if (MZSizetextBox.Text != info.Size.ToString()) MZSizetextBox.Text = string.Empty;
             }
         }
@@ -1473,23 +1481,6 @@ namespace Server
             RefreshMineZoneList();
         }
 
-        private void MineIndextextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (ActiveControl != sender) return;
-
-            byte temp;
-
-            if ((!byte.TryParse(ActiveControl.Text, out temp)) || (Settings.MineSetList.Count < temp))
-            {
-                ActiveControl.BackColor = Color.Red;
-                return;
-            }
-            ActiveControl.BackColor = SystemColors.Window;
-
-            for (int i = 0; i < _selectedMapInfos.Count; i++)
-                _selectedMapInfos[i].MineIndex = temp;
-        }
-
         private void ImportMapInfoButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -1571,7 +1562,6 @@ namespace Server
 
             MessageBox.Show("Import Complete");
         }
-
         private void ExportMapInfoButton_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
@@ -1632,6 +1622,172 @@ namespace Server
                 }
             }
             MessageBox.Show("Export Complete");
+        }
+
+        private void ImportNPCInfoButton_Click(object sender, EventArgs e)
+        {
+            bool hasImported = false;
+
+            if (Envir.MapInfoList.Count == 0) return;
+
+            MirForms.ConvertNPCInfo.Start();
+            for (int i = 0; i < MirForms.ConvertNPCInfo.NPCInfoList.Count; i++)
+            {
+                try
+                {
+                    NPCInfo npcinfo = new NPCInfo
+                    {
+                        FileName = MirForms.ConvertNPCInfo.NPCInfoList[i].FileName,
+                        Location = new Point(MirForms.ConvertNPCInfo.NPCInfoList[i].X, MirForms.ConvertNPCInfo.NPCInfoList[i].Y),
+                        Name = MirForms.ConvertNPCInfo.NPCInfoList[i].Title.Replace('*', ' '),
+                        Image = (byte)MirForms.ConvertNPCInfo.NPCInfoList[i].Image,
+                        Rate = (ushort)MirForms.ConvertNPCInfo.NPCInfoList[i].Rate
+                    };
+
+                    int index = Envir.MapInfoList.FindIndex(a => a.FileName == MirForms.ConvertNPCInfo.NPCInfoList[i].Map);
+                    if (index == -1) continue;
+
+                    Envir.MapInfoList[index].NPCs.Add(npcinfo);
+                    hasImported = true;
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
+            MirForms.ConvertNPCInfo.Stop();
+
+            if (!hasImported) return;
+
+            UpdateInterface();
+            MessageBox.Show("NPC Import complete");
+        }
+        private void ExportNPCInfoButton_Click(object sender, EventArgs e)
+        {
+            if (_selectedMapInfos.Count == 0) return;
+
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.InitialDirectory = Application.StartupPath + @"\Exports";
+            sfd.Filter = "Text File|*.txt";
+            sfd.ShowDialog();
+
+            if (sfd.FileName == string.Empty) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+            {
+                using (StreamWriter sw = File.AppendText(sfd.FileNames[0]))
+                {
+                    for (int j = 0; j < _selectedMapInfos[i].NPCs.Count; j++)
+                    {
+                        string Output = string.Format("{0} {1} {2} {3} {4} {5} {6}",
+                            _selectedMapInfos[i].NPCs[j].FileName,
+                            _selectedMapInfos[i].FileName,
+                            _selectedMapInfos[i].NPCs[j].Location.X,
+                            _selectedMapInfos[i].NPCs[j].Location.Y,
+                            _selectedMapInfos[i].NPCs[j].Name,
+                            _selectedMapInfos[i].NPCs[j].Image,
+                            _selectedMapInfos[i].NPCs[j].Rate);
+
+                        sw.WriteLine(Output);
+                    }
+                }
+            }
+            MessageBox.Show("NPC Export complete");
+        }
+
+        private void ImportMonGenButton_Click(object sender, EventArgs e)
+        {
+            bool hasImported = false;
+
+            if (Envir.MapInfoList.Count == 0) return;
+
+            MirForms.ConvertMonGenInfo.Start();
+
+            for (int i = 0; i < MirForms.ConvertMonGenInfo.monGenList.Count; i++)
+            {
+                try
+                {
+                    int monsterIndex = Envir.MonsterInfoList.FindIndex(a => a.GameName == MirForms.ConvertMonGenInfo.monGenList[i].Name.Replace('*', ' '));
+                    if (monsterIndex == -1) continue;
+
+                    RespawnInfo respawnInfo = new RespawnInfo
+                    {
+                        MonsterIndex = monsterIndex + 1,
+                        Location = new Point(MirForms.ConvertMonGenInfo.monGenList[i].X, MirForms.ConvertMonGenInfo.monGenList[i].Y),
+                        Count = (ushort)MirForms.ConvertMonGenInfo.monGenList[i].Count,
+                        Spread = (ushort)MirForms.ConvertMonGenInfo.monGenList[i].Range,
+                        Delay = (ushort)MirForms.ConvertMonGenInfo.monGenList[i].Delay,
+                        Direction = (byte)MirForms.ConvertMonGenInfo.monGenList[i].Direction
+                    };
+
+                    int index = Envir.MapInfoList.FindIndex(a => a.FileName == MirForms.ConvertMonGenInfo.monGenList[i].Map);
+                    if (index == -1) continue;
+
+                    Envir.MapInfoList[index].Respawns.Add(respawnInfo);
+                    hasImported = true;
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
+            MirForms.ConvertMonGenInfo.Stop();
+
+            if (!hasImported) return;
+
+            UpdateInterface();
+            MessageBox.Show("MonGen Import complete");
+        }
+        private void ExportMonGenButton_Click(object sender, EventArgs e)
+        {
+            if (_selectedMapInfos.Count == 0) return;
+
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.InitialDirectory = Application.StartupPath + @"\Exports";
+            sfd.Filter = "Text File|*.txt";
+            sfd.ShowDialog();
+
+            if (sfd.FileName == string.Empty) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+            {
+                using (StreamWriter sw = File.AppendText(sfd.FileNames[0]))
+                {
+                    for (int j = 0; j < _selectedMapInfos[i].Respawns.Count; j++)
+                    {
+                        string Output = string.Format("{0} {1} {2} {3} {4} {5} {6} {7}",
+                            _selectedMapInfos[i].FileName,
+                            _selectedMapInfos[i].Respawns[j].Location.X,
+                            _selectedMapInfos[i].Respawns[j].Location.Y,
+                            Envir.MonsterInfoList[j].GameName.Replace(' ', '*'),
+                           _selectedMapInfos[i].Respawns[j].Spread,
+                           _selectedMapInfos[i].Respawns[j].Count,
+                           _selectedMapInfos[i].Respawns[j].Delay,
+                           _selectedMapInfos[i].Respawns[j].Direction);
+
+                        sw.WriteLine(Output);
+                    }
+                }
+            }
+            MessageBox.Show("MonGen Export complete");
+        }
+
+        private void MineComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].MineIndex = Convert.ToByte(MineComboBox.SelectedIndex);
+        }
+
+        private void MineZoneComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMineZones.Count; i++)
+                _selectedMineZones[i].Mine = Convert.ToByte(MineZoneComboBox.SelectedIndex);
+
+            RefreshMineZoneList();
         }
     }
 }

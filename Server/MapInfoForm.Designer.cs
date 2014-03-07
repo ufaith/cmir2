@@ -35,6 +35,8 @@ namespace Server
         {
             this.MapTabs = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label33 = new System.Windows.Forms.Label();
+            this.MineComboBox = new System.Windows.Forms.ComboBox();
             this.label15 = new System.Windows.Forms.Label();
             this.BigMapTextBox = new System.Windows.Forms.TextBox();
             this.LightsComboBox = new System.Windows.Forms.ComboBox();
@@ -48,8 +50,6 @@ namespace Server
             this.FileNameTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tabPage6 = new System.Windows.Forms.TabPage();
-            this.label27 = new System.Windows.Forms.Label();
-            this.MineIndextextBox = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
             this.MapDarkLighttextBox = new System.Windows.Forms.TextBox();
             this.NoNamesCheckbox = new System.Windows.Forms.CheckBox();
@@ -141,8 +141,8 @@ namespace Server
             this.MZDeletebutton = new System.Windows.Forms.Button();
             this.MZAddbutton = new System.Windows.Forms.Button();
             this.MineZonepanel = new System.Windows.Forms.Panel();
-            this.label33 = new System.Windows.Forms.Label();
-            this.MZMineIndextextBox = new System.Windows.Forms.TextBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.MineZoneComboBox = new System.Windows.Forms.ComboBox();
             this.label30 = new System.Windows.Forms.Label();
             this.MZYtextBox = new System.Windows.Forms.TextBox();
             this.label31 = new System.Windows.Forms.Label();
@@ -157,6 +157,10 @@ namespace Server
             this.CopyMapButton = new System.Windows.Forms.Button();
             this.ImportMapInfoButton = new System.Windows.Forms.Button();
             this.ExportMapInfoButton = new System.Windows.Forms.Button();
+            this.ImportMongenButton = new System.Windows.Forms.Button();
+            this.ExportMongenButton = new System.Windows.Forms.Button();
+            this.ImportNPCInfoButton = new System.Windows.Forms.Button();
+            this.ExportNPCInfoButton = new System.Windows.Forms.Button();
             this.MapTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage6.SuspendLayout();
@@ -184,14 +188,16 @@ namespace Server
             this.MapTabs.Controls.Add(this.tabPage4);
             this.MapTabs.Controls.Add(this.tabPage5);
             this.MapTabs.Controls.Add(this.tabPage7);
-            this.MapTabs.Location = new System.Drawing.Point(207, 41);
+            this.MapTabs.Location = new System.Drawing.Point(207, 62);
             this.MapTabs.Name = "MapTabs";
             this.MapTabs.SelectedIndex = 0;
-            this.MapTabs.Size = new System.Drawing.Size(540, 218);
+            this.MapTabs.Size = new System.Drawing.Size(540, 256);
             this.MapTabs.TabIndex = 8;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.label33);
+            this.tabPage1.Controls.Add(this.MineComboBox);
             this.tabPage1.Controls.Add(this.label15);
             this.tabPage1.Controls.Add(this.BigMapTextBox);
             this.tabPage1.Controls.Add(this.LightsComboBox);
@@ -207,10 +213,29 @@ namespace Server
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(532, 192);
+            this.tabPage1.Size = new System.Drawing.Size(532, 230);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Info";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(16, 153);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(60, 13);
+            this.label33.TabIndex = 16;
+            this.label33.Text = "Mine Type:";
+            // 
+            // MineComboBox
+            // 
+            this.MineComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.MineComboBox.FormattingEnabled = true;
+            this.MineComboBox.Location = new System.Drawing.Point(82, 150);
+            this.MineComboBox.Name = "MineComboBox";
+            this.MineComboBox.Size = new System.Drawing.Size(92, 21);
+            this.MineComboBox.TabIndex = 15;
+            this.MineComboBox.SelectedIndexChanged += new System.EventHandler(this.MineComboBox_SelectedIndexChanged);
             // 
             // label15
             // 
@@ -320,8 +345,6 @@ namespace Server
             // 
             // tabPage6
             // 
-            this.tabPage6.Controls.Add(this.label27);
-            this.tabPage6.Controls.Add(this.MineIndextextBox);
             this.tabPage6.Controls.Add(this.label19);
             this.tabPage6.Controls.Add(this.MapDarkLighttextBox);
             this.tabPage6.Controls.Add(this.NoNamesCheckbox);
@@ -348,23 +371,6 @@ namespace Server
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "Attributes";
             this.tabPage6.UseVisualStyleBackColor = true;
-            // 
-            // label27
-            // 
-            this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(338, 120);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(59, 13);
-            this.label27.TabIndex = 42;
-            this.label27.Text = "Mine Index";
-            // 
-            // MineIndextextBox
-            // 
-            this.MineIndextextBox.Location = new System.Drawing.Point(443, 117);
-            this.MineIndextextBox.Name = "MineIndextextBox";
-            this.MineIndextextBox.Size = new System.Drawing.Size(49, 20);
-            this.MineIndextextBox.TabIndex = 41;
-            this.MineIndextextBox.TextChanged += new System.EventHandler(this.MineIndextextBox_TextChanged);
             // 
             // label19
             // 
@@ -1319,8 +1325,8 @@ namespace Server
             this.MineZonepanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.MineZonepanel.Controls.Add(this.label33);
-            this.MineZonepanel.Controls.Add(this.MZMineIndextextBox);
+            this.MineZonepanel.Controls.Add(this.label27);
+            this.MineZonepanel.Controls.Add(this.MineZoneComboBox);
             this.MineZonepanel.Controls.Add(this.label30);
             this.MineZonepanel.Controls.Add(this.MZYtextBox);
             this.MineZonepanel.Controls.Add(this.label31);
@@ -1330,31 +1336,32 @@ namespace Server
             this.MineZonepanel.Enabled = false;
             this.MineZonepanel.Location = new System.Drawing.Point(189, 35);
             this.MineZonepanel.Name = "MineZonepanel";
-            this.MineZonepanel.Size = new System.Drawing.Size(197, 139);
+            this.MineZonepanel.Size = new System.Drawing.Size(241, 139);
             this.MineZonepanel.TabIndex = 14;
             // 
-            // label33
+            // label27
             // 
-            this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(21, 29);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(62, 13);
-            this.label33.TabIndex = 12;
-            this.label33.Text = "Mine Index:";
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(12, 17);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(60, 13);
+            this.label27.TabIndex = 14;
+            this.label27.Text = "Mine Type:";
             // 
-            // MZMineIndextextBox
+            // MineZoneComboBox
             // 
-            this.MZMineIndextextBox.Location = new System.Drawing.Point(89, 26);
-            this.MZMineIndextextBox.MaxLength = 5;
-            this.MZMineIndextextBox.Name = "MZMineIndextextBox";
-            this.MZMineIndextextBox.Size = new System.Drawing.Size(37, 20);
-            this.MZMineIndextextBox.TabIndex = 11;
-            this.MZMineIndextextBox.TextChanged += new System.EventHandler(this.MZMineIndextextBox_TextChanged);
+            this.MineZoneComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.MineZoneComboBox.FormattingEnabled = true;
+            this.MineZoneComboBox.Location = new System.Drawing.Point(78, 14);
+            this.MineZoneComboBox.Name = "MineZoneComboBox";
+            this.MineZoneComboBox.Size = new System.Drawing.Size(124, 21);
+            this.MineZoneComboBox.TabIndex = 13;
+            this.MineZoneComboBox.SelectedIndexChanged += new System.EventHandler(this.MineZoneComboBox_SelectedIndexChanged);
             // 
             // label30
             // 
             this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(109, 60);
+            this.label30.Location = new System.Drawing.Point(142, 53);
             this.label30.Name = "label30";
             this.label30.Size = new System.Drawing.Size(17, 13);
             this.label30.TabIndex = 10;
@@ -1362,7 +1369,7 @@ namespace Server
             // 
             // MZYtextBox
             // 
-            this.MZYtextBox.Location = new System.Drawing.Point(132, 57);
+            this.MZYtextBox.Location = new System.Drawing.Point(165, 50);
             this.MZYtextBox.MaxLength = 5;
             this.MZYtextBox.Name = "MZYtextBox";
             this.MZYtextBox.Size = new System.Drawing.Size(37, 20);
@@ -1372,7 +1379,7 @@ namespace Server
             // label31
             // 
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(53, 82);
+            this.label31.Location = new System.Drawing.Point(42, 99);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(30, 13);
             this.label31.TabIndex = 8;
@@ -1380,7 +1387,7 @@ namespace Server
             // 
             // MZSizetextBox
             // 
-            this.MZSizetextBox.Location = new System.Drawing.Point(89, 79);
+            this.MZSizetextBox.Location = new System.Drawing.Point(78, 96);
             this.MZSizetextBox.MaxLength = 5;
             this.MZSizetextBox.Name = "MZSizetextBox";
             this.MZSizetextBox.Size = new System.Drawing.Size(37, 20);
@@ -1390,7 +1397,7 @@ namespace Server
             // label32
             // 
             this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(23, 60);
+            this.label32.Location = new System.Drawing.Point(55, 57);
             this.label32.Name = "label32";
             this.label32.Size = new System.Drawing.Size(17, 13);
             this.label32.TabIndex = 3;
@@ -1398,7 +1405,7 @@ namespace Server
             // 
             // MZXtextBox
             // 
-            this.MZXtextBox.Location = new System.Drawing.Point(46, 57);
+            this.MZXtextBox.Location = new System.Drawing.Point(78, 54);
             this.MZXtextBox.MaxLength = 5;
             this.MZXtextBox.Name = "MZXtextBox";
             this.MZXtextBox.Size = new System.Drawing.Size(37, 20);
@@ -1419,7 +1426,7 @@ namespace Server
             // 
             // RemoveButton
             // 
-            this.RemoveButton.Location = new System.Drawing.Point(126, 12);
+            this.RemoveButton.Location = new System.Drawing.Point(126, 33);
             this.RemoveButton.Name = "RemoveButton";
             this.RemoveButton.Size = new System.Drawing.Size(75, 23);
             this.RemoveButton.TabIndex = 6;
@@ -1429,7 +1436,7 @@ namespace Server
             // 
             // AddButton
             // 
-            this.AddButton.Location = new System.Drawing.Point(12, 12);
+            this.AddButton.Location = new System.Drawing.Point(12, 33);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(75, 23);
             this.AddButton.TabIndex = 5;
@@ -1442,16 +1449,16 @@ namespace Server
             this.MapInfoListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.MapInfoListBox.FormattingEnabled = true;
-            this.MapInfoListBox.Location = new System.Drawing.Point(12, 41);
+            this.MapInfoListBox.Location = new System.Drawing.Point(12, 62);
             this.MapInfoListBox.Name = "MapInfoListBox";
             this.MapInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.MapInfoListBox.Size = new System.Drawing.Size(189, 212);
+            this.MapInfoListBox.Size = new System.Drawing.Size(189, 251);
             this.MapInfoListBox.TabIndex = 7;
             this.MapInfoListBox.SelectedIndexChanged += new System.EventHandler(this.MapInfoListBox_SelectedIndexChanged);
             // 
             // PasteMapButton
             // 
-            this.PasteMapButton.Location = new System.Drawing.Point(288, 12);
+            this.PasteMapButton.Location = new System.Drawing.Point(288, 33);
             this.PasteMapButton.Name = "PasteMapButton";
             this.PasteMapButton.Size = new System.Drawing.Size(75, 23);
             this.PasteMapButton.TabIndex = 24;
@@ -1461,7 +1468,7 @@ namespace Server
             // 
             // CopyMapButton
             // 
-            this.CopyMapButton.Location = new System.Drawing.Point(207, 12);
+            this.CopyMapButton.Location = new System.Drawing.Point(207, 33);
             this.CopyMapButton.Name = "CopyMapButton";
             this.CopyMapButton.Size = new System.Drawing.Size(75, 23);
             this.CopyMapButton.TabIndex = 23;
@@ -1470,9 +1477,9 @@ namespace Server
             // 
             // ImportMapInfoButton
             // 
-            this.ImportMapInfoButton.Location = new System.Drawing.Point(533, 12);
+            this.ImportMapInfoButton.Location = new System.Drawing.Point(478, 4);
             this.ImportMapInfoButton.Name = "ImportMapInfoButton";
-            this.ImportMapInfoButton.Size = new System.Drawing.Size(108, 23);
+            this.ImportMapInfoButton.Size = new System.Drawing.Size(87, 23);
             this.ImportMapInfoButton.TabIndex = 25;
             this.ImportMapInfoButton.Text = "Import MapInfo";
             this.ImportMapInfoButton.UseVisualStyleBackColor = true;
@@ -1480,19 +1487,63 @@ namespace Server
             // 
             // ExportMapInfoButton
             // 
-            this.ExportMapInfoButton.Location = new System.Drawing.Point(647, 12);
+            this.ExportMapInfoButton.Location = new System.Drawing.Point(478, 33);
             this.ExportMapInfoButton.Name = "ExportMapInfoButton";
-            this.ExportMapInfoButton.Size = new System.Drawing.Size(100, 23);
+            this.ExportMapInfoButton.Size = new System.Drawing.Size(87, 23);
             this.ExportMapInfoButton.TabIndex = 26;
             this.ExportMapInfoButton.Text = "Export MapInfo";
             this.ExportMapInfoButton.UseVisualStyleBackColor = true;
             this.ExportMapInfoButton.Click += new System.EventHandler(this.ExportMapInfoButton_Click);
             // 
+            // ImportMongenButton
+            // 
+            this.ImportMongenButton.Location = new System.Drawing.Point(571, 3);
+            this.ImportMongenButton.Name = "ImportMongenButton";
+            this.ImportMongenButton.Size = new System.Drawing.Size(86, 23);
+            this.ImportMongenButton.TabIndex = 27;
+            this.ImportMongenButton.Text = "Import Spawns";
+            this.ImportMongenButton.UseVisualStyleBackColor = true;
+            this.ImportMongenButton.Click += new System.EventHandler(this.ImportMonGenButton_Click);
+            // 
+            // ExportMongenButton
+            // 
+            this.ExportMongenButton.Location = new System.Drawing.Point(571, 33);
+            this.ExportMongenButton.Name = "ExportMongenButton";
+            this.ExportMongenButton.Size = new System.Drawing.Size(86, 23);
+            this.ExportMongenButton.TabIndex = 28;
+            this.ExportMongenButton.Text = "Export Spawns";
+            this.ExportMongenButton.UseVisualStyleBackColor = true;
+            this.ExportMongenButton.Click += new System.EventHandler(this.ExportMonGenButton_Click);
+            // 
+            // ImportNPCInfoButton
+            // 
+            this.ImportNPCInfoButton.Location = new System.Drawing.Point(664, 4);
+            this.ImportNPCInfoButton.Name = "ImportNPCInfoButton";
+            this.ImportNPCInfoButton.Size = new System.Drawing.Size(75, 23);
+            this.ImportNPCInfoButton.TabIndex = 29;
+            this.ImportNPCInfoButton.Text = "Import NPCs";
+            this.ImportNPCInfoButton.UseVisualStyleBackColor = true;
+            this.ImportNPCInfoButton.Click += new System.EventHandler(this.ImportNPCInfoButton_Click);
+            // 
+            // ExportNPCInfoButton
+            // 
+            this.ExportNPCInfoButton.Location = new System.Drawing.Point(664, 33);
+            this.ExportNPCInfoButton.Name = "ExportNPCInfoButton";
+            this.ExportNPCInfoButton.Size = new System.Drawing.Size(75, 23);
+            this.ExportNPCInfoButton.TabIndex = 30;
+            this.ExportNPCInfoButton.Text = "Export NPCs";
+            this.ExportNPCInfoButton.UseVisualStyleBackColor = true;
+            this.ExportNPCInfoButton.Click += new System.EventHandler(this.ExportNPCInfoButton_Click);
+            // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(759, 271);
+            this.ClientSize = new System.Drawing.Size(759, 319);
+            this.Controls.Add(this.ExportNPCInfoButton);
+            this.Controls.Add(this.ImportNPCInfoButton);
+            this.Controls.Add(this.ExportMongenButton);
+            this.Controls.Add(this.ImportMongenButton);
             this.Controls.Add(this.ExportMapInfoButton);
             this.Controls.Add(this.ImportMapInfoButton);
             this.Controls.Add(this.PasteMapButton);
@@ -1639,14 +1690,10 @@ namespace Server
         private Button ExportMapInfoButton;
         private Label label19;
         private TextBox MapDarkLighttextBox;
-        private Label label27;
-        private TextBox MineIndextextBox;
         private TabPage tabPage7;
         private Button MZDeletebutton;
         private Button MZAddbutton;
         private Panel MineZonepanel;
-        private Label label33;
-        private TextBox MZMineIndextextBox;
         private Label label30;
         private TextBox MZYtextBox;
         private Label label31;
@@ -1654,6 +1701,14 @@ namespace Server
         private Label label32;
         private TextBox MZXtextBox;
         private ListBox MZListlistBox;
+        private ComboBox MineComboBox;
+        private ComboBox MineZoneComboBox;
+        private Label label27;
+        private Label label33;
+        private Button ImportMongenButton;
+        private Button ExportMongenButton;
+        private Button ImportNPCInfoButton;
+        private Button ExportNPCInfoButton;
 
     }
 }

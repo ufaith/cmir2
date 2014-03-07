@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Server.MirForms
 {
@@ -203,40 +204,44 @@ namespace Server.MirForms
     public class MapInfo
     {
         public LightSetting
-            Light;
+            Light = LightSetting.Normal;
 
         public int
-            Index,
-            FireDamage,
-            LightningDamage;
+            Index = 0,
+            FireDamage = 0,
+            LightningDamage = 0;
 
         public ushort
-            MiniMapNumber,
-            BigMapNumber;
+            MiniMapNumber = 0,
+            BigMapNumber = 0;
 
         public string
-            MapFile,
-            MapName,
-            ReconnectMap = string.Empty; // for no reconnect
+            MapFile = string.Empty,
+            MapName = string.Empty,
+            ReconnectMap = string.Empty;
+
+        public byte
+            MapLightValue = 0;
 
         public bool
-            NoTeleport,
-            NoReconnect,
-            NoRandom,
-            NoEscape,
-            NoRecall,
-            NoDrug,
-            NoPositionMove,
-            NoThrowItem,
-            NoPlayerDrop,
-            NoMonsterDrop,
-            NoNames,
-            Fight,
-            Fire,
-            Lightning,
-            MiniMap,
-            BigMap,
-            Mine;
+            NoTeleport = false,
+            NoReconnect = false,
+            NoRandom = false,
+            NoEscape = false,
+            NoRecall = false,
+            NoDrug = false,
+            NoPositionMove = false,
+            NoThrowItem = false,
+            NoPlayerDrop = false,
+            NoMonsterDrop = false,
+            NoNames = false,
+            Fight = false,
+            Fire = false,
+            Lightning = false,
+            MiniMap = false,
+            BigMap = false,
+            MapLight = false,
+            Mine = false;
 
         public List<MapMovements>
             MapMovements = new List<MapMovements>();
@@ -245,14 +250,150 @@ namespace Server.MirForms
     public class MapMovements
     {
         public int
-            fromIndex,
-            toMap;
+            fromIndex = 0,
+            toMap = 0;
 
         public string
-             fromX,
-             fromY,
+             fromX = string.Empty,
+             fromY = string.Empty,
 
-             toX,
-             toY;
+             toX = string.Empty,
+             toY = string.Empty;
+    }
+
+    public static class ConvertNPCInfo
+    {
+        public static List<NPCInfo> NPCInfoList = new List<NPCInfo>();
+
+        public static void Start()
+        {
+            string Path = string.Empty;
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Text File|*.txt";
+            ofd.ShowDialog();
+
+            if (ofd.FileName == string.Empty) return;
+
+            Path = ofd.FileName;
+
+            var NPCList = File.ReadAllLines(Path);
+
+            for (int i = 0; i < NPCList.Length; i++)
+            {
+                if (NPCList[i].Contains(';'))
+                    NPCList[i] = NPCList[i].Substring(0, NPCList[i].IndexOf(";", StringComparison.Ordinal));
+
+                var Line = System.Text.RegularExpressions.Regex.Replace(NPCList[i], @"\s+", " ").Split(' ');
+
+                if (Line.Length < 6) continue;
+
+                try
+                {
+                    NPCInfo NPC = new NPCInfo
+                    {
+                        FileName = Line[0],
+                        Map = Line[1],
+                        X = Convert.ToInt16(Line[2]),
+                        Y = Convert.ToInt16(Line[3]),
+                        Title = Line[4],
+                        Image = (Line.Length == 8) ? Convert.ToInt16(Line[6]) : Convert.ToInt16(Line[5])
+                    };
+
+                    NPCInfoList.Add(NPC);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
+        }
+
+        public static void Stop()
+        {
+            NPCInfoList.Clear();
+        }
+    }
+
+    public class NPCInfo
+    {
+        public string
+            FileName = string.Empty,
+            Map = "0",
+            Title = string.Empty;
+
+        public int
+            X = 0,
+            Y = 0,
+            Image = 0,
+            Rate = 100;
+    }
+
+
+    public static class ConvertMonGenInfo
+    {
+        public static List<MonGenInfo> monGenList = new List<MonGenInfo>();
+
+        public static void Start()
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Text File|*.txt|Gen File|*.gen|All|*.*";
+            ofd.ShowDialog();
+
+            if (ofd.FileNames.Length == 0) return;
+
+            for (int i = 0; i < ofd.FileNames.Length; i++)
+            {
+                var MonGen = File.ReadAllLines(ofd.FileNames[i]);
+
+                for (int j = 0; j < MonGen.Length; j++)
+                {
+                    if (MonGen[j].Contains(';'))
+                        MonGen[j] = MonGen[j].Substring(0, MonGen[j].IndexOf(";", System.StringComparison.Ordinal));
+
+                    var Line = System.Text.RegularExpressions.Regex.Replace(MonGen[j], @"\s+", " ").Split(' ');
+
+                    if (Line.Length < 7) continue;
+
+                    try
+                    {
+                        MonGenInfo MonGenItem = new MonGenInfo
+                        {
+                            Map = Line[0],
+                            X = Convert.ToInt16(Line[1]),
+                            Y = Convert.ToInt16(Line[2]),
+                            Name = Line[3],
+                            Range = Convert.ToInt16(Line[4]),
+                            Count = Convert.ToInt16(Line[5]),
+                            Delay = Convert.ToInt16(Line[6]),
+                            Direction = (Line.Length == 8) ? Convert.ToInt16(Line[7]) : 0
+                        };
+
+                        monGenList.Add(MonGenItem);
+                    }
+                    catch (Exception) { continue; }
+                }
+            }
+        }
+
+        public static void Stop()
+        {
+            monGenList.Clear();
+        }
+    }
+
+    public class MonGenInfo
+    {
+        public string
+            Map = string.Empty,
+            Name = string.Empty;
+
+        public int
+            X = 0,
+            Y = 0,
+            Range = 0,
+            Count = 0,
+            Delay = 0,
+            Direction = 0;
     }
 }

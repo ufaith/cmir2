@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 
 namespace Server
@@ -19,10 +20,14 @@ namespace Server
         {
             InitializeComponent();
             ClassComboBox.Items.AddRange(Enum.GetValues(typeof(MirClass)).Cast<object>().ToArray());
+
             for (int i = 0; i < Settings.RandomItemStatsList.Count; i++)
                 RISIndexcomboBox.Items.Add(i);
+
             for (int i = 0; i < Settings.MineSetList.Count; i++)
-                MineIndexcomboBox.Items.Add(i+1);
+                MineIndexcomboBox.Items.Add(new ListItem(Settings.MineSetList[i].Name, (i + 1).ToString()));
+                //MineIndexcomboBox.Items.Add(i+1);
+
             UpdateInterface();
             UpdateRandomItemStats();
             UpdateMines();
@@ -284,6 +289,7 @@ namespace Server
             if (MineIndexcomboBox.SelectedItem == null)
             {
                 MineDropsIndexcomboBox.Items.Clear();
+                MineNametextBox.Text = string.Empty;
                 MineRegenDelaytextBox.Text = string.Empty;
                 MineAttemptstextBox.Text = string.Empty;
                 MineHitRatetextBox.Text = string.Empty;
@@ -305,13 +311,13 @@ namespace Server
                     UpdateMines();
                     return;
                 }
+                MineNametextBox.Text = Settings.MineSetList[MineIndexcomboBox.SelectedIndex].Name.ToString();
                 MineRegenDelaytextBox.Text = Settings.MineSetList[MineIndexcomboBox.SelectedIndex].SpotRegenRate.ToString();
                 MineAttemptstextBox.Text = Settings.MineSetList[MineIndexcomboBox.SelectedIndex].MaxStones.ToString();
                 MineHitRatetextBox.Text = Settings.MineSetList[MineIndexcomboBox.SelectedIndex].HitRate.ToString();
                 MineDropRatetextBox.Text = Settings.MineSetList[MineIndexcomboBox.SelectedIndex].DropRate.ToString();
                 MineSlotstextBox.Text = Settings.MineSetList[MineIndexcomboBox.SelectedIndex].TotalSlots.ToString();
-                if (MineDropsIndexcomboBox.SelectedIndex >= Settings.MineSetList[MineIndexcomboBox.SelectedIndex].Drops.Count)
-                    MineDropsIndexcomboBox.SelectedItem = null;
+                if (MineDropsIndexcomboBox.SelectedIndex >= Settings.MineSetList[MineIndexcomboBox.SelectedIndex].Drops.Count) MineDropsIndexcomboBox.SelectedItem = null;
                 if (MineDropsIndexcomboBox.SelectedItem == null)
                 {
                     MineItemNametextBox.Text = string.Empty;
@@ -2025,7 +2031,8 @@ namespace Server
             if (ActiveControl != sender) return;
             MinesChanged = true;
             Settings.MineSetList.Add(new MineSet());
-            MineIndexcomboBox.Items.Add(Settings.MineSetList.Count);
+            //MineIndexcomboBox.Items.Add(Settings.MineSetList.Count);
+            MineIndexcomboBox.Items.Add(new ListItem(String.Empty, Settings.MineSetList.Count.ToString()));
             MineIndexcomboBox.SelectedIndex = Settings.MineSetList.Count - 1;
             MineDropsIndexcomboBox.Items.Clear();
             UpdateMines();
@@ -2036,7 +2043,7 @@ namespace Server
             if (ActiveControl != sender) return;
             if (MessageBox.Show("Are you sure you want to delete the last index?", "Delete?", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
             MinesChanged = true;
-            MineIndexcomboBox.Items.Remove(Settings.MineSetList.Count - 1);
+            MineIndexcomboBox.Items.RemoveAt(Settings.MineSetList.Count - 1);
             Settings.MineSetList.RemoveAt(Settings.MineSetList.Count - 1);
             UpdateMines();
         }
@@ -2269,6 +2276,19 @@ namespace Server
             ActiveControl.BackColor = SystemColors.Window;
             MinesChanged = true;
             Settings.MineSetList[MineIndexcomboBox.SelectedIndex].Drops[MineDropsIndexcomboBox.SelectedIndex].MaxBonusDura = temp;
+        }
+
+        private void MineNametextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+            if (MineIndexcomboBox.SelectedItem == null) return;
+            string temp = ActiveControl.Text;
+
+            ActiveControl.BackColor = SystemColors.Window;
+            MinesChanged = true;
+            Settings.MineSetList[MineIndexcomboBox.SelectedIndex].Name = temp;
+
+            MineIndexcomboBox.Refresh();
         }
     }
 }
