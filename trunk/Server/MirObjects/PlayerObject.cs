@@ -6815,13 +6815,19 @@ namespace Server.MirObjects
                 {
                     for (int j = 0; j < CurrentMap.Players[i].Pets.Count; j++)
                     {
-                        if (CurrentMap.Players[i].Pets[j].ObjectID != id && CurrentMap.Players[i].Pets[j] is Monsters.HumanWizard) continue;
+                        if (CurrentMap.Players[i].Pets[j].ObjectID != id ||
+                            !(CurrentMap.Players[i].Pets[j] is Monsters.HumanWizard)) continue;
                         player = CurrentMap.Players[i];
                         break;
                     }
+
+                    if (player != null) break;
                 }
-                player = CurrentMap.Players[i];
-                if (player != null) break;
+                else
+                {
+                    player = CurrentMap.Players[i];
+                    break;
+                }
             }
 
             for (int i = 0; i < player.Info.Equipment.Length; i++)
