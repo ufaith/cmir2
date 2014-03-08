@@ -1707,7 +1707,7 @@ namespace Server
             {
                 try
                 {
-                    int monsterIndex = Envir.MonsterInfoList.FindIndex(a => a.GameName == MirForms.ConvertMonGenInfo.monGenList[i].Name.Replace('*', ' '));
+                    int monsterIndex = Envir.MonsterInfoList.FindIndex(a => a.Name.Replace(" ","") == MirForms.ConvertMonGenInfo.monGenList[i].Name.Replace('*', ' '));
                     if (monsterIndex == -1) continue;
 
                     RespawnInfo respawnInfo = new RespawnInfo

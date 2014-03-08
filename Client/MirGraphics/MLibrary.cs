@@ -88,7 +88,7 @@ namespace Client.MirGraphics
             MapLibs[0] = new MLibrary(Settings.DataPath + "Tiles");
             MapLibs[1] = new MLibrary(Settings.DataPath + "Smtiles");
             MapLibs[2] = new MLibrary(Settings.DataPath + "Objects");
-            for (int i = 2; i < 21; i++)
+            for (int i = 2; i < 24; i++)
             {
                 MapLibs[i+1] = new MLibrary(Settings.DataPath + "Objects" + i.ToString());
             }
