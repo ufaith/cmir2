@@ -53,3 +53,6 @@ C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.csproj.G
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.exe
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.pdb
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.MineEntry.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.RespawnEntry.resources
+C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\Server\obj\Release\Server.MirForms.VisualMapInfo.VForm.resources

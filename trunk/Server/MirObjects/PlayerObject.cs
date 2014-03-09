@@ -1534,6 +1534,7 @@ namespace Server.MirObjects
                     Looks_Armour = RealItem.Shape;
                     Looks_Wings = RealItem.Effect;
                 }
+
                 if (RealItem.Type == ItemType.Weapon)
                     Looks_Weapon = RealItem.Shape;
 
