@@ -161,6 +161,7 @@ namespace Server
             this.ExportMongenButton = new System.Windows.Forms.Button();
             this.ImportNPCInfoButton = new System.Windows.Forms.Button();
             this.ExportNPCInfoButton = new System.Windows.Forms.Button();
+            this.VisualizerButton = new System.Windows.Forms.Button();
             this.MapTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage6.SuspendLayout();
@@ -367,7 +368,7 @@ namespace Server
             this.tabPage6.Location = new System.Drawing.Point(4, 22);
             this.tabPage6.Name = "tabPage6";
             this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage6.Size = new System.Drawing.Size(532, 192);
+            this.tabPage6.Size = new System.Drawing.Size(532, 230);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "Attributes";
             this.tabPage6.UseVisualStyleBackColor = true;
@@ -575,7 +576,7 @@ namespace Server
             this.tabPage3.Controls.Add(this.SafeZoneInfoListBox);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(532, 192);
+            this.tabPage3.Size = new System.Drawing.Size(532, 230);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Safe Zones";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -706,7 +707,7 @@ namespace Server
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(532, 192);
+            this.tabPage2.Size = new System.Drawing.Size(532, 230);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Respawns";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -924,7 +925,7 @@ namespace Server
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(532, 192);
+            this.tabPage4.Size = new System.Drawing.Size(532, 230);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Movements";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -1096,7 +1097,7 @@ namespace Server
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage5.Size = new System.Drawing.Size(532, 192);
+            this.tabPage5.Size = new System.Drawing.Size(532, 230);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "NPCs";
             this.tabPage5.UseVisualStyleBackColor = true;
@@ -1295,7 +1296,7 @@ namespace Server
             this.tabPage7.Location = new System.Drawing.Point(4, 22);
             this.tabPage7.Name = "tabPage7";
             this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage7.Size = new System.Drawing.Size(532, 192);
+            this.tabPage7.Size = new System.Drawing.Size(532, 230);
             this.tabPage7.TabIndex = 6;
             this.tabPage7.Text = "MineZones";
             this.tabPage7.UseVisualStyleBackColor = true;
@@ -1483,7 +1484,6 @@ namespace Server
             this.ImportMapInfoButton.TabIndex = 25;
             this.ImportMapInfoButton.Text = "Import MapInfo";
             this.ImportMapInfoButton.UseVisualStyleBackColor = true;
-            this.ImportMapInfoButton.Click += new System.EventHandler(this.ImportMapInfoButton_Click);
             // 
             // ExportMapInfoButton
             // 
@@ -1493,7 +1493,6 @@ namespace Server
             this.ExportMapInfoButton.TabIndex = 26;
             this.ExportMapInfoButton.Text = "Export MapInfo";
             this.ExportMapInfoButton.UseVisualStyleBackColor = true;
-            this.ExportMapInfoButton.Click += new System.EventHandler(this.ExportMapInfoButton_Click);
             // 
             // ImportMongenButton
             // 
@@ -1535,11 +1534,22 @@ namespace Server
             this.ExportNPCInfoButton.UseVisualStyleBackColor = true;
             this.ExportNPCInfoButton.Click += new System.EventHandler(this.ExportNPCInfoButton_Click);
             // 
+            // VisualizerButton
+            // 
+            this.VisualizerButton.Location = new System.Drawing.Point(397, 4);
+            this.VisualizerButton.Name = "VisualizerButton";
+            this.VisualizerButton.Size = new System.Drawing.Size(75, 23);
+            this.VisualizerButton.TabIndex = 31;
+            this.VisualizerButton.Text = "Visualizer";
+            this.VisualizerButton.UseVisualStyleBackColor = true;
+            this.VisualizerButton.Click += new System.EventHandler(this.VisualizerButton_Click);
+            // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(759, 319);
+            this.Controls.Add(this.VisualizerButton);
             this.Controls.Add(this.ExportNPCInfoButton);
             this.Controls.Add(this.ImportNPCInfoButton);
             this.Controls.Add(this.ExportMongenButton);
@@ -1709,6 +1719,7 @@ namespace Server
         private Button ExportMongenButton;
         private Button ImportNPCInfoButton;
         private Button ExportNPCInfoButton;
+        private Button VisualizerButton;
 
     }
 }

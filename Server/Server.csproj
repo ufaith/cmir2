@@ -36,6 +36,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -112,6 +113,30 @@
       <DependentUpon>MapInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MirForms\MapForm.cs" />
+    <Compile Include="MirForms\VisualMapInfo\Class\LockBitmap.cs" />
+    <Compile Include="MirForms\VisualMapInfo\Class\ReadMap.cs" />
+    <Compile Include="MirForms\VisualMapInfo\Class\VisualizerGlobal.cs" />
+    <Compile Include="MirForms\VisualMapInfo\Control\MapContainer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MirForms\VisualMapInfo\Control\MineEntry.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MirForms\VisualMapInfo\Control\MineEntry.Designer.cs">
+      <DependentUpon>MineEntry.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MirForms\VisualMapInfo\Control\RespawnEntry.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MirForms\VisualMapInfo\Control\RespawnEntry.Designer.cs">
+      <DependentUpon>RespawnEntry.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MirForms\VisualMapInfo\VForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MirForms\VisualMapInfo\VForm.Designer.cs">
+      <DependentUpon>VForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MirNetwork\MirConnection.cs" />
     <Compile Include="MirObjects\DelayedAction.cs" />
     <Compile Include="MirObjects\ItemObject.cs" />
@@ -205,6 +230,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MapInfoForm.resx">
       <DependentUpon>MapInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirForms\VisualMapInfo\Control\MineEntry.resx">
+      <DependentUpon>MineEntry.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirForms\VisualMapInfo\Control\RespawnEntry.resx">
+      <DependentUpon>RespawnEntry.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirForms\VisualMapInfo\VForm.resx">
+      <DependentUpon>VForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MonsterInfoForm.resx">
       <DependentUpon>MonsterInfoForm.cs</DependentUpon>
