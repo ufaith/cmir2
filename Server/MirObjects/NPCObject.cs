@@ -193,7 +193,7 @@ namespace Server.MirObjects
                         Match match = Regex.Match(lines[x]);
                         while (match.Success)
                         {
-                            currentButtons.Add(string.Format("[{0}]", match.Groups[1].Captures[0].Value.ToUpper()));
+                            currentButtons.Add(string.Format("[{0}]", match.Groups[1].Captures[0].Value));//ToUpper()
                             match = match.NextMatch();
                         }
 
@@ -496,6 +496,8 @@ namespace Server.MirObjects
 
         public void Call(PlayerObject player, string key)
         {
+            bool found = false;
+
             if (key != MainKey.ToUpper())
             {
                 if (player.NPCID != ObjectID) return;
@@ -504,11 +506,13 @@ namespace Server.MirObjects
                 {
                     if (player.NPCSuccess)
                     {
-                        if (!player.NPCPage.Buttons.Contains(key.ToUpper())) return;
+                        if (!player.NPCPage.Buttons.Any(c => c.ToUpper().Contains(key.ToUpper()))) return;
+                        //if (!player.NPCPage.Buttons.Contains(key.ToUpper())) return;
                     }
                     else
                     {
-                        if (!player.NPCPage.ElseButtons.Contains(key.ToUpper())) return;
+                        if (!player.NPCPage.ElseButtons.Any(c => c.ToUpper().Contains(key.ToUpper()))) return;
+                        //if (!player.NPCPage.ElseButtons.Contains(key.ToUpper())) return;
                     }
                 }
 
@@ -519,7 +523,7 @@ namespace Server.MirObjects
             {
 
                 NPCPage page = NPCSections[i];
-                if (page.Key.ToUpper() != key) continue;
+                if (!String.Equals(page.Key, key, StringComparison.CurrentCultureIgnoreCase)) continue;
 
                 ProcessPage(player, page);
             }
@@ -645,7 +649,7 @@ namespace Server.MirObjects
 
             for (int i = 0; i < words.Length; i++)
             {
-                Match match = r.Match(words[i]);
+                Match match = r.Match(words[i].ToUpper());
 
                 if (!match.Success) continue;
 
@@ -659,13 +663,13 @@ namespace Server.MirObjects
 
         public void AddVariable(PlayerObject player, string key, string value)
         {
-            Regex regex = new Regex(@"[A-Z][0-9]");
+            Regex regex = new Regex(@"[A-Za-z][0-9]");
 
             if (!regex.Match(key).Success) return;
 
             for (int i = 0; i < player.NPCVar.Count; i++)
             {
-                if (player.NPCVar[i].Key != key) continue;
+                if (!String.Equals(player.NPCVar[i].Key, key, StringComparison.CurrentCultureIgnoreCase)) continue;
                 player.NPCVar[i] = new KeyValuePair<string, string>(player.NPCVar[i].Key, value);
                 return;
             }
@@ -675,7 +679,7 @@ namespace Server.MirObjects
 
         public string FindVariable(PlayerObject player, string key)
         {
-            Regex regex = new Regex(@"\%[A-Z][0-9]");
+            Regex regex = new Regex(@"\%[A-Za-z][0-9]");
 
             if (!regex.Match(key).Success) return key;
 
@@ -683,7 +687,7 @@ namespace Server.MirObjects
 
             foreach (KeyValuePair<string, string> t in player.NPCVar)
             {
-                if (t.Key == tempKey) return t.Value;
+                if (String.Equals(t.Key, tempKey, StringComparison.CurrentCultureIgnoreCase)) return t.Value;
             }
 
             return key;
