@@ -1484,6 +1484,7 @@ namespace Server
             this.ImportMapInfoButton.TabIndex = 25;
             this.ImportMapInfoButton.Text = "Import MapInfo";
             this.ImportMapInfoButton.UseVisualStyleBackColor = true;
+            this.ImportMapInfoButton.Click += new System.EventHandler(this.ImportMapInfoButton_Click);
             // 
             // ExportMapInfoButton
             // 
@@ -1493,6 +1494,7 @@ namespace Server
             this.ExportMapInfoButton.TabIndex = 26;
             this.ExportMapInfoButton.Text = "Export MapInfo";
             this.ExportMapInfoButton.UseVisualStyleBackColor = true;
+            this.ExportMapInfoButton.Click += new System.EventHandler(this.ExportMapInfoButton_Click);
             // 
             // ImportMongenButton
             // 
