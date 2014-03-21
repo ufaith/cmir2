@@ -569,7 +569,7 @@ namespace Server.MirObjects
             player.NPCSuccess = page.Check(player);
             player.NPCPage = page;
 
-            switch (page.Key)
+            switch (page.Key.ToUpper())
             {
                 case BuyKey:
                     for (int i = 0; i < Goods.Count; i++)

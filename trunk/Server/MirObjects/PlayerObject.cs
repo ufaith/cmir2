@@ -5013,7 +5013,7 @@ namespace Server.MirObjects
                     array = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
+                    if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
                     {
                         Enqueue(p);
                         return;
@@ -5088,7 +5088,7 @@ namespace Server.MirObjects
                     array = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
+                    if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
                     {
                         Enqueue(p);
                         return;
@@ -5130,7 +5130,7 @@ namespace Server.MirObjects
         {
             S.StoreItem p = new S.StoreItem { From = from, To = to, Success = false };
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
+            if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
             {
                 Enqueue(p);
                 return;
@@ -5192,7 +5192,7 @@ namespace Server.MirObjects
         {
             S.TakeBackItem p = new S.TakeBackItem { From = from, To = to, Success = false };
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
+            if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
             {
                 Enqueue(p);
                 return;
@@ -5266,7 +5266,7 @@ namespace Server.MirObjects
                     array = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
+                    if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
                     {
                         Enqueue(p);
                         return;
@@ -5501,7 +5501,7 @@ namespace Server.MirObjects
                     array = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
+                    if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
                     {
                         Enqueue(p);
                         return;
@@ -5582,7 +5582,7 @@ namespace Server.MirObjects
                     arrayFrom = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
+                    if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
                     {
                         Enqueue(p);
                         return;
@@ -5618,7 +5618,7 @@ namespace Server.MirObjects
                     arrayTo = Info.Inventory;
                     break;
                 case MirGridType.Storage:
-                    if (NPCPage == null || NPCPage.Key != NPCObject.StorageKey.ToUpper())
+                    if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
                     {
                         Enqueue(p);
                         return;
@@ -6322,7 +6322,7 @@ namespace Server.MirObjects
         {
             if (Dead) return;
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.BuyKey.ToUpper()) return;
+            if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.BuyKey, StringComparison.CurrentCultureIgnoreCase)) return;
 
             for (int i = 0; i < CurrentMap.NPCs.Count; i++)
             {
@@ -6340,7 +6340,7 @@ namespace Server.MirObjects
                 return;
             }
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.SellKey.ToUpper())
+            if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.SellKey, StringComparison.CurrentCultureIgnoreCase))
             {
                 Enqueue(p);
                 return;
@@ -6415,7 +6415,7 @@ namespace Server.MirObjects
 
             if (Dead) return;
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.RepairKey.ToUpper() && !special) || (NPCPage.Key != NPCObject.SRepairKey.ToUpper() && special)) return;
+            if (NPCPage == null || (!String.Equals(NPCPage.Key, NPCObject.RepairKey, StringComparison.CurrentCultureIgnoreCase) && !special) || (!String.Equals(NPCPage.Key, NPCObject.SRepairKey, StringComparison.CurrentCultureIgnoreCase) && special)) return;
 
             for (int n = 0; n < CurrentMap.NPCs.Count; n++)
             {
@@ -6488,7 +6488,7 @@ namespace Server.MirObjects
                 return;
             }
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.ConsignKey.ToUpper()))
+            if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.ConsignKey, StringComparison.CurrentCultureIgnoreCase))
             {
                 Enqueue(p);
                 return;
@@ -6567,7 +6567,7 @@ namespace Server.MirObjects
         {
             if (Dead || Envir.Time < SearchTime) return;
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey.ToUpper() && NPCPage.Key != NPCObject.ConsignmentsKey.ToUpper()) || page <= PageSent) return;
+            if (NPCPage == null || (!String.Equals(NPCPage.Key, NPCObject.MarketKey, StringComparison.CurrentCultureIgnoreCase) && !String.Equals(NPCPage.Key, NPCObject.ConsignmentsKey, StringComparison.CurrentCultureIgnoreCase)) || page <= PageSent) return;
 
             SearchTime = Envir.Time + Globals.SearchDelay;
 
@@ -6627,7 +6627,7 @@ namespace Server.MirObjects
         {
             if (Dead || Envir.Time < SearchTime) return;
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey.ToUpper() && NPCPage.Key != NPCObject.ConsignmentsKey.ToUpper())) return;
+            if (NPCPage == null || (!String.Equals(NPCPage.Key, NPCObject.MarketKey, StringComparison.CurrentCultureIgnoreCase) && !String.Equals(NPCPage.Key, NPCObject.ConsignmentsKey, StringComparison.CurrentCultureIgnoreCase))) return;
 
             SearchTime = Envir.Time + Globals.SearchDelay;
 
@@ -6643,7 +6643,7 @@ namespace Server.MirObjects
         {
             if (Dead || Envir.Time < SearchTime) return;
 
-            if (NPCPage == null || (NPCPage.Key != NPCObject.MarketKey.ToUpper() && NPCPage.Key != NPCObject.ConsignmentsKey.ToUpper())) return;
+            if (NPCPage == null || (!String.Equals(NPCPage.Key, NPCObject.MarketKey, StringComparison.CurrentCultureIgnoreCase) && !String.Equals(NPCPage.Key, NPCObject.ConsignmentsKey, StringComparison.CurrentCultureIgnoreCase))) return;
 
             SearchTime = Envir.Time + Globals.SearchDelay;
 
@@ -6664,7 +6664,7 @@ namespace Server.MirObjects
                 
             }
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.MarketKey.ToUpper())
+            if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.MarketKey, StringComparison.CurrentCultureIgnoreCase))
             {
                 Enqueue(new S.MarketFail {Reason = 1});
                 return;
@@ -6732,7 +6732,7 @@ namespace Server.MirObjects
 
             }
 
-            if (NPCPage == null || NPCPage.Key != NPCObject.ConsignmentsKey.ToUpper())
+            if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.ConsignmentsKey, StringComparison.CurrentCultureIgnoreCase))
             {
                 Enqueue(new S.MarketFail { Reason = 1 });
                 return;
