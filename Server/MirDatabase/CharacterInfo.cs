@@ -17,6 +17,7 @@ namespace Server.MirDatabase
         public MirClass Class;
         public MirGender Gender;
         public byte Hair;
+        public int GuildIndex = -1;
 
         public string CreationIP;
         public DateTime CreationDate;
@@ -162,6 +163,8 @@ namespace Server.MirDatabase
 
             for (int i = 0; i < Globals.FlagIndexCount; i++)
                 Flags[i] = reader.ReadBoolean();
+            if (Envir.LoadVersion > 27)
+                GuildIndex = reader.ReadInt32();
         }
 
 
@@ -240,6 +243,7 @@ namespace Server.MirDatabase
 
             for (int i = 0; i < Flags.Length; i++)
                 writer.Write(Flags[i]);
+            writer.Write(GuildIndex);
         }
 
         public SelectInfo ToSelectInfo()

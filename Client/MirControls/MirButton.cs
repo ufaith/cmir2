@@ -68,7 +68,29 @@ namespace Client.MirControls
         #region Label
         private MirLabel _label;
         #endregion
-        
+
+        #region CenterText
+        private bool Center;
+        public bool CenterText
+        {
+            get
+            {
+                return Center;
+            }
+            set
+            {
+                Center = value;
+                if (Center)
+                {
+                    _label.Size = Size;
+                    _label.DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter;
+                }
+                else
+                    _label.AutoSize = true;
+            }
+        }
+        #endregion
+
         #region Pressed Index
         private int _pressedIndex;
         public int PressedIndex
@@ -124,6 +146,7 @@ namespace Client.MirControls
                 {
                     NotControl = true,
                     Parent = this,
+                    
                 };
         }
 

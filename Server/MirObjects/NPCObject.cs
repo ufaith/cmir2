@@ -33,7 +33,8 @@ namespace Server.MirObjects
             MarketKey = "[@MARKET]",
             ConsignmentsKey = "[@CONSIGNMENT]",
             TradeKey = "[TRADE]",
-            TypeKey = "[TYPES]";
+            TypeKey = "[TYPES]",
+            GuildCreateKey = "[@CREATEGUILD]";
 
 
         //public static Regex Regex = new Regex(@"[^\{\}]<.*?/(.*?)>");
@@ -104,7 +105,7 @@ namespace Server.MirObjects
 
             for (int i = 0; i < buttons.Count; i++)
             {
-                string section = buttons[i];
+                string section = buttons[i].ToUpper();
 
                 bool match = false;
                 for (int a = 0; a < NPCSections.Count; a++)
@@ -143,11 +144,11 @@ namespace Server.MirObjects
             List<string> currentSay = say, currentButtons = buttons;
 
             //Used to fake page name
-            string tempSectionName = SectionArgumentParse(sectionName);
+            string tempSectionName = SectionArgumentParse(sectionName).ToUpper();
 
             for (int i = 0; i < lines.Count; i++)
             {
-                if (!lines[i].ToUpper().StartsWith(tempSectionName.ToUpper())) continue;
+                if (!lines[i].ToUpper().StartsWith(tempSectionName)) continue;
 
                 for (int x = i + 1; x < lines.Count; x++)
                 {
@@ -228,7 +229,7 @@ namespace Server.MirObjects
             }
 
 
-            NPCPage page = new NPCPage(sectionName, Info.Name, say, buttons, elseSay, elseButtons, gotoButtons);
+            NPCPage page = new NPCPage(sectionName.ToUpper(), Info.Name, say, buttons, elseSay, elseButtons, gotoButtons);
 
             for (int i = 0; i < checks.Count; i++)
                 page.ParseCheck(checks[i]);
@@ -277,7 +278,7 @@ namespace Server.MirObjects
             string[] split = line.Split(' ');
 
             string path = Path.Combine(Settings.EnvirPath, split[1].Substring(1, split[1].Length - 2));
-            string page = "[" + split[2] + "]";
+            string page = ("[" + split[2] + "]").ToUpper();
 
             bool start = false, finish = false;
 
@@ -288,7 +289,7 @@ namespace Server.MirObjects
 
             for (int i = 0; i < lines.Count; i++)
             {
-                if (!lines[i].ToUpper().StartsWith(page.ToUpper())) continue;
+                if (!lines[i].ToUpper().StartsWith(page)) continue;
 
                 for (int x = i + 1; x < lines.Count; x++)
                 {
@@ -318,7 +319,7 @@ namespace Server.MirObjects
         {
             for (int i = 0; i < lines.Count; i++)
             {
-                if (!lines[i].ToUpper().StartsWith(TypeKey.ToUpper())) continue;
+                if (!lines[i].ToUpper().StartsWith(TypeKey)) continue;
 
                 while (++i < lines.Count)
                 {
@@ -335,7 +336,7 @@ namespace Server.MirObjects
         {
             for (int i = 0; i < lines.Count; i++)
             {
-                if (!lines[i].ToUpper().StartsWith(TradeKey.ToUpper())) continue;
+                if (!lines[i].ToUpper().StartsWith(TradeKey)) continue;
 
                 while (++i < lines.Count)
                 {
@@ -498,7 +499,8 @@ namespace Server.MirObjects
         {
             bool found = false;
 
-            if (key != MainKey.ToUpper())
+            key = key.ToUpper();
+            if (key != MainKey)
             {
                 if (player.NPCID != ObjectID) return;
 
@@ -506,13 +508,11 @@ namespace Server.MirObjects
                 {
                     if (player.NPCSuccess)
                     {
-                        if (!player.NPCPage.Buttons.Any(c => c.ToUpper().Contains(key.ToUpper()))) return;
-                        //if (!player.NPCPage.Buttons.Contains(key.ToUpper())) return;
+                       if (!player.NPCPage.Buttons.Any(c => c.ToUpper().Contains(key))) return;
                     }
                     else
                     {
-                        if (!player.NPCPage.ElseButtons.Any(c => c.ToUpper().Contains(key.ToUpper()))) return;
-                        //if (!player.NPCPage.ElseButtons.Contains(key.ToUpper())) return;
+                        if (!player.NPCPage.ElseButtons.Any(c => c.ToUpper().Contains(key))) return;
                     }
                 }
 
@@ -524,7 +524,6 @@ namespace Server.MirObjects
 
                 NPCPage page = NPCSections[i];
                 if (!String.Equals(page.Key, key, StringComparison.CurrentCultureIgnoreCase)) continue;
-
                 ProcessPage(player, page);
             }
         }
@@ -602,6 +601,19 @@ namespace Server.MirObjects
                 case ConsignmentsKey:
                     player.UserMatch = true;
                     player.GetMarket(string.Empty, ItemType.Nothing);
+                    break;
+                case GuildCreateKey:
+                    if (player.Info.Level < Settings.Guild_RequiredLevel)
+                    {
+                        player.ReceiveChat(String.Format("You have to be at least level {0} to create a guild.", Settings.Guild_RequiredLevel), ChatType.System);
+                    }
+                    if (player.MyGuild == null)
+                    {
+                        player.CanCreateGuild = true;
+                        player.Enqueue(new S.GuildNameRequest());
+                    }
+                    else
+                        player.ReceiveChat("You are already part of a guild.", ChatType.System);
                     break;
             }
 

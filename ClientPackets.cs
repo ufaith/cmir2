@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Collections.Generic;
 
 namespace ClientPackets
 {
@@ -867,6 +868,95 @@ namespace ClientPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(ChatItemID);
+        }
+    }
+    public sealed class EditGuildMember : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.EditGuildMember; } }
+
+        public byte ChangeType = 0;
+        public byte RankIndex = 0;
+        public string Name = "";
+        public string RankName = "";
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ChangeType = reader.ReadByte();
+            RankIndex = reader.ReadByte();
+            Name = reader.ReadString();
+            RankName = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ChangeType);
+            writer.Write(RankIndex);
+            writer.Write(Name);
+            writer.Write(RankName);
+        }
+    }
+    public sealed class EditGuildNotice : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.EditGuildNotice; } }
+
+        public List<string> notice = new List<string>();
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            int LineCount = reader.ReadInt32();
+            for (int i = 0; i < LineCount; i++)
+                notice.Add(reader.ReadString());
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(notice.Count);
+            for (int i = 0; i < notice.Count; i++)
+                writer.Write(notice[i]);
+        }
+    }
+    public sealed class GuildInvite : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.GuildInvite; } }
+
+        public bool AcceptInvite;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            AcceptInvite = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(AcceptInvite);
+        }
+    }
+    public sealed class RequestGuildInfo : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ClientPacketIds.RequestGuildInfo; } 
+        }
+        public byte Type;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Type = reader.ReadByte();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Type);
+        }
+    }
+    public sealed class GuildNameReturn : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ClientPacketIds.GuildNameReturn; }
+        }
+        public string Name;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Name = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Name);
         }
     }
 }

@@ -431,6 +431,8 @@ namespace ServerPackets
         public uint ObjectID;
         public uint RealId;
         public string Name = string.Empty;
+        public string GuildName = string.Empty;
+        public string GuildRank = string.Empty;
         public Color NameColour;
         public MirClass Class;
         public MirGender Gender;
@@ -451,6 +453,8 @@ namespace ServerPackets
             ObjectID = reader.ReadUInt32();
             RealId = reader.ReadUInt32();
             Name = reader.ReadString();
+            GuildName = reader.ReadString();
+            GuildRank = reader.ReadString();
             NameColour = Color.FromArgb(reader.ReadInt32());
             Class = (MirClass) reader.ReadByte();
             Gender = (MirGender) reader.ReadByte();
@@ -496,6 +500,8 @@ namespace ServerPackets
             writer.Write(ObjectID);
             writer.Write(RealId);
             writer.Write(Name);
+            writer.Write(GuildName);
+            writer.Write(GuildRank);
             writer.Write(NameColour.ToArgb());
             writer.Write((byte) Class);
             writer.Write((byte) Gender);
@@ -577,6 +583,8 @@ namespace ServerPackets
 
         public uint ObjectID;
         public string Name = string.Empty;
+        public string GuildName = string.Empty;
+        public string GuildRankName = string.Empty;
         public Color NameColour;
         public MirClass Class;
         public MirGender Gender;
@@ -595,6 +603,8 @@ namespace ServerPackets
         {
             ObjectID = reader.ReadUInt32();
             Name = reader.ReadString();
+            GuildName = reader.ReadString();
+            GuildRankName = reader.ReadString();
             NameColour = Color.FromArgb(reader.ReadInt32());
             Class = (MirClass) reader.ReadByte();
             Gender = (MirGender) reader.ReadByte();
@@ -616,6 +626,8 @@ namespace ServerPackets
         {
             writer.Write(ObjectID);
             writer.Write(Name);
+            writer.Write(GuildName);
+            writer.Write(GuildRankName);
             writer.Write(NameColour.ToArgb());
             writer.Write((byte) Class);
             writer.Write((byte) Gender);
@@ -1098,6 +1110,8 @@ namespace ServerPackets
         }
 
         public string Name = string.Empty;
+        public string GuildName = string.Empty;
+        public string GuildRank = string.Empty;
         public UserItem[] Equipment;
         public MirClass Class;
         public MirGender Gender;
@@ -1107,7 +1121,8 @@ namespace ServerPackets
         protected override void ReadPacket(BinaryReader reader)
         {
             Name = reader.ReadString();
-
+            GuildName = reader.ReadString();
+            GuildRank = reader.ReadString();
             Equipment = new UserItem[reader.ReadInt32()];
             for (int i = 0; i < Equipment.Length; i++)
             {
@@ -1124,7 +1139,8 @@ namespace ServerPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(Name);
-
+            writer.Write(GuildName);
+            writer.Write(GuildRank);
             writer.Write(Equipment.Length);
             for (int i = 0; i < Equipment.Length; i++)
             {
@@ -2947,4 +2963,182 @@ namespace ServerPackets
             if (Stats != null) Stats.Save(writer);
         }
     }
+
+    public sealed class GuildNoticeChange : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.GuildNoticeChange; }
+        }
+        public int update = 0;
+        public List<string> notice = new List<string>();
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            update = reader.ReadInt32();
+            for (int i = 0; i < update; i++)
+                notice.Add(reader.ReadString());
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            if (update < 0)
+            {
+                writer.Write(update);
+                return;
+            }
+            writer.Write(notice.Count);
+            for (int i = 0; i < notice.Count; i++)
+                writer.Write(notice[i]);
+        }
+    }
+
+    public sealed class GuildMemberChange : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.GuildMemberChange; }
+        }
+        public string Name = string.Empty;
+        public byte Status = 0;
+        public byte RankIndex = 0;
+        public List<Rank> Ranks = new List<Rank>();
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Name = reader.ReadString();
+            RankIndex = reader.ReadByte();
+            Status = reader.ReadByte();
+            if (Status > 5)
+            {
+                int rankcount = reader.ReadInt32();
+                for (int i = 0; i < rankcount; i++)
+                    Ranks.Add(new Rank(reader));
+            }
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Name);
+            writer.Write(RankIndex);
+            writer.Write(Status);
+            if (Status > 5)
+            {
+                writer.Write(Ranks.Count);
+                for (int i = 0; i < Ranks.Count; i++)
+                    Ranks[i].Save(writer);
+            }
+        }
+    }
+    public sealed class GuildChange : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.GuildChange; }
+        }
+        public string GuildName = string.Empty;
+        public string GuildRank = string.Empty;
+        public RankOptions Status = (RankOptions)0;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            GuildName = reader.ReadString();
+            GuildRank = reader.ReadString();
+            Status = (RankOptions)reader.ReadByte();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(GuildName);
+            writer.Write(GuildRank);
+            writer.Write((byte)Status);
+        }
+    }
+
+    public sealed class GuildStatus : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.GuildStatus; }
+        }
+        public string GuildName = string.Empty;
+        public byte Level;
+        public long Experience;
+        public long MaxExperience;
+        public uint Gold;
+        public byte SparePoints;
+        public int MemberCount;
+        public int MaxMembers;
+        public bool Voting;
+        public byte ItemCount;
+        public byte BuffCount;
+        public RankOptions MyOptions;
+        public int MyRankId;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            GuildName = reader.ReadString();
+            Level = reader.ReadByte();
+            Experience = reader.ReadInt64();
+            MaxExperience = reader.ReadInt64();
+            Gold = reader.ReadUInt32();
+            SparePoints = reader.ReadByte();
+            MemberCount = reader.ReadInt32();
+            MaxMembers = reader.ReadInt32();
+            Voting = reader.ReadBoolean();
+            ItemCount = reader.ReadByte();
+            BuffCount = reader.ReadByte();
+            MyOptions = (RankOptions)reader.ReadByte();
+            MyRankId = reader.ReadInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(GuildName);
+            writer.Write(Level);
+            writer.Write(Experience);
+            writer.Write(MaxExperience);
+            writer.Write(Gold);
+            writer.Write(SparePoints);
+            writer.Write(MemberCount);
+            writer.Write(MaxMembers);
+            writer.Write(Voting);
+            writer.Write(ItemCount);
+            writer.Write(BuffCount);
+            writer.Write((byte)MyOptions);
+            writer.Write(MyRankId);
+        }
+    }
+    public sealed class GuildInvite : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.GuildInvite; } }
+
+        public string Name = string.Empty;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Name = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Name);
+        }
+    }
+    public sealed class GuildExpGain : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.GuildExpGain; } }
+
+        public uint Amount = 0;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Amount = reader.ReadUInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Amount);
+        }
+    }
+    public sealed class GuildNameRequest : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.GuildNameRequest; } }
+        protected override void ReadPacket(BinaryReader reader)
+        {
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+        }
+    }
+
 }

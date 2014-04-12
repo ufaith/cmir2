@@ -144,6 +144,7 @@
     </Compile>
     <Compile Include="MirNetwork\MirConnection.cs" />
     <Compile Include="MirObjects\DelayedAction.cs" />
+    <Compile Include="MirObjects\GuildObject.cs" />
     <Compile Include="MirObjects\ItemObject.cs" />
     <Compile Include="MirObjects\MapObject.cs" />
     <Compile Include="MirObjects\MonsterObject.cs" />

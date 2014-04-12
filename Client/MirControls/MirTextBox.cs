@@ -155,6 +155,20 @@ namespace Client.MirControls
                     TextBox.Text = value;
             }
         }
+        public string[] MultiText
+        {
+            get
+            {
+                if (TextBox != null && !TextBox.IsDisposed)
+                    return TextBox.Lines;
+                return null;
+            }
+            set
+            {
+                if (TextBox != null && !TextBox.IsDisposed)
+                    TextBox.Lines = value;
+            }
+        }
 
         #endregion
 
@@ -208,6 +222,15 @@ namespace Client.MirControls
 
         #endregion
 
+        #region MultiLine
+
+        public override void MultiLine()
+        {
+            TextBox.Multiline = true;
+            
+        }
+
+        #endregion
 
         public MirTextBox()
         {
