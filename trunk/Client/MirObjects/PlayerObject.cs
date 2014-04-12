@@ -51,6 +51,9 @@ namespace Client.MirObjects
         private short StanceDelay = 2500;
 
         public long StanceTime, BlizzardFreezeTime;
+
+        public string GuildName;
+        public string GuildRankName;
         
         public PlayerObject(uint objectID) : base(objectID)
         {
@@ -61,6 +64,8 @@ namespace Client.MirObjects
         {
             Name = info.Name;
             NameColour = info.NameColour;
+            GuildName = info.GuildName;
+            GuildRankName = info.GuildRankName;
             Class = info.Class;
             Gender = info.Gender;
 

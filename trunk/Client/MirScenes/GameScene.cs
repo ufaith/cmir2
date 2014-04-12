@@ -939,6 +939,27 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.ChatItemStats:
                     ChatItemStats((S.ChatItemStats)p);
                     break;
+                case (short)ServerPacketIds.GuildChange:
+                    GuildChange((S.GuildChange)p);
+                    break;
+                case (short)ServerPacketIds.GuildInvite:
+                    GuildInvite((S.GuildInvite)p);
+                    break;
+                case (short)ServerPacketIds.GuildMemberChange:
+                    GuildMemberChange((S.GuildMemberChange)p);
+                    break;
+                case (short)ServerPacketIds.GuildNoticeChange:
+                    GuildNoticeChange((S.GuildNoticeChange)p);
+                    break;
+                case (short)ServerPacketIds.GuildStatus:
+                    GuildStatus((S.GuildStatus)p);
+                    break;
+                case (short)ServerPacketIds.GuildExpGain:
+                    GuildExpGain((S.GuildExpGain)p);
+                    break;
+                case (short)ServerPacketIds.GuildNameRequest:
+                    GuildNameRequest((S.GuildNameRequest)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1441,6 +1462,8 @@ namespace Client.MirScenes
             InspectDialog.Items = p.Equipment;
 
             InspectDialog.Name = p.Name;
+            InspectDialog.GuildName = p.GuildName;
+            InspectDialog.GuildRank = p.GuildRank;
             InspectDialog.Class = p.Class;
             InspectDialog.Gender = p.Gender;
             InspectDialog.Hair = p.Hair;
@@ -2644,6 +2667,126 @@ namespace Client.MirScenes
                     ChatItemList[i].ItemStats = p.Stats;
                     ChatItemList[i].RecievedTick = CMain.Time;
                 }
+        }
+
+        private void GuildInvite(S.GuildInvite p)
+        {
+            MirMessageBox messageBox = new MirMessageBox(string.Format("Do you want to join the {0} guild?", p.Name), MirMessageBoxButtons.YesNo);
+
+            messageBox.YesButton.Click += (o, e) => Network.Enqueue(new C.GuildInvite { AcceptInvite = true });
+            messageBox.NoButton.Click += (o, e) => Network.Enqueue(new C.GuildInvite { AcceptInvite = false });
+
+            messageBox.Show();
+        }
+
+        private void GuildNameRequest(S.GuildNameRequest p)
+        {
+            MirInputBox inputBox = new MirInputBox("Please enter a guild name, length must be 3~20 characters.");
+            inputBox.OKButton.Click += (o, e) =>
+            {
+                if (inputBox.InputTextBox.Text.Contains('\\'))
+                {
+                    ChatDialog.ReceiveChat("You cannot use the \\ sign in a guildname!",ChatType.System);
+                    inputBox.InputTextBox.Text = "";
+                }
+                Network.Enqueue(new C.GuildNameReturn { Name = inputBox.InputTextBox.Text });
+                inputBox.Dispose();
+            };
+            inputBox.Show();
+        }
+
+        private void GuildNoticeChange(S.GuildNoticeChange p)
+        {
+            if (p.update == -1)
+                GuildDialog.NoticeChanged = true;
+            else
+                GuildDialog.NoticeChange(p.notice);
+        }
+        private void GuildMemberChange(S.GuildMemberChange p)
+        {
+            switch (p.Status)
+            {
+                case 0: // logged of
+                    GuildDialog.MemberStatusChange(p.Name,false);
+                    break;
+                case 1: // logged on
+                    ChatDialog.ReceiveChat(String.Format("{0} logged on.", p.Name), ChatType.Guild);
+                    GuildDialog.MemberStatusChange(p.Name, true);
+                    break;
+                case 2://new member
+                    ChatDialog.ReceiveChat(String.Format("{0} joined guild.", p.Name), ChatType.Guild);
+                    GuildDialog.MembersChanged = true;
+                    break;
+                case 3://kicked member
+                    ChatDialog.ReceiveChat(String.Format("{0} got removed from the guild.", p.Name), ChatType.Guild);
+                    GuildDialog.MembersChanged = true;
+                    break;
+                case 4://member left
+                    ChatDialog.ReceiveChat(String.Format("{0} left the guild.", p.Name), ChatType.Guild);
+                    GuildDialog.MembersChanged = true;
+                    break;
+                case 5://rank change (name or different rank)
+                    GuildDialog.MembersChanged = true;
+                    break;
+                case 6: //new rank
+                    if (p.Ranks.Count > 0)
+                        GuildDialog.NewRankRecieved(p.Ranks[0]);
+                    break;
+                case 7: //rank option changed
+                    if (p.Ranks.Count > 0)
+                        GuildDialog.RankChangeRecieved(p.Ranks[0]);
+                    break;
+                case 8: //my rank changed
+                    if (p.Ranks.Count > 0)
+                        GuildDialog.MyRankChanged(p.Ranks[0]);
+                    break;
+                case 255:
+                    GuildDialog.NewMembersList(p.Ranks);
+                    break;
+            }
+        }
+
+        private void GuildChange(S.GuildChange p)
+        {
+            if ((User.GuildName == "" ) && (p.GuildName != ""))
+            {
+                GuildDialog.NoticeChanged = true;
+                GuildDialog.MembersChanged = true;
+            }
+            if (p.GuildName == "")
+                GuildDialog.Hide();
+            User.GuildName = p.GuildName;
+            User.GuildRankName = p.GuildRank;
+            GuildDialog.StatusChanged(p.Status);
+            
+        }
+
+        private void GuildStatus(S.GuildStatus p)
+        {
+            if ((User.GuildName == p.GuildName) && (GuildDialog.Level < p.Level))
+            {
+                //guild leveled
+            }
+            User.GuildName = p.GuildName;
+            GuildDialog.Level = p.Level;
+            GuildDialog.Experience = p.Experience;
+            GuildDialog.MaxExperience = p.MaxExperience;
+            GuildDialog.Gold = p.Gold;
+            GuildDialog.SparePoints = p.SparePoints;
+            GuildDialog.MemberCount = p.MemberCount;
+            GuildDialog.MaxMembers = p.MaxMembers;
+            GuildDialog.Voting = p.Voting;
+            GuildDialog.ItemCount = p.ItemCount;
+            GuildDialog.BuffCount = p.BuffCount;
+            GuildDialog.StatusChanged(p.MyOptions);
+            GuildDialog.MyRankId = p.MyRankId;
+            GuildDialog.UpdateMembers();
+        }
+
+        private void GuildExpGain(S.GuildExpGain p)
+        {
+            //OutputMessage(string.Format("Guild Experience Gained {0}.", p.Amount));
+            GuildDialog.Experience += p.Amount;
         }
 
         public void AddItem(UserItem item)
@@ -4534,6 +4677,10 @@ namespace Client.MirScenes
                     if (x >= Width) break;
                     int imageIndex = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
                     if (M2CellInfo[x, y].Light <= 0 || M2CellInfo[x, y].Light >= 10) continue;
+                    Color lightIntensity = Color.FromArgb(255, 97, 200, 200);
+                    //this code would look great on chronicles shanda mir2 maps (give a blue glow to blue town lights), but it'll also give blue glow to mir3 maps
+                    //if (M2CellInfo[x, y].Light == 4) 
+                    //    lightIntensity = Color.FromArgb(255, 100,100,200);
                     light = M2CellInfo[x, y].Light*3;
                     int fileIndex = M2CellInfo[x, y].FrontIndex;
 
@@ -4551,7 +4698,7 @@ namespace Client.MirScenes
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
                     {
                         p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - CellHeight);
-                        DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.FromArgb(255, 97, 200, 200));
+                        DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, lightIntensity);
                     }
                 }
             }
@@ -5763,6 +5910,10 @@ namespace Client.MirScenes
                     foreColour = Color.DarkBlue;
                     backColour = Color.White;
                     break;
+                case ChatType.Guild:
+                    backColour = Color.White;
+                    foreColour = Color.Green;
+                    break;
                 default:
                     backColour = Color.White;
                     foreColour = Color.Black;
@@ -6558,6 +6709,14 @@ namespace Client.MirScenes
                     Size = new Size(190, 20),
                     NotControl = true,
                 };
+            GuildLabel = new MirLabel
+            {
+                DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
+                Parent = this,
+                Location = new Point (50,33),
+                Size = new Size(190,30),
+                NotControl = true,
+            };
             ClassImage = new MirImageControl
                 {
                     Index = 100,
@@ -6899,6 +7058,7 @@ namespace Client.MirScenes
             }
 
             NameLabel.Text = MapObject.User.Name;
+            GuildLabel.Text = MapObject.User.GuildName + " " + MapObject.User.GuildRankName;
 
             for (int i = 0; i < Magics.Length; i++)
             {
@@ -7196,6 +7356,8 @@ namespace Client.MirScenes
         public static uint InspectID;
 
         public string Name;
+        public string GuildName;
+        public string GuildRank;
         public MirClass Class;
         public MirGender Gender;
         public byte Hair;
@@ -7342,6 +7504,15 @@ namespace Client.MirScenes
                     GameScene.Scene.ChatDialog.ChatTextBox.TextBox.SelectionStart = Name.Length + 2;
 
                 };
+            GuildLabel = new MirLabel
+            {
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                Parent = this,
+                Location = new Point(50, 33),
+                Size = new Size(190,30),
+                NotControl = true,
+            };
+
             ClassImage = new MirImageControl
                 {
                     Index = 100,
@@ -7477,6 +7648,7 @@ namespace Client.MirScenes
             }
 
             NameLabel.Text = Name;
+            GuildLabel.Text = GuildName + " " + GuildRank;
 
             for (int i = 0; i < Items.Length; i++)
             {
@@ -9780,8 +9952,72 @@ namespace Client.MirScenes
 
     public sealed class GuildDialog : MirImageControl
     {
+        public MirButton NoticeButton, MembersButton, StatusButton, StorageButton, BuffsButton, RankButton;
+        public MirImageControl NoticePage, MembersPage, StatusPage, StoragePage, BuffsPage, RankPage;
+        public MirLabel GuildName;
+
         public MirImageControl TitleLabel;
         public MirButton CloseButton;
+
+        public byte Level;
+        public long Experience;
+        public long MaxExperience;
+        public uint Gold;
+        public byte SparePoints;
+        public int MemberCount;
+        public int MaxMembers;
+        public bool Voting;
+        public byte ItemCount;
+        public byte BuffCount;
+        public RankOptions MyOptions;
+        public int MyRankId;
+        public List<Rank> Ranks = new List<Rank>();
+        
+        public bool MembersChanged = true;        
+        public long LastMemberRequest = 0;
+        public long LastGuildMsg = 0;
+        public long LastRankNameChange = 0;
+
+        #region notice page
+        public bool NoticeChanged = true;
+        public long LastNoticeRequest = 0;
+        public int NoticeScrollIndex = 0;
+        public MirButton NoticeUpButton, NoticeDownButton, NoticePositionBar, NoticeEditButton;
+        public MirTextBox Notice;
+        #endregion
+
+        #region members page
+        public int MemberScrollIndex = 0, MembersShowCount = 1;
+        public MirButton MembersUpButton, MembersDownButton, MembersPositionBar;
+        public MirLabel MembersHeaderRank, MembersHeaderName, MembersHeaderStatus, MembersShowOffline;
+        public MirButton MembersAddMember;
+        public MirButton MembersShowOfflineButton;
+        public MirImageControl MembersShowOfflineStatus;
+        public MirDropDownBox[] MembersRanks;
+        public MirLabel[] MembersName,MembersStatus;
+        public MirButton[] MembersDelete;
+        public int MemberPageRows = 20;
+        public bool MembersShowOfflinesetting = true;
+        #endregion
+
+        #region status page
+        public MirLabel StatusHeaders; //name/level/members(online)/max memebers
+        public MirLabel StatusData;
+        public MirImageControl StatusExpBar;
+        public MirLabel StatusExpLabel;
+        //alliance list
+        //enemy list
+        #endregion
+
+        #region rank page
+
+        public MirLabel RanksSelectText;
+        public MirTextBox RanksName;
+        public MirImageControl[] RanksOptionsStatus;
+        public MirButton[] RanksOptionsButtons;
+        public MirLabel[] RanksOptionsTexts;
+        public MirDropDownBox RanksSelectBox;
+        #endregion
 
         public GuildDialog()
         {
@@ -9790,8 +10026,83 @@ namespace Client.MirScenes
             Movable = true;
             Sort = true;
             Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
-
-
+            #region tab buttons
+            NoticeButton = new MirButton
+            {
+                Library = Libraries.Prguse,
+                Index = 231,
+                PressedIndex = 231,
+                Sound = SoundList.ButtonA,
+                Parent = this,
+                Text = "Notice",
+                Location = new Point(8, 404),
+                CenterText = true
+                
+            };
+            NoticeButton.Click += (o, e) => ChangePage(0);
+            MembersButton = new MirButton
+            {
+                Library = Libraries.Prguse,
+                Index = 232,
+                PressedIndex = 232,
+                Sound = SoundList.ButtonA,
+                Parent = this,
+                Text = "Members",
+                Location = new Point(104, 404),
+                CenterText = true
+            };
+            MembersButton.Click += (o, e) => ChangePage(1);
+            StatusButton = new MirButton
+            {
+                Library = Libraries.Prguse,
+                Index = 232,
+                PressedIndex = 232,
+                Sound = SoundList.ButtonA,
+                Parent = this,
+                Text = "Status",
+                Location = new Point(200, 404),
+                CenterText = true
+            };
+            StatusButton.Click += (o, e) => ChangePage(2);
+            StorageButton = new MirButton
+            {
+                Library = Libraries.Prguse,
+                Index = 232,
+                PressedIndex = 232,
+                Sound = SoundList.ButtonA,
+                Parent = this,
+                Text = "Storage",
+                Location = new Point(296, 404),
+                Visible = false,
+                CenterText = true
+            };
+            StorageButton.Click += (o, e) => ChangePage(3);
+            BuffsButton = new MirButton
+            {
+                Library = Libraries.Prguse,
+                Index = 232,
+                PressedIndex = 232,
+                Sound = SoundList.ButtonA,
+                Parent = this,
+                Text = "Buffs",
+                Location = new Point(392, 404),
+                Visible = false,
+                CenterText = true
+            };
+            BuffsButton.Click += (o, e) => ChangePage(4);
+            RankButton = new MirButton
+            {
+                Library = Libraries.Prguse,
+                Index = 232,
+                PressedIndex = 232,
+                Sound = SoundList.ButtonA,
+                Parent = this,
+                Text = "Ranks",
+                Location = new Point(488, 404),
+                Visible = false,
+                CenterText = true
+            };
+            RankButton.Click += (o, e) => ChangePage(5);
             TitleLabel = new MirImageControl
             {
                 // Index = 7,
@@ -9800,6 +10111,23 @@ namespace Client.MirScenes
                 Parent = this
             };
 
+            GuildName = new MirLabel
+            {
+                Location = new Point(302, 9),
+                Parent = this,
+                Size = new Size(144, 16),
+                Font = new Font(Settings.FontName, 8F),
+                Text = "",
+                Visible = true,
+            };
+            GuildName.BeforeDraw += (o, e) =>
+            {
+                if (MapControl.User.GuildName != "")
+                    GuildName.Text = MapControl.User.GuildName;
+                else
+                    GuildName.Text = "None";
+            };
+            #endregion
             CloseButton = new MirButton
             {
                 HoverIndex = 361,
@@ -9811,8 +10139,1157 @@ namespace Client.MirScenes
                 Sound = SoundList.ButtonA,
             };
             CloseButton.Click += (o, e) => Hide();
+
+            #region "notice tab"
+            NoticePage = new MirImageControl()
+            {
+                Parent = this,
+                Size = new Size(567, 368),
+                Location = new Point(13, 37),
+                Visible = true,
+            };
+            Notice = new MirTextBox()
+            {
+                ForeColour = Color.White,
+                Font = new Font(Settings.FontName, 8F),
+                Enabled = false,
+                Visible = true,
+                Parent = NoticePage,
+                Size = new Size(550, 325),
+                Location = new Point(0, 0),      
+            };
+            Notice.MultiLine();
+
+            NoticeEditButton = new MirButton
+            {
+                Visible = false,
+                Index = 2216,
+                HoverIndex = 2217,
+                PressedIndex = 2218,
+                Library = Libraries.Prguse,
+                Sound = SoundList.ButtonA,
+                Text = "Edit Notice",
+                Parent = NoticePage,
+                Location = new Point(492, 345),
+                CenterText = true
+            };
+            NoticeEditButton.Click += (o, e) => EditNotice();
+
+            NoticeUpButton = new MirButton
+            {
+                //Index = 312,
+                HoverIndex = 312,
+                Library = Libraries.Prguse,
+                Location = new Point(551, 0),
+                Size = new Size(16, 14),
+                Parent = NoticePage,
+                PressedIndex = 313,
+                Sound = SoundList.ButtonA
+            };
+            NoticeUpButton.Click += (o, e) =>
+            {
+                if (NoticeScrollIndex == 0) return;
+                if (NoticeScrollIndex >= 25) NoticeScrollIndex -= 24;
+                NoticeScrollIndex--;
+                UpdateNotice();
+            };
+
+            NoticeDownButton = new MirButton
+            {
+                //Index = 314,
+                HoverIndex = 314,
+                Library = Libraries.Prguse,
+                Location = new Point(551, 316),
+                Size = new Size(16,14),
+                Parent = NoticePage,
+                PressedIndex = 315,
+                Sound = SoundList.ButtonA
+            };
+            NoticeDownButton.Click += (o, e) =>
+            {
+                if (NoticeScrollIndex == Notice.MultiText.Length - 1) return;
+                if (NoticeScrollIndex < 25) NoticeScrollIndex = 24;
+                NoticeScrollIndex++;
+                UpdateNotice();
+            };
+
+            NoticePositionBar = new MirButton
+            {
+                Index = 955,
+                Library = Libraries.Prguse,
+                Location = new Point(551, 15),
+                Parent = NoticePage,
+                Movable = true,
+                Sound = SoundList.None,
+            };
+            NoticePositionBar.OnMoving += NoticePositionBar_OnMoving;
+
+            NoticePage.KeyDown += NoticePanel_KeyDown;
+            NoticePage.MouseWheel += NoticePanel_MouseWheel;
+            #endregion
+
+
+
+            #region "members tab"
+            MembersPage = new MirImageControl()
+            {
+                Parent = this,
+                Size = new Size(567, 368),
+                Location = new Point(13, 37),
+                Visible = false,
+            };
+            MembersPage.BeforeDraw += (o, e) => RequestUpdateMembers();
+
+            MembersHeaderRank = new MirLabel
+            {
+                Parent = MembersPage,
+                BackColour = Color.DimGray,
+                ForeColour = Color.White,
+                Text = "Rank:",
+                Location = new Point(10,10),
+                Size = new Size(150,14),
+                Font = new Font(Settings.FontName, 7F),
+                Visible = true,
+            };
+            MembersHeaderName = new MirLabel
+            {
+                Parent = MembersPage,
+                BackColour = Color.DimGray,
+                ForeColour = Color.White,
+                Text = "Name:",
+                Location = new Point(160, 10),
+                Size = new Size(160, 14),
+                Font = new Font(Settings.FontName, 7F),
+                Visible = true,
+            };
+            MembersHeaderStatus = new MirLabel
+            {
+                Parent = MembersPage,
+                BackColour = Color.DimGray,
+                ForeColour = Color.White,
+                Text = "Status:",
+                Location = new Point(320, 10),
+                Size = new Size(150, 14),
+                Font = new Font(Settings.FontName, 7F),
+                Visible = true,
+            };
+            
+            MembersRanks = new MirDropDownBox[MemberPageRows];
+            MembersName = new MirLabel[MemberPageRows];
+            MembersStatus = new MirLabel[MemberPageRows];
+            MembersDelete = new MirButton[MemberPageRows];
+            for (int i = MembersRanks.Length-1; i >= 0; i--)
+            {
+                int index = i;
+                MembersRanks[i] = new MirDropDownBox()
+                {
+                    BackColour = i%2 == 0? Color.Black: Color.DarkSlateGray,
+                    ForeColour = Color.White,
+                    Parent = MembersPage,
+                    Size = new Size(150, 14),
+                    Location = new Point(10, 24 + (i*15)),
+                    Visible = false,
+                    Enabled = false,
+                };
+                MembersRanks[index].ValueChanged += (o, e) => OnNewRank(index, MembersRanks[index]._WantedIndex);
+            }
+            for (int i = 0; i < MembersName.Length; i++)
+            {
+                MembersName[i] = new MirLabel()
+                {
+                    BackColour = i % 2 == 0 ? Color.Black : Color.DarkSlateGray,
+                    ForeColour = Color.White,
+                    Parent = MembersPage,
+                    Size = new Size(160, 14),
+                    Location = new Point(160, 24 + (i * 15)),
+                    Visible = false,
+                    Enabled = false,
+                    Font = new Font(Settings.FontName, 7F)
+                };
+
+            }
+            for (int i = 0; i < MembersStatus.Length; i++)
+            {
+                MembersStatus[i] = new MirLabel()
+                {
+                    BackColour = i % 2 == 0 ? Color.Black : Color.DarkSlateGray,
+                    ForeColour = Color.White,
+                    Parent = MembersPage,
+                    Size = new Size(200, 14),
+                    Location = new Point(320, 24 + (i * 15)),
+                    Visible = false,
+                    Enabled = false,
+                    Font = new Font(Settings.FontName, 7F)
+                };
+            }
+            for (int i = 0; i < MembersDelete.Length; i++)
+            {
+                int index = i;
+                MembersDelete[i] = new MirButton()
+                {
+                    Enabled = true,
+                    Visible = false,
+                    Location = new Point(530,24+(i*15)),
+                    Library = Libraries.Prguse,
+                    Index = 917,
+                    Parent = MembersPage,
+                };
+                MembersDelete[index].Click += (o, e) => DeleteMember(index);
+            }
+
+            MembersAddMember = new MirButton
+            {
+                Parent = MembersPage,
+                Enabled = true,
+                Visible = false,
+                Location = new Point(10,335),
+                Library = Libraries.Prguse2,
+                Index = 383,
+                HoverIndex = 384,
+                PressedIndex = 385,
+                Text = "Add Member",
+                
+                CenterText = true,
+            };
+            MembersAddMember.Click += (o, e) => AddMember();
+            
+            MembersUpButton = new MirButton
+            {
+                //Index = 312,
+                HoverIndex = 312,
+                Library = Libraries.Prguse,
+                Location = new Point(551, 0),
+                Size = new Size(16, 14),
+                Parent = MembersPage,
+                PressedIndex = 313,
+                Sound = SoundList.ButtonA
+            };
+            MembersUpButton.Click += (o, e) =>
+            {
+                if (MemberScrollIndex == 0) return;
+                MemberScrollIndex--;
+                UpdateMembers();
+                UpdateMembersScrollPosition();
+            };
+
+            MembersDownButton = new MirButton
+            {
+                //Index = 314,
+                HoverIndex = 314,
+                Library = Libraries.Prguse,
+                Location = new Point(551, 316),
+                Size = new Size(16, 14),
+                Parent = MembersPage,
+                PressedIndex = 315,
+                Sound = SoundList.ButtonA
+            };
+            MembersDownButton.Click += (o, e) =>
+            {
+                if (MemberScrollIndex == MembersShowCount - MemberPageRows) return;
+                MemberScrollIndex++;
+                UpdateMembers();
+                UpdateMembersScrollPosition();
+            };
+
+            MembersPositionBar = new MirButton
+            {
+                Index = 955,
+                Library = Libraries.Prguse,
+                Location = new Point(551, 15),
+                Parent = MembersPage,
+                Movable = true,
+                Sound = SoundList.None,
+            };
+            MembersPositionBar.OnMoving += MembersPositionBar_OnMoving;
+
+            MembersShowOfflineButton = new MirButton
+            {
+                Visible = true,
+                Index = 1346,
+                Library = Libraries.Prguse,
+                Sound = SoundList.ButtonA,
+                Parent = MembersPage,
+                Location = new Point(432, 345),
+            };
+            MembersShowOfflineButton.Click += (o, e) => MembersShowOfflineSwitch();
+
+            MembersShowOfflineStatus = new MirImageControl
+            {
+                Visible = true,
+                Index = 1347,
+                Library = Libraries.Prguse,
+                Parent = MembersPage,
+                Location = new Point(432, 345)
+            };
+            MembersShowOfflineStatus.Click += (o, e) => MembersShowOfflineSwitch();
+
+            MembersShowOffline = new MirLabel
+            {
+                Visible = true,
+                Text = "Show Offline Members",
+                Location = new Point(449, 345),
+                Parent = MembersPage,
+                Size = new Size(150,12),
+                Font = new Font(Settings.FontName, 7F),
+                ForeColour = Color.White,
+            };
+            MembersPage.KeyDown += MembersPanel_KeyDown;
+            MembersPage.MouseWheel += MembersPanel_MouseWheel;
+            #endregion 
+
+            #region "status tab"
+            StatusPage = new MirImageControl()
+            {
+                Parent = this,
+                Size = new Size(567, 368),
+                Location = new Point(13, 37),
+                Visible = false,
+            };
+            StatusPage.BeforeDraw += (o, e) =>
+            {
+                if (MapControl.User.GuildName == "")
+                    StatusData.Text = "";
+                else
+                    StatusData.Text = string.Format("{0}\n{1}\n{2}\n{3}", MapObject.User.GuildName, Level, MemberCount, MaxMembers == 0? "Unlimited": MaxMembers.ToString());
+            };
+            StatusHeaders = new MirLabel()
+            {
+                Location = new Point(0,15),
+                Size = new Size(100,300),
+                NotControl = true,
+                Text = "GuildName:\nLevel:\nMembers:\nMaximum Members:\n",
+                Visible = true,
+                Parent = StatusPage,
+            };
+            StatusData = new MirLabel()
+            {
+                Location = new Point(101, 15),
+                Size = new Size(100, 300),
+                NotControl = true,
+                Text = "",
+                Visible = true,
+                Parent = StatusPage,
+            };
+            StatusExpBar = new MirImageControl()
+            {
+                Index = 7,
+                Library = Libraries.Prguse,
+                Location = new Point(0,0),
+                DrawImage = false,
+                NotControl = true,
+                Parent = StatusPage,
+                Size = new Size(550,7),
+            };
+            StatusExpBar.BeforeDraw += StatusExpBar_BeforeDraw;
+            StatusExpLabel = new MirLabel()
+            {
+                DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
+                Location = new Point(0, 0),
+                NotControl = true,
+                Parent = StatusPage,
+                Size = new Size(550, 12),
+            };
+            #endregion
+            #region "storage tab"
+            StoragePage = new MirImageControl()
+            {
+                Parent = this,
+                Size = new Size(567, 368),
+                Location = new Point(13, 37),
+                Visible = false,
+            };
+            #endregion
+            #region "buffs tab"
+            BuffsPage = new MirImageControl()
+            {
+                Parent = this,
+                Size = new Size(567, 368),
+                Location = new Point(13, 37),
+                Visible = false,
+            };
+            #endregion
+            #region "Ranks tab"
+            RankPage = new MirImageControl()
+            {
+                Parent = this,
+                Size = new Size(567, 368),
+                Location = new Point(13, 37),
+                Visible = false,
+            };
+            RankPage.BeforeDraw += (o, e) => RequestUpdateMembers();
+
+            RanksSelectText = new MirLabel()
+            {
+                Text = "Select a rank:",
+                Location = new Point(0,0),
+                Size = new Size (150,16),
+                ForeColour = Color.White,
+                Parent = RankPage,
+                NotControl = true,
+            };
+
+            RanksName = new MirTextBox()
+            {
+                Location = new Point(0, 20),
+                Size = new Size(150, 0),
+                MaxLength = 20,
+                Parent = RankPage,
+                Visible = true,
+                Enabled = false,
+                Text = "",
+            };
+            RanksName.BeforeDraw += (o, e) => RanksName_BeforeDraw();
+            RanksName.TextBox.KeyPress += RanksName_KeyPress;
+            
+            String[] Options = { "Edit ranks", "Recruit member", "Kick member", "Store item", "Retrieve item", "Alter alliance", "Change notice", "Activate Buff"};
+            RanksOptionsButtons = new MirButton[8];
+            RanksOptionsStatus = new MirImageControl[8];
+            RanksOptionsTexts = new MirLabel[8];
+            for (int i = 0; i < RanksOptionsButtons.Length; i++)
+            {
+                RanksOptionsButtons[i] = new MirButton()
+                {
+                    Visible = true,
+                    Enabled = false,
+                    Index = 1346,
+                    Library = Libraries.Prguse,
+                    Sound = SoundList.ButtonA,
+                    Parent = RankPage,
+                    Location = new Point(i % 2 == 0? 0:200, i % 2 == 0?  50 + (i * 20): 50 + ((i-1)*20)),   
+                };
+                int index = i;
+                RanksOptionsButtons[i].Click += (o, e) => SwitchRankOption(index);
+            }
+            
+            for (int i = 0; i < RanksOptionsStatus.Length; i++)
+            {
+                RanksOptionsStatus[i] = new MirImageControl()
+                {
+                    Visible = false,
+                    Index = 1347,
+                    Library = Libraries.Prguse,
+                    Parent = RankPage,
+                    Location = new Point(i % 2 == 0 ? 0 : 200, i % 2 == 0 ? 50 + (i * 20) : 50 + ((i - 1) * 20)),
+                };
+                int index = i;
+                RanksOptionsStatus[i].Click += (o, e) => SwitchRankOption(index);
+            }
+            for (int i = 0; i < RanksOptionsTexts.Length; i++)
+            {
+                RanksOptionsTexts[i] = new MirLabel()
+                {
+                    Visible = true,
+                    NotControl = true,
+                    Parent = RankPage,
+                    Location = new Point(17 + (i % 2 == 0 ? 0 : 200), i % 2 == 0 ? 50 + (i * 20) : 50 + ((i - 1) * 20)),
+                    AutoSize = true,
+                    Text = Options[i],
+                };
+            }
+
+            RanksSelectBox = new MirDropDownBox()
+            {
+                Parent = RankPage,
+                Location = new Point(160, 0),
+                Size = new Size(150, 16),
+                ForeColour = Color.White,
+                Visible = true,
+                Enabled = true,
+            };
+            RanksSelectBox.ValueChanged += (o, e) => OnRankSelect(RanksSelectBox._WantedIndex);
+            
+            #endregion
+            
+        }
+        public void ResetButtonStats()
+        {
+            if (MyOptions.HasFlag(RankOptions.CanRetrieveItem) || MyOptions.HasFlag(RankOptions.CanStoreItem))
+                StorageButton.Visible = true;
+            else
+                StorageButton.Visible = false;
+            if(MyOptions.HasFlag(RankOptions.CanChangeRank))
+                RankButton.Visible = true;
+            else
+                RankButton.Visible = false;
+            if (MyOptions.HasFlag(RankOptions.CanChangeNotice))
+                NoticeEditButton.Visible = true;
+            else
+                NoticeEditButton.Visible = false;
+        }
+        #region "notice code"
+        public void EditNotice()
+        {
+            if (Notice.Enabled == false)
+            {
+                Notice.Enabled = true;
+                Notice.SetFocus();
+                NoticeEditButton.Text = "Save";
+            }
+            else
+            {
+                Notice.Enabled = false;
+                NoticeEditButton.Text = "Edit";
+                Network.Enqueue(new C.EditGuildNotice() { notice = Notice.MultiText.ToList() });
+            }
+        }
+        public void NoticeChange(List<string> newnotice)
+        {
+            NoticeEditButton.Text = "Edit";
+            Notice.Enabled = false;
+            NoticeScrollIndex = 0;
+            Notice.Text = "";
+            Notice.MultiText = newnotice.ToArray();
+            NoticeChanged = false;
+            UpdateNotice();
+        }
+        public void UpdateNotice()
+        { 
+            if (NoticeScrollIndex >= Notice.MultiText.Length) NoticeScrollIndex = Math.Max(0,Notice.MultiText.Length - 1);
+            if (NoticeScrollIndex < 0) NoticeScrollIndex = 0;
+            if (Notice.MultiText.Length != 0)
+            {
+                Notice.TextBox.SelectionLength = 1;
+                Notice.TextBox.SelectionStart = Notice.TextBox.GetFirstCharIndexFromLine(NoticeScrollIndex);
+                Notice.TextBox.ScrollToCaret();
+            }
+            
+            if (Notice.MultiText.Length > 1)
+            {
+                int h = 302-19;
+                h = (int)((h / (float)(Notice.MultiText.Length - 1)) * NoticeScrollIndex);
+                NoticePositionBar.Location = new Point(551, 15 + h);
+            }
+            
+        }
+        void NoticePositionBar_OnMoving(object sender, MouseEventArgs e)
+        {
+            int x = 551;
+            int y = NoticePositionBar.Location.Y;
+            if (y >= NoticeDownButton.Location.Y-19) y = NoticeDownButton.Location.Y-19;
+            if (y < 15) y = 15;
+
+            int h = 302;// NoticePositionBar.Size.Height;
+            h = (int)((y - 15) / (h / (float)(Notice.MultiText.Length - 1)));
+
+            if (h != NoticeScrollIndex)
+            {
+                NoticeScrollIndex = h;
+                UpdateNotice();
+            }
+
+            NoticePositionBar.Location = new Point(x, y);
         }
 
+        private void NoticePanel_MouseWheel(object sender, MouseEventArgs e)
+        {
+            int count = e.Delta / SystemInformation.MouseWheelScrollDelta;
+
+            if (NoticeScrollIndex == 0 && count >= 0) return;
+            if (NoticeScrollIndex == Notice.MultiText.Length - 1 && count <= 0) return;
+            if (count > 0)
+            { if (NoticeScrollIndex >= 25) NoticeScrollIndex -= 24; }
+            else
+            { if (NoticeScrollIndex < 25) NoticeScrollIndex += 24; }
+                        NoticeScrollIndex -= count;
+            UpdateNotice();
+        }
+
+        private void NoticePanel_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    if (NoticeScrollIndex == 0) break;
+                    if (NoticeScrollIndex >= 25) NoticeScrollIndex -= 24;
+                    NoticeScrollIndex--;
+                    break;
+                case Keys.Home:
+                    if (NoticeScrollIndex == 0) break;
+                    NoticeScrollIndex = 0;
+                    break;
+                case Keys.Down:
+                    if (NoticeScrollIndex == Notice.MultiText.Length - 1) break;
+                    if (NoticeScrollIndex < 25) NoticeScrollIndex = 24;
+                    NoticeScrollIndex++;
+                    break;
+                case Keys.End:
+                    if (NoticeScrollIndex == Notice.MultiText.Length - 1) break;
+                    NoticeScrollIndex = Notice.MultiText.Length -1;
+                    break;
+                case Keys.PageUp:
+                    if (NoticeScrollIndex == 0) break;
+                    NoticeScrollIndex -= 25;
+                    break;
+                case Keys.PageDown:
+                    if (NoticeScrollIndex == Notice.MultiText.Length - 25) break;
+                    NoticeScrollIndex += 25;
+                    break;
+                default:
+                    return;
+            }
+            UpdateNotice();
+            e.Handled = true;
+        }
+        #endregion 
+        
+        #region "members code"
+        public void NewMembersList(List<Rank> NewRanks)
+        {
+            Ranks = NewRanks;
+            MembersChanged = false;
+            RefreshMemberList();
+        }
+        public void RefreshMemberList()
+        {
+            MemberScrollIndex = 0;
+            List<string> RankNames = new List<string>();
+            for (int i = 0; i < Ranks.Count; i++)
+            {
+                if (Ranks[i] != null)
+                {
+                    int index = i;
+                    Ranks[i].Index = index;
+                    RankNames.Add(Ranks[i].Name);
+                }
+                else
+                    RankNames.Add("Missing Rank");
+            }
+            for (int i = 0; i < MembersRanks.Length; i++)
+            {
+                MembersRanks[i].Items = RankNames;
+                MembersRanks[i].MinimumOption = MyRankId;
+            }
+            RanksSelectBox.Items = RankNames.ToList();
+            RanksSelectBox.MinimumOption = 0;
+            if (RankNames.Count < 255)
+                RanksSelectBox.Items.Add("Add New");
+            UpdateMembers();
+            UpdateRanks();
+        }
+
+        public void MemberStatusChange(string name, bool online)
+        {
+            for (int i = 0; i < Ranks.Count; i++)
+                for (int j = 0; j < Ranks[i].Members.Count; j++)
+                    if (Ranks[i].Members[j].name == name)
+                        Ranks[i].Members[j].Online = online;
+            UpdateMembers();
+        }
+
+        public void OnNewRank(int Index, int SelectedIndex)
+        {
+            if (SelectedIndex >= Ranks.Count) return;
+            if (LastGuildMsg > CMain.Time) return;
+            MirMessageBox messageBox = new MirMessageBox(string.Format("Are you sure you want to change the rank of {0} to {1}?", MembersName[Index].Text, Ranks[SelectedIndex].Name), MirMessageBoxButtons.YesNo);
+
+            messageBox.YesButton.Click += (o, a) =>
+            {
+                Network.Enqueue(new C.EditGuildMember { ChangeType = 2, Name = MembersName[Index].Text, RankIndex = (byte)Ranks[SelectedIndex].Index, RankName = Ranks[SelectedIndex].Name });
+                LastGuildMsg = CMain.Time + 5000;
+            };
+            messageBox.Show();
+        }
+
+        public void AddMember()
+        {
+            if (!MyOptions.HasFlag(RankOptions.CanRecruit)) return;
+            if (LastGuildMsg > CMain.Time) return;
+            MirInputBox messageBox = new MirInputBox("Who would you like to invite to guild?");
+            messageBox.OKButton.Click += (o, e) =>
+            {
+                Network.Enqueue(new C.EditGuildMember { ChangeType = 0, Name = messageBox.InputTextBox.Text });
+                LastGuildMsg = CMain.Time + 5000;
+                messageBox.Dispose();
+            };
+            messageBox.Show();
+
+        }
+
+        public void DeleteMember(int Index)
+        {
+            if (MembersName[Index].Text == MapControl.User.Name) return;
+            if (LastGuildMsg > CMain.Time) return;
+            MirMessageBox messageBox = new MirMessageBox(string.Format("Are you sure you want to kick {0}?", MembersName[Index].Text), MirMessageBoxButtons.YesNo);
+
+            messageBox.YesButton.Click += (o, a) =>
+            {
+                Network.Enqueue(new C.EditGuildMember { ChangeType = 1, Name = MembersName[Index].Text });
+                LastGuildMsg = CMain.Time + 5000;
+            };
+            messageBox.Show();
+        }
+
+        public void UpdateMembers()
+        {
+            MembersShowCount = 0;
+            for (int i = 0; i < Ranks.Count; i++)
+                for (int j = 0; j < Ranks[i].Members.Count; j++)
+                {
+                    if (MembersShowOfflinesetting || Ranks[i].Members[j].Online) MembersShowCount++;
+                }
+            if (MembersShowCount < (MemberScrollIndex - MemberPageRows))
+                MemberScrollIndex = 0;
+            if (MembersShowCount > MemberPageRows)
+            {
+                MembersUpButton.Visible = true;
+                MembersDownButton.Visible = true;
+                MembersPositionBar.Visible = true;
+            }
+            else
+            {
+                MembersUpButton.Visible = false;
+                MembersDownButton.Visible = false;
+                MembersPositionBar.Visible = false;
+            }
+
+            for (int i = 0; i < MembersRanks.Length; i++)
+            {
+                if (MembersShowCount > i)
+                {
+                    MembersRanks[i].Visible = true;
+                }
+                else
+                    MembersRanks[i].Visible = false;
+            }
+            for (int i = 0; i < MembersName.Length; i++)
+            {
+                if (MembersShowCount > i)
+                    MembersName[i].Visible = true;
+                else
+                    MembersName[i].Visible = false;
+            }
+            for (int i = 0; i < MembersStatus.Length; i++)
+            {
+                if (MembersShowCount > i)
+                    MembersStatus[i].Visible = true;
+                else
+                    MembersStatus[i].Visible = false;
+            }
+            for (int i = 0; i < MembersDelete.Length; i++)
+            {
+                MembersDelete[i].Visible = false;
+            }
+            if (MyOptions.HasFlag(RankOptions.CanRecruit))
+                MembersAddMember.Visible = true;
+            else
+                MembersAddMember.Visible = false;
+            int Offset = 0;
+            int RowCount = 0;
+            DateTime now = DateTime.Now;
+            for (int i = 0; i < Ranks.Count; i++)
+                for (int j = 0; j < Ranks[i].Members.Count; j++)
+                {
+                    if (Offset < MemberScrollIndex)
+                    {
+                        if ((MembersShowOfflinesetting) || (Ranks[i].Members[j].Online))
+                            Offset++;
+                    }
+                    else
+                    {
+
+                        if ((!MembersShowOfflinesetting) && (Ranks[i].Members[j].Online == false)) continue;
+                        if ((MyOptions.HasFlag(RankOptions.CanChangeRank)) && (Ranks[i].Index >= MyRankId) )
+                            MembersRanks[RowCount].Enabled = true;
+                        else
+                            MembersRanks[RowCount].Enabled = false;
+                        if ((MyOptions.HasFlag(RankOptions.CanKick)) && (Ranks[i].Index >= MyRankId) && (Ranks[i].Members[j].name != MapControl.User.Name)/* && (Ranks[i].Index != 0)*/)
+                            MembersDelete[RowCount].Visible = true;
+                        else
+                            MembersDelete[RowCount].Visible = false;
+                        MembersRanks[RowCount].SelectedIndex = Ranks[i].Index;
+                        MembersName[RowCount].Text = Ranks[i].Members[j].name;
+                        if (Ranks[i].Members[j].Online)
+                            MembersStatus[RowCount].ForeColour = Color.Green;
+                        else
+                            MembersStatus[RowCount].ForeColour = Color.White;
+                        TimeSpan Diff = now - Ranks[i].Members[j].LastLogin.ToLocalTime();
+                        string text;
+                        if (Ranks[i].Members[j].Online)
+                            text = "Online";
+                        else
+                        {
+                            switch (Diff.Days)
+                            {
+                                case 0:
+                                    text = "Today";
+                                    break;
+                                case 1: 
+                                    text = "Yesterday";
+                                    break;
+                                default:
+                                    text = Diff.Days.ToString() + "Days ago";
+                                    break;
+                            }
+                        }
+                        MembersStatus[RowCount].Text = text;
+                        RowCount++;
+                        if (RowCount > MemberPageRows-1) return;
+                    }
+                }
+        }
+        public void MembersShowOfflineSwitch()
+        {
+            if (MembersShowOfflinesetting)
+            {
+                MembersShowOfflinesetting = false;
+                MembersShowOfflineStatus.Visible = false;
+            }
+            else
+            {
+                MembersShowOfflinesetting = true;
+                MembersShowOfflineStatus.Visible = true;
+            }
+            UpdateMembers();
+        }
+        public void MembersPositionBar_OnMoving(object sender, MouseEventArgs e)
+        {
+            int x = 551;
+            int y = MembersPositionBar.Location.Y;
+            if (y >= MembersDownButton.Location.Y - 19) y = MembersDownButton.Location.Y - 19;
+            if (y < 15) y = 15;
+
+            int h = 302;
+            h = (int)((y - 15) / (h / (float)(MembersShowCount - 1)));
+            if (h > (MembersShowCount - MemberPageRows)) h = MembersShowCount - MemberPageRows;
+            if (h != MemberScrollIndex)
+            {
+                MemberScrollIndex = h;
+                UpdateMembers();
+            }
+            MembersPositionBar.Location = new Point (x, y);
+        }
+        private void UpdateMembersScrollPosition()
+        {
+            int h = 302;
+            h = (int)(h / (float)(MembersShowCount - 1));
+            int y = 15 + (h * MemberScrollIndex);
+            MembersPositionBar.Location = new Point (551, y);
+        }
+        private void MembersPanel_MouseWheel(object sender, MouseEventArgs e)
+        {
+            int count = e.Delta / SystemInformation.MouseWheelScrollDelta;
+
+            if (MemberScrollIndex == 0 && count >= 0) return;
+            if (MemberScrollIndex == MembersShowCount - MemberPageRows && count <= 0) return;
+            MemberScrollIndex -= count > 0? 1: -1;
+            UpdateMembers();
+            UpdateMembersScrollPosition();
+        }
+
+        private void MembersPanel_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    if (MemberScrollIndex == 0) break;
+                    //if (MemberScrollIndex >= 25) MemberScrollIndex -= 24;
+                    MemberScrollIndex--;
+                    break;
+                case Keys.Home:
+                    if (MemberScrollIndex == 0) break;
+                    MemberScrollIndex = 0;
+                    break;
+                case Keys.Down:
+                    if (MembersShowCount < MemberPageRows) break;
+                    if (MemberScrollIndex == MembersShowCount - MemberPageRows) break;
+                    MemberScrollIndex++;
+                    break;
+                case Keys.End:
+                    if (MembersShowCount < MemberPageRows) break;
+                    if (MemberScrollIndex == MembersShowCount - MemberPageRows) break;
+                    MemberScrollIndex = MembersShowCount - MemberPageRows;
+                    break;
+                case Keys.PageUp:
+                    if (MemberScrollIndex == 0) break;
+                    MemberScrollIndex -= 25;
+                    if (MemberScrollIndex < 0) MemberScrollIndex = 0;
+                    break;
+                case Keys.PageDown:
+                    if (MembersShowCount < MemberPageRows) break;
+                    if (MemberScrollIndex == MembersShowCount - 25) break;
+                    MemberScrollIndex += 25;
+                    if (MemberScrollIndex > (MembersShowCount - MemberPageRows)) MemberScrollIndex = MembersShowCount - MemberPageRows;
+                    break;
+                default:
+                    return;
+            }
+            UpdateMembers();
+            UpdateMembersScrollPosition();
+            e.Handled = true;
+        }
+        #endregion
+
+        #region statuspage code
+        private void StatusExpBar_BeforeDraw(object sender, EventArgs e)
+        {
+            if (MaxExperience == 0)
+            {
+                StatusExpLabel.Text = "";
+                return;
+            }
+            if (StatusExpBar.Library == null) return;
+            StatusExpBar.Library.Draw(StatusExpBar.Index, StatusExpBar.DisplayLocation, new Size(550,7), Color.Red);
+            
+            double percent = Experience / (double)MaxExperience;
+            StatusExpLabel.Text = string.Format("{0:#0.##%}", percent);
+            if (percent > 1) percent = 1;
+            if (percent <= 0) return;
+            Rectangle section = new Rectangle
+            {
+                Location = StatusExpBar.Location,
+                Size = new Size((int)((550 - 3) * percent), StatusExpBar.Size.Height)
+            };
+
+            StatusExpBar.Library.Draw(StatusExpBar.Index, section, StatusExpBar.DisplayLocation, Color.White, false);
+            
+        }
+        #endregion
+
+        #region ranks page
+        public void NewRankRecieved(Rank New)
+        {
+            int NewIndex = Ranks.Count > 1? Ranks.Count-1: 1;
+            Ranks.Insert(NewIndex,New);
+            Ranks[Ranks.Count -1].Index = Ranks.Count-1;
+            RefreshMemberList();
+            UpdateRanks();
+        }
+        public void MyRankChanged(Rank New)
+        {
+            MyOptions = New.Options;
+            
+            MapObject.User.GuildRankName = New.Name;
+            GuildMember Member = null;
+            int OldRank = MyRankId;
+            MyRankId = New.Index;
+            if (OldRank >= Ranks.Count) return;
+            for (int i = 0; i < Ranks[OldRank].Members.Count; i++)
+                if (Ranks[OldRank].Members[i].name == MapObject.User.Name)
+                {
+                    Member = Ranks[OldRank].Members[i];
+                    Ranks[OldRank].Members.Remove(Member);
+                    break;
+                }
+            
+            if (Member == null) return;
+            if (Ranks.Count <= New.Index)
+            {
+                Ranks[MyRankId].Members.Add(Member);
+                MembersChanged = true;
+                return;
+            }
+            Ranks[New.Index].Members.Add(Member);
+
+            ResetButtonStats();
+            UpdateMembers();
+
+        }
+        public void RankChangeRecieved(Rank New)
+        {
+            for (int i = 0; i < Ranks.Count; i++)
+                if (Ranks[i].Index == New.Index)
+                {
+                    if (Ranks[i].Name == MapObject.User.GuildRankName)
+                        for (int j = 0; j < Ranks[i].Members.Count; j++)
+                            if (Ranks[i].Members[j].name == MapObject.User.Name)
+                            {
+                                MapObject.User.GuildRankName = New.Name;
+                                MyOptions = New.Options;
+                                ResetButtonStats();
+                                UpdateMembers();
+                            }
+                    if (Ranks[i].Name == New.Name)
+                    {
+                        Ranks[i] = New;
+                    }
+                    else
+                    {
+                        Ranks[i] = New;
+                        RefreshMemberList();
+                    }
+                }
+            UpdateRanks();
+        }
+        public void UpdateRanks()
+        {
+            if ((RanksSelectBox.SelectedIndex == -1) ||(Ranks[RanksSelectBox.SelectedIndex].Index < MyRankId))
+            {
+                for (int i = 0; i < RanksOptionsButtons.Length; i++)
+                    RanksOptionsButtons[i].Enabled = false;
+                for (int i = 0; i < RanksOptionsStatus.Length; i++)
+                    RanksOptionsStatus[i].Enabled = false;
+                if (RanksSelectBox.SelectedIndex == -1)
+                    for (int i = 0; i < RanksOptionsStatus.Length; i++)
+                        RanksOptionsStatus[i].Visible = false;
+                //RanksName.Enabled = false;
+                LastRankNameChange = long.MaxValue;
+                RanksName.Text = "";
+                return;
+            }
+            RanksName.Text = Ranks[RanksSelectBox.SelectedIndex].Name;
+            if (Ranks[RanksSelectBox.SelectedIndex].Index >= MyRankId)
+                //RanksName.Enabled = true;
+                LastRankNameChange = 0;
+            else
+                LastRankNameChange = long.MaxValue;
+                //RanksName.Enabled = false;
+            for (int i = 0; i < RanksOptionsStatus.Length; i++)
+            {
+                if (Ranks[RanksSelectBox.SelectedIndex].Options.HasFlag((RankOptions)(1 << i)))
+                    RanksOptionsStatus[i].Visible = true;
+                else
+                    RanksOptionsStatus[i].Visible = false;
+                if (Ranks[RanksSelectBox.SelectedIndex].Index >= MyRankId)
+                    RanksOptionsButtons[i].Enabled = true;
+                else
+                    RanksOptionsButtons[i].Enabled = false;
+            }
+        }
+        public void OnRankSelect(int Index)
+        {
+            if (Index < Ranks.Count)
+                RanksSelectBox.SelectedIndex = Index;
+            else
+            {
+                if (Ranks.Count == 255) return;
+                if (LastGuildMsg > CMain.Time) return;
+                MirMessageBox messageBox = new MirMessageBox("Are you sure you want to create a new rank?", MirMessageBoxButtons.YesNo);
+                messageBox.YesButton.Click += (o, a) =>
+                {
+                    Network.Enqueue(new C.EditGuildMember { ChangeType = 4, RankName = String.Format("Rank-{0}", Ranks.Count - 1) });
+                    LastGuildMsg = CMain.Time + 5000;
+                };
+                messageBox.Show();
+            }
+            UpdateRanks();
+        }
+        public void SwitchRankOption(int OptionIndex)
+        {
+            if ((RanksSelectBox.SelectedIndex == -1) || (RanksSelectBox.SelectedIndex >= Ranks.Count)) return;
+            if (LastGuildMsg > CMain.Time) return;
+            Network.Enqueue(new C.EditGuildMember { ChangeType = 5, RankIndex = (byte)Ranks[RanksSelectBox.SelectedIndex].Index, RankName = OptionIndex.ToString(), Name = RanksOptionsStatus[OptionIndex].Visible ? "false" : "true" });
+            LastGuildMsg = CMain.Time + 1000;
+            //UpdateRanks();
+        }
+
+        public void RanksName_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            switch (e.KeyChar)
+            {
+                case (char) '\\':
+                    e.Handled = true;
+                    break;
+                case (char) Keys.Enter:
+                    e.Handled = true;
+                    if (!string.IsNullOrEmpty(RanksName.Text))
+                    {
+                        Network.Enqueue(new C.EditGuildMember { ChangeType = 3, RankIndex = (byte)Ranks[RanksSelectBox.SelectedIndex].Index, RankName = RanksName.Text });
+                        LastRankNameChange = CMain.Time + 5000;
+                        RanksName.Enabled = false;
+                    }
+                    break;
+                case (char) Keys.Escape:
+                    e.Handled = true;
+                    UpdateRanks();
+                    break;
+            }
+        }
+
+        public void RanksName_BeforeDraw()
+        {
+            if (LastRankNameChange < CMain.Time)
+                RanksName.Enabled = true;
+            else
+                RanksName.Enabled = false;
+        }
+
+        #endregion
+
+        public void RequestUpdateNotice()
+        {
+            if ((NoticeChanged) && (LastNoticeRequest < CMain.Time))
+            {
+                LastNoticeRequest = CMain.Time + 5000;
+                Network.Enqueue(new C.RequestGuildInfo() { Type = 0 });
+            }
+        }
+
+        public void RequestUpdateMembers()
+        {
+            if ((MembersChanged) && (LastMemberRequest < CMain.Time))
+            {
+                LastMemberRequest = CMain.Time + 5000;
+                Network.Enqueue(new C.RequestGuildInfo() { Type = 1 });
+            }
+        }
+
+        public void ChangePage(byte pageid)
+        {
+            NoticePage.Visible = false;
+            MembersPage.Visible = false;
+            StatusPage.Visible = false;
+            StoragePage.Visible = false;
+            BuffsPage.Visible = false;
+            RankPage.Visible = false;
+
+            NoticeButton.Index = 232;
+            MembersButton.Index = 232;
+            StatusButton.Index = 232;
+            StorageButton.Index = 232;
+            BuffsButton.Index = 232;
+            RankButton.Index = 232;
+
+            switch (pageid)
+            {
+                case 0:
+                    NoticePage.Visible = true;
+                    NoticeButton.Index = 231;
+                    RequestUpdateNotice();       
+                    break;
+                case 1:
+                    MembersPage.Visible = true;
+                    MembersButton.Index = 231;
+                    RequestUpdateMembers();
+                    break;
+                case 2:
+                    StatusPage.Visible = true;
+                    StatusButton.Index = 231;
+                    break;
+                case 3:
+                    StoragePage.Visible = true;
+                    StorageButton.Index = 231;
+                    break;
+                case 4:
+                    BuffsPage.Visible = true;
+                    BuffsButton.Index = 231;
+                    break;
+                case 5:
+                    RankPage.Visible = true;
+                    RankButton.Index = 231;
+                    RequestUpdateMembers();
+                    break;
+            }
+        }
+
+        public void StatusChanged(RankOptions status)
+        {
+            Notice.Enabled = false;
+            NoticeEditButton.Text = "Edit";
+            MyOptions = status;
+            if (MyOptions.HasFlag(RankOptions.CanChangeNotice))
+                NoticeEditButton.Visible = true;
+            else
+                NoticeEditButton.Visible = false;
+            if (MyOptions.HasFlag(RankOptions.CanChangeRank))
+                RankButton.Visible = true;
+            else
+                RankButton.Visible = false;
+            if ((MyOptions.HasFlag(RankOptions.CanStoreItem)) || (MyOptions.HasFlag(RankOptions.CanRetrieveItem)))
+                StorageButton.Visible = true;
+            else
+                StorageButton.Visible = false;
+            
+        }
 
         public void Hide()
         {
@@ -9821,8 +11298,15 @@ namespace Client.MirScenes
         }
         public void Show()
         {
+            if (MapControl.User.GuildName == "") return;
             if (Visible) return;
             Visible = true;
+            if (NoticePage.Visible)
+                if ((NoticeChanged) && (LastNoticeRequest < CMain.Time))
+                {
+                    LastNoticeRequest = CMain.Time + 5000;
+                    Network.Enqueue(new C.RequestGuildInfo() { Type = 0 });
+                }
         }
     }
 

@@ -19,10 +19,11 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 27;
+        public const int Version = 28;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
+        public const string GuildPath = @".\guilds\";
         private static readonly Regex AccountIDReg, PasswordReg, EMailReg, CharacterReg;
 
         public static int LoadVersion;
@@ -73,6 +74,8 @@ namespace Server.MirEnvir
         public List<AccountInfo> AccountList = new List<AccountInfo>();
         public List<CharacterInfo> CharacterList = new List<CharacterInfo>(); 
         public LinkedList<AuctionInfo> Auctions = new LinkedList<AuctionInfo>();
+        public int GuildCount, NextGuildID;
+        public List<GuildObject> GuildList = new List<GuildObject>();
 
         //Live Info
         public List<Map> MapList = new List<Map>();
@@ -80,6 +83,7 @@ namespace Server.MirEnvir
         public List<ItemInfo> StartItems = new List<ItemInfo>(); 
         public List<PlayerObject> Players = new List<PlayerObject>();
         public bool Saving = false;
+        public bool SavingGuilds = false;
         public LightSetting Lights;
         public LinkedList<MapObject> Objects = new LinkedList<MapObject>();
         public Dragon DragonSystem;
@@ -173,6 +177,7 @@ namespace Server.MirEnvir
                     {
                         saveTime = Time + Settings.SaveDelay*Settings.Minute;
                         BeginSaveAccounts();
+                        SaveGuilds();
                     }
 
                     if (Time >= userTime)
@@ -203,6 +208,7 @@ namespace Server.MirEnvir
             StopNetwork();
             StopEnvir(); 
             SaveAccounts();
+            SaveGuilds();
 
             _thread = null;
         }
@@ -286,7 +292,8 @@ namespace Server.MirEnvir
                 writer.Write(NextAccountID);
                 writer.Write(NextCharacterID);
                 writer.Write(NextUserItemID);
-
+                writer.Write(GuildList.Count);
+                writer.Write(NextGuildID);
                 writer.Write(AccountList.Count);
                 for (int i = 0; i < AccountList.Count; i++)
                     AccountList[i].Save(writer);
@@ -296,6 +303,37 @@ namespace Server.MirEnvir
                 foreach (AuctionInfo auction in Auctions)
                     auction.Save(writer);
             }
+        }
+
+        private void SaveGuilds()
+        {
+            if (SavingGuilds) return;
+            SavingGuilds = true;
+            if (!Directory.Exists(GuildPath)) Directory.CreateDirectory(GuildPath);
+            for (int i = 0; i < GuildList.Count; i++)
+            {
+                if (GuildList[i].NeedSave)
+                {
+                    MemoryStream mStream = new MemoryStream();
+                    BinaryWriter writer = new BinaryWriter(mStream);
+                    GuildList[i].Save(writer); //mir guild data :p
+                    FileStream fStream = new FileStream(GuildPath + i.ToString() + ".mgd", FileMode.Create);
+                    byte[] data = mStream.ToArray();
+                    fStream.BeginWrite(data, 0, data.Length, EndSaveGuilds, fStream);
+                }
+            }
+        }
+        private void EndSaveGuilds(IAsyncResult result)
+        {
+            FileStream fStream = result.AsyncState as FileStream;
+
+            if (fStream != null)
+            {
+                fStream.EndWrite(result);
+                fStream.Dispose();
+            }
+
+            SavingGuilds = false;
         }
         private void BeginSaveAccounts()
         {
@@ -373,7 +411,7 @@ namespace Server.MirEnvir
                     if (LoadVersion >= 11) DragonInfo = new DragonInfo(reader);
                     else DragonInfo = new DragonInfo();
                 }
-
+                Settings.LinkGuildCreationItems(ItemInfoList);
             }
 
         }
@@ -393,6 +431,11 @@ namespace Server.MirEnvir
                     NextCharacterID = reader.ReadInt32();
                     NextUserItemID = reader.ReadUInt64();
 
+                    if (LoadVersion > 27)
+                    {
+                        GuildCount = reader.ReadInt32();
+                        NextGuildID = reader.ReadInt32();
+                    }
 
                     int count = reader.ReadInt32();
                     AccountList.Clear();
@@ -432,6 +475,26 @@ namespace Server.MirEnvir
                             auction.AuctionID = ++NextAuctionID;
                         }
                     }
+                }
+            }
+        }
+
+        public void LoadGuilds()
+        {
+            lock (LoadLock)
+            {
+                for (int i = 0; i < GuildCount; i++)
+                {
+                    GuildObject newGuild;
+                    if (!File.Exists(GuildPath + i.ToString() + ".mgd"))
+                        newGuild = new GuildObject();
+                    else
+                    {
+                        using (FileStream stream = File.OpenRead(GuildPath + i.ToString() + ".mgd"))
+                        using (BinaryReader reader = new BinaryReader(stream))
+                            newGuild = new GuildObject(reader);
+                    }
+                    GuildList.Add(newGuild);
                 }
             }
         }
@@ -500,7 +563,7 @@ namespace Server.MirEnvir
         {
             Connections.Clear();
             LoadAccounts();
-
+            LoadGuilds();
             _listener = new TcpListener(IPAddress.Parse(Settings.IPAddress), Settings.Port);
             _listener.Start();
             _listener.BeginAcceptTcpClient(Connection, null);
@@ -1009,6 +1072,14 @@ namespace Server.MirEnvir
 
             return null;
         }
+        public PlayerObject GetPlayer(uint PlayerId)
+        {
+            for (int i = 0; i < Players.Count; i++)
+                if (Players[i].Info.Index == PlayerId)
+                    return Players[i];
+
+            return null;
+        }
         public CharacterInfo GetCharacterInfo(string name)
         {
             for (int i = 0; i < CharacterList.Count; i++)
@@ -1017,6 +1088,16 @@ namespace Server.MirEnvir
 
             return null;
         }
+
+        public CharacterInfo GetCharacterInfo(int Index)
+        {
+            for (int i = 0; i < CharacterList.Count; i++)
+                if (CharacterList[i].Index == Index)
+                    return CharacterList[i];
+
+            return null;
+        }
+
         public ItemInfo GetItemInfo(int index)
         {
             for (int i = 0; i < ItemInfoList.Count; i++)
@@ -1050,7 +1131,22 @@ namespace Server.MirEnvir
                 return;
             }
         }
-
+        public GuildObject GetGuild(string Name)
+        {
+            for (int i = 0; i < GuildList.Count; i++)
+            {
+                if (String.Compare(GuildList[i].Name.Replace(" ", ""), Name, StringComparison.OrdinalIgnoreCase) != 0) continue;
+                return GuildList[i];
+            }
+            return null;
+        }
+        public GuildObject GetGuild(int index)
+        {
+            for (int i = 0; i < GuildList.Count; i++)
+                if (GuildList[i].Guildindex == index)
+                    return GuildList[i];
+            return null;
+        }
     }
 }
 

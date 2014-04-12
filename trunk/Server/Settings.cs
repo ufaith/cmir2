@@ -109,6 +109,14 @@ namespace Server
                               PvpCanResistPoison = false,
                               PvpCanFreeze = false;
 
+        //guild related settings
+        public static byte Guild_RequiredLevel = 22, Guild_PointPerLevel = 0;
+        public static float Guild_ExpRate = 0.01f;
+        public static List<ItemVolume> Guild_CreationCostList = new List<ItemVolume>();
+        public static List<long> Guild_ExperienceList = new List<long>();
+        public static List<int> Guild_MembercapList = new List<int>();
+        public static List<GuildBuff> Guild_BuffList = new List<GuildBuff>();
+
         public static void Load()
         {
             //General
@@ -239,6 +247,7 @@ namespace Server
             LoadEXP();
             LoadRandomItemStats();
             LoadMines();
+            LoadGuildSettings();
         }
 
         public static void LoadVersion()
@@ -608,6 +617,98 @@ namespace Server
                     reader.Write("Mine" + i.ToString(), "D" + j.ToString() + "-BonusChance", Drop.BonusChance);
                     reader.Write("Mine" + i.ToString(), "D" + j.ToString() + "-MaxBonusDura", Drop.MaxBonusDura);
                 }
+            }
+        }
+        public static void LoadGuildSettings()
+        {
+            if (!File.Exists(@".\GuildSettings.ini"))
+            {
+                Guild_CreationCostList.Add(new ItemVolume(){Amount = 1000000});
+                Guild_CreationCostList.Add(new ItemVolume(){ItemName = "WoomaHorn",Amount = 1});
+                return;
+            }
+            InIReader reader = new InIReader(@".\GuildSettings.ini");
+            Guild_RequiredLevel = reader.ReadByte("Guilds", "MinimuLevel", Guild_RequiredLevel);
+            Guild_ExpRate = reader.ReadFloat("Guilds", "ExpRate", Guild_ExpRate);
+            Guild_PointPerLevel = reader.ReadByte("Guilds", "PointPerLevel", Guild_PointPerLevel);
+            int i = 0;
+            while (reader.ReadUInt32("Required-" + i.ToString(),"Amount",0) != 0)
+            {
+                Guild_CreationCostList.Add(new ItemVolume()
+                {
+                    ItemName = reader.ReadString("Required-" + i.ToString(), "ItemName", ""),
+                    Amount = reader.ReadUInt32("Required-" + i.ToString(), "Amount", 0)
+                }
+                );
+                i++;
+            }
+            i = 0;
+            while (reader.ReadInt64("Exp", "Level-" + i.ToString(), -1) != -1)
+            {
+                Guild_ExperienceList.Add(reader.ReadInt64("Exp", "Level-" + i.ToString(), 0));
+                i++;
+            }
+            i = 0;
+            while (reader.ReadInt32("Cap", "Level-" + i.ToString(), -1) != -1)
+            {
+                Guild_MembercapList.Add(reader.ReadInt32("Cap", "Level-" + i.ToString(), 0));
+                i++;
+            }
+            byte TotalBuffs = reader.ReadByte("Guilds", "TotalBuffs", 0);
+            for (i = 0; i < TotalBuffs; i++)
+            {
+                Guild_BuffList.Add(new GuildBuff()
+                {
+                    Cost = reader.ReadInt32("Buff-" + i.ToString(), "Cost",0),
+                    PointsNeeded = reader.ReadByte("Buff-" + i.ToString(), "PointsNeeded", 0),
+                    RunTime = reader.ReadInt64("Buff-" + i.ToString(), "RunTime", 0),
+                    MinimumLevel = reader.ReadByte("Buff-" + i.ToString(), "MinimumLevel",0)
+                });
+            }
+
+        }
+        public static void SaveGuildSettings()
+        {
+            File.Delete(@".\GuildSettings.ini");
+            InIReader reader = new InIReader(@".\GuildSettings.ini");
+            reader.Write("Guilds", "MinimumLevel", Guild_RequiredLevel);
+            reader.Write("Guilds", "ExpRate", Guild_ExpRate);
+            reader.Write("Guilds", "PointPerLevel", Guild_PointPerLevel);
+            reader.Write("Guilds", "TotalBuffs", Guild_BuffList.Count);
+            int i = 0;
+            for (i = 0; i < Guild_ExperienceList.Count; i++)
+            {
+                reader.Write("Exp", "Level-" + i.ToString(), Guild_ExperienceList[i]);
+            }
+            for (i = 0; i < Guild_MembercapList.Count; i++)
+            {
+                reader.Write("Cap", "Level-" + i.ToString(), Guild_MembercapList[i]);
+            }
+            for (i = 0; i < Guild_CreationCostList.Count; i++)
+            {
+                reader.Write("Required-" + i.ToString(), "ItemName", Guild_CreationCostList[i].ItemName);
+                reader.Write("Required-" + i.ToString(), "Amount", Guild_CreationCostList[i].Amount);
+            }
+            for (i = 0; i < Guild_BuffList.Count; i++)
+            {
+                reader.Write("Buff-" + i.ToString(), "Cost", Guild_BuffList[i].Cost);
+                reader.Write("Buff-" + i.ToString(), "PointsNeeded", Guild_BuffList[i].PointsNeeded);
+                reader.Write("Buff-" + i.ToString(), "RunTime", Guild_BuffList[i].RunTime);
+                reader.Write("Buff-" + i.ToString(), "MinimumLevel", Guild_BuffList[i].MinimumLevel);
+            }
+        }
+        public static void LinkGuildCreationItems(List<ItemInfo> ItemList)
+        {
+            for (int i = 0; i < Guild_CreationCostList.Count; i++)
+            {
+                if (Guild_CreationCostList[i].ItemName != "")
+                    for (int j = 0; j < ItemList.Count; j++)
+                    {
+                        if (String.Compare(ItemList[j].Name.Replace(" ", ""), Guild_CreationCostList[i].ItemName, StringComparison.OrdinalIgnoreCase) != 0) continue;
+                        Guild_CreationCostList[i].Item = ItemList[j];
+                        break;
+                    }
+                  
             }
         }
     }

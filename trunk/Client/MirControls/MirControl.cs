@@ -604,6 +604,15 @@ namespace Client.MirControls
         }
         #endregion
 
+        #region MultiLine
+
+        public virtual void MultiLine()
+        {
+        }
+
+        #endregion
+
+
         public void BringToFront()
         {
             if (Parent == null) return;

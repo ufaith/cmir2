@@ -59,6 +59,8 @@ namespace Client.MirObjects
             Id = info.RealId;
             Name = info.Name;
             NameColour = info.NameColour;
+            GuildName = info.GuildName;
+            GuildRankName = info.GuildRank;
             Class = info.Class;
             Gender = info.Gender;
             Level = info.Level;

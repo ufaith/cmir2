@@ -683,6 +683,13 @@ public enum ServerPacketIds : short
     BaseStatsInfo,
     UserName,
     ChatItemStats,
+    GuildNoticeChange,
+    GuildMemberChange,
+    GuildChange,
+    GuildStatus,
+    GuildInvite,
+    GuildExpGain,
+    GuildNameRequest,
 }
 
 public enum ClientPacketIds : short
@@ -739,6 +746,11 @@ public enum ClientPacketIds : short
     MarketGetBack,
     RequestUserName,
     RequestChatItem,
+    EditGuildMember,
+    EditGuildNotice,
+    GuildInvite,
+    GuildNameReturn,
+    RequestGuildInfo,
 }
 
 public class InIReader
@@ -2276,6 +2288,16 @@ public abstract class Packet
                 return new C.RequestUserName();
             case (short)ClientPacketIds.RequestChatItem:
                 return new C.RequestChatItem();
+            case (short)ClientPacketIds.EditGuildMember:
+                return new C.EditGuildMember();
+            case (short)ClientPacketIds.EditGuildNotice:
+                return new C.EditGuildNotice();
+            case (short)ClientPacketIds.GuildInvite:
+                return new C.GuildInvite();
+            case (short)ClientPacketIds.GuildNameReturn:
+                return new C.GuildNameReturn();
+            case (short)ClientPacketIds.RequestGuildInfo:
+                return new C.RequestGuildInfo();
             default:
                 throw new NotImplementedException();
         }
@@ -2531,6 +2553,20 @@ public abstract class Packet
                 return new S.UserName();
             case (short)ServerPacketIds.ChatItemStats:
                 return new S.ChatItemStats();
+            case (short)ServerPacketIds.GuildMemberChange:
+                return new S.GuildMemberChange();
+            case (short)ServerPacketIds.GuildNoticeChange:
+                return new S.GuildNoticeChange();
+            case (short)ServerPacketIds.GuildChange:
+                return new S.GuildChange();
+            case (short)ServerPacketIds.GuildStatus:
+                return new S.GuildStatus();
+            case (short)ServerPacketIds.GuildInvite:
+                return new S.GuildInvite();
+            case (short)ServerPacketIds.GuildExpGain:
+                return new S.GuildExpGain();
+            case (short)ServerPacketIds.GuildNameRequest:
+                return new S.GuildNameRequest();
             default:
                 throw new NotImplementedException();
         }
@@ -2944,6 +2980,7 @@ public class UserId
     public string UserName = "";
 }
 
+#region "Mine Related"
 public class MineSet
 {
     public string Name = string.Empty;
@@ -3041,3 +3078,123 @@ public class MineZone
         return string.Format("Mine: {0}- {1}", Functions.PointToString(Location), Mine);
     }
 }
+#endregion
+
+#region "Guild Related"
+public class ItemVolume
+{
+    public ItemInfo Item;
+    public string ItemName;
+    public uint Amount;
+}
+
+public class GuildBuff
+{
+    public bool Enabled = false;
+    public bool Active = false;
+    public byte PointsNeeded = 1;
+    public long StartTick = 0;
+    public long RunTime = 0;
+    public int Cost = 0;
+    public byte MinimumLevel = 0;
+    //todo: add all the available stats 
+    public GuildBuff()
+    { }
+    public GuildBuff(BinaryReader reader)
+    {
+        byte bools = reader.ReadByte();
+        Enabled = (bools & 0x01) == 0x01 ? true : false;
+        Active = (bools & 0x02) == 0x02 ? true : false;
+        StartTick = reader.ReadInt64();
+    }
+    public void Save(BinaryWriter writer)
+    {
+        byte bools = 0;
+        if (Enabled) bools |= 0x01;
+        if (Active) bools |= 0x02;
+        writer.Write(bools);
+        writer.Write(StartTick);
+    }
+}
+
+public class Rank
+{
+    public List<GuildMember> Members = new List<GuildMember>();
+    public string Name = "";
+    public int Index = 0;
+    public RankOptions Options = (RankOptions)0;
+    public Rank() 
+    {
+    }
+    public Rank(BinaryReader reader, bool Offline = false)
+    {
+        Name = reader.ReadString();
+        Options = (RankOptions)reader.ReadByte();
+        if (!Offline)
+            Index = reader.ReadInt32();
+        int Membercount = reader.ReadInt32();
+        for (int j = 0; j < Membercount; j++)
+            Members.Add(new GuildMember(reader, Offline));
+    }
+    public void Save(BinaryWriter writer, bool Save = false)
+    {
+        writer.Write(Name);
+        writer.Write((byte)Options);
+        if (!Save)
+            writer.Write(Index);
+        writer.Write(Members.Count);
+        for (int j = 0; j < Members.Count; j++)
+            Members[j].save(writer);
+    }
+}
+
+public class GuildStorageItem
+{
+    public UserItem Item;
+    public long UserId = 0;
+}
+
+public class GuildMember
+{
+    public string name = "";
+    public int Id;
+    public object Player;
+    public DateTime LastLogin;
+    public bool hasvoted;
+    public bool Online;
+
+    public GuildMember()
+    {}
+    public GuildMember(BinaryReader reader, bool Offline = false)
+    {
+        name = reader.ReadString();
+        Id = reader.ReadInt32();
+        LastLogin = DateTime.FromBinary(reader.ReadInt64());
+        hasvoted = reader.ReadBoolean();
+        Online = reader.ReadBoolean();
+        Online = Offline ? false: Online;
+    }
+    public void save(BinaryWriter writer)
+    {
+        writer.Write(name);
+        writer.Write(Id);
+        writer.Write(LastLogin.ToBinary());
+        writer.Write(hasvoted);
+        writer.Write(Online);
+    }
+}
+
+[Flags]
+[Obfuscation(Feature = "renaming", Exclude = true)]
+public enum RankOptions : byte
+{
+    CanChangeRank = 1,
+    CanRecruit = 2,
+    CanKick = 4,
+    CanStoreItem = 8,
+    CanRetrieveItem = 16,
+    CanAlterAlliance = 32,
+    CanChangeNotice = 64,
+    CanActivateBuff = 128
+}
+#endregion

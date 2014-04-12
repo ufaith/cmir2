@@ -14,7 +14,7 @@ namespace Server.MirObjects
     public sealed class PlayerObject : MapObject
     {
         public string GMPassword = Settings.GMPassword;
-        public bool IsGM, GMLogin, GMNeverDie, GMGameMaster, EnableGroupRecall;
+        public bool IsGM, GMLogin, GMNeverDie, GMGameMaster, EnableGroupRecall, EnableGuildInvite;
 
         public bool HasUpdatedBaseStats = true;
 
@@ -187,6 +187,12 @@ namespace Server.MirObjects
         public bool ActiveBlizzard;
         public byte Reflect;
         public bool UnlockCurse = false;
+        public bool CanCreateGuild = false;
+        public GuildObject MyGuild = null;
+        public Rank MyGuildRank = null;
+        public GuildObject PendingGuildInvite = null;
+        public bool GuildNoticeChanged = true; //set to false first time client requests notice list, set to true each time someone in guild edits notice
+        public bool GuildMembersChanged = true;//same as above but for members
         public override bool Blocking
         {
             get
@@ -255,7 +261,7 @@ namespace Server.MirObjects
             }
 
             Pets.Clear();
-
+            if (MyGuild != null) MyGuild.PlayerLogged(this, false);
             Envir.Players.Remove(this);
             CurrentMap.RemoveObject(this);
             Despawn();
@@ -928,6 +934,9 @@ namespace Server.MirObjects
                 if (monster.CurrentMap == CurrentMap && Functions.InRange(monster.CurrentLocation, CurrentLocation, Globals.DataRange) && !monster.Dead)
                     monster.PetExp(amount);
             }
+            
+            if (MyGuild != null)
+                MyGuild.GainExp(amount);
 
             if (Experience < MaxExperience) return;
             if (Level >= byte.MaxValue) return;
@@ -1104,7 +1113,26 @@ namespace Server.MirObjects
         {
             Connection.Stage = GameStage.Game;
             Enqueue(new S.StartGame { Result = 4 });
-
+            ReceiveChat("Welcome to the Legend of Mir 2 C# Server.", ChatType.Hint);
+            if (Info.GuildIndex != -1)
+            {
+               MyGuild = Envir.GetGuild(Info.GuildIndex);
+                if (MyGuild == null)
+                {
+                    Info.GuildIndex = -1;
+                    ReceiveChat("You have been removed from the guild.", ChatType.System);
+                }
+                else
+                {
+                    MyGuildRank = MyGuild.FindRank(Info.Name);
+                    if (MyGuildRank == null)
+                    {
+                        MyGuild = null;
+                        Info.GuildIndex = -1;
+                        ReceiveChat("You have been removed from the guild.", ChatType.System);
+                    }
+                }
+            }
             Spawned();
             GetItemInfo();
             GetMapInfo();
@@ -1112,8 +1140,6 @@ namespace Server.MirObjects
             Enqueue(new S.BaseStatsInfo { Stats = Settings.ClassBaseStats[(byte)Class] });
             GetObjectsPassive();
             Enqueue(new S.TimeOfDay { Lights = Envir.Lights });
-
-            ReceiveChat("Welcome to the Legend of Mir 2 C# Server.", ChatType.Hint);
             Enqueue(new S.ChangeAMode { Mode = AMode });
             if (Class == MirClass.Wizard || Class == MirClass.Taoist)
                 Enqueue(new S.ChangePMode {Mode = PMode});
@@ -1143,8 +1169,8 @@ namespace Server.MirObjects
                 monster.SetHP(info.HP);
             }
             Info.Pets.Clear();
-            
-
+            if (MyGuild != null)
+                MyGuild.PlayerLogged(this, true);
             SMain.Enqueue(string.Format("{0} has connected.", Info.Name));
         }
         private void StartGameFailed()
@@ -1213,11 +1239,15 @@ namespace Server.MirObjects
         }
         private void GetUserInfo()
         {
+            string guildname = MyGuild != null ? MyGuild.Name : "";
+            string guildrank = MyGuild != null ? MyGuildRank.Name : "";
             S.UserInformation packet = new S.UserInformation
                 {
                     ObjectID = ObjectID,
                     RealId = (uint)Info.Index,
                     Name = Name,
+                    GuildName = guildname,
+                    GuildRank = guildrank,
                     NameColour = NameColour,
                     Class = Class,
                     Gender = Gender,
@@ -1936,8 +1966,11 @@ namespace Server.MirObjects
             }
             else if (message.StartsWith("!~"))
             {
+                if (MyGuild == null) return;
+
                 //Guild
-                //message = message.Remove(0, 2);
+                message = message.Remove(0, 2);
+                MyGuild.SendMessage(String.Format("{0}: {1}", Name, message));
 
             }
             else if (message.StartsWith("!"))
@@ -2197,7 +2230,11 @@ namespace Server.MirObjects
                         hintstring = Observer ? "Observer Mode." : "Normal Mode.";
                         ReceiveChat(hintstring, ChatType.Hint);
                         break;
-
+                    case "ALLOWGUILD":
+                        EnableGuildInvite = !EnableGuildInvite;
+                        hintstring = EnableGuildInvite ? "Guild invites enabled." : "Guild invites disabled.";
+                        ReceiveChat(hintstring, ChatType.Hint);
+                        break;
                     case "RECALL":
                         if (!IsGM) return;
 
@@ -2498,6 +2535,43 @@ namespace Server.MirObjects
                         if (!IsGM)
                             LastProbeTime = Envir.Time + 180000;
                         ReceiveChat((string.Format("{0} is located at {1} ({2},{3})", player.Name,player.CurrentMap.Info.Title,player.CurrentLocation.X, player.CurrentLocation.Y)),ChatType.System);
+                        break;
+                    case "LEAVEGUILD":
+                        if (MyGuild == null) return;
+                        if (MyGuildRank == null) return;
+                        MyGuild.DeleteMember(this, Name);
+                        break;
+                    case "CREATEGUILD":
+                        if (!IsGM) return;
+                        if (parts.Length < 3) return;
+                        player = Envir.GetPlayer(parts[1]);
+                        if (player == null)
+                        {
+                            ReceiveChat(string.Format("Player {0} was not found.", parts[1]), ChatType.System);
+                            return;
+                        }
+                        if (player.MyGuild != null)
+                        {
+                            ReceiveChat(string.Format("Player {0} is already in a guild.", parts[1]), ChatType.System);
+                            return;
+                        }
+                        if ((parts[2].Length < 3) || (parts[2].Length > 20))
+                        {
+                            ReceiveChat("Guildname is restricted to 3-20 characters.",ChatType.System);
+                            return;
+                        }
+                        GuildObject guild = Envir.GetGuild(parts[2]);
+                        if (guild != null)
+                        {
+                            ReceiveChat(string.Format("Guild {0} already excists.", parts[2]), ChatType.System);
+                            return;
+                        }
+                        player.CanCreateGuild = true;
+                        if (player.CreateGuild(parts[2]))
+                            ReceiveChat(string.Format("Succesfully created guild {0}", parts[2]), ChatType.System);
+                        else
+                            ReceiveChat("Failed to create guild", ChatType.System);
+                        player.CanCreateGuild = false;
                         break;
                 }
             }
@@ -4716,6 +4790,8 @@ namespace Server.MirObjects
                 ObjectID = ObjectID,
                 Name = CurrentMap.Info.NoNames ? "?????" : Name,
                 NameColour = NameColour,
+                GuildName = CurrentMap.Info.NoNames ? "?????": MyGuild != null? MyGuild.Name: "",
+                GuildRankName = CurrentMap.Info.NoNames ? "?????": MyGuildRank != null? MyGuildRank.Name: "",
                 Class = Class,
                 Gender = Gender,
                 Location = CurrentLocation,
@@ -6790,6 +6866,11 @@ namespace Server.MirObjects
         }
         public void RequestUserName(uint id)
         {
+            CharacterInfo Character = Envir.GetCharacterInfo((int)id);
+            if (Character != null)
+                Enqueue(new S.UserName { Id = (uint)Character.Index, Name = Character.Name });
+
+            /*
             for (int i = 0; i < Envir.Players.Count; i++)
             {
                 if (Envir.Players[i].Info.Index == id)
@@ -6798,6 +6879,7 @@ namespace Server.MirObjects
                     return;
                 }
             }
+            */
         }
 
         public void RequestChatItem(ulong id)
@@ -6821,13 +6903,7 @@ namespace Server.MirObjects
                         player = CurrentMap.Players[i];
                         break;
                     }
-
-                    if (player != null) break;
-                }
-                else
-                {
-                    player = CurrentMap.Players[i];
-                    break;
+                    continue;
                 }
             }
 
@@ -6838,11 +6914,19 @@ namespace Server.MirObjects
 
                 CheckItemInfo(u.Info);
             }
-
+            string guildname = "";
+            string guildrank = "";
+            if (player.MyGuild != null)
+            {
+                guildname = player.MyGuild.Name;
+                guildrank = player.MyGuildRank.Name;
+            }
             Enqueue(new S.PlayerInspect
             {
                 Name = player.Name,
                 Equipment = player.Info.Equipment,
+                GuildName = guildname,
+                GuildRank = guildrank,
                 Hair = player.Hair,
                 Gender = player.Gender,
                 Class = player.Class,
@@ -7665,6 +7749,85 @@ namespace Server.MirObjects
             Enqueue(p);
         }
 
+        public void GuildInvite(bool accept)
+        {
+            if (PendingGuildInvite == null)
+            {
+                ReceiveChat("You have not been invited to a guild.", ChatType.System);
+                return;
+            }
+            if (!accept) return;
+            if (!PendingGuildInvite.HasRoom())
+            {
+                ReceiveChat(String.Format("{0} is full.",PendingGuildInvite.Name), ChatType.System);
+                return;
+            }
+            PendingGuildInvite.NewMember(this);
+            Info.GuildIndex = PendingGuildInvite.Guildindex;
+            MyGuild = PendingGuildInvite;
+            MyGuildRank = PendingGuildInvite.FindRank(Name);
+            GuildMembersChanged = true;
+            GuildNoticeChanged = true;
+            //tell us we now have a guild
+            Broadcast(GetInfo());
+            Enqueue(new S.GuildChange() { GuildName = MyGuild.Name, GuildRank = MyGuildRank.Name, Status = MyGuildRank.Options });
+            MyGuild.SendGuildStatus(this);
+            PendingGuildInvite = null;
+            EnableGuildInvite = false;            
+        }
+
+        public void RequestGuildInfo(byte Type)
+        {
+            if (MyGuild == null) return;
+            if (MyGuildRank == null) return;
+            switch (Type)
+            {
+                case 0://notice
+                    if (GuildNoticeChanged)
+                        Enqueue(new S.GuildNoticeChange() { notice = MyGuild.Notice });
+                    GuildNoticeChanged = false;
+                    break;
+                case 1://memberlist
+                    if (GuildMembersChanged)
+                        Enqueue(new S.GuildMemberChange() { Status = 255, Ranks = MyGuild.Ranks });
+                    break;
+            }
+        }
+
+        public void GuildNameReturn(string Name)
+        {
+            if (Name == "") CanCreateGuild = false;
+            if (!CanCreateGuild) return;            
+            if ((Name.Length < 3) || (Name.Length > 20))
+            {
+                ReceiveChat("Guild name to long.", ChatType.System);
+                CanCreateGuild = false;
+                return;
+            }
+            if (Name.Contains('\\'))
+            {
+                CanCreateGuild = false;
+                return;
+            }
+            if (MyGuild != null)
+            {
+                ReceiveChat("You are already part of a guild.", ChatType.System);
+                CanCreateGuild = false;
+                return;
+            }
+            GuildObject guild = Envir.GetGuild(Name);
+            if (guild != null)
+            {
+                ReceiveChat(string.Format("Guild {0} already excists.", Name), ChatType.System);
+                CanCreateGuild = false;
+                return;
+            }
+
+
+            CreateGuild(Name);
+            CanCreateGuild = false;
+        }
+
         public void Enqueue(Packet p)
         {
             if (Connection == null) return;
@@ -7714,6 +7877,242 @@ namespace Server.MirObjects
             }
         }
 
+        public bool CreateGuild(string GuildName)
+        {
+            if ((MyGuild != null) || (Info.GuildIndex != -1)) return false;
+            if (Envir.GetGuild(GuildName) != null) return false;
+            if (Info.Level < Settings.Guild_RequiredLevel) return false;
+            //check if we have the required items
+            for (int i = 0; i < Settings.Guild_CreationCostList.Count; i++)
+            {
+                ItemVolume Required = Settings.Guild_CreationCostList[i];
+                if (Required.Item == null)
+                {
+                    if (Info.AccountInfo.Gold < Required.Amount)
+                    {
+                        ReceiveChat(String.Format("Insufficient gold. Creating a guild requires {0} gold.", Required.Amount), ChatType.System);
+                        return false;
+                    }
+                }
+                else
+                {
+                    uint count = Required.Amount;
+                    foreach (var item in Info.Inventory.Where(item => item != null && item.Info == Required.Item))
+                    {
+                        if ((Required.Item.Type == ItemType.Ore) && (item.CurrentDura / 1000 > Required.Amount))
+                        {
+                            count = 0;
+                            break;
+                        }
+                        if (item.Count > count)
+                            count = 0;
+                        else
+                            count = count - item.Count;
+                        if (count == 0) break;
+                    }
+                    if (count != 0)
+                    {
+                        if (Required.Amount == 1)
+                            ReceiveChat(String.Format("{0} is required to create a guild.", Required.Item.Name), ChatType.System);
+                        else
+                        {
+                            if (Required.Item.Type == ItemType.Ore)
+                                ReceiveChat(string.Format("{0} with purity {1} is recuired to create a guild.", Required.Item.Name, Required.Amount / 1000), ChatType.System);
+                            else
+                                ReceiveChat(string.Format("Insufficient {0}, you need {1} to create a guild.", Required.Item.Name, Required.Amount), ChatType.System);
+                        }
+                        return false;
+                    }
+                }
+            }
+            //take the required items
+            for (int i = 0; i < Settings.Guild_CreationCostList.Count; i++)
+            {
+                ItemVolume Required = Settings.Guild_CreationCostList[i];
+                if (Required.Item == null)
+                {
+                    if (Info.AccountInfo.Gold >= Required.Amount)
+                    {
+                        Info.AccountInfo.Gold -= Required.Amount;
+                        Enqueue(new S.LoseGold { Gold = Required.Amount });
+                    }
+                }
+                else
+                {
+                    uint count = Required.Amount;
+                    for (int o = 0; o < Info.Inventory.Length; o++)
+                    {
+                        UserItem item = Info.Inventory[o];
+                        if (item == null) continue;
+                        if (item.Info != Required.Item) continue;
+                            
+                        if ((Required.Item.Type == ItemType.Ore) && (item.CurrentDura / 1000 > Required.Amount))
+                        {
+                            Enqueue(new S.DeleteItem { UniqueID = item.UniqueID, Count = item.Count });
+                            Info.Inventory[o] = null;
+                            break;
+                        }
+                        if (count > item.Count)
+                        {
+                            Enqueue(new S.DeleteItem { UniqueID = item.UniqueID, Count = item.Count });
+                            Info.Inventory[o] = null;
+                            count -= item.Count;
+                            continue;
+                        }
+                        
+                        Enqueue(new S.DeleteItem { UniqueID = item.UniqueID, Count = count });
+                        if (count == item.Count)
+                            Info.Inventory[o] = null;
+                        else
+                            item.Count -= count;
+                        break;
+                    }
+                }
+            }
+            RefreshStats();
+            //make the guild
+            GuildObject guild = new GuildObject(this, GuildName) { Guildindex = ++Envir.NextGuildID };
+            Envir.GuildList.Add(guild);
+            Info.GuildIndex = guild.Guildindex;
+            MyGuild = guild;
+            MyGuildRank = guild.FindRank(Name);
+            GuildMembersChanged = true;
+            GuildNoticeChanged = true;
+            //tell us we now have a guild
+            Broadcast(GetInfo());
+            Enqueue(new S.GuildChange() { GuildName = MyGuild.Name, GuildRank = MyGuildRank.Name, Status = MyGuildRank.Options });
+            return true;
+        }
+
+        public void EditGuildMember(string Name, string RankName, byte RankIndex, byte ChangeType)
+        {
+            if ((MyGuild == null) || (MyGuildRank == null))
+            {
+                ReceiveChat("You are not in a guild!",ChatType.System);
+                return;
+            }
+            switch (ChangeType)
+            {
+                case 0: //add member
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanRecruit))
+                    {
+                        ReceiveChat("You are not allowed to recruit new members!",ChatType.System);
+                        return;
+                    }
+                    if (Name == "") return;
+                    PlayerObject player = Envir.GetPlayer(Name);
+                    if (player == null)
+                    {
+                        ReceiveChat(String.Format("{0} is not online!",Name), ChatType.System);
+                        return;
+                    }
+                    if ((player.MyGuild != null) || (player.MyGuildRank != null) || (player.Info.GuildIndex != -1))
+                    {
+                        ReceiveChat(String.Format("{0} is already in a guild!", Name), ChatType.System);
+                        return;
+                    }
+                    if (!player.EnableGuildInvite)
+                    {
+                        ReceiveChat(String.Format("{0} is disabling guild invites!", Name), ChatType.System);
+                        return;
+                    }
+                    if (player.PendingGuildInvite != null)
+                    {
+                        ReceiveChat(string.Format("{0} already has a guild invite pending.", Name), ChatType.System);
+                        return;
+                    }
+                    player.Enqueue(new S.GuildInvite { Name = MyGuild.Name });
+                    player.PendingGuildInvite = MyGuild;
+                    break;
+                case 1: //delete member
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanKick))
+                    {
+                        ReceiveChat("You are not allowed to remove members!",ChatType.System);
+                        return;
+                    }
+                    if (Name == "") return;
+                    
+                    if (!MyGuild.DeleteMember(this,Name))
+                    {
+                        return;
+                    }
+                    break;
+                case 2: //promote member (and it'll auto create a new rank at bottom if the index > total ranks!)
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanChangeRank))
+                    {
+                        ReceiveChat("You are not allowed to change other members rank!",ChatType.System);
+                        return;
+                    }
+                    if (Name == "") return;
+                    MyGuild.ChangeRank(this, Name, RankIndex, RankName);
+                    break;
+                case 3: //change rank name
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanChangeRank))
+                    {
+                        ReceiveChat("You are not allowed to change ranks!",ChatType.System);
+                        return;
+                    }
+                    if ((RankName == "") || (RankName.Length < 3))
+                    {
+                        ReceiveChat("Rank name to short!", ChatType.System);
+                        return;
+                    }
+                    if (RankName.Contains("\\") ||RankName.Length > 20)
+                    {
+                        return;
+                    }
+                    if (!MyGuild.ChangeRankName(this, RankName, RankIndex))
+                        return;
+                    break;
+                case 4: //new rank
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanChangeRank))
+                    {
+                        ReceiveChat("You are not allowed to change ranks!", ChatType.System);
+                        return;
+                    }
+                    if (MyGuild.Ranks.Count > 254)
+                    {
+                        ReceiveChat("No more rank slots available.", ChatType.System);
+                        return;
+                    }
+                    MyGuild.NewRank(this);
+                    break;
+                case 5: //change rank setting
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanChangeRank))
+                    {
+                        ReceiveChat("You are not allowed to change ranks!", ChatType.System);
+                        return;
+                    }
+                    int temp;
+
+                    if (!int.TryParse(RankName, out temp))
+                    {
+                        return;
+                    }
+                    MyGuild.ChangeRankOption(this, RankIndex, temp,Name);
+                    break;
+            }
+        }
+        public void EditGuildNotice(List<string> notice)
+        {
+            if ((MyGuild == null) || (MyGuildRank == null))
+            {
+                ReceiveChat("You are not in a guild!",ChatType.System);
+                return;
+            }
+            if (!MyGuildRank.Options.HasFlag(RankOptions.CanChangeNotice))
+            {
+                
+                ReceiveChat("You are not allowed to change the guild notice!",ChatType.System);
+                return;
+            }
+            if (notice.Count > 200)
+            {
+                ReceiveChat("Guild notice can not be longer then 200 lines!", ChatType.System);
+                return;
+            }
+            MyGuild.NewNotice(notice);
+        }
     }
 }
 

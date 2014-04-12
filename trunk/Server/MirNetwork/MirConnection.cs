@@ -348,6 +348,21 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.RequestChatItem:
                     RequestChatItem((C.RequestChatItem)p);
                     return;
+                case (short)ClientPacketIds.EditGuildMember:
+                    EditGuildMember((C.EditGuildMember)p);
+                    return;
+                case (short)ClientPacketIds.EditGuildNotice:
+                    EditGuildNotice((C.EditGuildNotice)p);
+                    return;
+                case (short)ClientPacketIds.GuildInvite:
+                    GuildInvite((C.GuildInvite)p);
+                    return;
+                case (short)ClientPacketIds.RequestGuildInfo:
+                    RequestGuildInfo((C.RequestGuildInfo)p);
+                    return;
+                case (short)ClientPacketIds.GuildNameReturn:
+                    GuildNameReturn((C.GuildNameReturn)p);
+                    return;
                 default:
                     throw new NotImplementedException();
             }
@@ -865,6 +880,32 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.RequestChatItem(p.ChatItemID);
+        }
+        private void EditGuildMember(C.EditGuildMember p)
+        {
+            if (Stage != GameStage.Game) return;
+            Player.EditGuildMember(p.Name,p.RankName,p.RankIndex,p.ChangeType);
+        }
+        private void EditGuildNotice(C.EditGuildNotice p)
+        {
+            if (Stage != GameStage.Game) return;
+            Player.EditGuildNotice(p.notice);
+        }
+        private void GuildInvite(C.GuildInvite p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.GuildInvite(p.AcceptInvite);
+        }
+        private void RequestGuildInfo(C.RequestGuildInfo p)
+        {
+            if (Stage != GameStage.Game) return;
+            Player.RequestGuildInfo(p.Type);
+        }
+        private void GuildNameReturn(C.GuildNameReturn p)
+        {
+            if (Stage != GameStage.Game) return;
+            Player.GuildNameReturn(p.Name);
         }
     }
 }
