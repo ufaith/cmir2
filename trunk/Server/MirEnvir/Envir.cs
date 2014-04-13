@@ -83,7 +83,6 @@ namespace Server.MirEnvir
         public List<ItemInfo> StartItems = new List<ItemInfo>(); 
         public List<PlayerObject> Players = new List<PlayerObject>();
         public bool Saving = false;
-        public bool SavingGuilds = false;
         public LightSetting Lights;
         public LinkedList<MapObject> Objects = new LinkedList<MapObject>();
         public Dragon DragonSystem;
@@ -208,7 +207,7 @@ namespace Server.MirEnvir
             StopNetwork();
             StopEnvir(); 
             SaveAccounts();
-            SaveGuilds();
+            SaveGuilds(true);
 
             _thread = null;
         }
@@ -305,10 +304,8 @@ namespace Server.MirEnvir
             }
         }
 
-        private void SaveGuilds()
+        private void SaveGuilds(bool forced = false)
         {
-            if (SavingGuilds) return;
-            SavingGuilds = true;
             if (!Directory.Exists(GuildPath)) Directory.CreateDirectory(GuildPath);
             for (int i = 0; i < GuildList.Count; i++)
             {
@@ -326,14 +323,12 @@ namespace Server.MirEnvir
         private void EndSaveGuilds(IAsyncResult result)
         {
             FileStream fStream = result.AsyncState as FileStream;
-
             if (fStream != null)
             {
                 fStream.EndWrite(result);
                 fStream.Dispose();
             }
 
-            SavingGuilds = false;
         }
         private void BeginSaveAccounts()
         {

@@ -939,9 +939,6 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.ChatItemStats:
                     ChatItemStats((S.ChatItemStats)p);
                     break;
-                case (short)ServerPacketIds.GuildChange:
-                    GuildChange((S.GuildChange)p);
-                    break;
                 case (short)ServerPacketIds.GuildInvite:
                     GuildInvite((S.GuildInvite)p);
                     break;
@@ -2682,6 +2679,12 @@ namespace Client.MirScenes
         private void GuildNameRequest(S.GuildNameRequest p)
         {
             MirInputBox inputBox = new MirInputBox("Please enter a guild name, length must be 3~20 characters.");
+            inputBox.InputTextBox.TextBox.KeyPress += (o, e) =>
+            {
+                string Allowed = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                if (!Allowed.Contains(e.KeyChar))
+                    e.Handled = true;
+            };
             inputBox.OKButton.Click += (o, e) =>
             {
                 if (inputBox.InputTextBox.Text.Contains('\\'))
@@ -2715,6 +2718,7 @@ namespace Client.MirScenes
                     break;
                 case 2://new member
                     ChatDialog.ReceiveChat(String.Format("{0} joined guild.", p.Name), ChatType.Guild);
+                    GuildDialog.MemberCount++;
                     GuildDialog.MembersChanged = true;
                     break;
                 case 3://kicked member
@@ -2746,28 +2750,22 @@ namespace Client.MirScenes
             }
         }
 
-        private void GuildChange(S.GuildChange p)
+        private void GuildStatus(S.GuildStatus p)
         {
-            if ((User.GuildName == "" ) && (p.GuildName != ""))
+            if ((User.GuildName == "") && (p.GuildName != ""))
             {
                 GuildDialog.NoticeChanged = true;
                 GuildDialog.MembersChanged = true;
             }
             if (p.GuildName == "")
                 GuildDialog.Hide();
-            User.GuildName = p.GuildName;
-            User.GuildRankName = p.GuildRank;
-            GuildDialog.StatusChanged(p.Status);
-            
-        }
 
-        private void GuildStatus(S.GuildStatus p)
-        {
             if ((User.GuildName == p.GuildName) && (GuildDialog.Level < p.Level))
             {
                 //guild leveled
             }
             User.GuildName = p.GuildName;
+            User.GuildRankName = p.GuildRankName;
             GuildDialog.Level = p.Level;
             GuildDialog.Experience = p.Experience;
             GuildDialog.MaxExperience = p.MaxExperience;
@@ -10017,6 +10015,7 @@ namespace Client.MirScenes
         public MirButton[] RanksOptionsButtons;
         public MirLabel[] RanksOptionsTexts;
         public MirDropDownBox RanksSelectBox;
+        public MirButton RanksSaveName;
         #endregion
 
         public GuildDialog()
@@ -10540,6 +10539,25 @@ namespace Client.MirScenes
             };
             RanksName.BeforeDraw += (o, e) => RanksName_BeforeDraw();
             RanksName.TextBox.KeyPress += RanksName_KeyPress;
+
+            RanksSaveName = new MirButton()
+            {
+                Location = new Point(160, 20),
+                Text = "Save",
+                Enabled = false,
+                Visible = true,
+                Parent = RankPage,
+                Index = 2216,
+                HoverIndex = 2217,
+                PressedIndex = 2218,
+                Library = Libraries.Prguse,
+                Sound = SoundList.ButtonA,
+                CenterText = true
+            };
+            RanksSaveName.Click += (o, e) =>
+                {
+                    RanksChangeName();
+                };
             
             String[] Options = { "Edit ranks", "Recruit member", "Kick member", "Store item", "Retrieve item", "Alter alliance", "Change notice", "Activate Buff"};
             RanksOptionsButtons = new MirButton[8];
@@ -10569,6 +10587,7 @@ namespace Client.MirScenes
                     Index = 1347,
                     Library = Libraries.Prguse,
                     Parent = RankPage,
+                    NotControl = true,
                     Location = new Point(i % 2 == 0 ? 0 : 200, i % 2 == 0 ? 50 + (i * 20) : 50 + ((i - 1) * 20)),
                 };
                 int index = i;
@@ -11168,10 +11187,18 @@ namespace Client.MirScenes
             if ((RanksSelectBox.SelectedIndex == -1) || (RanksSelectBox.SelectedIndex >= Ranks.Count)) return;
             if (LastGuildMsg > CMain.Time) return;
             Network.Enqueue(new C.EditGuildMember { ChangeType = 5, RankIndex = (byte)Ranks[RanksSelectBox.SelectedIndex].Index, RankName = OptionIndex.ToString(), Name = RanksOptionsStatus[OptionIndex].Visible ? "false" : "true" });
-            LastGuildMsg = CMain.Time + 1000;
+            LastGuildMsg = CMain.Time + 300;
             //UpdateRanks();
         }
-
+        public void RanksChangeName()
+        {
+            if (!string.IsNullOrEmpty(RanksName.Text))
+            {
+                Network.Enqueue(new C.EditGuildMember { ChangeType = 3, RankIndex = (byte)Ranks[RanksSelectBox.SelectedIndex].Index, RankName = RanksName.Text });
+                LastRankNameChange = CMain.Time + 5000;
+                RanksName.Enabled = false;
+            }
+        }
         public void RanksName_KeyPress(object sender, KeyPressEventArgs e)
         {
             switch (e.KeyChar)
@@ -11181,12 +11208,7 @@ namespace Client.MirScenes
                     break;
                 case (char) Keys.Enter:
                     e.Handled = true;
-                    if (!string.IsNullOrEmpty(RanksName.Text))
-                    {
-                        Network.Enqueue(new C.EditGuildMember { ChangeType = 3, RankIndex = (byte)Ranks[RanksSelectBox.SelectedIndex].Index, RankName = RanksName.Text });
-                        LastRankNameChange = CMain.Time + 5000;
-                        RanksName.Enabled = false;
-                    }
+                    RanksChangeName();
                     break;
                 case (char) Keys.Escape:
                     e.Handled = true;
@@ -11198,9 +11220,15 @@ namespace Client.MirScenes
         public void RanksName_BeforeDraw()
         {
             if (LastRankNameChange < CMain.Time)
+            {
                 RanksName.Enabled = true;
+                RanksSaveName.Enabled = true;
+            }
             else
+            {
                 RanksName.Enabled = false;
+                RanksSaveName.Enabled = false;
+            }
         }
 
         #endregion

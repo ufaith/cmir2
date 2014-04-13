@@ -2563,7 +2563,7 @@ namespace Server.MirObjects
                         GuildObject guild = Envir.GetGuild(parts[2]);
                         if (guild != null)
                         {
-                            ReceiveChat(string.Format("Guild {0} already excists.", parts[2]), ChatType.System);
+                            ReceiveChat(string.Format("Guild {0} already exists.", parts[2]), ChatType.System);
                             return;
                         }
                         player.CanCreateGuild = true;
@@ -6890,22 +6890,10 @@ namespace Server.MirObjects
         {
             if (ObjectID == id) return;
 
-            PlayerObject player = null;
+            
+            PlayerObject player = CurrentMap.Players.SingleOrDefault(x => x.ObjectID == id || x.Pets.Count(y => y.ObjectID == id && y is Monsters.HumanWizard) > 0);
 
-            for (int i = 0; i < CurrentMap.Players.Count; i++)
-            {
-                if (CurrentMap.Players[i].ObjectID != id)
-                {
-                    for (int j = 0; j < CurrentMap.Players[i].Pets.Count; j++)
-                    {
-                        if (CurrentMap.Players[i].Pets[j].ObjectID != id ||
-                            !(CurrentMap.Players[i].Pets[j] is Monsters.HumanWizard)) continue;
-                        player = CurrentMap.Players[i];
-                        break;
-                    }
-                    continue;
-                }
-            }
+            if (player == null) return;
 
             for (int i = 0; i < player.Info.Equipment.Length; i++)
             {
@@ -7770,7 +7758,6 @@ namespace Server.MirObjects
             GuildNoticeChanged = true;
             //tell us we now have a guild
             Broadcast(GetInfo());
-            Enqueue(new S.GuildChange() { GuildName = MyGuild.Name, GuildRank = MyGuildRank.Name, Status = MyGuildRank.Options });
             MyGuild.SendGuildStatus(this);
             PendingGuildInvite = null;
             EnableGuildInvite = false;            
@@ -7818,7 +7805,7 @@ namespace Server.MirObjects
             GuildObject guild = Envir.GetGuild(Name);
             if (guild != null)
             {
-                ReceiveChat(string.Format("Guild {0} already excists.", Name), ChatType.System);
+                ReceiveChat(string.Format("Guild {0} already exists.", Name), ChatType.System);
                 CanCreateGuild = false;
                 return;
             }
@@ -7881,7 +7868,11 @@ namespace Server.MirObjects
         {
             if ((MyGuild != null) || (Info.GuildIndex != -1)) return false;
             if (Envir.GetGuild(GuildName) != null) return false;
-            if (Info.Level < Settings.Guild_RequiredLevel) return false;
+            if (Info.Level < Settings.Guild_RequiredLevel)
+            {
+                ReceiveChat(String.Format("Your level is not high enough to create a guild, required: {0}", Settings.Guild_RequiredLevel), ChatType.System);
+                return false;
+            }
             //check if we have the required items
             for (int i = 0; i < Settings.Guild_CreationCostList.Count; i++)
             {
@@ -7980,7 +7971,7 @@ namespace Server.MirObjects
             GuildNoticeChanged = true;
             //tell us we now have a guild
             Broadcast(GetInfo());
-            Enqueue(new S.GuildChange() { GuildName = MyGuild.Name, GuildRank = MyGuildRank.Name, Status = MyGuildRank.Options });
+            MyGuild.SendGuildStatus(this);
             return true;
         }
 

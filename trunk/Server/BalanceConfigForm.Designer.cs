@@ -2636,6 +2636,7 @@
             this.GuildBuffListcomboBox.Name = "GuildBuffListcomboBox";
             this.GuildBuffListcomboBox.Size = new System.Drawing.Size(55, 21);
             this.GuildBuffListcomboBox.TabIndex = 42;
+            this.GuildBuffListcomboBox.SelectedIndexChanged += new System.EventHandler(this.GuildBuffListcomboBox_SelectedIndexChanged);
             // 
             // groupBox12
             // 
@@ -2745,9 +2746,9 @@
             // 
             this.GuildItemNamecomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.GuildItemNamecomboBox.FormattingEnabled = true;
-            this.GuildItemNamecomboBox.Location = new System.Drawing.Point(157, 52);
+            this.GuildItemNamecomboBox.Location = new System.Drawing.Point(108, 52);
             this.GuildItemNamecomboBox.Name = "GuildItemNamecomboBox";
-            this.GuildItemNamecomboBox.Size = new System.Drawing.Size(83, 21);
+            this.GuildItemNamecomboBox.Size = new System.Drawing.Size(143, 21);
             this.GuildItemNamecomboBox.TabIndex = 37;
             this.GuildItemNamecomboBox.SelectedIndexChanged += new System.EventHandler(this.GuildItemNamecomboBox_SelectedIndexChanged);
             // 
@@ -2762,16 +2763,16 @@
             // 
             // GuildAmounttextBox
             // 
-            this.GuildAmounttextBox.Location = new System.Drawing.Point(157, 75);
+            this.GuildAmounttextBox.Location = new System.Drawing.Point(108, 75);
             this.GuildAmounttextBox.Name = "GuildAmounttextBox";
-            this.GuildAmounttextBox.Size = new System.Drawing.Size(83, 20);
+            this.GuildAmounttextBox.Size = new System.Drawing.Size(143, 20);
             this.GuildAmounttextBox.TabIndex = 35;
             this.GuildAmounttextBox.TextChanged += new System.EventHandler(this.GuildAmounttextBox_TextChanged);
             // 
             // label93
             // 
             this.label93.AutoSize = true;
-            this.label93.Location = new System.Drawing.Point(81, 78);
+            this.label93.Location = new System.Drawing.Point(41, 78);
             this.label93.Name = "label93";
             this.label93.Size = new System.Drawing.Size(46, 13);
             this.label93.TabIndex = 34;
@@ -2790,7 +2791,7 @@
             // label92
             // 
             this.label92.AutoSize = true;
-            this.label92.Location = new System.Drawing.Point(81, 55);
+            this.label92.Location = new System.Drawing.Point(41, 55);
             this.label92.Name = "label92";
             this.label92.Size = new System.Drawing.Size(61, 13);
             this.label92.TabIndex = 32;
