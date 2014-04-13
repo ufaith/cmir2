@@ -3026,28 +3026,6 @@ namespace ServerPackets
             }
         }
     }
-    public sealed class GuildChange : Packet
-    {
-        public override short Index
-        {
-            get { return (short)ServerPacketIds.GuildChange; }
-        }
-        public string GuildName = string.Empty;
-        public string GuildRank = string.Empty;
-        public RankOptions Status = (RankOptions)0;
-        protected override void ReadPacket(BinaryReader reader)
-        {
-            GuildName = reader.ReadString();
-            GuildRank = reader.ReadString();
-            Status = (RankOptions)reader.ReadByte();
-        }
-        protected override void WritePacket(BinaryWriter writer)
-        {
-            writer.Write(GuildName);
-            writer.Write(GuildRank);
-            writer.Write((byte)Status);
-        }
-    }
 
     public sealed class GuildStatus : Packet
     {
@@ -3056,6 +3034,7 @@ namespace ServerPackets
             get { return (short)ServerPacketIds.GuildStatus; }
         }
         public string GuildName = string.Empty;
+        public string GuildRankName = string.Empty;
         public byte Level;
         public long Experience;
         public long MaxExperience;
@@ -3072,6 +3051,7 @@ namespace ServerPackets
         protected override void ReadPacket(BinaryReader reader)
         {
             GuildName = reader.ReadString();
+            GuildRankName = reader.ReadString();
             Level = reader.ReadByte();
             Experience = reader.ReadInt64();
             MaxExperience = reader.ReadInt64();
@@ -3088,6 +3068,7 @@ namespace ServerPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(GuildName);
+            writer.Write(GuildRankName);
             writer.Write(Level);
             writer.Write(Experience);
             writer.Write(MaxExperience);

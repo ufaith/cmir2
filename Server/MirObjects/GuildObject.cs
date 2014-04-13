@@ -169,6 +169,7 @@ namespace Server.MirObjects
                 member.Enqueue(new ServerPackets.GuildStatus()
                 {
                     GuildName = Name,
+                    GuildRankName = member.MyGuildRank != null? member.MyGuildRank.Name: "",
                     Experience = Experience,
                     MaxExperience = MaxExperience,
                     MemberCount = Membercount,
@@ -325,7 +326,7 @@ namespace Server.MirObjects
 
             if (SelfRankIndex > RankIndex)
             {
-                Self.ReceiveChat("Your rank is not addequate.", ChatType.System);
+                Self.ReceiveChat("Your rank is not adequate.", ChatType.System);
                 return false;
             }
             if (RankIndex >= Ranks.Count)
@@ -367,9 +368,9 @@ namespace Server.MirObjects
 
             Found:
             if (Member == null) return false;
-            if ((Kicker.MyGuildRank.Index >= MemberRank.Index) && (Kicker.MyGuildRank.Index != 0))
+            if (((Kicker.MyGuildRank.Index >= MemberRank.Index) && (Kicker.MyGuildRank.Index != 0)) && (Kicker.Info.Name != membername))
             {
-                Kicker.ReceiveChat("Your rank is not addequate.", ChatType.System);
+                Kicker.ReceiveChat("Your rank is not adequate.", ChatType.System);
                 return false;
             }
             if (MemberRank.Index == 0)
@@ -412,7 +413,7 @@ namespace Server.MirObjects
                 formermember.MyGuild = null;
                 formermember.MyGuildRank = null;
                 formermember.ReceiveChat(kickself ? "You have left your guild." : "You have been removed from your guild.", ChatType.Guild);
-                formermember.Enqueue(new ServerPackets.GuildChange() { GuildName = "", GuildRank = "", Status = (RankOptions)0 });
+                formermember.Enqueue(new ServerPackets.GuildStatus() { GuildName = "", GuildRankName = "", MyOptions = (RankOptions)0 });
                 formermember.Broadcast(formermember.GetInfo());
             }
         }
@@ -485,6 +486,8 @@ namespace Server.MirObjects
 
             if (Leveled)
             {
+                if (Level < Settings.Guild_MembercapList.Count)
+                    MemberCap = Settings.Guild_MembercapList[Level];
                 NextExpUpdate = Envir.Time + 10000;
                 for (int i = 0; i < Ranks.Count; i++)
                     for (int j = 0; j < Ranks[i].Members.Count; j++)

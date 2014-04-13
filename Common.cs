@@ -685,7 +685,6 @@ public enum ServerPacketIds : short
     ChatItemStats,
     GuildNoticeChange,
     GuildMemberChange,
-    GuildChange,
     GuildStatus,
     GuildInvite,
     GuildExpGain,
@@ -2557,8 +2556,6 @@ public abstract class Packet
                 return new S.GuildMemberChange();
             case (short)ServerPacketIds.GuildNoticeChange:
                 return new S.GuildNoticeChange();
-            case (short)ServerPacketIds.GuildChange:
-                return new S.GuildChange();
             case (short)ServerPacketIds.GuildStatus:
                 return new S.GuildStatus();
             case (short)ServerPacketIds.GuildInvite:

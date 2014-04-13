@@ -366,7 +366,7 @@ namespace Server
 
         private void UpdateGuildInterface()
         {
-            GuildMinGuildLeveltextBox.Text = Settings.Guild_RequiredLevel.ToString();
+            GuildMinOwnerLeveltextBox.Text = Settings.Guild_RequiredLevel.ToString();
             GuildPPLtextBox.Text = Settings.Guild_PointPerLevel.ToString();
             GuildExpratetextBox.Text = Settings.Guild_ExpRate.ToString();
             if ((GuildLevelListcomboBox.SelectedItem == null) || (GuildLevelListcomboBox.SelectedIndex >= Settings.Guild_ExperienceList.Count) || (GuildLevelListcomboBox.SelectedIndex >= Settings.Guild_MembercapList.Count))
@@ -2620,6 +2620,12 @@ namespace Server
         }
 
         private void GuildCreateListcomboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+            UpdateGuildInterface();
+        }
+
+        private void GuildBuffListcomboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ActiveControl != sender) return;
             UpdateGuildInterface();
