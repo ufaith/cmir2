@@ -35,20 +35,17 @@ namespace Client.MirGraphics
 
         public static Point[] LightSizes =
         {
-            new Point(125,110),
-            new Point(240,160),
-            new Point(336,224),
-            new Point(432,228),
-            new Point(528,352),
-            new Point(581,566),
-            new Point(624,384),//default mir2 effect light ?(6)
-            new Point (638,623),
-            new Point (695,680),
-            new Point (752,737),
-            new Point(809,794),
-            new Point(866,851),
-            new Point(923,908),
-
+            new Point(125,95),
+            new Point(205,156),
+            new Point(285,217),
+            new Point(365,277),
+            new Point(445,338),
+            new Point(525,399),
+            new Point(605,460),
+            new Point(685,521),
+            new Point(765,581),
+            new Point(845,642),
+            new Point(925,703)
         };
 
         public static void Create()

@@ -42,15 +42,18 @@
             this.MineComboBox.Size = new System.Drawing.Size(68, 21);
             this.MineComboBox.TabIndex = 2;
             this.MineComboBox.SelectedIndexChanged += new System.EventHandler(this.MineComboBox_SelectedIndexChanged);
+            this.MineComboBox.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
             // 
             // Details
             // 
             this.Details.AutoSize = true;
             this.Details.Location = new System.Drawing.Point(97, 7);
             this.Details.Name = "Details";
-            this.Details.Size = new System.Drawing.Size(125, 13);
+            this.Details.Size = new System.Drawing.Size(39, 13);
             this.Details.TabIndex = 3;
-            this.Details.Text = "X: 850 Y: 850 Range: 50";
+            this.Details.Text = "Details";
+            this.Details.DoubleClick += new System.EventHandler(this.Details_DoubleClick);
+            this.Details.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
             // 
             // Selected
             // 
@@ -60,6 +63,7 @@
             this.Selected.Size = new System.Drawing.Size(15, 14);
             this.Selected.TabIndex = 4;
             this.Selected.UseVisualStyleBackColor = true;
+            this.Selected.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
             // 
             // MineEntry
             // 
@@ -72,6 +76,8 @@
             this.Name = "MineEntry";
             this.Size = new System.Drawing.Size(249, 28);
             this.Load += new System.EventHandler(this.MineEntry_Load);
+            this.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
+            this.MouseLeave += new System.EventHandler(this.Region_MouseLeave);
             this.ResumeLayout(false);
             this.PerformLayout();
 

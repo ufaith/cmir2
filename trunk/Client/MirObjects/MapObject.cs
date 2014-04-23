@@ -192,7 +192,7 @@ namespace Client.MirObjects
             string name = Name;
 
             if (Name.Contains("(")) name = Name.Substring(Name.IndexOf("(") + 1, Name.Length - Name.IndexOf("(") - 2);
-
+            
 
             if (PercentHealth == 0 || Dead) return;
 

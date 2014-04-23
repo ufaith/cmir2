@@ -24,3 +24,12 @@ C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\AutoPatcherAdmin\obj\Release\AutoP
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csproj.GenerateResource.Cache
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.exe
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.pdb
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.exe.config
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.exe
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.pdb
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.AMain.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.Properties.Resources.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csproj.GenerateResource.Cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.exe
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.pdb

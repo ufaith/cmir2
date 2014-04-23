@@ -4619,7 +4619,7 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[LightRange] != null && !DXManager.Lights[LightRange].Disposed)
                     {
-                        p.Offset(-(DXManager.LightSizes[LightRange].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[LightRange].Y / 2) - 68);
+                        p.Offset(-(DXManager.LightSizes[LightRange].X / 2) - (CellWidth / 2) + 10, -(DXManager.LightSizes[LightRange].Y / 2) - (CellHeight / 2) - 5);
                         DXManager.Sprite.Draw2D(DXManager.Lights[LightRange], PointF.Empty, 0, p, ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : lightIntensity);
                     }
                
@@ -4638,7 +4638,8 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
                     {
-                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - 68);
+                     //   p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - 68);
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, - (DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
                     }
 
@@ -4659,7 +4660,7 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
                     {
-                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - CellHeight);
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, - (DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
                     }
                 }
@@ -4695,7 +4696,7 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
                     {
-                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - CellHeight);
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, - (DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, lightIntensity);
                     }
                 }

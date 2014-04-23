@@ -87,10 +87,11 @@ namespace Server.MirObjects
             NameColour = Color.Lime;
 
             Direction = (MirDirection) Envir.Random.Next(3);
-            TurnTime = Envir.Time + Envir.Random.Next(10000);
-            
-            if (!Directory.Exists(Settings.NPCPath)) return;
+            TurnTime = Envir.Time + Envir.Random.Next(100);
 
+            Spawned();
+
+            if (!Directory.Exists(Settings.NPCPath)) return;
 
             string fileName = Path.Combine(Settings.NPCPath, info.FileName + ".txt");
             if (File.Exists(fileName))
