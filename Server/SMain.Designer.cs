@@ -59,8 +59,8 @@ namespace Server
             this.accountsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.configToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.InterfaceTimer = new System.Windows.Forms.Timer(this.components);
             this.balanceConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.InterfaceTimer = new System.Windows.Forms.Timer(this.components);
             this.MainTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -78,7 +78,7 @@ namespace Server
             this.MainTabs.Location = new System.Drawing.Point(0, 24);
             this.MainTabs.Name = "MainTabs";
             this.MainTabs.SelectedIndex = 0;
-            this.MainTabs.Size = new System.Drawing.Size(543, 375);
+            this.MainTabs.Size = new System.Drawing.Size(543, 373);
             this.MainTabs.TabIndex = 5;
             // 
             // tabPage1
@@ -87,7 +87,7 @@ namespace Server
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(535, 349);
+            this.tabPage1.Size = new System.Drawing.Size(535, 347);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Logs";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -100,7 +100,7 @@ namespace Server
             this.LogTextBox.Name = "LogTextBox";
             this.LogTextBox.ReadOnly = true;
             this.LogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.LogTextBox.Size = new System.Drawing.Size(529, 343);
+            this.LogTextBox.Size = new System.Drawing.Size(529, 341);
             this.LogTextBox.TabIndex = 2;
             // 
             // tabPage2
@@ -131,7 +131,7 @@ namespace Server
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(535, 347);
+            this.tabPage3.Size = new System.Drawing.Size(535, 349);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Chat Logs";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -144,7 +144,7 @@ namespace Server
             this.ChatLogTextBox.Name = "ChatLogTextBox";
             this.ChatLogTextBox.ReadOnly = true;
             this.ChatLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ChatLogTextBox.Size = new System.Drawing.Size(529, 341);
+            this.ChatLogTextBox.Size = new System.Drawing.Size(529, 343);
             this.ChatLogTextBox.TabIndex = 4;
             // 
             // StatusBar
@@ -153,9 +153,9 @@ namespace Server
             this.PlayersLabel,
             this.MonsterLabel,
             this.ConnectionsLabel});
-            this.StatusBar.Location = new System.Drawing.Point(0, 399);
+            this.StatusBar.Location = new System.Drawing.Point(0, 397);
             this.StatusBar.Name = "StatusBar";
-            this.StatusBar.Size = new System.Drawing.Size(543, 22);
+            this.StatusBar.Size = new System.Drawing.Size(543, 24);
             this.StatusBar.TabIndex = 4;
             this.StatusBar.Text = "statusStrip1";
             // 
@@ -165,7 +165,7 @@ namespace Server
             | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
             | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
             this.PlayersLabel.Name = "PlayersLabel";
-            this.PlayersLabel.Size = new System.Drawing.Size(59, 17);
+            this.PlayersLabel.Size = new System.Drawing.Size(60, 19);
             this.PlayersLabel.Text = "Players: 0";
             // 
             // MonsterLabel
@@ -174,7 +174,7 @@ namespace Server
             | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
             | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
             this.MonsterLabel.Name = "MonsterLabel";
-            this.MonsterLabel.Size = new System.Drawing.Size(68, 17);
+            this.MonsterLabel.Size = new System.Drawing.Size(72, 19);
             this.MonsterLabel.Text = "Monsters: 0";
             // 
             // ConnectionsLabel
@@ -183,7 +183,7 @@ namespace Server
             | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
             | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
             this.ConnectionsLabel.Name = "ConnectionsLabel";
-            this.ConnectionsLabel.Size = new System.Drawing.Size(83, 17);
+            this.ConnectionsLabel.Size = new System.Drawing.Size(90, 19);
             this.ConnectionsLabel.Text = "Connections: 0";
             // 
             // MainMenu
@@ -205,32 +205,32 @@ namespace Server
             this.toolStripMenuItem1,
             this.closeServerToolStripMenuItem});
             this.controlToolStripMenuItem.Name = "controlToolStripMenuItem";
-            this.controlToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
+            this.controlToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
             this.controlToolStripMenuItem.Text = "Control";
             // 
             // startServerToolStripMenuItem
             // 
             this.startServerToolStripMenuItem.Name = "startServerToolStripMenuItem";
-            this.startServerToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.startServerToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.startServerToolStripMenuItem.Text = "Start Server";
             this.startServerToolStripMenuItem.Click += new System.EventHandler(this.startServerToolStripMenuItem_Click);
             // 
             // stopServerToolStripMenuItem
             // 
             this.stopServerToolStripMenuItem.Name = "stopServerToolStripMenuItem";
-            this.stopServerToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.stopServerToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.stopServerToolStripMenuItem.Text = "Stop Server";
             this.stopServerToolStripMenuItem.Click += new System.EventHandler(this.stopServerToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(132, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(135, 6);
             // 
             // closeServerToolStripMenuItem
             // 
             this.closeServerToolStripMenuItem.Name = "closeServerToolStripMenuItem";
-            this.closeServerToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+            this.closeServerToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.closeServerToolStripMenuItem.Text = "Close Server";
             this.closeServerToolStripMenuItem.Click += new System.EventHandler(this.closeServerToolStripMenuItem_Click);
             // 
@@ -246,67 +246,67 @@ namespace Server
             this.configToolStripMenuItem,
             this.balanceConfigToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.editToolStripMenuItem.Text = "Edit";
             // 
             // mapInfoToolStripMenuItem
             // 
             this.mapInfoToolStripMenuItem.Name = "mapInfoToolStripMenuItem";
-            this.mapInfoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mapInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.mapInfoToolStripMenuItem.Text = "Map Info";
             this.mapInfoToolStripMenuItem.Click += new System.EventHandler(this.gameToolStripMenuItem_Click);
             // 
             // itemInfoToolStripMenuItem
             // 
             this.itemInfoToolStripMenuItem.Name = "itemInfoToolStripMenuItem";
-            this.itemInfoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.itemInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.itemInfoToolStripMenuItem.Text = "Item Info";
             this.itemInfoToolStripMenuItem.Click += new System.EventHandler(this.itemInfoToolStripMenuItem_Click);
             // 
             // monsterInfoToolStripMenuItem
             // 
             this.monsterInfoToolStripMenuItem.Name = "monsterInfoToolStripMenuItem";
-            this.monsterInfoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.monsterInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.monsterInfoToolStripMenuItem.Text = "Monster Info";
             this.monsterInfoToolStripMenuItem.Click += new System.EventHandler(this.monsterInfoToolStripMenuItem_Click);
             // 
             // dragonInfoToolStripMenuItem
             // 
             this.dragonInfoToolStripMenuItem.Name = "dragonInfoToolStripMenuItem";
-            this.dragonInfoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dragonInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.dragonInfoToolStripMenuItem.Text = "Dragon Info";
             this.dragonInfoToolStripMenuItem.Click += new System.EventHandler(this.dragonInfoToolStripMenuItem_Click);
             // 
             // accountsToolStripMenuItem
             // 
             this.accountsToolStripMenuItem.Name = "accountsToolStripMenuItem";
-            this.accountsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.accountsToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.accountsToolStripMenuItem.Text = "Accounts";
             this.accountsToolStripMenuItem.Click += new System.EventHandler(this.accountsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(151, 6);
             // 
             // configToolStripMenuItem
             // 
             this.configToolStripMenuItem.Name = "configToolStripMenuItem";
-            this.configToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.configToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.configToolStripMenuItem.Text = "Config";
             this.configToolStripMenuItem.Click += new System.EventHandler(this.configToolStripMenuItem_Click);
+            // 
+            // balanceConfigToolStripMenuItem
+            // 
+            this.balanceConfigToolStripMenuItem.Name = "balanceConfigToolStripMenuItem";
+            this.balanceConfigToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.balanceConfigToolStripMenuItem.Text = "Balance Config";
+            this.balanceConfigToolStripMenuItem.Click += new System.EventHandler(this.balanceConfigToolStripMenuItem_Click);
             // 
             // InterfaceTimer
             // 
             this.InterfaceTimer.Enabled = true;
             this.InterfaceTimer.Tick += new System.EventHandler(this.InterfaceTimer_Tick);
-            // 
-            // balanceConfigToolStripMenuItem
-            // 
-            this.balanceConfigToolStripMenuItem.Name = "balanceConfigToolStripMenuItem";
-            this.balanceConfigToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.balanceConfigToolStripMenuItem.Text = "Balance Config";
-            this.balanceConfigToolStripMenuItem.Click += new System.EventHandler(this.balanceConfigToolStripMenuItem_Click);
             // 
             // SMain
             // 

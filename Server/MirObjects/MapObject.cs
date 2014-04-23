@@ -252,7 +252,7 @@ namespace Server.MirObjects
             Node = Envir.Objects.AddLast(this);
             OperateTime = Envir.Time + Envir.Random.Next(OperateDelay);
 
-            InSafeZone = CurrentMap.GetSafeZone(CurrentLocation) != null;
+            InSafeZone = CurrentMap != null && CurrentMap.GetSafeZone(CurrentLocation) != null;
             Broadcast(GetInfo());
             BroadcastHealthChange();
         }

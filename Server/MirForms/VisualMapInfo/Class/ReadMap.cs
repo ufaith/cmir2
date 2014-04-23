@@ -14,15 +14,15 @@ namespace Server.MirForms.VisualMapInfo.Class
 
         private byte FindType(byte[] input)
         {
-            if (input[0] == 0)
+            if (input[0] == 0) // Mir 3 WeMade
                 return 5;
-            if ((input[0] == 0x0F) && (input[5] == 0x53) && (input[14] == 0x33))
+            if ((input[0] == 0x0F) && (input[5] == 0x53) && (input[14] == 0x33)) // Mir 3 Shanda
                 return 6;
-            if ((input[0] == 0x15) && (input[4] == 0x32) && (input[6] == 0x41) && (input[19] == 0x31))
+            if ((input[0] == 0x15) && (input[4] == 0x32) && (input[6] == 0x41) && (input[19] == 0x31)) // Mir WeMade AntiHack
                 return 4;
-            if ((input[0] == 0x10) && (input[2] == 0x61) && (input[7] == 0x31) && (input[14] == 0x31))
+            if ((input[0] == 0x10) && (input[2] == 0x61) && (input[7] == 0x31) && (input[14] == 0x31)) // Mir 2010 WeMade
                 return 1;
-            if ((input[4] == 0x0F) && (input[18] == 0x0D) && (input[19] == 0x0A))
+            if ((input[4] == 0x0F) && (input[18] == 0x0D) && (input[19] == 0x0A)) // Mir 2012 Shanda
             {
                 int W = input[0] + (input[1] << 8),
                     H = input[2] + (input[3] << 8);
@@ -32,8 +32,10 @@ namespace Server.MirForms.VisualMapInfo.Class
                 else
                     return 2;
             }
-            if ((input[0] == 0x0D) && (input[1] == 0x4C) && (input[7] == 0x20) && (input[11] == 0x6D))
+            if ((input[0] == 0x0D) && (input[1] == 0x4C) && (input[7] == 0x20) && (input[11] == 0x6D)) // Mir 3/4 Heroes
                 return 7;
+            if ((input[0] == 0xC8) && (input[2] == 0xC8) && (input[4] == 0x0D)) // Shortys Map Save
+                return 8;
 
             return 0;
         }
@@ -57,7 +59,7 @@ namespace Server.MirForms.VisualMapInfo.Class
                 for (int y = 0; y < Height; y++)
                 {
                     if (Cells[x, y] == null)
-                       BitLock.SetPixel(x, y, Color.White);
+                        BitLock.SetPixel(x, y, Color.WhiteSmoke);
 
                     if ((BitConverter.ToInt16(fileBytes, offSet) & 0x8000) != 0)
                         BitLock.SetPixel(x, y, Color.Black);
@@ -94,7 +96,7 @@ namespace Server.MirForms.VisualMapInfo.Class
                 for (int y = 0; y < Height; y++)
                 {
                     if (Cells[x, y] == null)
-                        clippingZone.SetPixel(x, y, Color.White);
+                        clippingZone.SetPixel(x, y, Color.WhiteSmoke);
 
                     if (((BitConverter.ToInt32(fileBytes, offSet) ^ 0xAA38AA38) & 0x20000000) != 0)
                         clippingZone.SetPixel(x, y, Color.Black);
@@ -124,7 +126,7 @@ namespace Server.MirForms.VisualMapInfo.Class
                 for (int y = 0; y < Height; y++)
                 {
                     if (Cells[x, y] == null)
-                        clippingZone.SetPixel(x, y, Color.White);
+                        clippingZone.SetPixel(x, y, Color.WhiteSmoke);
 
                     if ((BitConverter.ToInt16(fileBytes, offSet) & 0x8000) != 0)
                         clippingZone.SetPixel(x, y, Color.Black);
@@ -154,7 +156,7 @@ namespace Server.MirForms.VisualMapInfo.Class
                 for (int y = 0; y < Height; y++)
                 {
                     if (Cells[x, y] == null)
-                        clippingZone.SetPixel(x, y, Color.White);
+                        clippingZone.SetPixel(x, y, Color.WhiteSmoke);
 
                     if ((BitConverter.ToInt16(fileBytes, offSet) & 0x8000) != 0)
                         clippingZone.SetPixel(x, y, Color.Black);
@@ -188,7 +190,7 @@ namespace Server.MirForms.VisualMapInfo.Class
                 for (int y = 0; y < Height; y++)
                 {
                     if (Cells[x, y] == null)
-                        clippingZone.SetPixel(x, y, Color.White);
+                        clippingZone.SetPixel(x, y, Color.WhiteSmoke);
 
                     if ((BitConverter.ToInt16(fileBytes, offSet) & 0x8000) != 0)
                         clippingZone.SetPixel(x, y, Color.Black);
@@ -224,7 +226,7 @@ namespace Server.MirForms.VisualMapInfo.Class
                         clippingZone.SetPixel(x, y, Color.Black);
 
                     else
-                        clippingZone.SetPixel(x, y, Color.White);
+                        clippingZone.SetPixel(x, y, Color.WhiteSmoke);
 
                     offSet += 14;
                 }
@@ -252,7 +254,7 @@ namespace Server.MirForms.VisualMapInfo.Class
                         clippingZone.SetPixel(x, y, Color.Black);
 
                     else
-                        clippingZone.SetPixel(x, y, Color.White);
+                        clippingZone.SetPixel(x, y, Color.WhiteSmoke);
 
                     offSet += 20;
                 }
@@ -282,9 +284,39 @@ namespace Server.MirForms.VisualMapInfo.Class
                         clippingZone.SetPixel(x, y, Color.Black);
 
                     if (Cells[x, y] == null)
-                        clippingZone.SetPixel(x, y, Color.White);
+                        clippingZone.SetPixel(x, y, Color.WhiteSmoke);
 
                     offSet += 13;
+                }
+        }
+
+        private void LoadMapCellsv8(byte[] fileBytes)
+        {
+            int offSet = 0;
+            Width = BitConverter.ToInt16(fileBytes, offSet);
+            offSet += 2;
+            Height = BitConverter.ToInt16(fileBytes, offSet);
+            Cells = new Cell[Width, Height];
+
+            offSet = 52;
+
+            clippingZone = new Bitmap(Width, Height);
+
+            for (int x = 0; x < Width; x++)
+                for (int y = 0; y < Height; y++)
+                {
+                    if (Cells[x, y] == null)
+                        clippingZone.SetPixel(x, y, Color.WhiteSmoke);
+
+                    if ((BitConverter.ToInt16(fileBytes, offSet) & 0x8000) != 0)
+                        clippingZone.SetPixel(x, y, Color.Black);
+
+                    offSet += 2;
+
+                    if ((BitConverter.ToInt16(fileBytes, offSet) & 0x8000) != 0)
+                        clippingZone.SetPixel(x, y, Color.Black);
+
+                    offSet += 10;
                 }
         }
 
@@ -336,6 +368,11 @@ namespace Server.MirForms.VisualMapInfo.Class
                         case 7:
                             LoadMapCellsv7(fileBytes);
                             mapFormat = "Heroes";
+                            break;
+
+                        case 8:
+                            LoadMapCellsv8(fileBytes);
+                            mapFormat = "Shortys";
                             break;
                     }
                 }

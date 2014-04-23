@@ -125,6 +125,8 @@ namespace Server.MirObjects
                     return new DragonStatue(info);
                 case 55:
                     return new HumanWizard(info);
+                case 56:
+                    return new Trainer(info);
                 default:
                     return new MonsterObject(info);
             }
@@ -1345,7 +1347,7 @@ namespace Server.MirObjects
             {
                 if (attacker.Master == null) //Wild Monster
                     return true;
-
+                
                 //Pet Vs Pet
                 if (Master == attacker.Master)
                     return false;

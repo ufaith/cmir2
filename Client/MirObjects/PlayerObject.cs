@@ -1167,7 +1167,7 @@ namespace Client.MirObjects
                                 PlayStepSound();
                         }
                     }
-
+                    
                     if (WingEffect > 0 && CMain.Time >= NextMotion2)
                     {
                         if (this == User) GameScene.Scene.MapControl.TextureValid = false;

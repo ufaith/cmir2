@@ -152,7 +152,7 @@ public enum Monster : ushort
     EvilMirBody = 138,
     DragonStatue = 139,
     RedFrogSpider = 140,
-    BrownFrogSpider = 141,
+    BrownFrogSpider = 141
 }
 
 public enum MirAction : byte
@@ -214,7 +214,8 @@ public enum MirClass : byte
     Warrior = 0,
     Wizard = 1,
     Taoist = 2,
-    Assassin = 3
+    Assassin = 3,
+    Archer = 4
 }
 public enum MirDirection : byte
 {
@@ -248,6 +249,7 @@ public enum ChatType : byte
     WhisperOut = 7,
     Guild = 8,
     Experience = 9,
+    Trainer = 10
 }
 public enum ItemType : byte
 {

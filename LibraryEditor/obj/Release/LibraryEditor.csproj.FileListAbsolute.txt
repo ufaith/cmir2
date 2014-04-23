@@ -25,3 +25,12 @@ C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\LibraryEditor\obj\Release\LibraryE
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\LibraryEditor\obj\Release\LibraryEditor.csproj.GenerateResource.Cache
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\LibraryEditor\obj\Release\LibraryEditor.exe
 C:\Users\ANDYHOME\Desktop\Mir2 C Source\trunk\LibraryEditor\obj\Release\LibraryEditor.pdb
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\Release\LibraryEditor\LibraryEditor.exe.config
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\Release\LibraryEditor\LibraryEditor.exe
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\Release\LibraryEditor\LibraryEditor.pdb
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\LibraryEditor\obj\Release\LibraryEditor.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\LibraryEditor\obj\Release\LibraryEditor.LMain.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\LibraryEditor\obj\Release\LibraryEditor.Properties.Resources.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\LibraryEditor\obj\Release\LibraryEditor.csproj.GenerateResource.Cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\LibraryEditor\obj\Release\LibraryEditor.exe
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk\LibraryEditor\obj\Release\LibraryEditor.pdb

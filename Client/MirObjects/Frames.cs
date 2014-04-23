@@ -38,23 +38,81 @@ namespace Client.MirObjects
             Players.Frames.Add(MirAction.Attack4, new Frame(416, 6, 0, 100, 448, 6, 0, 100));
             Players.Frames.Add(MirAction.Revive, new Frame(384, 4, 0, 100, 416, 4, 0, 100) { Reverse = true });
             Players.Frames.Add(MirAction.Mine,new Frame(184, 6, 0, 100, 216, 6, 0, 100));
+
             /*
              * NPCS
              */
+
+            //Default
             NPCs.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 450));
             frame.Frames.Add(MirAction.Harvest, new Frame(12, 10, 0, 200));
 
+            //Washer
             NPCs.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(4, 4, 0, 450));
-            frame.Frames.Add(MirAction.Harvest, new Frame(22, 10, 0, 200));
+            frame.Frames.Add(MirAction.Harvest, new Frame(12, 20, 0, 200));
 
-            NPCs.Add(frame = new FrameSet());
-            frame.Frames.Add(MirAction.Standing, new Frame(8, 4, 0, 450));
-            frame.Frames.Add(MirAction.Harvest, new Frame(32, 20, 0, 200));
-
+            //Default - No Harvest Animation
             NPCs.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 450));
+
+            // Large Teleport Stones
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 12, 0, 200, 12, 10, 0, 150));
+
+            // Small Teleport Stones
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 2, 0, 500, 2, 9, 0, 100));
+
+            // Pot With Flames
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 2, 0, 300, 2, 6, 0, 100));
+
+            // Statues
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 1, 0, 0));
+
+            // Flags (10 frames)
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 10, 0, 250));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 12, 0, 250));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 8, 0, 250));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 6, 0, 250));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 2, 0, 300, 2, 8, 0, 100));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 11, 0, 250));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 20, 0, 450, 20, 20, 0, 450));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 250, 12, 4, 0, 250));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 250));
+            frame.Frames.Add(MirAction.Harvest, new Frame(12, 6, 0, 200));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 6, 0, 450, 6, 12, 0, 250));
 
             /*
              * MONSTERS             

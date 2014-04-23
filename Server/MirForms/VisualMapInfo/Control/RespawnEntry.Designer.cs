@@ -46,6 +46,8 @@
             this.MonsterComboBox.Size = new System.Drawing.Size(222, 21);
             this.MonsterComboBox.TabIndex = 2;
             this.MonsterComboBox.SelectedIndexChanged += new System.EventHandler(this.MonsterComboBox_SelectedIndexChanged);
+            this.MonsterComboBox.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
+            this.MonsterComboBox.MouseLeave += new System.EventHandler(this.Region_MouseLeave);
             // 
             // Details
             // 
@@ -55,6 +57,9 @@
             this.Details.Size = new System.Drawing.Size(103, 13);
             this.Details.TabIndex = 3;
             this.Details.Text = "C               D            ";
+            this.Details.DoubleClick += new System.EventHandler(this.Details_DoubleClick);
+            this.Details.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
+            this.Details.MouseLeave += new System.EventHandler(this.Region_MouseLeave);
             // 
             // Selected
             // 
@@ -64,6 +69,8 @@
             this.Selected.Size = new System.Drawing.Size(15, 14);
             this.Selected.TabIndex = 4;
             this.Selected.UseVisualStyleBackColor = true;
+            this.Selected.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
+            this.Selected.MouseLeave += new System.EventHandler(this.Region_MouseLeave);
             // 
             // Count
             // 
@@ -72,6 +79,8 @@
             this.Count.Size = new System.Drawing.Size(28, 20);
             this.Count.TabIndex = 5;
             this.Count.Text = "0";
+            this.Count.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
+            this.Count.MouseLeave += new System.EventHandler(this.Region_MouseLeave);
             // 
             // Delay
             // 
@@ -80,6 +89,8 @@
             this.Delay.Size = new System.Drawing.Size(28, 20);
             this.Delay.TabIndex = 6;
             this.Delay.Text = "0";
+            this.Delay.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
+            this.Delay.MouseLeave += new System.EventHandler(this.Region_MouseLeave);
             // 
             // RespawnEntry
             // 
@@ -94,6 +105,8 @@
             this.Name = "RespawnEntry";
             this.Size = new System.Drawing.Size(249, 50);
             this.Load += new System.EventHandler(this.RespawnEntry_Load);
+            this.MouseEnter += new System.EventHandler(this.Region_MouseEnter);
+            this.MouseLeave += new System.EventHandler(this.Region_MouseLeave);
             this.ResumeLayout(false);
             this.PerformLayout();
 
