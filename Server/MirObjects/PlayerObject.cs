@@ -193,6 +193,7 @@ namespace Server.MirObjects
         public GuildObject PendingGuildInvite = null;
         public bool GuildNoticeChanged = true; //set to false first time client requests notice list, set to true each time someone in guild edits notice
         public bool GuildMembersChanged = true;//same as above but for members
+        public bool GuildCanRequestItems = true;
         public override bool Blocking
         {
             get
@@ -7760,7 +7761,8 @@ namespace Server.MirObjects
             Broadcast(GetInfo());
             MyGuild.SendGuildStatus(this);
             PendingGuildInvite = null;
-            EnableGuildInvite = false;            
+            EnableGuildInvite = false;
+            GuildCanRequestItems = true;
         }
 
         public void RequestGuildInfo(byte Type)
@@ -7813,6 +7815,162 @@ namespace Server.MirObjects
 
             CreateGuild(Name);
             CanCreateGuild = false;
+        }
+
+        public void GuildStorageGoldChange(Byte Type, uint Amount)
+        {
+            if ((MyGuild == null) || (MyGuildRank == null))
+            {
+                ReceiveChat("You are not part of a guild.", ChatType.System);
+                return;
+            }
+            if (Type == 0)//donate
+            {
+                if (Account.Gold < Amount)
+                {
+                    ReceiveChat("Insufficient gold.", ChatType.System);
+                    return;
+                }
+                if ((MyGuild.Gold + (UInt64)Amount) > uint.MaxValue)
+                {
+                    ReceiveChat("Guild gold limit reached.", ChatType.System);
+                    return;
+                }
+                Account.Gold -= Amount;
+                MyGuild.Gold += Amount;
+                Enqueue(new S.LoseGold { Gold = Amount });
+                MyGuild.SendServerPacket(new S.GuildStorageGoldChange() { Type = 0, Name = Info.Name, Amount = Amount });
+                MyGuild.NeedSave = true;
+            }
+            else
+            {
+                if (MyGuild.Gold < Amount)
+                {
+                    ReceiveChat("Insufficient gold.", ChatType.System);
+                    return;
+                }
+                if (!CanGainGold(Amount))
+                {
+                    ReceiveChat("Gold limit reached.", ChatType.System);
+                    return;
+                }
+                if (MyGuildRank.Index != 0)
+                {
+                    ReceiveChat("Insufficient rank.", ChatType.System);
+                    return;
+                }
+                MyGuild.Gold -= Amount;
+                GainGold(Amount);
+                MyGuild.SendServerPacket(new S.GuildStorageGoldChange() { Type = 1, Name = Info.Name, Amount = Amount });
+                MyGuild.NeedSave = true;
+            }
+        }
+
+        public void GuildStorageItemChange(Byte Type, int from, int to)
+        {
+            S.GuildStorageItemChange p = new S.GuildStorageItemChange { Type = (byte)(3 + Type), From = from, To = to };
+            if ((MyGuild == null) || (MyGuildRank == null))
+            {
+                Enqueue(p);
+                ReceiveChat("You are not part of a guild.", ChatType.System);
+                return;
+            }
+
+            switch (Type)
+            {
+                case 0://store
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanStoreItem))
+                    {
+                        Enqueue(p);
+                        ReceiveChat("You do not have permission to store items in guild storage.", ChatType.System);
+                        return;
+                    }
+                    if (from < 0 || from >= Info.Inventory.Length)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (to < 0 || to >= MyGuild.StoredItems.Length)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (Info.Inventory[from] == null)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (Info.Inventory[from].Info.Bind.HasFlag(BindMode.DontStore))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (MyGuild.StoredItems[to] != null)
+                    {
+                        ReceiveChat("Target slot not empty.", ChatType.System);
+                        Enqueue(p);
+                        return;
+                    }
+                    MyGuild.StoredItems[to] = new GuildStorageItem() { Item = Info.Inventory[from], UserId = Info.Index };
+                    Info.Inventory[from] = null;
+                    RefreshBagWeight();
+                    MyGuild.SendItemInfo(MyGuild.StoredItems[to].Item.Info);
+                    MyGuild.SendServerPacket(new S.GuildStorageItemChange() { Type = 0, User = Info.Index, Item = MyGuild.StoredItems[to], To = to, From = from });
+                    MyGuild.NeedSave = true;
+                    break;
+                case 1://retrieve
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanRetrieveItem))
+                    {
+
+                        ReceiveChat("You do not have permission to retrieve items from guild storage.", ChatType.System);
+                        return;
+                    }
+                    if (from < 0 || from >= MyGuild.StoredItems.Length)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (to < 0 || to >= Info.Inventory.Length)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (Info.Inventory[to] != null)
+                    {
+                        ReceiveChat("Target slot not empty.", ChatType.System);
+                        Enqueue(p);
+                        return;
+                    }
+                    if (MyGuild.StoredItems[from] == null)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (MyGuild.StoredItems[from].Item.Info.Bind.HasFlag(BindMode.DontStore))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    Info.Inventory[to] = MyGuild.StoredItems[from].Item;
+                    MyGuild.StoredItems[from] = null;
+                    MyGuild.SendServerPacket(new S.GuildStorageItemChange() { Type = 1, User = Info.Index, To = to, From = from });
+                    RefreshBagWeight();
+                    MyGuild.NeedSave = true;
+                    break;
+                case 2://request list
+                    if (!GuildCanRequestItems) return;
+                    GuildCanRequestItems = false;
+                    for (int i = 0; i < MyGuild.StoredItems.Length; i++)
+                    {
+                        if (MyGuild.StoredItems[i] == null) continue;
+                        UserItem item = MyGuild.StoredItems[i].Item;
+                        if (item == null) continue;
+                        CheckItemInfo(item.Info);
+                    }
+                    Enqueue(new S.GuildStorageList() { Items = MyGuild.StoredItems });
+                    break;
+            }
+
         }
 
         public void Enqueue(Packet p)
@@ -7969,6 +8127,7 @@ namespace Server.MirObjects
             MyGuildRank = guild.FindRank(Name);
             GuildMembersChanged = true;
             GuildNoticeChanged = true;
+            GuildCanRequestItems = true;
             //tell us we now have a guild
             Broadcast(GetInfo());
             MyGuild.SendGuildStatus(this);

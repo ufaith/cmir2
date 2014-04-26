@@ -72,6 +72,7 @@ namespace Client.MirScenes
         public List<Buff> Buffs = new List<Buff>();
 
         public static UserItem[] Storage = new UserItem[80];
+        public static UserItem[] GuildStorage = new UserItem[112];
         public static UserItem HoverItem;
         public static MirItemCell SelectedCell;
         public static bool PickedUpGold;
@@ -956,6 +957,15 @@ namespace Client.MirScenes
                     break;
                 case (short)ServerPacketIds.GuildNameRequest:
                     GuildNameRequest((S.GuildNameRequest)p);
+                    break;
+                case (short)ServerPacketIds.GuildStorageGoldChange:
+                    GuildStorageGoldChange((S.GuildStorageGoldChange)p);
+                    break;
+                case (short)ServerPacketIds.GuildStorageItemChange:
+                    GuildStorageItemChange((S.GuildStorageItemChange)p);
+                    break;
+                case (short)ServerPacketIds.GuildStorageList:
+                    GuildStorageList((S.GuildStorageList)p);
                     break;
                 default:
                     base.ProcessPacket(p);
@@ -2785,6 +2795,101 @@ namespace Client.MirScenes
         {
             //OutputMessage(string.Format("Guild Experience Gained {0}.", p.Amount));
             GuildDialog.Experience += p.Amount;
+        }
+
+        private void GuildStorageGoldChange(S.GuildStorageGoldChange p)
+        {
+            switch (p.Type)
+            {
+                case 0:
+                    ChatDialog.ReceiveChat(String.Format("{0} donated {1} gold to guild funds.", p.Name, p.Amount), ChatType.Guild);
+                    GuildDialog.Gold += p.Amount;
+                    break;
+                case 1:
+                    ChatDialog.ReceiveChat(String.Format("{0} retrieved {1} gold from guild funds.", p.Name, p.Amount), ChatType.Guild);
+                    if (GuildDialog.Gold > p.Amount)
+                        GuildDialog.Gold -= p.Amount;
+                    else
+                        GuildDialog.Gold = 0;
+                    break;
+            }
+        }
+
+        private void GuildStorageItemChange(S.GuildStorageItemChange p)
+        {
+            MirItemCell fromCell = null;
+            MirItemCell toCell = null;
+            switch (p.Type)
+            {
+                case 0://store
+                    toCell = GuildDialog.StorageGrid[p.To];
+
+                    if (toCell == null) return;
+
+                    toCell.Locked = false;
+                    toCell.Item = p.Item.Item;
+                    Bind(toCell.Item);
+                    if (p.User != User.Id) return;
+                    fromCell = p.From < 40 ? InventoryDialog.Grid[p.From] : BeltDialog.Grid[p.From - 40];
+                    fromCell.Locked = false;
+                    if (fromCell != null)
+                        fromCell.Item = null;
+                    User.RefreshStats();
+                    break;
+                case 1://retrieve
+                    
+
+                    fromCell = GuildDialog.StorageGrid[p.From];
+
+                    if (fromCell == null) return;
+                    fromCell.Locked = false;
+
+                    if (p.User != User.Id)
+                    {
+                        fromCell.Item = null;
+                        return;
+                    }
+                    toCell = p.To < 40 ? InventoryDialog.Grid[p.To] : BeltDialog.Grid[p.To - 40];
+                    if (toCell == null) return;
+                    toCell.Locked = false;
+                    toCell.Item = fromCell.Item;
+                    fromCell.Item = null;
+                    break;
+                case 3://failstore
+                    fromCell = p.From < 40 ? InventoryDialog.Grid[p.From] : BeltDialog.Grid[p.From - 40];
+
+                    toCell = GuildDialog.StorageGrid[p.To];
+
+                    if (toCell == null || fromCell == null) return;
+
+                    toCell.Locked = false;
+                    fromCell.Locked = false;
+                    break;
+                case 4://failretrieve
+                    toCell = p.From < 40 ? InventoryDialog.Grid[p.From] : BeltDialog.Grid[p.From - 40];
+
+                    fromCell = GuildDialog.StorageGrid[p.To];
+
+                    if (toCell == null || fromCell == null) return;
+
+                    toCell.Locked = false;
+                    fromCell.Locked = false;
+                    break;
+            }
+        }
+        private void GuildStorageList(S.GuildStorageList p)
+        {
+            for (int i = 0; i < p.Items.Length; i++)
+            {
+                if (i >= GuildDialog.StorageGrid.Length) break;
+                if (p.Items[i] == null)
+                {
+                    GuildDialog.StorageGrid[i].Item = null;
+                    continue;
+                }
+                GuildDialog.StorageGrid[i].Item = p.Items[i].Item;
+                Bind(GuildDialog.StorageGrid[i].Item);
+            }
         }
 
         public void AddItem(UserItem item)
@@ -9968,8 +10073,8 @@ namespace Client.MirScenes
         public bool Voting;
         public byte ItemCount;
         public byte BuffCount;
-        public RankOptions MyOptions;
-        public int MyRankId;
+        public static RankOptions MyOptions;
+        public static int MyRankId;
         public List<Rank> Ranks = new List<Rank>();
         
         public bool MembersChanged = true;        
@@ -10006,6 +10111,14 @@ namespace Client.MirScenes
         public MirLabel StatusExpLabel;
         //alliance list
         //enemy list
+        #endregion
+
+        #region Storage page
+        public MirLabel StorageGoldText;
+        public MirButton StorageGoldAdd;
+        public MirButton StorageGoldRemove;
+        public MirItemCell[] StorageGrid;
+        public bool StorageRequested = false;
         #endregion
 
         #region rank page
@@ -10498,6 +10611,79 @@ namespace Client.MirScenes
                 Location = new Point(13, 37),
                 Visible = false,
             };
+            StoragePage.BeforeDraw += (o, e) =>
+                {
+                    StorageGoldText.Text = Gold > 0? string.Format("{0:###,###,###} Gold.", Gold): "0 Gold.";
+                    if (MyRankId == 0)
+                        StorageGoldRemove.Visible = true;
+                    else
+                        StorageGoldRemove.Visible = false;
+
+                };
+            StorageGoldText = new MirLabel()
+            {
+                Parent = StoragePage,
+                Size = new Size (150,20),
+                Location = new Point(0, 0),
+                Visible = true,
+                Text = "0",
+                NotControl = true,
+            };
+            StorageGoldAdd = new MirButton()
+            {
+                Parent = StoragePage,
+                Library = Libraries.Prguse,
+                Index = 918,
+                Visible = true,
+                Enabled = true,
+                Location = new Point(155,0),
+            };
+            StorageGoldAdd.Click += (o, e) => StorageAddGold();
+            StorageGoldRemove = new MirButton()
+            {
+                Parent = StoragePage,
+                Library = Libraries.Prguse,
+                Index = 917,
+                Visible = false,
+                Enabled = true,
+                Location = new Point(171, 0),
+            };
+            StorageGoldRemove.Click += (o, e) => StorageRemoveGold();
+
+            for (int i = 0; i < 9; i++)
+                new MirLabel()
+                {
+                    Parent = StoragePage,
+                    BackColour = Color.SlateGray,
+                    Location = new Point(0,(i*32) + 21 + i),
+                    Size = new Size(521,1),
+                    Text = " ",
+                };
+
+            for (int i = 0; i < 15; i++)
+                new MirLabel()
+                {
+                    Parent = StoragePage,
+                    BackColour = Color.SlateGray,
+                    Location = new Point((i * 36) + 1 + i, 21),
+                    Size = new Size(1, 265),
+                    Text = " ",
+                };
+
+            StorageGrid = new MirItemCell[112];
+            for (int i = 0; i < StorageGrid.Length; i++)
+            {
+                StorageGrid[i] = new MirItemCell()
+                {
+                    BorderColour = Color.Snow,
+                    ItemSlot = i,
+                    GridType = MirGridType.GuildStorage,
+                    Library = Libraries.Items,
+                    Parent = StoragePage,
+                    Location = new Point((i % 14) * 36 + 2 + (i % 14) , (i/14) * 32 + 22 + (i/14)),
+                };
+            }
+            
             #endregion
             #region "buffs tab"
             BuffsPage = new MirImageControl()
@@ -11234,6 +11420,44 @@ namespace Client.MirScenes
 
         #endregion
 
+        #region Storage code
+        public void StorageAddGold()
+        {
+            if (LastGuildMsg > CMain.Time) return;
+            MirAmountBox amountBox = new MirAmountBox("Gold to add:", 116, GameScene.Gold);
+
+            amountBox.OKButton.Click += (o, a) =>
+            {
+                if (amountBox.Amount <= 0) return;
+                LastGuildMsg = CMain.Time + 100;
+                Network.Enqueue(new C.GuildStorageGoldChange
+                {
+                    Type = 0,
+                    Amount = amountBox.Amount,
+                });
+            };
+
+            amountBox.Show();
+        }
+        public void StorageRemoveGold()
+        {
+            if (LastGuildMsg > CMain.Time) return;
+            MirAmountBox amountBox = new MirAmountBox("Gold to retrieve:", 116, Gold);
+
+            amountBox.OKButton.Click += (o, a) =>
+            {
+                if (amountBox.Amount <= 0) return;
+                LastGuildMsg = CMain.Time + 100;
+                Network.Enqueue(new C.GuildStorageGoldChange
+                {
+                    Type = 1,
+                    Amount = amountBox.Amount,
+                });
+            };
+
+            amountBox.Show();
+        }
+        #endregion
         public void RequestUpdateNotice()
         {
             if ((NoticeChanged) && (LastNoticeRequest < CMain.Time))
@@ -11287,6 +11511,8 @@ namespace Client.MirScenes
                 case 3:
                     StoragePage.Visible = true;
                     StorageButton.Index = 231;
+                    if (!StorageRequested)
+                        Network.Enqueue(new C.GuildStorageItemChange() { Type = 2 });
                     break;
                 case 4:
                     BuffsPage.Visible = true;

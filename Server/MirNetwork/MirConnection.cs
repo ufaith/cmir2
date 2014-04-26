@@ -363,6 +363,12 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.GuildNameReturn:
                     GuildNameReturn((C.GuildNameReturn)p);
                     return;
+                case (short)ClientPacketIds.GuildStorageGoldChange:
+                    GuildStorageGoldChange((C.GuildStorageGoldChange)p);
+                    return;
+                case (short)ClientPacketIds.GuildStorageItemChange:
+                    GuildStorageItemChange((C.GuildStorageItemChange)p);
+                    return;
                 default:
                     throw new NotImplementedException();
             }
@@ -906,6 +912,16 @@ namespace Server.MirNetwork
         {
             if (Stage != GameStage.Game) return;
             Player.GuildNameReturn(p.Name);
+        }
+        private void GuildStorageGoldChange(C.GuildStorageGoldChange p)
+        {
+            if (Stage != GameStage.Game) return;
+            Player.GuildStorageGoldChange(p.Type, p.Amount);
+        }
+        private void GuildStorageItemChange(C.GuildStorageItemChange p)
+        {
+            if (Stage != GameStage.Game) return;
+            Player.GuildStorageItemChange(p.Type, p.From, p.To);
         }
     }
 }

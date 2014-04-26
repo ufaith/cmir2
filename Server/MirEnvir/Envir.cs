@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 28;
+        public const int Version = 29;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -154,7 +154,6 @@ namespace Server.MirEnvir
                         if (current == null) break;
 
                         LinkedListNode<MapObject> next = current.Next;
-
 
                         if (Time > current.Value.OperateTime)
                         {
@@ -311,6 +310,7 @@ namespace Server.MirEnvir
             {
                 if (GuildList[i].NeedSave)
                 {
+                    GuildList[i].NeedSave = false;
                     MemoryStream mStream = new MemoryStream();
                     BinaryWriter writer = new BinaryWriter(mStream);
                     GuildList[i].Save(writer); //mir guild data :p

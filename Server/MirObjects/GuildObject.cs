@@ -22,7 +22,7 @@ namespace Server.MirObjects
         public long Experience = 0;
         public uint Gold = 0;
         public List<Rank> Ranks = new List<Rank>();
-        public List<GuildStorageItem> StoredItems = new List<GuildStorageItem>();
+        public GuildStorageItem[] StoredItems = new GuildStorageItem[112];
         public List<GuildBuff> BuffList = new List<GuildBuff>();
         public Int32 Votes = 0;
         public DateTime LastVoteAttempt;
@@ -70,17 +70,20 @@ namespace Server.MirObjects
                 Ranks.Add(new Rank(reader, true) { Index = index });
                 Membercount += Ranks[i].Members.Count;
             }
-            
             int ItemCount = reader.ReadInt32();
             for (int j = 0; j < ItemCount; j++)
             {
-                StoredItems.Add(new GuildStorageItem()
+                if (Envir.Version > 28)
+                    if (!reader.ReadBoolean()) continue;
+                GuildStorageItem Guilditem = new GuildStorageItem()
                 {
-                    Item = new UserItem(reader),
+                    Item = new UserItem(reader, Envir.LoadVersion),
                     UserId = reader.ReadInt64()
-                });
+                };
+                
+                if (SMain.Envir.BindItem(Guilditem.Item) && j < StoredItems.Length)
+                    StoredItems[j] = Guilditem;
             }
-
             int BuffCount = reader.ReadInt32();
             for (int j = 0; j < BuffCount; j++)
                 BuffList.Add(new GuildBuff(reader));
@@ -113,11 +116,15 @@ namespace Server.MirObjects
             for (int i = 0; i < Ranks.Count; i++)
                 if (Ranks[i].Members.Count > 0)
                     Ranks[i].Save(writer,true);
-            writer.Write(StoredItems.Count);
-            for (int i = 0; i < StoredItems.Count; i++)
+            writer.Write(StoredItems.Length);
+            for (int i = 0; i < StoredItems.Length; i++)
             {
-                StoredItems[i].Item.Save(writer);
-                writer.Write(StoredItems[i].UserId);
+                writer.Write(StoredItems[i] != null);
+                if (StoredItems[i] != null)
+                {
+                    StoredItems[i].Item.Save(writer);
+                    writer.Write(StoredItems[i].UserId);
+                }
             }
             writer.Write(BuffList.Count);
             for (int i = 0; i < BuffList.Count; i++)
@@ -178,7 +185,7 @@ namespace Server.MirObjects
                     Level = Level,
                     Voting = Voting,
                     SparePoints = SparePoints,
-                    ItemCount = (byte)StoredItems.Count,
+                    ItemCount = (byte)StoredItems.Length,
                     BuffCount = (byte)BuffList.Count,
                     MyOptions = member.MyGuildRank != null? member.MyGuildRank.Options: (RankOptions)0,
                     MyRankId = member.MyGuildRank != null? member.MyGuildRank.Index: 256
@@ -450,6 +457,18 @@ namespace Server.MirObjects
                     player = (PlayerObject)Ranks[i].Members[j].Player;
                     if (player != null)
                         player.Enqueue(p);
+                }
+        }
+
+        public void SendItemInfo(ItemInfo Item)
+        {
+            PlayerObject player = null;
+            for (int i = 0; i < Ranks.Count; i++)
+                for (int j = 0; j < Ranks[i].Members.Count; j++)
+                {
+                    player = (PlayerObject)Ranks[i].Members[j].Player;
+                    if (player != null)
+                        player.CheckItemInfo(Item);
                 }
         }
 
