@@ -3122,4 +3122,83 @@ namespace ServerPackets
         }
     }
 
+    public sealed class GuildStorageGoldChange : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.GuildStorageGoldChange; } }
+        public uint Amount = 0;
+        public byte Type = 0;
+        public string Name = string.Empty;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Amount= reader.ReadUInt32();
+            Type = reader.ReadByte();
+            Name = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Amount);
+            writer.Write(Type);
+            writer.Write(Name);
+        }
+    }
+    public sealed class GuildStorageItemChange : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.GuildStorageItemChange; } }
+        public int User = 0;
+        public byte Type = 0;
+        public int To = 0;
+        public int From = 0;
+        public GuildStorageItem Item = null;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Type = reader.ReadByte();
+            To = reader.ReadInt32();
+            From = reader.ReadInt32();
+            User = reader.ReadInt32();
+            if (!reader.ReadBoolean()) return;
+            Item = new GuildStorageItem();
+            Item.UserId = reader.ReadInt64();
+            Item.Item = new UserItem(reader);
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Type);
+            writer.Write(To);
+            writer.Write(From);
+            writer.Write(User);
+            writer.Write(Item != null);
+            if (Item == null) return;
+            writer.Write(Item.UserId);
+            Item.Item.Save(writer);
+        }
+    }
+    public sealed class GuildStorageList : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.GuildStorageList; }
+        }
+        public GuildStorageItem[] Items;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Items = new GuildStorageItem[reader.ReadInt32()];
+            for (int i = 0; i < Items.Length; i++)
+            {
+                if (reader.ReadBoolean() == true)
+                    Items[i] = new GuildStorageItem(reader);
+            }
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Items.Length);
+            for (int i = 0; i < Items.Length; i++)
+            {
+                writer.Write(Items[i] != null);
+                if (Items[i] != null)
+                    Items[i].save(writer);
+            }
+        }
+
+    }
 }

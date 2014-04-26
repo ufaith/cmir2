@@ -54,6 +54,8 @@ namespace Client.MirControls
                         return GameScene.Storage;
                     case MirGridType.Inspect:
                         return InspectDialog.Items;
+                    case MirGridType.GuildStorage:
+                        return GameScene.GuildStorage;
                     default:
                         throw new NotImplementedException();
                 }
@@ -242,7 +244,7 @@ namespace Client.MirControls
         }
         public void UseItem()
         {
-            if (Locked || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant) return;
+            if (Locked || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant || GridType == MirGridType.GuildStorage) return;
 
             if (GridType == MirGridType.BuyBack)
             {
@@ -555,7 +557,24 @@ namespace Client.MirControls
                                     }
                                 break;
                             #endregion
-
+                            #region From Guild Storage
+                            case MirGridType.GuildStorage:
+                                if (Item != null)
+                                {
+                                    GameScene.Scene.ChatDialog.ReceiveChat("You cannot swap items.", ChatType.System);
+                                    return;
+                                }
+                                if (!GuildDialog.MyOptions.HasFlag(RankOptions.CanRetrieveItem))
+                                {
+                                    GameScene.Scene.ChatDialog.ReceiveChat("Insufficient rights to retrieve items.", ChatType.System);
+                                    return;
+                                }
+                                Network.Enqueue(new C.GuildStorageItemChange { Type = 1, From = GameScene.SelectedCell.ItemSlot, To = ItemSlot });
+                                Locked = true;
+                                GameScene.SelectedCell.Locked = true;
+                                GameScene.SelectedCell = null;
+                                break;
+                            #endregion
                         }
                         break;
                     #endregion
@@ -699,9 +718,35 @@ namespace Client.MirControls
                                 GameScene.SelectedCell = null;
                                 return;
                             #endregion
+                            
                         }
                         break;
 
+                    #endregion
+                    #region To guild storage
+                    case MirGridType.GuildStorage: //To Guild Storage
+                        if (GameScene.SelectedCell.GridType == MirGridType.Inventory)
+                        {
+                            if (Item != null)
+                            {
+                                GameScene.Scene.ChatDialog.ReceiveChat("You cannot swap items.", ChatType.System);
+                                return;
+                            }
+                            if (!GuildDialog.MyOptions.HasFlag(RankOptions.CanStoreItem))
+                            {
+                                GameScene.Scene.ChatDialog.ReceiveChat("Insufficient rights to store items.", ChatType.System);
+                                return;
+                            }
+                            if (ItemArray[ItemSlot] == null)
+                            {
+                                Network.Enqueue(new C.GuildStorageItemChange {Type = 0, From = GameScene.SelectedCell.ItemSlot, To = ItemSlot });
+                                Locked = true;
+                                GameScene.SelectedCell.Locked = true;
+                                GameScene.SelectedCell = null;
+                                return;
+                            }
+                        }
+                        break;
                     #endregion
                 }
 

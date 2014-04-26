@@ -284,7 +284,8 @@ public enum MirGridType : byte
     BuyBack = 5,
     DropPanel = 6,
     Inspect = 7,
-    TrustMerchant = 8
+    TrustMerchant = 8,
+    GuildStorage = 9,
 }
 public enum EquipmentSlot : byte
 {
@@ -691,6 +692,9 @@ public enum ServerPacketIds : short
     GuildInvite,
     GuildExpGain,
     GuildNameRequest,
+    GuildStorageGoldChange,
+    GuildStorageItemChange,
+    GuildStorageList,
 }
 
 public enum ClientPacketIds : short
@@ -752,6 +756,8 @@ public enum ClientPacketIds : short
     GuildInvite,
     GuildNameReturn,
     RequestGuildInfo,
+    GuildStorageGoldChange,
+    GuildStorageItemChange,
 }
 
 public class InIReader
@@ -2299,6 +2305,10 @@ public abstract class Packet
                 return new C.GuildNameReturn();
             case (short)ClientPacketIds.RequestGuildInfo:
                 return new C.RequestGuildInfo();
+            case (short)ClientPacketIds.GuildStorageGoldChange:
+                return new C.GuildStorageGoldChange();
+            case (short)ClientPacketIds.GuildStorageItemChange:
+                return new C.GuildStorageItemChange();
             default:
                 throw new NotImplementedException();
         }
@@ -2566,6 +2576,12 @@ public abstract class Packet
                 return new S.GuildExpGain();
             case (short)ServerPacketIds.GuildNameRequest:
                 return new S.GuildNameRequest();
+            case (short)ServerPacketIds.GuildStorageGoldChange:
+                return new S.GuildStorageGoldChange();
+            case (short)ServerPacketIds.GuildStorageItemChange:
+                return new S.GuildStorageItemChange();
+            case (short)ServerPacketIds.GuildStorageList:
+                return new S.GuildStorageList();
             default:
                 throw new NotImplementedException();
         }
@@ -3151,6 +3167,19 @@ public class GuildStorageItem
 {
     public UserItem Item;
     public long UserId = 0;
+    public GuildStorageItem()
+    {
+    }
+    public GuildStorageItem(BinaryReader reader)
+    {
+        Item = new UserItem(reader);
+        UserId = reader.ReadInt64();
+    }
+    public void save(BinaryWriter writer)
+    {
+        Item.Save(writer);
+        writer.Write(UserId);
+    }
 }
 
 public class GuildMember
