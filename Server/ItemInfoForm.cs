@@ -501,9 +501,9 @@ namespace Server
         {
             if (ActiveControl != sender) return;
 
-            sbyte temp;
+            short temp;
 
-            if (!sbyte.TryParse(ActiveControl.Text, out temp))
+            if (!short.TryParse(ActiveControl.Text, out temp))
             {
                 ActiveControl.BackColor = Color.Red;
                 return;

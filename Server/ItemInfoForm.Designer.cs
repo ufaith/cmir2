@@ -158,6 +158,7 @@
             this.Bind_dontrepaircheckbox = new System.Windows.Forms.CheckBox();
             this.Bind_donttradecheckbox = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.PickaxecheckBox = new System.Windows.Forms.CheckBox();
             this.NoDuraLosscheckBox = new System.Windows.Forms.CheckBox();
             this.SkillcheckBox = new System.Windows.Forms.CheckBox();
             this.ProbecheckBox = new System.Windows.Forms.CheckBox();
@@ -178,7 +179,6 @@
             this.ExportAllButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
-            this.PickaxecheckBox = new System.Windows.Forms.CheckBox();
             this.ItemInfoPanel.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -1534,6 +1534,17 @@
             this.tabPage4.Text = "Special Stats";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // PickaxecheckBox
+            // 
+            this.PickaxecheckBox.AutoSize = true;
+            this.PickaxecheckBox.Location = new System.Drawing.Point(22, 267);
+            this.PickaxecheckBox.Name = "PickaxecheckBox";
+            this.PickaxecheckBox.Size = new System.Drawing.Size(64, 17);
+            this.PickaxecheckBox.TabIndex = 11;
+            this.PickaxecheckBox.Text = "Pickaxe";
+            this.PickaxecheckBox.UseVisualStyleBackColor = true;
+            this.PickaxecheckBox.CheckedChanged += new System.EventHandler(this.PickaxecheckBox_CheckedChanged);
+            // 
             // NoDuraLosscheckBox
             // 
             this.NoDuraLosscheckBox.AutoSize = true;
@@ -1746,17 +1757,6 @@
             this.ImportButton.Text = "Import";
             this.ImportButton.UseVisualStyleBackColor = true;
             this.ImportButton.Click += new System.EventHandler(this.ImportButton_Click);
-            // 
-            // PickaxecheckBox
-            // 
-            this.PickaxecheckBox.AutoSize = true;
-            this.PickaxecheckBox.Location = new System.Drawing.Point(22, 267);
-            this.PickaxecheckBox.Name = "PickaxecheckBox";
-            this.PickaxecheckBox.Size = new System.Drawing.Size(64, 17);
-            this.PickaxecheckBox.TabIndex = 11;
-            this.PickaxecheckBox.Text = "Pickaxe";
-            this.PickaxecheckBox.UseVisualStyleBackColor = true;
-            this.PickaxecheckBox.CheckedChanged += new System.EventHandler(this.PickaxecheckBox_CheckedChanged);
             // 
             // ItemInfoForm
             // 

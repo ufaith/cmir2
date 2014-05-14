@@ -126,7 +126,6 @@ namespace Client.MirScenes
             C.ClientVersion p = new C.ClientVersion();
             try
             {
-                
                 byte[] sum;
                 using (MD5 md5 = MD5.Create())
                 using (FileStream stream = File.OpenRead(Application.ExecutablePath))

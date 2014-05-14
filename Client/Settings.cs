@@ -20,6 +20,9 @@ namespace Client
                             AArmourPath = @".\Data\AArmour\",
                             AWeaponPath = @".\Data\AWeapon\",
                             AHairPath = @".\Data\AHair\",
+                            ARArmourPath = @".\Data\ARArmour\",
+                            ARWeaponPath = @".\Data\ARWeapon\",
+                            ARHairPath = @".\Data\ARHair\",
                             CHumEffectPath = @".\Data\CHumEffect\",
                             AHumEffectPath = @".\Data\AHumEffect\";
         //Logs

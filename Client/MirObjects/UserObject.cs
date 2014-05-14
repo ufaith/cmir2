@@ -193,6 +193,9 @@ namespace Client.MirObjects
                 case MirClass.Assassin:
                     MaxMP = (ushort)Math.Min(ushort.MaxValue, (11 + Level * 5F) + (Level * CoreStats.MpGainRate));
                     break;
+                case MirClass.Archer:
+                    MaxMP = (ushort)Math.Min(ushort.MaxValue, (11 + Level * 4F) + (Level * CoreStats.MpGainRate));
+                    break;
             }
         }
         private void RefreshBagWeight()

@@ -897,6 +897,13 @@ namespace Client.MirControls
                         return false;
                     }
                     break;
+                case MirClass.Archer:
+                    if (!Item.Info.RequiredClass.HasFlag(RequiredClass.Archer))
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("Archers cannot use this item.", ChatType.System);
+                        return false;
+                    }
+                    break;
             }
 
             switch (Item.Info.RequiredType)
@@ -998,6 +1005,13 @@ namespace Client.MirControls
                     if (!i.Info.RequiredClass.HasFlag(RequiredClass.Assassin))
                     {
                         GameScene.Scene.ChatDialog.ReceiveChat("Assassins cannot use this item.", ChatType.System);
+                        return false;
+                    }
+                    break;
+                case MirClass.Archer:
+                    if (!i.Info.RequiredClass.HasFlag(RequiredClass.Archer))
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("Archers cannot use this item.", ChatType.System);
                         return false;
                     }
                     break;
