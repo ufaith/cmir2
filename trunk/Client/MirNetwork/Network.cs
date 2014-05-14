@@ -164,6 +164,7 @@ namespace Client.MirNetwork
                     while (_receiveList != null && !_receiveList.IsEmpty)
                     {
                         Packet p;
+
                         if (!_receiveList.TryDequeue(out p) || p == null) continue;
                         if (!(p is ServerPackets.Disconnect) && !(p is ServerPackets.ClientVersion)) continue;
 

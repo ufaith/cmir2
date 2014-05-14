@@ -170,8 +170,9 @@ public enum MirAction : byte
     Attack2,
     Attack3,
     Attack4,
-    AttackRange,
+    AttackRange1,
     AttackRange2,
+    AttackRange3,
     Special,
     Struck,
     Harvest,
@@ -186,6 +187,10 @@ public enum MirAction : byte
     Revive,
     SitDown,
     Mine,
+
+    WalkingBow,
+    RunningBow,
+    Jump
 }
 
 public enum CellAttribute : byte
@@ -372,8 +377,9 @@ public enum RequiredClass : byte
     Wizard = 2,
     Taoist = 4,
     Assassin = 8,
+    Archer = 16,
     WarWizTao = Warrior | Wizard | Taoist,
-    None = WarWizTao | Assassin
+    None = WarWizTao | Assassin | Archer
 }
 [Flags]
 [Obfuscation(Feature = "renaming", Exclude = true)]
@@ -509,6 +515,10 @@ public enum Spell : byte
     DarkBody = 103,
     Hemorrhage = 104,
     CrescentSlash = 105,
+
+    //Archer
+    Focus = 121,
+    StraightShot = 122,
 
     //Map Events
     DigOutZombie = 200,
@@ -651,6 +661,7 @@ public enum ServerPacketIds : short
     Magic,
     ObjectMagic,
     ObjectEffect,
+    RangeAttack,
     Pushed,
     ObjectPushed,
     ObjectName,
@@ -728,6 +739,7 @@ public enum ClientPacketIds : short
     ChangeAMode,
     ChangePMode,
     Attack,
+    RangeAttack,
     Harvest,
     CallNPC,
     BuyItem,
@@ -1511,7 +1523,7 @@ public class ItemInfo
     public RequiredGender RequiredGender = RequiredGender.None;
     public ItemSet Set;
 
-    public sbyte Shape;
+    public short Shape;
     public byte Weight, Light, RequiredAmount;
 
     public ushort Image, Durability;
@@ -1559,7 +1571,7 @@ public class ItemInfo
         RequiredGender = (RequiredGender) reader.ReadByte();
         if(version >= 17) Set = (ItemSet)reader.ReadByte();
 
-        Shape = reader.ReadSByte();
+        Shape = version >= 30 ? reader.ReadInt16() : reader.ReadSByte();
         Weight = reader.ReadByte();
         Light = reader.ReadByte();
         RequiredAmount = reader.ReadByte();
@@ -1741,7 +1753,7 @@ public class ItemInfo
         if (!Enum.TryParse(data[2], out info.RequiredType)) return null;
         if (!Enum.TryParse(data[3], out info.RequiredClass)) return null;
         if (!Enum.TryParse(data[4], out info.RequiredGender)) return null;
-        if (!sbyte.TryParse(data[5], out info.Shape)) return null;
+        if (!short.TryParse(data[5], out info.Shape)) return null;
 
         if (!byte.TryParse(data[6], out info.Weight)) return null;
         if (!byte.TryParse(data[7], out info.Light)) return null;
@@ -2249,6 +2261,8 @@ public abstract class Packet
                 return new C.ChangePMode();
             case (short)ClientPacketIds.Attack:
                 return new C.Attack();
+            case (short)ClientPacketIds.RangeAttack:
+                return new C.RangeAttack();
             case (short)ClientPacketIds.Harvest:
                 return new C.Harvest();
             case (short)ClientPacketIds.CallNPC:
@@ -2492,6 +2506,8 @@ public abstract class Packet
                 return new S.ObjectMagic();
             case (short)ServerPacketIds.ObjectEffect:
                 return new S.ObjectEffect();
+            case (short)ServerPacketIds.RangeAttack:
+                return new S.RangeAttack();
             case (short)ServerPacketIds.Pushed:
                 return new S.Pushed();
             case (short)ServerPacketIds.ObjectPushed:
@@ -2586,9 +2602,8 @@ public abstract class Packet
                 throw new NotImplementedException();
         }
     }
-
-    
 }
+
 public class BaseStats
 {
     public float HpGain, HpGainRate, MpGainRate, BagWeightGain, WearWeightGain, HandWeightGain;
@@ -2682,13 +2697,37 @@ public class BaseStats
                 MinMac = 0;
                 MaxMac = 0;
                 MinDc = 8;
-                MaxDc = 6;
+                MaxDc = 8;
                 MinMc = 0;
                 MaxMc = 0;
                 MinSc = 0;
                 MaxSc = 0;
                 StartAgility = 20;
                 StartAccuracy = 5;
+                StartCriticalRate = 0;
+                StartCriticalDamage = 0;
+                CritialRateGain = 0;
+                CriticalDamageGain = 0;
+                break;
+            case MirClass.Archer:
+                HpGain = 4F;
+                HpGainRate = 3.25F;
+                MpGainRate = 0;
+                BagWeightGain = 4F; //done
+                WearWeightGain = 5F;
+                HandWeightGain = 5F;
+                MinAc = 0;
+                MaxAc = 0;
+                MinMac = 0;
+                MaxMac = 0;
+                MinDc = 8;
+                MaxDc = 8;
+                MinMc = 8;
+                MaxMc = 8;
+                MinSc = 0;
+                MaxSc = 0;
+                StartAgility = 15;
+                StartAccuracy = 8;
                 StartCriticalRate = 0;
                 StartCriticalDamage = 0;
                 CritialRateGain = 0;

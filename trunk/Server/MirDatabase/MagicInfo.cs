@@ -96,6 +96,10 @@ namespace Server.MirDatabase
                                 Hemorrhage,
                                 CresentSlash;
 
+        //Archer
+        public static MagicInfo Focus,
+                                StraightShot;
+
 
         public Spell Spell;
         public byte BaseCost, LevelCost, Icon;
@@ -194,6 +198,9 @@ namespace Server.MirDatabase
             Hemorrhage = new MagicInfo { Spell = Spell.Hemorrhage, Icon = 75, Level1 = 47, Level2 = 50, Level3 = 53, Need1 = 100, Need2 = 200, Need3 = 300 };
             CresentSlash = new MagicInfo { Spell = Spell.CrescentSlash, Icon = 71, Level1 = 50, Level2 = 53, Level3 = 56, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 19, LevelCost = 5 };
 
+            //Archer
+            Focus = new MagicInfo { Spell = Spell.Focus, Icon = 88, Level1 = 7, Level2 = 9, Level3 = 11, Need1 = 100, Need2 = 200, Need3 = 300 };
+            StraightShot = new MagicInfo { Spell = Spell.StraightShot, Icon = 89, Level1 = 11, Level2 = 13, Level3 = 15, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 3, LevelCost = 2 };
         }
 
         public MagicInfo()
@@ -328,7 +335,8 @@ namespace Server.MirDatabase
                 case Spell.PoisonField:
                     return 40;
 
-
+                case Spell.StraightShot:
+                    return 7;
 
                 default:
                     return 0;
@@ -373,6 +381,8 @@ namespace Server.MirDatabase
                 case Spell.PoisonField:
                     return 20;
 
+                case Spell.StraightShot:
+                    return 3;
 
                 default:
                     return 0;

@@ -537,7 +537,7 @@ namespace Client.MirObjects
                     case MirAction.Pushed:
                         Frames.Frames.TryGetValue(MirAction.Walking, out Frame);
                         break;
-                    case MirAction.AttackRange:
+                    case MirAction.AttackRange1:
                         if (!Frames.Frames.TryGetValue(CurrentAction, out Frame))
                             Frames.Frames.TryGetValue(MirAction.Attack1, out Frame);
                         break;
@@ -668,7 +668,7 @@ namespace Client.MirObjects
                                 break;
                         }
                         break;
-                    case MirAction.AttackRange:
+                    case MirAction.AttackRange1:
                         PlayRangeSound();
                         switch (BaseImage)
                         {
@@ -721,7 +721,7 @@ namespace Client.MirObjects
                             if (ob.Race != ObjectType.Player) break;
                             PlayerObject player = ((PlayerObject) ob);
                             StruckWeapon = player.Weapon;
-                            if (player.Class != MirClass.Assassin || StruckWeapon == -1) break;
+                            if (player.Class != MirClass.Assassin || StruckWeapon == -1) break; //Archer?
                             StruckWeapon = 1;
                             break;
                         }
@@ -1011,7 +1011,7 @@ namespace Client.MirObjects
                         }
                     }
                     break;
-                case MirAction.AttackRange:
+                case MirAction.AttackRange1:
                     if (CMain.Time >= NextMotion)
                     {
                         GameScene.Scene.MapControl.TextureValid = false;
@@ -1638,7 +1638,7 @@ namespace Client.MirObjects
                         case MirAction.Struck:
                             Libraries.Monsters[(ushort)Monster.RedThunderZuma].DrawBlend(448 + FrameIndex + (int)Direction * 2, DrawLocation, Color.White, true);
                             break;
-                        case MirAction.AttackRange:
+                        case MirAction.AttackRange1:
                             Libraries.Monsters[(ushort)Monster.RedThunderZuma].DrawBlend(464 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
                             break;
                     }
@@ -1675,7 +1675,7 @@ namespace Client.MirObjects
                         case MirAction.Attack2:
                             Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(528 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
                             break;
-                        case MirAction.AttackRange:
+                        case MirAction.AttackRange1:
                             Libraries.Monsters[(ushort)Monster.BoneLord].DrawBlend(576 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
                             break;
                         case MirAction.Struck:
@@ -1696,7 +1696,7 @@ namespace Client.MirObjects
                         case MirAction.Pushed:
                             Libraries.Monsters[(ushort)Monster.HolyDeva].Draw(258 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
                             break;
-                        case MirAction.AttackRange:
+                        case MirAction.AttackRange1:
                             Libraries.Monsters[(ushort)Monster.HolyDeva].Draw(306 + FrameIndex + (int)Direction * 6, DrawLocation, Color.White, true);
                             break;
                         case MirAction.Struck:
@@ -1751,7 +1751,7 @@ namespace Client.MirObjects
                 case Monster.GuardianRock:
                     switch (CurrentAction)
                     {
-                        case MirAction.AttackRange:
+                        case MirAction.AttackRange1:
                             Libraries.Monsters[(ushort)Monster.GuardianRock].DrawBlend(8 + FrameIndex, DrawLocation, Color.White, true);
                             break;
                     }
@@ -1805,7 +1805,7 @@ namespace Client.MirObjects
                             Libraries.Monsters[(ushort)Monster.GreatFoxSpirit].DrawBlend(Frame.Start + 30 + FrameIndex, DrawLocation, Color.White, true);
                             break;
                         case MirAction.Attack1:
-                        case MirAction.AttackRange:
+                        case MirAction.AttackRange1:
                             Libraries.Monsters[(ushort)Monster.GreatFoxSpirit].DrawBlend(Frame.Start + 30 + FrameIndex, DrawLocation, Color.White, true);
                             break;
                         case MirAction.Struck:

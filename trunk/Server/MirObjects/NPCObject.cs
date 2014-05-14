@@ -1850,6 +1850,9 @@ namespace Server.MirObjects
                             case MirClass.Assassin:
                                 player.Info.Class = MirClass.Assassin;
                                 break;
+                            case MirClass.Archer:
+                                player.Info.Class = MirClass.Archer;
+                                break;
                         }
                         break;
 
@@ -1877,6 +1880,13 @@ namespace Server.MirObjects
                     case ActionType.Goto:
                         player.NPCGoto = true;
                         player.NPCGotoPage = "[" + param[0] + "]";
+
+                        //player.NPCJumpPage = new NPCJumpPage
+                        //{
+                        //    NPCID = player.NPCID,
+                        //    NPCGotoPage = "[" + param[0] + "]",
+                        //    TimePeriod = 0
+                        //};
                         break;
 
                     case ActionType.Set:
@@ -2225,9 +2235,11 @@ namespace Server.MirObjects
     {
         public Map PlayerMap;
         public Point PlayerCoords;
+
         public uint NPCID;
         public string NPCGotoPage;
         public string NPCPage;
+
         public bool Active;
         public bool Interrupted;
 

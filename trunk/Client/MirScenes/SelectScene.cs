@@ -116,7 +116,7 @@ namespace Client.MirScenes
                 FadeIn = true,
                 FadeInDelay = 75,
                 FadeInRate = 0.1F,
-                Index = 20,
+                Index = 220,
                 Library = Libraries.ChrSel,
                 Location = new Point(200, 300),
                 Parent = Background,
@@ -125,7 +125,7 @@ namespace Client.MirScenes
             };
             CharacterDisplay.AfterDraw += (o, e) =>
             {
-                if (_selected >= 0 && _selected < Characters.Count && characters[_selected].Class == MirClass.Wizard)
+               // if (_selected >= 0 && _selected < Characters.Count && characters[_selected].Class == MirClass.Wizard)
                     Libraries.ChrSel.DrawBlend(CharacterDisplay.Index + 560, CharacterDisplay.DisplayLocationWithoutOffSet, Color.White, true);
             };
             
@@ -437,7 +437,26 @@ namespace Client.MirScenes
             if (_selected >= 0 && _selected < Characters.Count)
             {
                 CharacterDisplay.Visible = true;
-                CharacterDisplay.Index = ((byte)Characters[_selected].Class + 1) * 20 + (byte)Characters[_selected].Gender * 280; 
+                //CharacterDisplay.Index = ((byte)Characters[_selected].Class + 1) * 20 + (byte)Characters[_selected].Gender * 280; 
+
+                switch ((MirClass)Characters[_selected].Class)
+                {
+                    case MirClass.Warrior:
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 220 : 500;
+                        break;
+                    case MirClass.Wizard:
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 240 : 520;
+                        break;
+                    case MirClass.Taoist:
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 260 : 540;
+                        break;
+                    case MirClass.Assassin:
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 280 : 560;
+                        break;
+                    case MirClass.Archer:
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 160 : 180;
+                        break;
+                }
 
                 LastAccessLabel.Text = Characters[_selected].LastAccess == DateTime.MinValue ? "Never" : Characters[_selected].LastAccess.ToString();
                 LastAccessLabel.Visible = true;
@@ -491,6 +510,7 @@ namespace Client.MirScenes
                              WizardButton,
                              TaoistButton,
                              AssassinButton,
+                             ArcherButton,
                              MaleButton,
                              FemaleButton;
 
@@ -509,7 +529,7 @@ namespace Client.MirScenes
 
             public const string WizardDescription =
                 "Wizards are a class of low strength and stamina, but have the ability to use powerful spells. Their offensive spells are very effective, but" +
-                " because it takes time to cast these spells, they're likely to leave themselves open for enemy's attacks. Therefore, the phyiscally weak wizards" +
+                " because it takes time to cast these spells, they're likely to leave themselves open for enemy's attacks. Therefore, the physically weak wizards" +
                 " must aim to attack their enemies from a safe distance.";
 
             public const string TaoistDescription =
@@ -519,8 +539,14 @@ namespace Client.MirScenes
 
             public const string AssassinDescription =
                 "Assassins are members of a secret organization and their history is relatively unknown. They're capable of hiding themselves and performing attacks" +
-                " while being unseen by others, which naturally makes them excellend at making fast kills. It is necessary for them to avoid being in battles with" +
+                " while being unseen by others, which naturally makes them excellent at making fast kills. It is necessary for them to avoid being in battles with" +
                 " multiple enemies due to their weak vitality and strength.";
+
+            public const string ArcherDescription = 
+                "Archers are a class of great accuracy and strength, using their powerful skills with bows to deal extraordinary damage from range. Much like" +
+                " wizards, they rely on their keen instincts to dodge oncoming attacks as they tend to leave themselves open to frontal attacks. However, their" +
+                " physical prowess and deadly aim allows them to instil fear into anyone they hit.";
+
             #endregion
 
             public NewCharacterDialog()
@@ -564,9 +590,9 @@ namespace Client.MirScenes
 
                 NameTextBox = new MirTextBox
                     {
-                        Location = new Point(357, 269),
+                        Location = new Point(325, 267),
                         Parent = this,
-                        Size = new Size(190, 15),
+                        Size = new Size(241, 20),
                         MaxLength = Globals.MaxCharacterNameLength
                     };
                 NameTextBox.TextBox.KeyPress += TextBox_KeyPress;
@@ -578,7 +604,7 @@ namespace Client.MirScenes
                         Animated = true,
                         AnimationCount = 16,
                         AnimationDelay = 250,
-                        Index = 20,
+                        Index = 220,
                         Library = Libraries.ChrSel,
                         Location = new Point(120, 250),
                         Parent = this,
@@ -586,7 +612,7 @@ namespace Client.MirScenes
                     };
                 CharacterDisplay.AfterDraw += (o, e) =>
                     {
-                        if (_class == MirClass.Wizard)
+                       // if (_class == MirClass.Wizard)
                             Libraries.ChrSel.DrawBlend(CharacterDisplay.Index + 560, CharacterDisplay.DisplayLocationWithoutOffSet, Color.White, true);
                     };
 
@@ -596,7 +622,7 @@ namespace Client.MirScenes
                         HoverIndex = 2427,
                         Index = 2427,
                         Library = Libraries.Prguse,
-                        Location = new Point(355, 296),
+                        Location = new Point(323, 296),
                         Parent = this,
                         PressedIndex = 2428,
                         Sound = SoundList.ButtonA,
@@ -613,7 +639,7 @@ namespace Client.MirScenes
                         HoverIndex = 2430,
                         Index = 2429,
                         Library = Libraries.Prguse,
-                        Location = new Point(405, 296),
+                        Location = new Point(373, 296),
                         Parent = this,
                         PressedIndex = 2431,
                         Sound = SoundList.ButtonA,
@@ -630,7 +656,7 @@ namespace Client.MirScenes
                         HoverIndex = 2433,
                         Index = 2432,
                         Library = Libraries.Prguse,
-                        Location = new Point(455, 296),
+                        Location = new Point(423, 296),
                         Parent = this,
                         PressedIndex = 2434,
                         Sound = SoundList.ButtonA,
@@ -646,7 +672,7 @@ namespace Client.MirScenes
                         HoverIndex = 2436,
                         Index = 2435,
                         Library = Libraries.Prguse,
-                        Location = new Point(505, 296),
+                        Location = new Point(473, 296),
                         Parent = this,
                         PressedIndex = 2437,
                         Sound = SoundList.ButtonA,
@@ -657,13 +683,29 @@ namespace Client.MirScenes
                         UpdateInterface();
                     };
 
+                ArcherButton = new MirButton
+                {
+                    HoverIndex = 2442,
+                    Index = 2441,
+                    Library = Libraries.Prguse,
+                    Location = new Point(523, 296),
+                    Parent = this,
+                    PressedIndex = 2443,
+                    Sound = SoundList.ButtonA,
+                };
+                ArcherButton.Click += (o, e) =>
+                {
+                    _class = MirClass.Archer;
+                    UpdateInterface();
+                };
+
 
                 MaleButton = new MirButton
                     {
                         HoverIndex = 2421,
                         Index = 2421,
                         Library = Libraries.Prguse,
-                        Location = new Point(355, 343),
+                        Location = new Point(323, 343),
                         Parent = this,
                         PressedIndex = 2422,
                         Sound = SoundList.ButtonA,
@@ -679,7 +721,7 @@ namespace Client.MirScenes
                         HoverIndex = 2424,
                         Index = 2423,
                         Library = Libraries.Prguse,
-                        Location = new Point(405, 343),
+                        Location = new Point(373, 343),
                         Parent = this,
                         PressedIndex = 2425,
                         Sound = SoundList.ButtonA,
@@ -751,6 +793,7 @@ namespace Client.MirScenes
                 WizardButton.Index = 2429;
                 TaoistButton.Index = 2432;
                 AssassinButton.Index = 2435;
+                ArcherButton.Index = 2441;
 
                 switch (_gender)
                 {
@@ -767,22 +810,31 @@ namespace Client.MirScenes
                     case MirClass.Warrior:
                         WarriorButton.Index = 2427;
                         Description.Text = WarriorDescription;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 220 : 500;
                         break;
                     case MirClass.Wizard:
                         WizardButton.Index = 2430;
                         Description.Text = WizardDescription;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 240 : 520;
                         break;
                     case MirClass.Taoist:
                         TaoistButton.Index = 2433;
                         Description.Text = TaoistDescription;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 260 : 540;
                         break;
                     case MirClass.Assassin:
                         AssassinButton.Index = 2436;
                         Description.Text = AssassinDescription;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 280 : 560;
+                        break;
+                    case MirClass.Archer:
+                        ArcherButton.Index = 2442;
+                        Description.Text = ArcherDescription;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 160 : 180;
                         break;
                 }
 
-                CharacterDisplay.Index = ((byte)_class + 1) * 20 + (byte)_gender * 280;
+                //CharacterDisplay.Index = ((byte)_class + 1) * 20 + (byte)_gender * 280;
             }
         }
         public sealed class CharacterButton : MirImageControl
@@ -839,7 +891,7 @@ namespace Client.MirScenes
 
                 Index = 90 + (byte) info.Class;
 
-                if (Selected) Index += 4;
+                if (Selected) Index += 5;
 
 
                 NameLabel.Text = info.Name;

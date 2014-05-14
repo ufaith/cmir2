@@ -279,6 +279,9 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.Attack:
                     Attack((C.Attack)p);
                     break;
+                case (short)ClientPacketIds.RangeAttack:
+                    RangeAttack((C.RangeAttack)p);
+                    break;
                 case (short)ClientPacketIds.Harvest:
                     Harvest((C.Harvest)p);
                     break;
@@ -726,6 +729,15 @@ namespace Server.MirNetwork
                 _retryList.Enqueue(p);
             else
                 Player.Attack(p.Direction, p.Spell);
+        }
+        private void RangeAttack(C.RangeAttack p) //ArcherTest
+        {
+            if (Stage != GameStage.Game) return;
+
+            if (!Player.Dead && (Player.ActionTime > SMain.Envir.Time || Player.AttackTime > SMain.Envir.Time))
+                _retryList.Enqueue(p);
+            else
+                Player.RangeAttack(p.Direction, p.TargetLocation, p.TargetID);
         }
         private void Harvest(C.Harvest p)
         {

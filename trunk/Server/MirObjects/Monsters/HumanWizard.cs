@@ -161,8 +161,8 @@ namespace Server.MirObjects.Monsters
         public override Packet GetInfo()
         {
             PlayerObject master = null;
-            sbyte weapon = -1;
-            sbyte armour = 0;
+            short weapon = -1;
+            short armour = 0;
             byte wing = 0;
             if (Master != null && Master is PlayerObject) master = (PlayerObject)Master;
             if (master != null)

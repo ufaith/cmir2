@@ -476,6 +476,20 @@ namespace Client
             }
         }
 
+        //FAR - Image to byteArray (screenshots)
+        public static byte[] ImageToByteArray(Image img)
+        {
+            byte[] byteArray = new byte[0];
+            using (MemoryStream stream = new MemoryStream())
+            {
+                img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                stream.Close();
+
+                byteArray = stream.ToArray();
+            }
+            return byteArray;
+        }
+
         public static void SaveError(string ex)
         {
             try

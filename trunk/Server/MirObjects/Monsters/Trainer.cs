@@ -38,6 +38,8 @@ namespace Server.MirObjects.Monsters
         // Player attacking trainer.
         public override int Attacked(PlayerObject attacker, int damage, DefenceType type = DefenceType.ACAgility, bool damageWeapon = false)
         {
+            if (attacker == null) return 0;
+
             switch (type)
             {
                 case DefenceType.ACAgility:
@@ -62,6 +64,8 @@ namespace Server.MirObjects.Monsters
         // Pet attacking trainer.
         public override int Attacked(MonsterObject attacker, int damage, DefenceType type = DefenceType.ACAgility)
         {
+            if (attacker == null || attacker.Master == null) return 0;
+            
             byte _masterLevel = attacker.Master.Level; // max 256
             byte _masterMaxMC = attacker.Master.MaxMC; // max 256
             int _total = (_masterLevel * 10) + _masterMaxMC;

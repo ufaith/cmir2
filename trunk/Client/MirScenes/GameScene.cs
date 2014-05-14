@@ -195,7 +195,7 @@ namespace Client.MirScenes
         {
             switch (e.KeyCode)
             {
-                     case Keys.F1:
+                case Keys.F1:
                      UseSpell(CMain.Ctrl ? 9 : 1);
                      break;
                  case Keys.F2:
@@ -452,6 +452,7 @@ namespace Client.MirScenes
                 case Spell.FatalSword:
                 case Spell.SpiritSword:
                 case Spell.Slaying:
+                case Spell.Focus:
                     return;
                 case Spell.Thrusting:
                     if (CMain.Time < ToggleTime) return;
@@ -830,6 +831,9 @@ namespace Client.MirScenes
                     break;
                 case (short)ServerPacketIds.ObjectEffect:
                     ObjectEffect((S.ObjectEffect)p);
+                    break;
+                case (short)ServerPacketIds.RangeAttack:
+                    RangeAttack((S.RangeAttack)p);
                     break;
                 case (short)ServerPacketIds.Pushed:
                     Pushed((S.Pushed)p);
@@ -1609,7 +1613,7 @@ namespace Client.MirScenes
                 if (ob.ObjectID != p.ObjectID) continue;
                 if (ob.Race == ObjectType.Player)
                 {
-                    action = new QueuedAction { Action = MirAction.Attack1, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                    action = new QueuedAction { Action = MirAction.Attack1, Direction = p.Direction, Location = p.Location, Params = new List<object>() }; //FAR Close up attack
                 }
                 else
                 {
@@ -2136,6 +2140,7 @@ namespace Client.MirScenes
                     break;
             }
         }
+        
         private void ObjectMagic(S.ObjectMagic p)
         {
             if (p.ObjectID == User.ObjectID) return;
@@ -2235,6 +2240,14 @@ namespace Client.MirScenes
             }
 
         }
+
+        private void RangeAttack(S.RangeAttack p)
+        {
+            User.TargetID = p.TargetID;
+            User.TargetPoint = p.Target;
+            User.Spell = p.Spell;
+        }
+
         private void Pushed(S.Pushed p)
         {
             User.ActionFeed.Add(new QueuedAction { Action = MirAction.Pushed, Direction = p.Direction, Location = p.Location });
@@ -2330,6 +2343,7 @@ namespace Client.MirScenes
         {
             switch (p.Spell)
             {
+                //Warrior
                 case Spell.Slaying:
                     Slaying = p.CanUse;
                     break;
@@ -2391,7 +2405,14 @@ namespace Client.MirScenes
                 QueuedAction action = null;
                 if (ob.Race == ObjectType.Player)
                 {
-                    action = new QueuedAction { Action = MirAction.AttackRange, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                    switch (p.Type)
+                    {
+                        default:
+                            {
+                                action = new QueuedAction { Action = MirAction.AttackRange1, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                                break;
+                            }
+                    }
                 }
                 else
                 {
@@ -2404,12 +2425,14 @@ namespace Client.MirScenes
                             }
                         default:
                             {
-                                action = new QueuedAction { Action = MirAction.AttackRange, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
+                                action = new QueuedAction { Action = MirAction.AttackRange1, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
                                 break;
                             }
                     }
                 }
                 action.Params.Add(p.TargetID);
+                action.Params.Add(p.Target);
+                action.Params.Add(p.Spell);
                 ob.ActionFeed.Add(action);
                 return;
             }
@@ -3076,6 +3099,10 @@ namespace Client.MirScenes
                         break;
                     case MirClass.Assassin:
                         if (!RealItem.RequiredClass.HasFlag(RequiredClass.Assassin))
+                            colour = Color.Red;
+                        break;
+                    case MirClass.Archer:
+                        if (!RealItem.RequiredClass.HasFlag(RequiredClass.Archer))
                             colour = Color.Red;
                         break;
                 }
@@ -4604,7 +4631,7 @@ namespace Client.MirScenes
 
             DXManager.Sprite.Flush();
             float oldOpacity = DXManager.Opacity;
-            DXManager.SetOpacity(0.5F);
+            DXManager.SetOpacity(0.4F); //ArcherTest
 
             MapObject.User.DrawBody();
             MapObject.User.DrawHead();
@@ -4641,7 +4668,7 @@ namespace Client.MirScenes
                 Effects[i].Draw();
 
         }
-        //FAR
+        //FAR DrawLights
         private void DrawLights(LightSetting setting)
         {
             if (DXManager.Lights == null || DXManager.Lights.Count == 0) return;
@@ -4781,7 +4808,7 @@ namespace Client.MirScenes
                     if (x >= Width) break;
                     int imageIndex = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
                     if (M2CellInfo[x, y].Light <= 0 || M2CellInfo[x, y].Light >= 10) continue;
-                    Color lightIntensity = Color.FromArgb(255, 97, 200, 200);
+                    Color lightIntensity = Color.FromArgb(255, 255, 255, 255);  //Color lightIntensity = Color.FromArgb(255, 97, 200, 200); -- this colour matches mir3
                     //this code would look great on chronicles shanda mir2 maps (give a blue glow to blue town lights), but it'll also give blue glow to mir3 maps
                     //if (M2CellInfo[x, y].Light == 4) 
                     //    lightIntensity = Color.FromArgb(255, 100,100,200);
@@ -4958,12 +4985,38 @@ namespace Client.MirScenes
                 UseMagic(User.NextMagic);
                 return;
             }
+
             if (MapObject.TargetObject != null && !MapObject.TargetObject.Dead)
             {
                 if (((MapObject.TargetObject.Name.EndsWith(")") || MapObject.TargetObject is PlayerObject) && CMain.Shift) ||
                     (!MapObject.TargetObject.Name.EndsWith(")") && MapObject.TargetObject is MonsterObject))
                 {
-                    if (Functions.InRange(MapObject.TargetObject.CurrentLocation, User.CurrentLocation, 1))
+                    if (User.Class == MirClass.Archer && User.HasClassWeapon)//ArcherTest - non aggressive targets (player / pets)
+                    {
+                        if (Functions.InRange(MapObject.TargetObject.CurrentLocation, User.CurrentLocation, 9))
+                        {
+                            if (CMain.Time > GameScene.AttackTime)
+                            {
+
+                                User.QueuedAction = new QueuedAction { Action = MirAction.AttackRange1, Direction = Functions.DirectionFromPoint(User.CurrentLocation, MapObject.TargetObject.CurrentLocation), Location = User.CurrentLocation, Params = new List<object>() };
+                                User.QueuedAction.Params.Add(MapObject.TargetObject != null ? MapObject.TargetObject.ObjectID : (uint)0);
+                                User.QueuedAction.Params.Add(MapObject.TargetObject.CurrentLocation);
+
+                               // MapObject.TargetObject = null; //stop constant attack when close up
+                            }
+                        }
+                        else
+                        {
+                            if (CMain.Time >= OutputDelay)
+                            {
+                                OutputDelay = CMain.Time + 1000;
+                                GameScene.Scene.OutputMessage("Target is too far.");
+                            }
+                        }
+                      //  return;
+                    }
+
+                    else if (Functions.InRange(MapObject.TargetObject.CurrentLocation, User.CurrentLocation, 1))
                     {
                         if (CMain.Time > GameScene.AttackTime)
                         {
@@ -5018,12 +5071,59 @@ namespace Client.MirScenes
                         }
                         if (CMain.Shift)
                         {
-                            if (CMain.Time > GameScene.AttackTime)
+                            if (CMain.Time > GameScene.AttackTime) //ArcherTest - shift click
                             {
+                                MapObject target = null;
+                                if (MapObject.MouseObject is MonsterObject || MapObject.MouseObject is PlayerObject) target = MapObject.MouseObject;
+
+                                if (User.Class == MirClass.Archer && User.HasClassWeapon)
+                                {
+                                    if (target != null)
+                                    {
+                                        if (!Functions.InRange(MapObject.MouseObject.CurrentLocation, User.CurrentLocation, 9))
+                                        {
+                                            if (CMain.Time >= OutputDelay)
+                                            {
+                                                OutputDelay = CMain.Time + 1000;
+                                                GameScene.Scene.OutputMessage("Target is too far.");
+                                            }
+                                            return;
+                                        }
+                                    }
+
+                                    User.QueuedAction = new QueuedAction { Action = MirAction.AttackRange1, Direction = MouseDirection(), Location = User.CurrentLocation, Params = new List<object>() };
+                                    User.QueuedAction.Params.Add(target != null ? target.ObjectID : (uint)0);
+                                    User.QueuedAction.Params.Add(Functions.PointMove(User.CurrentLocation, MouseDirection(), 10));
+                                    return;
+                                }
+
                                 User.QueuedAction = new QueuedAction { Action = MirAction.Attack1, Direction = direction, Location = User.CurrentLocation };
                             }
                             return;
                         }
+
+                        if (MapObject.MouseObject is MonsterObject && User.Class == MirClass.Archer && User.HasClassWeapon) //ArcherTest - range attack
+                        {
+                            if (Functions.InRange(MapObject.MouseObject.CurrentLocation, User.CurrentLocation, 9))
+                            {
+                                if (CMain.Time > GameScene.AttackTime)
+                                {
+                                    User.QueuedAction = new QueuedAction { Action = MirAction.AttackRange1, Direction = direction, Location = User.CurrentLocation, Params = new List<object>() };
+                                    User.QueuedAction.Params.Add(MapObject.TargetObject.ObjectID);
+                                    User.QueuedAction.Params.Add(MapObject.TargetObject.CurrentLocation);
+                                }
+                            }
+                            else
+                            {
+                                if (CMain.Time >= OutputDelay)
+                                {
+                                    OutputDelay = CMain.Time + 1000;
+                                    GameScene.Scene.OutputMessage("Target is too far.");
+                                }
+                            }
+                            return;
+                        }                        
+
                         if (MapLocation == User.CurrentLocation)
                         {
                             if (CMain.Time > GameScene.PickUpTime)
@@ -5032,7 +5132,9 @@ namespace Client.MirScenes
                                 Network.Enqueue(new C.PickUp());
                             }
                             return;
-                        }//mine
+                        }
+                    
+                        //mine
                         if (!ValidPoint(Functions.PointMove(User.CurrentLocation, direction, 1)))
                         {
                             if ((MapObject.User.Equipment[(int)EquipmentSlot.Weapon] != null) && (MapObject.User.Equipment[(int)EquipmentSlot.Weapon].Info.CanMine))
@@ -5046,6 +5148,9 @@ namespace Client.MirScenes
                                 return;
                             }
                         }
+
+                        
+
                         if (CanWalk(direction))
                         {
                             //if (MapObject.MouseObject != null) return;
@@ -5092,7 +5197,7 @@ namespace Client.MirScenes
             if (((!MapObject.TargetObject.Name.EndsWith(")") && !(MapObject.TargetObject is PlayerObject)) || !CMain.Shift) &&
                 (MapObject.TargetObject.Name.EndsWith(")") || !(MapObject.TargetObject is MonsterObject))) return;
             if (Functions.InRange(MapObject.TargetObject.CurrentLocation, User.CurrentLocation, 1)) return;
-
+            if (User.Class == MirClass.Archer && User.HasClassWeapon && (MapObject.TargetObject is MonsterObject || MapObject.TargetObject is PlayerObject)) return; //ArcherTest - stop walking
             direction = Functions.DirectionFromPoint(User.CurrentLocation, MapObject.TargetObject.CurrentLocation);
 
             if (!CanWalk(direction)) return;
@@ -5148,6 +5253,7 @@ namespace Client.MirScenes
                 case Spell.Vampirism:
                 case Spell.Revelation:
                 case Spell.Entrapment:
+                case Spell.StraightShot:
                     if (User.NextMagicObject != null)
                     {
                         if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
@@ -5204,6 +5310,7 @@ namespace Client.MirScenes
                     }
                     break;
             }
+
 
             MirDirection dir = (target == null || target == User) ? User.NextMagicDirection : Functions.DirectionFromPoint(User.CurrentLocation, target.CurrentLocation);
 
@@ -7159,6 +7266,9 @@ namespace Client.MirScenes
                 case MirClass.Assassin:
                     ClassImage.Index = 103 + offSet * 5;
                     break;
+                case MirClass.Archer:
+                    ClassImage.Index = 104 + offSet * 5;
+                    break;
             }
 
             NameLabel.Text = MapObject.User.Name;
@@ -7748,6 +7858,9 @@ namespace Client.MirScenes
                     break;
                 case MirClass.Assassin:
                     ClassImage.Index = 103 + offSet*5;
+                    break;
+                case MirClass.Archer:
+                    ClassImage.Index = 104 + offSet * 5;
                     break;
             }
 

@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 29;
+        public const int Version = 30;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -122,75 +122,90 @@ namespace Server.MirEnvir
 
                 while (Running)
                 {
-                    Time = _stopwatch.ElapsedMilliseconds;
 
-                    if (Time >= proceesTime)
-                    {
-                        LastCount = processCount;
-                        LastRealCount = processRealCount;
-                        processCount = 0;
-                        processRealCount = 0;
-                        proceesTime = Time + 1000;
-                    }
+                    
+                        Time = _stopwatch.ElapsedMilliseconds;
 
-                    if (conTime != Time)
-                    {
-                        conTime = Time;
-
-                        AdjustLights();
-
-                        lock (Connections)
+                        if (Time >= proceesTime)
                         {
-                            for (int i = Connections.Count - 1; i >= 0; i--)
-                                Connections[i].Process();
+                            LastCount = processCount;
+                            LastRealCount = processRealCount;
+                            processCount = 0;
+                            processRealCount = 0;
+                            proceesTime = Time + 1000;
                         }
-                    }
 
-                    if (current == null)
-                        current = Objects.First;
-
-                    for (int i = 0; i < 100; i++)
-                    {
-                        if (current == null) break;
-
-                        LinkedListNode<MapObject> next = current.Next;
-
-                        if (Time > current.Value.OperateTime)
+                    
+                        if (conTime != Time)
                         {
-                            processRealCount++;
-                            current.Value.Process();
-                            current.Value.SetOperateTime();
-                        }
-                        processCount++;
-                        current = next;
-                    }
+                            conTime = Time;
+
+                            AdjustLights();
 
 
-                    for (int i = 0; i < MapList.Count; i++)
-                        MapList[i].Process();
-
-                    if (DragonSystem != null) DragonSystem.Process();
-
-                    if (Time >= saveTime)
-                    {
-                        saveTime = Time + Settings.SaveDelay*Settings.Minute;
-                        BeginSaveAccounts();
-                        SaveGuilds();
-                    }
-
-                    if (Time >= userTime)
-                    {
-                        userTime = Time + Settings.Minute*5;
-                        Broadcast(new S.Chat
+                            lock (Connections)
                             {
-                                Message = string.Format("Online Players: {0}", Players.Count),
-                                Type = ChatType.Hint
-                            });
-                    }
+                                for (int i = Connections.Count - 1; i >= 0; i--)
+                                {
+                                    Connections[i].Process();
+                                }
+                            }
 
-                    //   if (Players.Count == 0) Thread.Sleep(1);
-                    //   GC.Collect();
+                        }
+                    
+
+                        if (current == null)
+                            current = Objects.First;
+
+
+                        for (int i = 0; i < 100; i++)
+                        {
+                            if (current == null) break;
+
+                            LinkedListNode<MapObject> next = current.Next;
+
+
+                            if (Time > current.Value.OperateTime)
+                            {
+
+                                processRealCount++;
+                                current.Value.Process();
+                                current.Value.SetOperateTime();
+
+                            }
+                            processCount++;
+                            current = next;
+                        }
+
+
+                        for (int i = 0; i < MapList.Count; i++)
+                            MapList[i].Process();
+
+                        if (DragonSystem != null) DragonSystem.Process();
+
+                        if (Time >= saveTime)
+                        {
+                            saveTime = Time + Settings.SaveDelay * Settings.Minute;
+                            BeginSaveAccounts();
+                            SaveGuilds();
+                        }
+
+                        if (Time >= userTime)
+                        {
+                            userTime = Time + Settings.Minute * 5;
+                            Broadcast(new S.Chat
+                                {
+                                    Message = string.Format("Online Players: {0}", Players.Count),
+                                    Type = ChatType.Hint
+                                });
+                        }
+
+                        //   if (Players.Count == 0) Thread.Sleep(1);
+                        //   GC.Collect();
+
+                    
                 }
+
             }
             catch (Exception ex)
             {
@@ -210,7 +225,6 @@ namespace Server.MirEnvir
 
             _thread = null;
         }
-
 
         private void AdjustLights()
         {
@@ -828,7 +842,7 @@ namespace Server.MirEnvir
             }
 
             if (p.Class != MirClass.Warrior && p.Class != MirClass.Wizard && p.Class != MirClass.Taoist &&
-                p.Class != MirClass.Assassin)
+                p.Class != MirClass.Assassin && p.Class != MirClass.Archer)
             {
                 c.Enqueue(new ServerPackets.NewCharacter {Result = 3});
                 return;

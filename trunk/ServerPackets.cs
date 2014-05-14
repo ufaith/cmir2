@@ -592,7 +592,7 @@ namespace ServerPackets
         public MirDirection Direction;
         public byte Hair;
         public byte Light;
-        public sbyte Weapon, Armour;
+        public short Weapon, Armour;
         public PoisonType Poison;
         public bool Dead, Hidden;
         public SpellEffect Effect;
@@ -612,8 +612,8 @@ namespace ServerPackets
             Direction = (MirDirection) reader.ReadByte();
             Hair = reader.ReadByte();
             Light = reader.ReadByte();
-            Weapon = reader.ReadSByte();
-            Armour = reader.ReadSByte();
+            Weapon = reader.ReadInt16();
+            Armour = reader.ReadInt16();
             Poison = (PoisonType) reader.ReadByte();
             Dead = reader.ReadBoolean();
             Hidden = reader.ReadBoolean();
@@ -1079,7 +1079,7 @@ namespace ServerPackets
 
         public uint ObjectID;
         public byte Light;
-        public sbyte Weapon, Armour;
+        public short Weapon, Armour;
         public byte WingEffect;
 
         protected override void ReadPacket(BinaryReader reader)
@@ -1087,8 +1087,8 @@ namespace ServerPackets
             ObjectID = reader.ReadUInt32();
 
             Light = reader.ReadByte();
-            Weapon = reader.ReadSByte();
-            Armour = reader.ReadSByte();
+            Weapon = reader.ReadInt16();
+            Armour = reader.ReadInt16();
             WingEffect = reader.ReadByte();
         }
 
@@ -1438,7 +1438,7 @@ namespace ServerPackets
             Level = reader.ReadByte();
             Type = reader.ReadByte();
         }
-
+        
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(ObjectID);
@@ -2203,6 +2203,8 @@ namespace ServerPackets
             writer.Write(Level);
         }
     }
+    
+
     public sealed class ObjectMagic : Packet
     {
         public override short Index { get { return (short)ServerPacketIds.ObjectMagic; } }
@@ -2244,6 +2246,9 @@ namespace ServerPackets
             writer.Write(Level);
         }
     }
+
+    
+
     public sealed class ObjectEffect : Packet
     {
         public override short Index { get { return (short)ServerPacketIds.ObjectEffect; } }
@@ -2262,6 +2267,29 @@ namespace ServerPackets
             writer.Write((byte) Effect);
         }
     }
+    public sealed class RangeAttack : Packet //ArcherTest
+    {
+        public override short Index { get { return (short)ServerPacketIds.RangeAttack; } }
+
+        public uint TargetID;
+        public Point Target;
+        public Spell Spell;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            TargetID = reader.ReadUInt32();
+            Target = new Point(reader.ReadInt32(), reader.ReadInt32());
+            Spell = (Spell)reader.ReadByte();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(TargetID);
+            writer.Write(Target.X);
+            writer.Write(Target.Y);
+            writer.Write((byte)Spell);
+        }
+    }
+
     public sealed class Pushed : Packet
     {
         public override short Index
@@ -2526,15 +2554,19 @@ namespace ServerPackets
         public Point Location;
         public MirDirection Direction;
         public uint TargetID;
+        public Point Target;
         public byte Type;
-
+        public Spell Spell;
+               
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
             Location = new Point(reader.ReadInt32(), reader.ReadInt32());
             Direction = (MirDirection)reader.ReadByte();
             TargetID = reader.ReadUInt32();
+            Target = new Point(reader.ReadInt32(), reader.ReadInt32());
             Type = reader.ReadByte();
+            Spell = (Spell)reader.ReadByte();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -2544,7 +2576,10 @@ namespace ServerPackets
             writer.Write(Location.Y);
             writer.Write((byte)Direction);
             writer.Write(TargetID);
+            writer.Write(Target.X);
+            writer.Write(Target.Y);
             writer.Write(Type);
+            writer.Write((byte)Spell);
         }
     }
     public sealed class AddBuff : Packet

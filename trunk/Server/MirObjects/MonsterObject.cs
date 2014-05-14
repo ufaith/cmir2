@@ -425,6 +425,7 @@ namespace Server.MirObjects
         }
         public virtual void ChangeHP(int amount)
         {
+
             uint value = (uint)Math.Max(uint.MinValue, Math.Min(MaxHP, HP + amount));
 
             if (value == HP) return;
@@ -1421,6 +1422,7 @@ namespace Server.MirObjects
 
         public override int Attacked(PlayerObject attacker, int damage, DefenceType type = DefenceType.ACAgility, bool damageWeapon = true)
         {
+
             if (Target == null && attacker.IsAttackTarget(this))
                 Target = attacker;
 
