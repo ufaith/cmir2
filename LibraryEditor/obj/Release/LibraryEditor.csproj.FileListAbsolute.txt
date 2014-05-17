@@ -43,3 +43,9 @@ C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\LibraryEditor\obj\Relea
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\LibraryEditor\obj\Release\LibraryEditor.csproj.GenerateResource.Cache
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\LibraryEditor\obj\Release\LibraryEditor.exe
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\LibraryEditor\obj\Release\LibraryEditor.pdb
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\LibraryEditor\obj\Release\LibraryEditor.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\LibraryEditor\obj\Release\LibraryEditor.LMain.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\LibraryEditor\obj\Release\LibraryEditor.Properties.Resources.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\LibraryEditor\obj\Release\LibraryEditor.csproj.GenerateResource.Cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\LibraryEditor\obj\Release\LibraryEditor.exe
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\LibraryEditor\obj\Release\LibraryEditor.pdb

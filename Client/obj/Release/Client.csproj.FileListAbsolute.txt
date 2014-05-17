@@ -44,3 +44,9 @@ C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\Client\obj\Release\Clie
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\Client\obj\Release\Client.csproj.GenerateResource.Cache
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\Release\Client\Client.exe
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\Release\Client\Client.pdb
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.CMain.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.Properties.Resources.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csproj.GenerateResource.Cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.exe
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.pdb

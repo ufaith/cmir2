@@ -207,7 +207,7 @@ namespace Client.MirObjects
 
                 ArmourOffSet = Gender == MirGender.Male ? 0 : AltAnim ? 352 : 808;
                 HairOffSet = Gender == MirGender.Male ? 0 : AltAnim ? 352 : 808;
-                WeaponOffSet = Gender == MirGender.Male ? 0 : AltAnim ? 704 : 416;
+                WeaponOffSet = Gender == MirGender.Male ? 0 : AltAnim ? 352 : 416;
                 WingOffset = Gender == MirGender.Male ? 0 : 840;
             }
             else if (Class == MirClass.Assassin)

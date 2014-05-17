@@ -42,3 +42,9 @@ C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\AutoPatcherAdmin\obj\Re
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csproj.GenerateResource.Cache
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.exe
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\Temp Backup\trunk\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.pdb
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csprojResolveAssemblyReference.cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.AMain.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.Properties.Resources.resources
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csproj.GenerateResource.Cache
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.exe
+C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.pdb
