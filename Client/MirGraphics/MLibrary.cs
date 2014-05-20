@@ -42,11 +42,11 @@ namespace Client.MirGraphics
 
 
         public static readonly MLibrary[] CArmours = new MLibrary[42],
-                                          CWeapons = new MLibrary[51],
+                                          CWeapons = new MLibrary[55],
                                           CHair = new MLibrary[9],
                                           AArmours = new MLibrary[12],
-                                          AWeaponsL = new MLibrary[11],
-                                          AWeaponsR = new MLibrary[11],
+                                          AWeaponsL = new MLibrary[19],
+                                          AWeaponsR = new MLibrary[19],
                                           AHair = new MLibrary[9],
                                           ARArmours = new MLibrary[17],
                                           ARWeapons = new MLibrary[19],
