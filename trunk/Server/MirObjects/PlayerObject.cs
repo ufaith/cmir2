@@ -1031,6 +1031,9 @@ namespace Server.MirObjects
                 case MirClass.Assassin:
                     if (!info.RequiredClass.HasFlag(RequiredClass.Assassin)) return false;
                     break;
+                case MirClass.Archer:
+                    if (!info.RequiredClass.HasFlag(RequiredClass.Archer)) return false;
+                    break;
                 default:
                     return false;
             }
