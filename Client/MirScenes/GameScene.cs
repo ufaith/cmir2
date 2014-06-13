@@ -3682,8 +3682,10 @@ namespace Client.MirScenes
             addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.AttackSpeed: 0;
 
 
-            if (value1 > 0 || addedValue1 > 0)
+            if (value1 >= 0 || addedValue1 > 0 || (addedValue1 + value1 < 0))
             {
+                string plus = (addedValue1 + value1 < 0) ? "" : "+";
+
                 MirLabel label = new MirLabel
                     {
                         AutoSize = true,
@@ -3691,7 +3693,7 @@ namespace Client.MirScenes
                         Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                         OutLine = false,
                         Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "A.Speed: +{0} (+{1})" : "A.Speed: +{0}", value1 + addedValue1, addedValue1)
+                        Text = string.Format(addedValue1 > 0 ? "A.Speed: " + plus + "{0} (+{1})" : "A.Speed: " + plus + "{0}", value1 + addedValue1, addedValue1)
                     };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
