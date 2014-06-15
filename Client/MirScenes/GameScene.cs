@@ -3682,7 +3682,7 @@ namespace Client.MirScenes
             addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.AttackSpeed: 0;
 
 
-            if (value1 >= 0 || addedValue1 > 0 || (addedValue1 + value1 < 0))
+            if (value1 > 0 || addedValue1 > 0 || (addedValue1 + value1 < 0))
             {
                 string plus = (addedValue1 + value1 < 0) ? "" : "+";
 
