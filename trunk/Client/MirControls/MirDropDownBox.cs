@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using Client.MirGraphics;
@@ -15,7 +14,7 @@ namespace Client.MirControls
         private MirLabel[] _Option = new MirLabel[5];
         private MirImageControl _ScrollBar;
         private MirButton _ScrollUp, _ScrollDown, _ScrollPosition;
-        
+
         public int _SelectedIndex = -1;
         public int _WantedIndex = -1;
         public int MinimumOption = 0;
@@ -36,12 +35,6 @@ namespace Client.MirControls
                 _SelectedIndex = value;
                 if (_SelectedIndex >= Items.Count)
                     _SelectedIndex = -1;
-                /*
-                if ((_SelectedIndex != -1) && (Items.Count > 0))
-                    _label.Visible = true;
-                else
-                    _label.Visible = false;
-                */
             }
         }
 
@@ -57,6 +50,7 @@ namespace Client.MirControls
                 ItemsChanged();
             }
         }
+
         #region Back Color
 
         protected override void OnBackColourChanged()
@@ -67,18 +61,19 @@ namespace Client.MirControls
         }
 
         #endregion
+
         #region Size
         protected override void OnSizeChanged()
         {
             base.OnSizeChanged();
-            OrigHeight = OrigHeight == 0? Size.Height : OrigHeight;
+            OrigHeight = OrigHeight == 0 ? Size.Height : OrigHeight;
             for (int i = 0; i < _Option.Length; i++)
             {
-                _Option[i].Size = new Size(Size.Width - 13, 13);
+                _Option[i].Size = new Size(Size.Width - 13, 16); //Size.Width - 13, 13
             }
 
             if (_label != null && !_label.IsDisposed)
-                _label.Size = new Size(Size.Width - 16, 12);
+                _label.Size = new Size(Size.Width - 16, 15); //Size.Width - 16, 12
             if (_DropDownButton != null && !_DropDownButton.IsDisposed)
                 _DropDownButton.Location = new Point(Size.Width - 16, 0);
             if (_ScrollUp != null && !_ScrollUp.IsDisposed)
@@ -92,7 +87,6 @@ namespace Client.MirControls
 
         }
         #endregion
-
 
         #region Enabled
 
@@ -113,14 +107,13 @@ namespace Client.MirControls
 
         public MirDropDownBox()
         {
-            BackColour = Color.Black;
+            BackColour = Color.FromArgb(0x0F, 0x0F, 0x42);
             ForeColour = Color.White;
             Enabled = false;
             _label = new MirLabel
             {
-                //NotControl = true,
                 Parent = this,
-                Location =new Point(0,0),
+                Location = new Point(0, 0),
                 ForeColour = ForeColour,
                 BackColour = BackColour,
                 Font = new Font(Settings.FontName, 7F),
@@ -142,7 +135,7 @@ namespace Client.MirControls
 
                         _label.Text = Items[SelectedIndex];
                 else
-                    _label.Text = "none";
+                    _label.Text = "None";
             };
             for (int i = 0; i < _Option.Length; i++)
             {
@@ -150,18 +143,18 @@ namespace Client.MirControls
                 {
                     Parent = this,
                     Visible = false,
-                    Location = new Point(0,15+(i*13)),
+                    Location = new Point(0, 15 + (i * 13)),
                     ForeColour = ForeColour,
-                    BackColour = Color.Gray,
+                    BackColour = Color.MidnightBlue,
                     Font = new Font(Settings.FontName, 7F)
                 };
                 int index = i;
                 _Option[index].MouseEnter += (o, e) => _Option[index].BackColour = Color.Blue;
-                _Option[index].MouseLeave += (o, e) => _Option[index].BackColour = Color.Gray;
-                _Option[index].MouseDown += (o, e) => _Option[index].BackColour = Color.Gray;
-                _Option[index].MouseUp += (o, e) => _Option[index].BackColour = Color.Gray;
+                _Option[index].MouseLeave += (o, e) => _Option[index].BackColour = Color.MidnightBlue;
+                _Option[index].MouseDown += (o, e) => _Option[index].BackColour = Color.MidnightBlue;
+                _Option[index].MouseUp += (o, e) => _Option[index].BackColour = Color.MidnightBlue;
                 _Option[index].Click += (o, e) => SelectOption(index);
-                
+
                 _Option[index].BeforeDraw += (o, e) =>
                 {
                     if (Items.Count > (ScrollIndex + index + MinimumOption))
@@ -202,13 +195,13 @@ namespace Client.MirControls
             _ScrollDown.Click += (o, e) => ScrollDown();
             _ScrollBar = new MirImageControl
             {
-                Index = 2012, //need a longer bar but there isnt any in the image file i guess
+                Index = 2011,
                 Library = Libraries.Prguse,
                 Location = new Point(Size.Width - 8, 22),
                 Parent = this,
                 Visible = false
             };
-            _ScrollPosition = new MirButton 
+            _ScrollPosition = new MirButton
             {
                 HoverIndex = 2016,
                 Index = 2015,
@@ -240,7 +233,7 @@ namespace Client.MirControls
                 CloseDropDown();
             base.OnMouseLeave();
         }
-        
+
         public void SelectOption(int index)
         {
             if (ScrollIndex + index + MinimumOption < Items.Count)
@@ -261,7 +254,7 @@ namespace Client.MirControls
         }
         public void Update()
         {
-
+            // Member is not implemented.
         }
         public void DropDownClick()
         {
@@ -272,7 +265,7 @@ namespace Client.MirControls
         }
         public void OpenDropDown()
         {
-            Size = new Size(Size.Width, OrigHeight + (Math.Max(5, Items.Count) * 13));
+            Size = new Size(Size.Width, OrigHeight + (Math.Max(5, Items.Count) * 15));
             ScrollIndex = 0;
             if (Items.Count > 5)
                 ScrollIndex = SelectedIndex > 3 ? SelectedIndex - 2 : 0;
@@ -319,14 +312,14 @@ namespace Client.MirControls
         }
         void ScrollPosition(object sender, MouseEventArgs e)
         {
-            int x = Size.Width-11;
+            int x = Size.Width - 11;
             int y = _ScrollPosition.Location.Y;
             if (y >= _ScrollDown.Location.Y - 14) y = _ScrollDown.Location.Y - 14;
             if (y < 20) y = 20;
 
             int h = _ScrollDown.Location.Y - _ScrollUp.Location.Y + 6;
             h = (int)((y - 15) / (h / (float)(Items.Count - 1)));
-            if (h > Items.Count - 5) h = Math.Max(0,Items.Count - 5);
+            if (h > Items.Count - 5) h = Math.Max(0, Items.Count - 5);
             if (h != ScrollIndex)
             {
                 ScrollIndex = h;
@@ -335,6 +328,7 @@ namespace Client.MirControls
 
             _ScrollPosition.Location = new Point(x, y);
         }
+
         #region Disposable
         protected override void Dispose(bool disposing)
         {

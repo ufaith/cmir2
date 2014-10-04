@@ -162,14 +162,18 @@ namespace Server.MirObjects
 
         private int _runCounter;
 
+        public NPCObject DefaultNPC
+        {
+            get
+            {
+                return SMain.Envir.DefaultNPC;
+            }
+        }
+
         public uint NPCID;
         public NPCPage NPCPage;
         public bool NPCSuccess;
-
-        public bool NPCGoto;
-        public string NPCGotoPage;
-        public NPCJumpPage NPCJumpPage;
-
+        public NPCJumpList NPCJumpList = new NPCJumpList();
         public NPCListener NPCListener;
 
         public List<KeyValuePair<string, string>> NPCVar = new List<KeyValuePair<string, string>>();
@@ -207,6 +211,12 @@ namespace Server.MirObjects
             set { Info.AllowGroup = value; }
         }
 
+        public bool AllowTrade
+        {
+            get { return Info.AllowTrade; }
+            set { Info.AllowTrade = value; }
+        }
+
         public bool GameStarted { get; set; }
 
         public bool HasTeleportRing, HasProtectionRing, HasRevivalRing;
@@ -215,6 +225,11 @@ namespace Server.MirObjects
 
 
         public PlayerObject GroupInvitation;
+        public PlayerObject TradeInvitation;
+
+        public PlayerObject TradePartner = null;
+        public uint TradeGoldAmount = 0;
+        public bool TradeLocked = false;
 
         public PlayerObject(CharacterInfo info, MirConnection connection)
         {
@@ -286,6 +301,8 @@ namespace Server.MirObjects
                 GroupMembers = null;
             }
 
+            TradeCancel();
+
             SMain.Enqueue(string.Format("{0} Has logged out.", Name));
 
             Info.LastIP = Connection.IPAddress;
@@ -341,21 +358,6 @@ namespace Server.MirObjects
             if (HasClearRing)
                 AddBuff(new Buff { Type = BuffType.Hiding, Caster = this, ExpireTime = Envir.Time + 1, Infinite = true });
 
-            //NPC Time Recall
-            if (NPCJumpPage != null && Envir.Time > NPCJumpPage.TimePeriod && NPCJumpPage.Active)
-            {
-                NPCJumpPage.Active = false;
-
-                if (NPCJumpPage.PlayerMap != null)
-                    Teleport(NPCJumpPage.PlayerMap, NPCJumpPage.PlayerCoords);
-
-                if (NPCJumpPage.NPCGotoPage != null && !NPCGoto && NPCJumpPage.Interrupted == false)
-                {
-                    NPCGoto = true;
-                    NPCGotoPage = NPCJumpPage.NPCGotoPage;
-                    CallNPC(NPCJumpPage.NPCID, NPCGotoPage);
-                }
-            }
 
             for (int i = Pets.Count() - 1; i >= 0; i--)
             {
@@ -363,6 +365,7 @@ namespace Server.MirObjects
                     Pets.Remove(Pets[i]);
             }
 
+            ProcessNPCPages();
             ProcessBuffs();
             ProcessRegen();
             ProcessPoison();
@@ -415,6 +418,20 @@ namespace Server.MirObjects
         public override void SetOperateTime()
         {
             OperateTime = Envir.Time;
+        }
+
+        private void ProcessNPCPages()
+        {
+            if (NPCJumpList.NextPage == null || Envir.Time < NPCJumpList.NextPage.TimePeriod) return;
+
+            if (NPCJumpList.NextPage.PlayerMap != null)
+                Teleport(NPCJumpList.NextPage.PlayerMap, NPCJumpList.NextPage.PlayerCoords);
+
+            NPCJumpList.NextPage.Active = true;
+
+            CallNPC(NPCJumpList.NextPage.NPCID, NPCJumpList.NextPage.Page);
+
+            NPCJumpList.RemovePage();
         }
 
         private void ProcessBuffs()
@@ -721,6 +738,8 @@ namespace Server.MirObjects
 
             PoisonList.Clear();
             InTrapRock = false;
+
+            CallDefaultNPC(DefaultNPCType.Die);
         }
 
         private void DeathDrop(MapObject killer)
@@ -965,6 +984,9 @@ namespace Server.MirObjects
             RefreshStats();
             SetHP(MaxHP);
             SetMP(MaxMP);
+
+            CallDefaultNPC(DefaultNPCType.LevelUp);
+
             Enqueue(new S.LevelChanged { Level = Level, Experience = Experience, MaxExperience = MaxExperience });
             Broadcast(new S.ObjectLeveled { ObjectID = ObjectID });
         }
@@ -1112,6 +1134,9 @@ namespace Server.MirObjects
             CurrentMap = temp;
             Envir.Players.Add(this);
             StartGameSuccess();
+
+            //Call Login NPC
+            CallDefaultNPC(DefaultNPCType.Login);
         }
         private void StartGameSuccess()
         {
@@ -1148,6 +1173,8 @@ namespace Server.MirObjects
             if (Class == MirClass.Wizard || Class == MirClass.Taoist)
                 Enqueue(new S.ChangePMode { Mode = PMode });
             Enqueue(new S.SwitchGroup { AllowGroup = AllowGroup });
+
+            Enqueue(new S.DefaultNPC { ObjectID = DefaultNPC.ObjectID });
 
             if (Info.Thrusting) Enqueue(new S.SpellToggle { Spell = Spell.Thrusting, CanUse = true });
             if (Info.HalfMoon) Enqueue(new S.SpellToggle { Spell = Spell.HalfMoon, CanUse = true });
@@ -2494,6 +2521,16 @@ namespace Server.MirObjects
                         ReceiveChat("Drops Reloaded.", ChatType.Hint);
                         break;
 
+                    case "RELOADNPCS":
+                        if (!IsGM) return;
+
+                        for (int i = 0; i < CurrentMap.NPCs.Count; i++)
+                        {
+                            CurrentMap.NPCs[i].LoadInfo(true);
+                        }
+                        ReceiveChat("NPCs Reloaded.", ChatType.Hint);
+                        break;
+
                     case "GIVEGOLD":
                         if (!IsGM) return;
                         if (parts.Length < 2) return;
@@ -2579,6 +2616,46 @@ namespace Server.MirObjects
                         else
                             ReceiveChat("Failed to create guild", ChatType.System);
                         player.CanCreateGuild = false;
+                        break;
+
+                    case "TRADE":
+                        if (parts.Length < 2) return;
+
+                        TradeRequest(parts[1]);
+                        break;
+
+                    case "ALLOWTRADE":
+                        AllowTrade = !AllowTrade;
+
+                        if(AllowTrade)
+                            ReceiveChat("You are now allowing trade", ChatType.System);
+                        else
+                            ReceiveChat("You are no longer allowing trade", ChatType.System);
+                        break;
+
+                    case "TRIGGER":
+                        if (!IsGM) return;
+                        if (parts.Length < 2) return;
+
+                        if (parts.Length >= 3)
+                        {
+                            player = Envir.GetPlayer(parts[2]);
+
+                            if (player == null)
+                            {
+                                ReceiveChat(string.Format("Player {0} was not found.", parts[2]), ChatType.System);
+                                return;
+                            }
+
+                            player.CallDefaultNPC(DefaultNPCType.Trigger, parts[1]);
+                            return;
+                        }
+
+                        foreach (var pl in Envir.Players)
+                        {
+                            pl.CallDefaultNPC(DefaultNPCType.Trigger, parts[1]);
+                        }
+
                         break;
                 }
             }
@@ -4714,6 +4791,17 @@ namespace Server.MirObjects
 
         public bool CheckMovement(Point location)
         {
+            //Script triggered coords
+            for (int s = 0; s < CurrentMap.Info.ActiveCoords.Count; s++)
+            {
+                Point activeCoord = CurrentMap.Info.ActiveCoords[s];
+
+                if (activeCoord != location) continue;
+
+                CallDefaultNPC(DefaultNPCType.MapCoord, CurrentMap.Info.FileName, activeCoord.X, activeCoord.Y);
+            }
+
+            //Map movements
             for (int i = 0; i < CurrentMap.Info.Movements.Count; i++)
             {
                 MovementInfo info = CurrentMap.Info.Movements[i];
@@ -5144,6 +5232,96 @@ namespace Server.MirObjects
             RefreshStats();
         }
 
+        public void DepositTradeItem(int from, int to)
+        {
+            S.DepositTradeItem p = new S.DepositTradeItem { From = from, To = to, Success = false };
+
+            if (from < 0 || from >= Info.Inventory.Length)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (to < 0 || to >= Info.Trade.Length)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            UserItem temp = Info.Inventory[from];
+
+            if (temp == null)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (temp.Info.Bind.HasFlag(BindMode.DontTrade))
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (Info.Trade[to] == null)
+            {
+                Info.Trade[to] = temp;
+                Info.Inventory[from] = null;
+                RefreshBagWeight();
+                TradeItem();
+
+                p.Success = true;
+                Enqueue(p);
+                return;
+            }
+            Enqueue(p);
+
+        }
+        public void RetrieveTradeItem(int from, int to)
+        {
+            S.RetrieveTradeItem p = new S.RetrieveTradeItem { From = from, To = to, Success = false };
+
+            if (from < 0 || from >= Info.Trade.Length)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (to < 0 || to >= Info.Inventory.Length)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            UserItem temp = Info.Trade[from];
+
+            if (temp == null)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (temp.Weight + CurrentBagWeight > MaxBagWeight)
+            {
+                ReceiveChat("Too heavy to get back.", ChatType.System);
+                Enqueue(p);
+                return;
+            }
+
+            if (Info.Inventory[to] == null)
+            {
+                Info.Inventory[to] = temp;
+                Info.Trade[from] = null;
+
+                p.Success = true;
+                RefreshBagWeight();
+                TradeItem();
+
+                Enqueue(p);
+                return;
+            }
+            Enqueue(p);
+        }
+
         public void RemoveItem(MirGridType grid, ulong id, int to)
         {
             S.RemoveItem p = new S.RemoveItem { Grid = grid, UniqueID = id, To = to, Success = false };
@@ -5248,6 +5426,10 @@ namespace Server.MirObjects
                         return;
                     }
                     array = Account.Storage;
+                    break;
+                case MirGridType.Trade:
+                    array = Info.Trade;
+                    TradeItem();
                     break;
                 default:
                     Enqueue(p);
@@ -5620,6 +5802,9 @@ namespace Server.MirObjects
 
                     Info.Magics.Add(magic);
                     Enqueue(magic.GetInfo());
+                    break;
+                case ItemType.Script:
+                    CallDefaultNPC(DefaultNPCType.UseItem, item.Info.Shape);
                     break;
                 default:
                     return;
@@ -6064,6 +6249,42 @@ namespace Server.MirObjects
 
             return false;
         }
+
+        public bool CanGainItems(UserItem[] items)
+        {
+            int itemCount = items.Where(e => e != null).Count();
+            uint itemWeight = 0;
+            uint stackOffset = 0;
+
+            if (itemCount < 1) return true;
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                if (items[i] == null) continue;
+
+                itemWeight += items[i].Weight;
+
+                if (items[i].Info.StackSize > 1)
+                {
+                    uint count = items[i].Count;
+
+                    for (int u = 0; u < Info.Inventory.Length; u++)
+                    {
+                        UserItem bagItem = Info.Inventory[u];
+
+                        if (bagItem == null || bagItem.Info != items[i].Info) continue;
+
+                        if (bagItem.Count + count > bagItem.Info.StackSize) stackOffset++;
+                    }
+                }
+            }
+
+            if (CurrentBagWeight + (itemWeight) > MaxBagWeight) return false;
+            if (FreeSpace(Info.Inventory) < itemCount + stackOffset) return false;
+
+            return true;
+        }
+
         private bool DropItem(UserItem item, int range = 1)
         {
             ItemObject ob = new ItemObject(this, item);
@@ -6442,20 +6663,57 @@ namespace Server.MirObjects
             return true;
         }
 
+        public void CallDefaultNPC(DefaultNPCType type, params object[] value)
+        {
+            string key = string.Empty;
 
+            switch (type)
+            {
+                case DefaultNPCType.Login:
+                    key = "Login";
+                    break;
+                case DefaultNPCType.UseItem:
+                    if (value.Length < 1) return;
+                    key = string.Format("UseItem({0})", value[0]);
+                    break;
+                case DefaultNPCType.Trigger:
+                    if (value.Length < 1) return;
+                    key = string.Format("Trigger({0})", value[0]);
+                    break;
+                case DefaultNPCType.MapCoord:
+                    if (value.Length < 3) return;
+                    key = string.Format("MapCoord({0},{1},{2})", value[0], value[1], value[2]);
+                    break;
+                case DefaultNPCType.Die:
+                    key = "Die";
+                    break;
+                case DefaultNPCType.LevelUp:
+                    key = "LevelUp";
+                    break;
+            }
+
+            key = string.Format("[@_{0}]", key);
+
+            NPCJumpList.AddPage(new NPCJumpPage { NPCID = DefaultNPC.ObjectID, Page = key, TimePeriod = 0 });
+            Enqueue(new S.NPCUpdate { NPCID = DefaultNPC.ObjectID });
+        }
         public void CallNPC(uint objectID, string key)
         {
-            if (NPCJumpPage != null) NPCJumpPage.Interrupted = true;
+            if (objectID == DefaultNPC.ObjectID)
+            {
+                DefaultNPC.Call(this, key.ToUpper());
+                return;
+            }
 
             if (Dead) return;
+
             for (int i = 0; i < CurrentMap.NPCs.Count; i++)
             {
                 NPCObject ob = CurrentMap.NPCs[i];
                 if (ob.ObjectID != objectID) continue;
-                ob.Call(this, NPCGoto ? NPCGotoPage.ToUpper() : key.ToUpper());
-
-                if (NPCGoto) i--;
-                else break;
+                
+                ob.Call(this, key.ToUpper());
+                break;
             }
         }
 
@@ -8086,6 +8344,7 @@ namespace Server.MirObjects
             }
         }
 
+        #region Guilds
         public bool CreateGuild(string GuildName)
         {
             if ((MyGuild != null) || (Info.GuildIndex != -1)) return false;
@@ -8197,7 +8456,6 @@ namespace Server.MirObjects
             MyGuild.SendGuildStatus(this);
             return true;
         }
-
         public void EditGuildMember(string Name, string RankName, byte RankIndex, byte ChangeType)
         {
             if ((MyGuild == null) || (MyGuildRank == null))
@@ -8327,6 +8585,276 @@ namespace Server.MirObjects
             }
             MyGuild.NewNotice(notice);
         }
+        #endregion
+
+        #region Trading
+        public void TradeRequest(string name)
+        {
+            if (TradePartner != null)
+            {
+                ReceiveChat("You are already trading.", ChatType.System);
+                return;
+            }
+
+            PlayerObject player = Envir.GetPlayer(name);
+
+            if (player == null)
+            {
+                ReceiveChat(string.Format("Player {0} was not found.", name), ChatType.System);
+                return;
+            }
+
+            if (player != null)
+            {
+                if (player == this)
+                {
+                    ReceiveChat("You cannot trade with your self.", ChatType.System);
+                    return;
+                }
+
+                if (player.Dead || Dead)
+                {
+                    ReceiveChat("Cannot trade when dead", ChatType.System);
+                    return;
+                }
+
+                if (player.TradeInvitation != null)
+                {
+                    ReceiveChat(string.Format("Player {0} already has a trade invitation.", player.Info.Name), ChatType.System);
+                    return;
+                }
+
+                if (!player.AllowTrade)
+                {
+                    ReceiveChat(string.Format("Player {0} is not allowing trade at the moment.", player.Info.Name), ChatType.System);
+                    return;
+                }
+
+                if (!Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange))
+                {
+                    ReceiveChat(string.Format("Player {0} is not within trading range.", player.Info.Name), ChatType.System);
+                    return;
+                }
+
+                if (player.TradePartner != null)
+                {
+                    ReceiveChat(string.Format("Player {0} is already trading.", player.Info.Name), ChatType.System);
+                    return;
+                }
+
+                player.TradeInvitation = this;
+                player.Enqueue(new S.TradeRequest { Name = Info.Name });
+            }
+        }
+        public void TradeReply(bool accept)
+        {
+            if (TradeInvitation == null || TradeInvitation.Info == null)
+            {
+                TradeInvitation = null;
+                return;
+            }
+
+            if (!accept)
+            {
+                TradeInvitation.ReceiveChat(string.Format("Player {0} has refused to trade.", Info.Name), ChatType.System);
+                TradeInvitation = null;
+                return;
+            }
+
+            if (TradePartner != null)
+            {
+                ReceiveChat("You are already trading.", ChatType.System);
+                TradeInvitation = null;
+                return;
+            }
+
+            if (TradeInvitation.TradePartner != null)
+            {
+                ReceiveChat(string.Format("Player {0} is already trading.", TradeInvitation.Info.Name), ChatType.System);
+                TradeInvitation = null;
+                return;
+            }
+
+            TradePartner = TradeInvitation;
+            TradeInvitation.TradePartner = this;
+            TradeInvitation = null;
+
+            Enqueue(new S.TradeAccept { Name = TradePartner.Info.Name });
+            TradePartner.Enqueue(new S.TradeAccept { Name = Info.Name });
+        }
+        public void TradeGold(uint amount)
+        {
+            if (TradePartner == null) return;
+
+            if (Account.Gold < amount)
+            {
+                return;
+            }
+
+            TradeGoldAmount += amount;
+            Account.Gold -= amount;
+
+            Enqueue(new S.LoseGold { Gold = amount });
+            TradePartner.Enqueue(new S.TradeGold { Amount = TradeGoldAmount });
+        }
+        public void TradeItem()
+        {
+            if (TradePartner == null) return;
+
+            for (int i = 0; i < Info.Trade.Length; i++)
+            {
+                UserItem u = Info.Trade[i];
+                if (u == null) continue;
+
+                TradePartner.CheckItemInfo(u.Info);
+            }
+
+            TradePartner.Enqueue(new S.TradeItem { TradeItems = Info.Trade });
+        }
+        public void TradeConfirm(bool locked)
+        {
+            if (TradePartner == null)
+            {
+                TradeCancel();
+                return;
+            }
+
+            TradeLocked = locked;
+
+            if (TradeLocked && !TradePartner.TradeLocked)
+            {
+                TradePartner.ReceiveChat(string.Format("Player {0} is waiting for you to confirm trade.", Info.Name), ChatType.System);
+            }
+
+            if (!TradeLocked || !TradePartner.TradeLocked) return;
+
+            if (!Functions.InRange(TradePartner.CurrentLocation, CurrentLocation, Globals.DataRange))
+            {
+                ReceiveChat(string.Format("Player {0} is no longer within trading range.", TradePartner.Info.Name), ChatType.System);
+                Enqueue(new S.TradeCancel { Unlock = true });
+                return;
+            }
+
+            PlayerObject[] TradePair = new PlayerObject[2] { TradePartner, this };
+
+            bool CanTrade = true;
+            UserItem u;
+
+            //check if both people can accept the others items
+            for (int p = 0; p < 2; p++)
+            {
+                int o = p == 0 ? 1 : 0;
+
+                if (!TradePair[o].CanGainItems(TradePair[p].Info.Trade))
+                {
+                    CanTrade = false;
+                    TradePair[p].ReceiveChat("Trading partner cannot accept all items.", ChatType.System);
+                    TradePair[p].Enqueue(new S.TradeCancel { Unlock = true });
+
+                    TradePair[o].ReceiveChat("Unable to accept all items.", ChatType.System);
+                    TradePair[o].Enqueue(new S.TradeCancel { Unlock = true });
+
+                    return;
+                }
+
+                if (!TradePair[o].CanGainGold(TradePair[p].TradeGoldAmount))
+                {
+                    CanTrade = false;
+                    TradePair[p].ReceiveChat("Trading partner cannot accept any more gold.", ChatType.System);
+                    TradePair[p].Enqueue(new S.TradeCancel { Unlock = true });
+
+                    TradePair[o].ReceiveChat("Unable to accept any more gold.", ChatType.System);
+                    TradePair[o].Enqueue(new S.TradeCancel { Unlock = true });
+
+                    return;
+                }
+            }
+
+            //swap items
+            if (CanTrade)
+            {
+                for (int p = 0; p < 2; p++)
+                {
+                    int o = p == 0 ? 1 : 0;
+
+                    for (int i = 0; i < TradePair[p].Info.Trade.Length; i++)
+                    {
+                        u = TradePair[p].Info.Trade[i];
+
+                        if (u == null) continue;
+
+                        TradePair[o].GainItem(u);
+
+                        TradePair[p].Info.Trade[i] = null;
+                        //TradePair[p].Report.ItemChange(u, u.Count, true);
+                    }
+
+                    if (TradePair[p].TradeGoldAmount > 0)
+                    {
+                        TradePair[o].GainGold(TradePair[p].TradeGoldAmount);
+                        TradePair[p].TradeGoldAmount = 0;
+                    }
+
+                    TradePair[p].ReceiveChat("Trade successful.", ChatType.System);
+                    TradePair[p].Enqueue(new S.TradeConfirm());
+
+                    TradePair[p].TradeLocked = false;
+                    TradePair[p].TradePartner = null;
+                }
+            }
+        }
+        public void TradeCancel()
+        {
+            PlayerObject[] TradePair = new PlayerObject[2] { TradePartner, this };
+
+            for (int p = 0; p < 2; p++)
+            {
+                if (TradePair[p] != null)
+                {
+                    for (int t = 0; t < TradePair[p].Info.Trade.Length; t++)
+                    {
+                        UserItem temp = TradePair[p].Info.Trade[t];
+
+                        if (temp == null) continue;
+
+                        for (int i = 0; i < TradePair[p].Info.Inventory.Length; i++)
+                        {
+                            if (TradePair[p].Info.Inventory[i] != null) continue;
+
+                            //Put item back in inventory
+                            if (TradePair[p].CanGainItem(temp))
+                            {
+                                TradePair[p].RetrieveTradeItem(t, i);
+                            }
+                            else //Drop item on floor if it can no longer be stored
+                            {
+                                if (TradePair[p].DropItem(temp, Settings.DropRange))
+                                {
+                                    TradePair[p].Enqueue(new S.DeleteItem { UniqueID = temp.UniqueID, Count = temp.Count });
+                                }
+                            }
+
+                            TradePair[p].Info.Trade[t] = null;
+
+                            break;
+                        }
+                    }
+
+                    //Put back deposited gold
+                    if (TradePair[p].TradeGoldAmount > 0)
+                    {
+                        TradePair[p].GainGold(TradePair[p].TradeGoldAmount);
+                        TradePair[p].TradeGoldAmount = 0;
+                    }
+
+                    TradePair[p].TradeLocked = false;
+                    TradePair[p].TradePartner = null;
+
+                    TradePair[p].Enqueue(new S.TradeCancel { Unlock = false });
+                }
+            }
+        }
+        #endregion
     }
 }
 

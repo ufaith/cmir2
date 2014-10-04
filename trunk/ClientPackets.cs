@@ -284,6 +284,38 @@ namespace ClientPackets
             writer.Write(To);
         }
     }
+    public sealed class DepositTradeItem : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.DepositTradeItem; } }
+
+        public int From, To;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            From = reader.ReadInt32();
+            To = reader.ReadInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(From);
+            writer.Write(To);
+        }
+    }
+    public sealed class RetrieveTradeItem : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.RetrieveTradeItem; } }
+
+        public int From, To;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            From = reader.ReadInt32();
+            To = reader.ReadInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(From);
+            writer.Write(To);
+        }
+    }
     public sealed class TakeBackItem : Packet
     {
         public override short Index { get { return (short)ClientPacketIds.TakeBackItem; } }
@@ -489,6 +521,21 @@ namespace ClientPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write((byte)Mode);
+        }
+    }
+    public sealed class ChangeTrade : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.ChangeTrade; } }
+
+        public bool AllowTrade;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            AllowTrade = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(AllowTrade);
         }
     }
     public sealed class Attack : Packet
@@ -748,6 +795,73 @@ namespace ClientPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(AcceptInvite);
+        }
+    }
+    public sealed class TradeReply : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.TradeReply; } }
+
+        public bool AcceptInvite;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            AcceptInvite = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(AcceptInvite);
+        }
+    }
+    public sealed class TradeRequest : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.TradeRequest; } }
+
+        public string Name;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Name = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Name);
+        }
+    }
+    public sealed class TradeGold : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.TradeGold; } }
+
+        public uint Amount;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Amount = reader.ReadUInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Amount);
+        }
+    }
+    public sealed class TradeConfirm : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.TradeConfirm; } }
+
+        public bool Locked;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Locked = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Locked);
+        }
+    }
+    public sealed class TradeCancel : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.TradeCancel; } }
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
         }
     }
     public sealed class TownRevive : Packet

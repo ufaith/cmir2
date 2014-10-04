@@ -48,3 +48,21 @@ C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPat
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.csproj.GenerateResource.Cache
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.exe
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.pdb
+E:\Legend of Mir\Mir 2 Source\Release\AutoPatcher\AutoPatcher.exe.config
+E:\Legend of Mir\Mir 2 Source\Release\AutoPatcher\AutoPatcher.exe
+E:\Legend of Mir\Mir 2 Source\Release\AutoPatcher\AutoPatcher.pdb
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.csprojResolveAssemblyReference.cache
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.AMain.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.Properties.Resources.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.csproj.GenerateResource.Cache
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.exe
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.pdb
+C:\Mir 2 Source\Release\AutoPatcher\AutoPatcher.exe.config
+C:\Mir 2 Source\Release\AutoPatcher\AutoPatcher.exe
+C:\Mir 2 Source\Release\AutoPatcher\AutoPatcher.pdb
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.csprojResolveAssemblyReference.cache
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.AMain.resources
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.Properties.Resources.resources
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.csproj.GenerateResource.Cache
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.exe
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Release\AutoPatcher.pdb

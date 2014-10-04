@@ -46,11 +46,12 @@ namespace Server.MirDatabase
         public AttackMode AMode;
         public PetMode PMode;
         public bool AllowGroup;
+        public bool AllowTrade;
 
         public bool Thrusting, HalfMoon, CrossHalfMoon;
         public bool DoubleSlash;
 
-        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[13];
+        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[13], Trade = new UserItem[10];
         public List<UserMagic> Magics = new List<UserMagic>();
         public List<PetInfo> Pets = new List<PetInfo>();
 
@@ -165,6 +166,9 @@ namespace Server.MirDatabase
                 Flags[i] = reader.ReadBoolean();
             if (Envir.LoadVersion > 27)
                 GuildIndex = reader.ReadInt32();
+
+            if (Envir.LoadVersion > 30)
+                AllowTrade = reader.ReadBoolean();
         }
 
 
@@ -244,6 +248,8 @@ namespace Server.MirDatabase
             for (int i = 0; i < Flags.Length; i++)
                 writer.Write(Flags[i]);
             writer.Write(GuildIndex);
+
+            writer.Write(AllowTrade);
         }
 
         public SelectInfo ToSelectInfo()

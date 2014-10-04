@@ -26,7 +26,7 @@ namespace Server.MirDatabase
         public List<RespawnInfo> Respawns = new List<RespawnInfo>();
         public List<NPCInfo> NPCs = new List<NPCInfo>();
         public List<MineZone> MineZones = new List<MineZone>();
-        
+        public List<Point> ActiveCoords = new List<Point>();
 
         public MapInfo()
         {

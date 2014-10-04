@@ -48,6 +48,8 @@ namespace Server.MirObjects
         public List<ItemType> Types = new List<ItemType>();
         public List<NPCPage> NPCSections = new List<NPCPage>();
 
+        public static List<string> Args = new List<string>();
+
         public override string Name
         {
             get { return Info.Name; }
@@ -86,23 +88,75 @@ namespace Server.MirObjects
             Info = info;
             NameColour = Color.Lime;
 
-            Direction = (MirDirection) Envir.Random.Next(3);
-            TurnTime = Envir.Time + Envir.Random.Next(100);
+            if (!Info.IsDefault)
+            {
+                Direction = (MirDirection)Envir.Random.Next(3);
+                TurnTime = Envir.Time + Envir.Random.Next(100);
 
-            Spawned();
+                Spawned();
+            }
+
+            LoadInfo();
+        }
+
+        public void LoadInfo(bool clear = false)
+        {
+            if (clear) ClearInfo();
 
             if (!Directory.Exists(Settings.NPCPath)) return;
 
-            string fileName = Path.Combine(Settings.NPCPath, info.FileName + ".txt");
+            string fileName = Path.Combine(Settings.NPCPath, Info.FileName + ".txt");
+
             if (File.Exists(fileName))
-                ParseScript(File.ReadAllLines(fileName));
+            {
+                List<string> lines = File.ReadAllLines(fileName).ToList();
+
+                lines = ParseInsert(lines);
+
+                if (Info.IsDefault)
+                    ParseDefault(lines);
+                else
+                    ParseScript(lines);
+            }
             else
-                SMain.Enqueue(string.Format("File Not Found: {0}, NPC: {1}", info.FileName, info.Name));
+                SMain.Enqueue(string.Format("File Not Found: {0}, NPC: {1}", Info.FileName, Info.Name));
         }
 
-        private void ParseScript(IList<string> lines)
+        public void ClearInfo()
         {
-            List<string> buttons = ParseSection(lines, MainKey);
+            Goods = new List<ItemInfo>();
+            GoodsIndex = new List<int>();
+            Types = new List<ItemType>();
+            NPCSections = new List<NPCPage>();
+        }
+
+        private void ParseDefault(List<string> lines)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (!lines[i].ToUpper().StartsWith("[@_")) continue;
+
+                if (lines[i].Contains("MAPCOORD"))
+                {
+                    Regex regex = new Regex(@"\((.*?),([0-9]{1,3}),([0-9]{1,3})\)");
+                    Match match = regex.Match(lines[i]);
+
+                    if (!match.Success) continue;
+
+                    Map map = Envir.MapList.Where(m => m.Info.FileName == match.Groups[1].Value).FirstOrDefault();
+
+                    if (map == null) continue;
+
+                    map.Info.ActiveCoords.Add(new Point(Convert.ToInt16(match.Groups[2].Value), Convert.ToInt16(match.Groups[3].Value)));
+                }
+
+                ParseScript(lines, lines[i]);
+            }
+        }
+
+        private void ParseScript(List<string> lines, string key = MainKey)
+        {
+            List<string> buttons = ParseSection(lines, key);
 
             for (int i = 0; i < buttons.Count; i++)
             {
@@ -114,7 +168,6 @@ namespace Server.MirObjects
                     if (NPCSections[a].Key != section) continue;
                     match = true;
                     break;
-
                 }
 
                 if (match) continue;
@@ -129,7 +182,7 @@ namespace Server.MirObjects
                 GoodsIndex.Add(Goods[i].Index);
         }
 
-        private List<string> ParseSection(IEnumerable<string> scriptLines, string sectionName)
+        private List<string> ParseSection(List<string> lines, string sectionName)
         {
             List<string>
                 checks = new List<string>(),
@@ -141,11 +194,11 @@ namespace Server.MirObjects
                 elseButtons = new List<string>(),
                 gotoButtons = new List<string>();
 
-            List<string> lines = scriptLines.ToList();
+            //List<string> lines = scriptLines.ToList();
             List<string> currentSay = say, currentButtons = buttons;
 
             //Used to fake page name
-            string tempSectionName = SectionArgumentParse(sectionName).ToUpper();
+            string tempSectionName = ArgumentParse(sectionName).ToUpper();
 
             for (int i = 0; i < lines.Count; i++)
             {
@@ -250,29 +303,30 @@ namespace Server.MirObjects
             return currentButtons;
         }
 
-        public static List<string> Args = new List<string>();
-
-        public string SectionArgumentParse(string key)
+        private List<string> ParseInsert(List<string> lines)
         {
-            Regex r = new Regex(@"\((.*?)\)");
+            List<string> newLines = new List<string>();
 
-            Match match = r.Match(key);
-            if (!match.Success) return key;
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (!lines[i].ToUpper().StartsWith("#INSERT")) continue;
 
-            key = Regex.Replace(key, r.ToString(), "()");
+                string[] split = lines[i].Split(' ');
 
-            string strValues = match.Groups[1].Value;
-            string[] arrValues = strValues.Split(',');
+                if (split.Length < 2) continue;
 
-            Args = new List<string>();
+                string path = Path.Combine(Settings.EnvirPath, split[1].Substring(1, split[1].Length - 2));
 
-            foreach (var t in arrValues)
-                Args.Add(t);
+                if (!File.Exists(path))
+                    SMain.Enqueue(string.Format("File Not Found: {0}, NPC: {1}", path, Info.Name));
+                else
+                    newLines = File.ReadAllLines(path).ToList();
 
-            return key;
+                lines.AddRange(newLines);
+            }
+
+            return lines;
         }
-
-        
 
         private IEnumerable<string> ParseInclude(string line)
         {
@@ -314,7 +368,31 @@ namespace Server.MirObjects
                 return parsedLines;
 
             return new List<string>();
-        } 
+        }
+
+
+        public string ArgumentParse(string key)
+        {
+            if (key.StartsWith("[@_")) return key; //Default NPC page so doesn't use arguments in this way
+
+            Regex r = new Regex(@"\((.*?)\)");
+
+            Match match = r.Match(key);
+            if (!match.Success) return key;
+
+            key = Regex.Replace(key, r.ToString(), "()");
+
+            string strValues = match.Groups[1].Value;
+            string[] arrValues = strValues.Split(',');
+
+            Args = new List<string>();
+
+            foreach (var t in arrValues)
+                Args.Add(t);
+
+            return key;
+        }
+
 
         private void ParseTypes(IList<string> lines)
         {
@@ -332,7 +410,6 @@ namespace Server.MirObjects
                 }
             }
         }
-
         private void ParseGoods(IList<string> lines)
         {
             for (int i = 0; i < lines.Count; i++)
@@ -498,26 +575,23 @@ namespace Server.MirObjects
 
         public void Call(PlayerObject player, string key)
         {
-            bool found = false;
-
             key = key.ToUpper();
-            if (key != MainKey)
-            {
-                if (player.NPCID != ObjectID) return;
 
-                if (!player.NPCGoto)
+            if (player.NPCJumpList.NextPage == null || !player.NPCJumpList.NextPage.Active)
+            {
+                if (key != MainKey) // && ObjectID != player.DefaultNPC.ObjectID
                 {
+                    if (player.NPCID != ObjectID) return;
+
                     if (player.NPCSuccess)
                     {
-                       if (!player.NPCPage.Buttons.Any(c => c.ToUpper().Contains(key))) return;
+                        if (!player.NPCPage.Buttons.Any(c => c.ToUpper().Contains(key))) return;
                     }
                     else
                     {
                         if (!player.NPCPage.ElseButtons.Any(c => c.ToUpper().Contains(key))) return;
                     }
                 }
-
-                player.NPCGoto = false;
             }
 
             for (int i = 0; i < NPCSections.Count; i++)
@@ -1878,15 +1952,7 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.Goto:
-                        player.NPCGoto = true;
-                        player.NPCGotoPage = "[" + param[0] + "]";
-
-                        //player.NPCJumpPage = new NPCJumpPage
-                        //{
-                        //    NPCID = player.NPCID,
-                        //    NPCGotoPage = "[" + param[0] + "]",
-                        //    TimePeriod = 0
-                        //};
+                        player.NPCJumpList.AddPage(new NPCJumpPage { NPCID = player.NPCID, Page = "[" + param[0] + "]", TimePeriod = 0 });
                         break;
 
                     case ActionType.Set:
@@ -1943,12 +2009,15 @@ namespace Server.MirObjects
                     case ActionType.TimeRecall:
                         if (!long.TryParse(param[0], out tempLong)) return;
 
-                        player.NPCJumpPage = new NPCJumpPage
+                        player.NPCJumpList.AddPage(new NPCJumpPage
                         {
+                            NPCID = player.NPCID,
+                            Page = "[" + param[0] + "]",
+                            TimePeriod = tempLong,
                             PlayerMap = player.CurrentMap,
-                            PlayerCoords = player.CurrentLocation,
-                            TimePeriod = tempLong
-                        };
+                            PlayerCoords = player.CurrentLocation
+                        });
+
                         break;
 
                     case ActionType.TimeRecallGroup:
@@ -1957,47 +2026,48 @@ namespace Server.MirObjects
 
                         for (i = 0; i < player.GroupMembers.Count(); i++)
                         {
-                            player.GroupMembers[i].NPCJumpPage = new NPCJumpPage
+                            player.GroupMembers[i].NPCJumpList.AddPage(new NPCJumpPage
                             {
+                                NPCID = player.NPCID,
+                                TimePeriod = tempLong,
                                 PlayerMap = player.CurrentMap,
-                                PlayerCoords = player.CurrentLocation,
-                                TimePeriod = tempLong
-                            };
+                                PlayerCoords = player.CurrentLocation
+                            });
                         }
                         break;
 
                     case ActionType.TimeRecallPage:
-                        if (player.NPCJumpPage == null) return;
+                        if (player.NPCJumpList.NextPage == null) return;
 
-                        player.NPCJumpPage.NPCID = player.NPCID;
-                        player.NPCJumpPage.NPCGotoPage = param[0];
+                        player.NPCJumpList.JumpPages.Last().NPCID = player.NPCID;
+                        player.NPCJumpList.JumpPages.Last().Page = param[0];
                         break;
 
                     case ActionType.TimeRecallGroupPage:
-                        if (player.NPCJumpPage == null) return;
+                        if (player.NPCJumpList.NextPage == null) return;
                         if (player.GroupMembers == null) return;
                         for (i = 0; i < player.GroupMembers.Count(); i++)
                         {
-                            if (player.GroupMembers[i].NPCJumpPage == null) continue;
-                            player.GroupMembers[i].NPCJumpPage.NPCID = player.NPCID;
-                            player.GroupMembers[i].NPCJumpPage.NPCGotoPage = param[0];
+                            if (player.GroupMembers[i].NPCJumpList.NextPage == null) continue;
+
+                            player.GroupMembers[i].NPCJumpList.JumpPages.Last().NPCID = player.NPCID;
+                            player.GroupMembers[i].NPCJumpList.JumpPages.Last().Page = param[0];
                         }
                         break;
 
                     case ActionType.BreakTimeRecall:
-                        if (player.NPCJumpPage == null) return;
-                        player.NPCJumpPage = null;
+                        player.NPCJumpList.JumpPages.Clear();
                         break;
 
                     case ActionType.DelayGoto:
                         if (!long.TryParse(param[0], out tempLong)) return;
 
-                        player.NPCJumpPage = new NPCJumpPage
+                        player.NPCJumpList.AddPage(new NPCJumpPage
                         {
                             NPCID = player.NPCID,
                             TimePeriod = tempLong,
-                            NPCGotoPage = "[" + param[1] + "]"
-                        };
+                            Page = "[" + param[1] + "]"
+                        });
                         break;
 
                     case ActionType.MonClear:
@@ -2231,18 +2301,38 @@ namespace Server.MirObjects
         CheckCalc,
     }
 
+    public class NPCJumpList
+    {
+        public List<NPCJumpPage> JumpPages = new List<NPCJumpPage>();
+
+        public NPCJumpPage NextPage
+        {
+            get { return JumpPages.Count > 0 ? JumpPages.First() : null; }
+        }
+
+        public NPCJumpList() { }
+
+        public void AddPage(NPCJumpPage item)
+        {
+            JumpPages.Add(item);
+            JumpPages = JumpPages.OrderByDescending(r => r.Active).ThenBy(r => r.TimePeriod).ToList();
+        }
+
+        public void RemovePage()
+        {
+            if (JumpPages.Count() > 0) JumpPages.Remove(JumpPages.First());
+        }
+    }
+
     public class NPCJumpPage
     {
+        public uint NPCID;
+        public string Page;
+
         public Map PlayerMap;
         public Point PlayerCoords;
 
-        public uint NPCID;
-        public string NPCGotoPage;
-        public string NPCPage;
-
         public bool Active;
-        public bool Interrupted;
-
         private long _timePeriod;
         public long TimePeriod
         {
@@ -2253,7 +2343,6 @@ namespace Server.MirObjects
             set
             {
                 _timePeriod = SMain.Envir.Time + (value * 1000);
-                Active = true;
             }
         }
     }

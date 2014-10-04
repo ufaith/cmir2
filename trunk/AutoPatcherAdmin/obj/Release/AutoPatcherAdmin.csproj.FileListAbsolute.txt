@@ -48,3 +48,21 @@ C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\Au
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csproj.GenerateResource.Cache
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.exe
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.pdb
+E:\Legend of Mir\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.exe.config
+E:\Legend of Mir\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.exe
+E:\Legend of Mir\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.pdb
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csprojResolveAssemblyReference.cache
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.AMain.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.Properties.Resources.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csproj.GenerateResource.Cache
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.exe
+E:\Legend of Mir\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.pdb
+C:\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.exe.config
+C:\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.exe
+C:\Mir 2 Source\Release\AutoPatcherAdmin\AutoPatcherAdmin.pdb
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csprojResolveAssemblyReference.cache
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.AMain.resources
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.Properties.Resources.resources
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.csproj.GenerateResource.Cache
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.exe
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Release\AutoPatcherAdmin.pdb

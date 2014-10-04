@@ -30,6 +30,8 @@ namespace Client.MirObjects
         public byte AI;
         public bool InTrapRock;
 
+        public uint TradeGoldAmount;
+
         public byte PercentHealth;
         public long HealthTime;
 
@@ -200,7 +202,7 @@ namespace Client.MirObjects
             {
                 if (Race == ObjectType.Monster && !Name.EndsWith(string.Format("({0})", User.Name)) && !GroupDialog.GroupList.Contains(name)) return;
                 if (Race == ObjectType.Player && this != User && !GroupDialog.GroupList.Contains(Name)) return;
-                if (this == User && GroupDialog.GroupList.Count == 0) return;
+                if (this == User && GroupDialog.GroupList.Count == 0 && !Settings.HPView) return;
             }
 
 
