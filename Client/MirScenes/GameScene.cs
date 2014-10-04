@@ -64,7 +64,11 @@ namespace Client.MirScenes
         public GuildDialog GuildDialog;
         public BigMapDialog BigMapDialog;
         public TrustMerchantDialog TrustMerchantDialog;
-        
+        public CharacterDuraPanel CharacterDuraPanel;
+        public DuraStatusDialog DuraStatusPanel;
+        public TradeDialog TradeDialog;
+        public GuestTradeDialog GuestTradeDialog;
+
         public static List<ItemInfo> ItemInfoList = new List<ItemInfo>();
         public static List<UserId> UserIdList = new List<UserId>();
         public static List<ChatItem> ChatItemList = new List<ChatItem>();
@@ -89,6 +93,7 @@ namespace Client.MirScenes
         public static long NPCTime;
         public static uint NPCID;
         public static float NPCRate;
+        public static uint DefaultNPCID;
 
         public long ToggleTime;
         public static bool Slaying, Thrusting, HalfMoon, CrossHalfMoon, DoubleSlash, TwinDrakeBlade, FlamingSword;
@@ -148,6 +153,10 @@ namespace Client.MirScenes
             GuildDialog = new GuildDialog { Parent = this, Visible = false };
             BigMapDialog = new BigMapDialog {Parent = this, Visible = false};
             TrustMerchantDialog = new TrustMerchantDialog {Parent = this, Visible = false};
+            CharacterDuraPanel = new CharacterDuraPanel { Parent = this, Visible = false };
+            DuraStatusPanel = new DuraStatusDialog { Parent = this, Visible = true };
+            TradeDialog = new TradeDialog { Parent = this, Visible = false };
+            GuestTradeDialog = new GuestTradeDialog { Parent = this, Visible = false };
 
             for (int i = 0; i < OutputLines.Length; i++)
                 OutputLines[i] = new MirLabel
@@ -303,6 +312,7 @@ namespace Client.MirScenes
                     InspectDialog.Hide();
                     StorageDialog.Hide();
                     TrustMerchantDialog.Hide();
+                    CharacterDuraPanel.Hide();
                     BigMapDialog.Visible = false;
                     break;
                 case Keys.O:
@@ -417,6 +427,8 @@ namespace Client.MirScenes
                         BeltDialog.Show();
                         ChatControl.Show();
                         MiniMapDialog.Show();
+                        CharacterDuraPanel.Show();
+                        DuraStatusPanel.Show();
                     }
                     else
                     {
@@ -425,6 +437,8 @@ namespace Client.MirScenes
                         BeltDialog.Hide();
                         ChatControl.Hide();
                         MiniMapDialog.Hide();
+                        CharacterDuraPanel.Hide();
+                        DuraStatusPanel.Hide();
                     }
                     break;
 
@@ -669,6 +683,12 @@ namespace Client.MirScenes
                     break;
                 case (short)ServerPacketIds.StoreItem:
                     StoreItem((S.StoreItem) p);
+                    break;
+                case (short)ServerPacketIds.DepositTradeItem:
+                    DepositTradeItem((S.DepositTradeItem)p);
+                    break;
+                case (short)ServerPacketIds.RetrieveTradeItem:
+                    RetrieveTradeItem((S.RetrieveTradeItem)p);
                     break;
                 case (short)ServerPacketIds.SplitItem:
                     SplitItem((S.SplitItem) p);
@@ -971,6 +991,30 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.GuildStorageList:
                     GuildStorageList((S.GuildStorageList)p);
                     break;
+                case (short)ServerPacketIds.DefaultNPC:
+                    DefaultNPC((S.DefaultNPC)p);
+                    break;
+                case (short)ServerPacketIds.NPCUpdate:
+                    NPCUpdate((S.NPCUpdate)p);
+                    break;
+                case (short)ServerPacketIds.TradeRequest:
+                    TradeRequest((S.TradeRequest)p);
+                    break;
+                case (short)ServerPacketIds.TradeAccept:
+                    TradeAccept((S.TradeAccept)p);
+                    break;
+                case (short)ServerPacketIds.TradeGold:
+                    TradeGold((S.TradeGold)p);
+                    break;
+                case (short)ServerPacketIds.TradeItem:
+                    TradeItem((S.TradeItem)p);
+                    break;
+                case (short)ServerPacketIds.TradeConfirm:
+                    TradeConfirm();
+                    break;
+                case (short)ServerPacketIds.TradeCancel:
+                    TradeCancel((S.TradeCancel)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1188,6 +1232,9 @@ namespace Client.MirScenes
                 case MirGridType.Storage:
                     fromCell = StorageDialog.Grid[p.From];
                     break;
+                case MirGridType.Trade:
+                    fromCell = TradeDialog.Grid[p.From];
+                    break;
                 default:
                     return;
             }
@@ -1200,6 +1247,9 @@ namespace Client.MirScenes
                 case MirGridType.Storage:
                     toCell = StorageDialog.Grid[p.To];
                     break;
+                case MirGridType.Trade:
+                    toCell = TradeDialog.Grid[p.To];
+                    break;
                 default:
                     return;
             }
@@ -1209,11 +1259,17 @@ namespace Client.MirScenes
             toCell.Locked = false;
             fromCell.Locked = false;
 
+            if (p.Grid == MirGridType.Trade)
+                TradeDialog.ChangeLockState(false);
+
             if (!p.Success) return;
+
             UserItem i = fromCell.Item;
             fromCell.Item = toCell.Item;
             toCell.Item = i;
+
             User.RefreshStats();
+            CharacterDuraPanel.GetCharacterDura();
         }
         private void EquipItem(S.EquipItem p)
         {
@@ -1260,6 +1316,9 @@ namespace Client.MirScenes
                 case MirGridType.Equipment:
                     fromCell = CharacterDialog.GetCell(p.IDFrom);
                     break;
+                case MirGridType.Trade:
+                    fromCell = TradeDialog.GetCell(p.IDFrom);
+                    break;
                 default:
                     return;
             }
@@ -1275,6 +1334,9 @@ namespace Client.MirScenes
                 case MirGridType.Equipment:
                     toCell = CharacterDialog.GetCell(p.IDTo);
                     break;
+                case MirGridType.Trade:
+                    toCell = TradeDialog.GetCell(p.IDTo);
+                    break;
                 default:
                     return;
             }
@@ -1283,6 +1345,10 @@ namespace Client.MirScenes
 
             toCell.Locked = false;
             fromCell.Locked = false;
+
+            if (p.GridFrom == MirGridType.Trade || p.GridTo == MirGridType.Trade)
+                TradeDialog.ChangeLockState(false);
+
             if (!p.Success) return;
             if (fromCell.Item.Count <= toCell.Item.Info.StackSize - toCell.Item.Count)
             {
@@ -1350,6 +1416,7 @@ namespace Client.MirScenes
             toCell.Item = fromCell.Item;
             fromCell.Item = null;
             User.RefreshStats();
+            CharacterDuraPanel.GetCharacterDura();
         }
         private void StoreItem(S.StoreItem p)
         {
@@ -1361,6 +1428,39 @@ namespace Client.MirScenes
 
             toCell.Locked = false;
             fromCell.Locked = false;
+
+            if (!p.Success) return;
+            toCell.Item = fromCell.Item;
+            fromCell.Item = null;
+            User.RefreshStats();
+        }
+        private void DepositTradeItem(S.DepositTradeItem p)
+        {
+            MirItemCell fromCell = p.From < 48 ? InventoryDialog.Grid[p.From] : BeltDialog.Grid[p.From - 48];
+
+            MirItemCell toCell = TradeDialog.Grid[p.To];
+
+            if (toCell == null || fromCell == null) return;
+
+            toCell.Locked = false;
+            fromCell.Locked = false;
+            TradeDialog.ChangeLockState(false);
+
+            if (!p.Success) return;
+            toCell.Item = fromCell.Item;
+            fromCell.Item = null;
+            User.RefreshStats();
+        }
+        private void RetrieveTradeItem(S.RetrieveTradeItem p)
+        {
+            MirItemCell fromCell = TradeDialog.Grid[p.From];
+            MirItemCell toCell = p.To < 48 ? InventoryDialog.Grid[p.To] : BeltDialog.Grid[p.To - 48];
+
+            if (toCell == null || fromCell == null) return;
+
+            toCell.Locked = false;
+            fromCell.Locked = false;
+            TradeDialog.ChangeLockState(false);
 
             if (!p.Success) return;
             toCell.Item = fromCell.Item;
@@ -1723,6 +1823,8 @@ namespace Client.MirScenes
                 DisposeItemLabel();
                 CreateItemLabel(item);
             }
+
+            CharacterDuraPanel.UpdateCharacterDura(item);
         }
         private void HealthChanged(S.HealthChanged p)
         {
@@ -1867,6 +1969,14 @@ namespace Client.MirScenes
             // BuyBackDialog.Hide();
             //   NPCDropDialog.Hide();
             StorageDialog.Hide();
+        }
+        private void NPCUpdate(S.NPCUpdate p)
+        {
+            GameScene.NPCID = p.NPCID; //Updates the client with the correct NPC ID if it's manually called from the client
+        }
+        private void DefaultNPC(S.DefaultNPC p)
+        {
+            GameScene.DefaultNPCID = p.ObjectID; //Updates the client with the correct Default NPC ID
         }
         private void ObjectHide(S.ObjectHide p)
         {
@@ -2912,6 +3022,48 @@ namespace Client.MirScenes
                 }
                 GuildDialog.StorageGrid[i].Item = p.Items[i].Item;
                 Bind(GuildDialog.StorageGrid[i].Item);
+            }
+        }
+
+        private void TradeRequest(S.TradeRequest p)
+        {
+            MirMessageBox messageBox = new MirMessageBox(string.Format("Player {0} has requested to trade with you.", p.Name), MirMessageBoxButtons.YesNo);
+
+            messageBox.YesButton.Click += (o, e) => Network.Enqueue(new C.TradeReply { AcceptInvite = true });
+            messageBox.NoButton.Click += (o, e) => { Network.Enqueue(new C.TradeReply { AcceptInvite = false }); messageBox.Dispose(); };
+
+            messageBox.Show();
+        }
+        private void TradeAccept(S.TradeAccept p)
+        {
+            GuestTradeDialog.GuestName = p.Name;
+            TradeDialog.TradeAccept();
+        }
+        private void TradeGold(S.TradeGold p)
+        {
+            GuestTradeDialog.GuestGold = p.Amount;
+            TradeDialog.ChangeLockState(false);
+            TradeDialog.RefreshInterface();
+        }
+        private void TradeItem(S.TradeItem p)
+        {
+            GuestTradeDialog.GuestItems = p.TradeItems;
+            TradeDialog.ChangeLockState(false);
+            TradeDialog.RefreshInterface();
+        }
+        private void TradeConfirm()
+        {
+            TradeDialog.TradeReset();
+        }
+        private void TradeCancel(S.TradeCancel p)
+        {
+            if (p.Unlock)
+            {
+                TradeDialog.ChangeLockState(false);
+            }
+            else
+            {
+                TradeDialog.TradeReset();
             }
         }
 
@@ -4090,6 +4242,9 @@ namespace Client.MirScenes
                 MenuDialog = null;
                 NPCDialog = null;
 
+                CharacterDuraPanel = null;
+                DuraStatusPanel = null;
+
                 HoverItem = null;
                 SelectedCell = null;
                 PickedUpGold = false;
@@ -4106,7 +4261,7 @@ namespace Client.MirScenes
 
                 NPCTime = 0;
                 NPCID = 0;
-
+                DefaultNPCID = 0;
 
                 for (int i = 0; i < OutputLines.Length; i++)
                     if (OutputLines[i] != null && OutputLines[i].IsDisposed)
@@ -5612,6 +5767,10 @@ namespace Client.MirScenes
                 PressedIndex = 1911,
                 Sound = SoundList.ButtonA,
             };
+            QuestButton.Click += (o, e) =>
+            {
+
+            };
 
             OptionButton = new MirButton
             {
@@ -6137,12 +6296,12 @@ namespace Client.MirScenes
                 StartIndex += chat.Count;
 
             for (int i = 0; i < chat.Count; i++)
-                History.Add(new ChatHistory {Text = chat[i], BackColour = backColour, ForeColour = foreColour});
+                History.Add(new ChatHistory { Text = chat[i], BackColour = backColour, ForeColour = foreColour, Type = type });
 
             Update();
         }
 
-        private void Update()
+        public void Update()
         {
             for (int i = 0; i < ChatLines.Count; i++)
                 ChatLines[i].Dispose();
@@ -6162,6 +6321,25 @@ namespace Client.MirScenes
             int y = 1;
             for (int i = StartIndex; i < History.Count; i++)
             {
+                //switch (History[i].Type)
+                //{
+                //    case ChatType.Normal:
+                //        if (!Settings.ShowNormalChat) continue;
+                //        break;
+                //    case ChatType.Shout:
+                //        if (!Settings.ShowYellChat) continue;
+                //        break;
+                //    case ChatType.WhisperIn:
+                //        if (!Settings.ShowWhisperChat) continue;
+                //        break;
+                //    case ChatType.Group:
+                //        if (!Settings.ShowGroupChat) continue;
+                //        break;
+                //    case ChatType.Guild:
+                //        if (!Settings.ShowGuildChat) continue;
+                //        break;
+                //}
+
                 MirLabel temp = new MirLabel
                     {
                         AutoSize = true,
@@ -6366,6 +6544,7 @@ namespace Client.MirScenes
         {
             public string Text;
             public Color ForeColour, BackColour;
+            public ChatType Type;
         }
     }
     public sealed class ChatControlBar : MirImageControl
@@ -6411,7 +6590,7 @@ namespace Client.MirScenes
 
             NormalButton = new MirButton
                 {
-                    Index = 2037,
+                    Index = 2036,
                     HoverIndex = 2037,
                     PressedIndex = 2038,
                     Library = Libraries.Prguse,
@@ -6419,8 +6598,11 @@ namespace Client.MirScenes
                     Location = new Point(12, 1),
                     Sound = SoundList.ButtonA
                 };
-
-
+            NormalButton.Click += (o, e) =>
+            {
+                Settings.ShowNormalChat = !Settings.ShowNormalChat;
+                SetStates();
+            };
 
             ShoutButton = new MirButton
                 {
@@ -6432,7 +6614,11 @@ namespace Client.MirScenes
                     Location = new Point(34, 1),
                     Sound = SoundList.ButtonA
                 };
-
+            ShoutButton.Click += (o, e) =>
+            {
+                Settings.ShowYellChat = !Settings.ShowYellChat;
+                SetStates();
+            };
 
             WhisperButton = new MirButton
                 {
@@ -6444,7 +6630,11 @@ namespace Client.MirScenes
                     Location = new Point(56, 1),
                     Sound = SoundList.ButtonA
                 };
-
+            WhisperButton.Click += (o, e) =>
+            {
+                Settings.ShowWhisperChat = !Settings.ShowWhisperChat;
+                SetStates();
+            };
 
             LoverButton = new MirButton
                 {
@@ -6456,6 +6646,11 @@ namespace Client.MirScenes
                     Location = new Point(78, 1),
                     Sound = SoundList.ButtonA
                 };
+            LoverButton.Click += (o, e) =>
+            {
+                Settings.ShowLoverChat = !Settings.ShowLoverChat;
+                SetStates();
+            };
 
             MentorButton = new MirButton
                 {
@@ -6467,7 +6662,11 @@ namespace Client.MirScenes
                     Location = new Point(100, 1),
                     Sound = SoundList.ButtonA
                 };
-
+            MentorButton.Click += (o, e) =>
+            {
+                Settings.ShowMentorChat = !Settings.ShowMentorChat;
+                SetStates();
+            };
 
             GroupButton = new MirButton
                 {
@@ -6479,7 +6678,11 @@ namespace Client.MirScenes
                     Location = new Point(122, 1),
                     Sound = SoundList.ButtonA
                 };
-
+            GroupButton.Click += (o, e) =>
+            {
+                Settings.ShowGroupChat = !Settings.ShowGroupChat;
+                SetStates();
+            };
 
             GuildButton = new MirButton
                 {
@@ -6491,7 +6694,13 @@ namespace Client.MirScenes
                     Location = new Point(144, 1),
                     Sound = SoundList.ButtonA
                 };
+            GuildButton.Click += (o, e) =>
+            {
+                Settings.ShowGuildChat = !Settings.ShowGuildChat;
+                SetStates();
+            };
 
+            SetStates();
         }
 
         public void Show()
@@ -6503,7 +6712,316 @@ namespace Client.MirScenes
         {
             Visible = false;
         }
+
+        public void SetStates()
+        {
+            NormalButton.Index = Settings.ShowNormalChat ? 2036 : 2300;
+            ShoutButton.Index = Settings.ShowYellChat ? 2039 : 2301;
+            WhisperButton.Index = Settings.ShowWhisperChat ? 2042 : 2302;
+            LoverButton.Index = Settings.ShowLoverChat ? 2045 : 2303;
+            MentorButton.Index = Settings.ShowMentorChat ? 2048 : 2304;
+            GroupButton.Index = Settings.ShowGroupChat ? 2051 : 2305;
+            GuildButton.Index = Settings.ShowGuildChat ? 2054 : 2306;
+
+            NormalButton.HoverIndex = Settings.ShowNormalChat ? 2037 : 2300;
+            ShoutButton.HoverIndex = Settings.ShowYellChat ? 2040 : 2301;
+            WhisperButton.HoverIndex = Settings.ShowWhisperChat ? 2043 : 2302;
+            LoverButton.HoverIndex = Settings.ShowLoverChat ? 2046 : 2303;
+            MentorButton.HoverIndex = Settings.ShowMentorChat ? 2049 : 2304;
+            GroupButton.HoverIndex = Settings.ShowGroupChat ? 2052 : 2305;
+            GuildButton.HoverIndex = Settings.ShowGuildChat ? 2055 : 2306;
+
+            GameScene.Scene.ChatDialog.Update();
+        }
     }
+
+    public sealed class TradeDialog : MirImageControl
+    {
+        public MirItemCell[] Grid;
+        public MirLabel NameLabel, GoldLabel;
+        public MirButton ConfirmButton, CloseButton;
+
+        public TradeDialog()
+        {
+            Index = 389;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Size = new Size(204, 152);
+            Location = new Point((Settings.ScreenWidth / 2) - Size.Width - 10, Settings.ScreenHeight - 350);
+            Sort = true;
+
+            #region Buttons
+            ConfirmButton = new MirButton
+            {
+                Index = 520,
+                HoverIndex = 521,
+                Location = new Point(135, 120),
+                Size = new Size(48, 25),
+                Library = Libraries.Title,
+                Parent = this,
+                PressedIndex = 522,
+                Sound = SoundList.ButtonA,
+            };
+            ConfirmButton.Click += (o, e) => { ChangeLockState(!GameScene.User.TradeLocked); };
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(Size.Width - 23, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) =>
+            {
+                Hide();
+                GameScene.Scene.GuestTradeDialog.Hide();
+                TradeCancel();
+            };
+
+            #endregion
+
+            #region Host labels
+            NameLabel = new MirLabel
+            {
+                Parent = this,
+                Location = new Point(20, 10),
+                Size = new Size(150, 14),
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+            };
+
+            GoldLabel = new MirLabel
+            {
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                Font = new Font(Settings.FontName, 8F),
+                Location = new Point(35, 123),
+                Parent = this,
+                Size = new Size(90, 15),
+                Sound = SoundList.Gold,
+            };
+            GoldLabel.Click += (o, e) =>
+            {
+                if (GameScene.SelectedCell == null && GameScene.Gold > 0)
+                {
+                    MirAmountBox amountBox = new MirAmountBox("Trade Amount:", 116, GameScene.Gold);
+
+                    amountBox.OKButton.Click += (c, a) =>
+                    {
+                        if (amountBox.Amount > 0)
+                        {
+                            GameScene.User.TradeGoldAmount += amountBox.Amount;
+                            Network.Enqueue(new C.TradeGold { Amount = amountBox.Amount });
+
+                            RefreshInterface();
+                        }
+                    };
+
+                    amountBox.Show();
+                    GameScene.PickedUpGold = false;
+                }
+            };
+            #endregion
+
+            #region Grids
+            Grid = new MirItemCell[5 * 2];
+
+            for (int x = 0; x < 5; x++)
+            {
+                for (int y = 0; y < 2; y++)
+                {
+                    Grid[2 * x + y] = new MirItemCell
+                    {
+                        ItemSlot = 2 * x + y,
+                        GridType = MirGridType.Trade,
+                        Parent = this,
+                        Location = new Point(x * 36 + 10 + x, y * 32 + 39 + y),
+                    };
+                }
+            }
+            #endregion
+        }
+
+        public void ChangeLockState(bool lockState, bool cancelled = false)
+        {
+            GameScene.User.TradeLocked = lockState;
+
+            if (GameScene.User.TradeLocked)
+            {
+                ConfirmButton.Index = 521;
+            }
+            else
+            {
+                ConfirmButton.Index = 520;
+            }
+
+            if (!cancelled)
+            {
+                //Send lock info to server
+                Network.Enqueue(new C.TradeConfirm { Locked = lockState });
+            }
+        }
+
+        public void RefreshInterface()
+        {
+            NameLabel.Text = GameScene.User.Name;
+            GoldLabel.Text = GameScene.User.TradeGoldAmount.ToString("###,###,##0");
+
+            GameScene.Scene.GuestTradeDialog.RefreshInterface();
+
+            Redraw();
+        }
+
+        public void TradeAccept()
+        {
+            GameScene.Scene.InventoryDialog.Location = new Point(Settings.ScreenWidth - GameScene.Scene.InventoryDialog.Size.Width, 0);
+            GameScene.Scene.InventoryDialog.Show();
+
+            RefreshInterface();
+
+            Show();
+            GameScene.Scene.GuestTradeDialog.Show();
+        }
+
+        public void TradeReset()
+        {
+            GameScene.Scene.GuestTradeDialog.TradeReset();
+
+            for (int i = 0; i < GameScene.User.Trade.Length; i++)
+                GameScene.User.Trade[i] = null;
+
+            GameScene.User.TradeGoldAmount = 0;
+            ChangeLockState(false, true);
+
+            RefreshInterface();
+
+            Hide();
+            GameScene.Scene.GuestTradeDialog.Hide();
+        }
+
+        public void TradeCancel()
+        {
+            Network.Enqueue(new C.TradeCancel());
+        }
+
+        public void Hide()
+        {
+            Visible = false;
+        }
+
+        public void Show()
+        {
+            Visible = true;
+        }
+
+        public MirItemCell GetCell(ulong id)
+        {
+            for (int i = 0; i < Grid.Length; i++)
+            {
+                if (Grid[i].Item == null || Grid[i].Item.UniqueID != id) continue;
+                return Grid[i];
+            }
+            return null;
+        }
+    }
+
+    public sealed class GuestTradeDialog : MirImageControl
+    {
+        public MirItemCell[] GuestGrid;
+        public static UserItem[] GuestItems = new UserItem[10];
+        public string GuestName;
+        public uint GuestGold;
+
+        public MirLabel GuestNameLabel, GuestGoldLabel;
+
+        public MirButton ConfirmButton;
+
+        public GuestTradeDialog()
+        {
+            Index = 390;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Size = new Size(204, 152);
+            Location = new Point((Settings.ScreenWidth / 2) + 10, Settings.ScreenHeight - 350);
+            Sort = true;
+
+            #region Host labels
+            GuestNameLabel = new MirLabel
+            {
+                Parent = this,
+                Location = new Point(0, 10),
+                Size = new Size(204, 14),
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+            };
+
+            GuestGoldLabel = new MirLabel
+            {
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                Font = new Font(Settings.FontName, 8F),
+                Location = new Point(35, 123),
+                Parent = this,
+                Size = new Size(90, 15),
+                Sound = SoundList.Gold,
+            };
+            #endregion
+
+            #region Grids
+            GuestGrid = new MirItemCell[5 * 2];
+
+            for (int x = 0; x < 5; x++)
+            {
+                for (int y = 0; y < 2; y++)
+                {
+                    GuestGrid[2 * x + y] = new MirItemCell
+                    {
+                        ItemSlot = 2 * x + y,
+                        GridType = MirGridType.GuestTrade,
+                        Parent = this,
+                        Location = new Point(x * 36 + 10 + x, y * 32 + 39 + y),
+                    };
+                }
+            }
+            #endregion
+        }
+
+        public void RefreshInterface()
+        {
+            GuestNameLabel.Text = GuestName;
+            GuestGoldLabel.Text = string.Format("{0:###,###,##0}", GuestGold);
+
+            for (int i = 0; i < GuestItems.Length; i++)
+            {
+                if (GuestItems[i] == null) continue;
+                GameScene.Bind(GuestItems[i]);
+            }
+
+            Redraw();
+        }
+
+        public void TradeReset()
+        {
+            for (int i = 0; i < GuestItems.Length; i++)
+                GuestItems[i] = null;
+
+            GuestName = string.Empty;
+            GuestGold = 0;
+
+            Hide();
+        }
+
+
+        public void Hide()
+        {
+            Visible = false;
+        }
+
+        public void Show()
+        {
+            Visible = true;
+        }
+    }
+
     public sealed class InventoryDialog : MirImageControl
     {
         public MirImageControl WeightBar;
@@ -7381,7 +7899,7 @@ namespace Client.MirScenes
             Library = Libraries.Prguse;
             Location = new Point(Settings.ScreenWidth - 126, 0);
             PixelDetect = true;
-            Movable = true;
+            //Movable = true;
 
             BeforeDraw += MiniMap_BeforeDraw;
 
@@ -7546,6 +8064,9 @@ namespace Client.MirScenes
             BigMapButton.Location = new Point(25, y);
             LocationLabel.Location = new Point(46, y);
             LightSetting.Location = new Point(102, y);
+
+            GameScene.Scene.DuraStatusPanel.Location = new Point((GameScene.Scene.MiniMapDialog.Location.X + 86),
+            GameScene.Scene.MiniMapDialog.Size.Height);
         }
 
         private void SetBigMode()
@@ -7556,6 +8077,9 @@ namespace Client.MirScenes
             BigMapButton.Location = new Point(25, y);
             LocationLabel.Location = new Point(46, y);
             LightSetting.Location = new Point(102, y);
+
+            GameScene.Scene.DuraStatusPanel.Location = new Point((GameScene.Scene.MiniMapDialog.Location.X + 86),
+            GameScene.Scene.MiniMapDialog.Size.Height);
         }
 
         public void Process()
@@ -7564,6 +8088,7 @@ namespace Client.MirScenes
             if (map == null) return;
             MapNameLabel.Text = map.Title;
             LocationLabel.Text = Functions.PointToString(MapObject.User.CurrentLocation);
+
         }
     }
     public sealed class InspectDialog : MirImageControl
@@ -7905,7 +8430,7 @@ namespace Client.MirScenes
 
         public OptionDialog()
         {
-            Index = 411;
+            Index = 410;
             Library = Libraries.Title;
             Movable = true;
             Sort = true;
@@ -10191,8 +10716,8 @@ namespace Client.MirScenes
         public static RankOptions MyOptions;
         public static int MyRankId;
         public List<Rank> Ranks = new List<Rank>();
-        
-        public bool MembersChanged = true;        
+
+        public bool MembersChanged = true;
         public long LastMemberRequest = 0;
         public long LastGuildMsg = 0;
         public long LastRankNameChange = 0;
@@ -10201,7 +10726,7 @@ namespace Client.MirScenes
         public bool NoticeChanged = true;
         public long LastNoticeRequest = 0;
         public int NoticeScrollIndex = 0;
-        public MirButton NoticeUpButton, NoticeDownButton, NoticePositionBar, NoticeEditButton;
+        public MirButton NoticeUpButton, NoticeDownButton, NoticePositionBar, NoticeEditButton, NoticeSaveButton;
         public MirTextBox Notice;
         #endregion
 
@@ -10213,14 +10738,14 @@ namespace Client.MirScenes
         public MirButton MembersShowOfflineButton;
         public MirImageControl MembersShowOfflineStatus;
         public MirDropDownBox[] MembersRanks;
-        public MirLabel[] MembersName,MembersStatus;
+        public MirLabel[] MembersName, MembersStatus;
         public MirButton[] MembersDelete;
         public int MemberPageRows = 20;
         public bool MembersShowOfflinesetting = true;
         #endregion
 
         #region status page
-        public MirLabel StatusHeaders; //name/level/members(online)/max memebers
+        public MirLabel StatusHeaders; //name/level/members(online)/max members
         public MirLabel StatusData;
         public MirImageControl StatusExpBar;
         public MirLabel StatusExpLabel;
@@ -10230,8 +10755,7 @@ namespace Client.MirScenes
 
         #region Storage page
         public MirLabel StorageGoldText;
-        public MirButton StorageGoldAdd;
-        public MirButton StorageGoldRemove;
+        public MirButton StorageGoldAdd, StorageGoldRemove, StorageGoldIcon;
         public MirItemCell[] StorageGrid;
         public bool StorageRequested = false;
         #endregion
@@ -10254,91 +10778,77 @@ namespace Client.MirScenes
             Movable = true;
             Sort = true;
             Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+
             #region tab buttons
-            NoticeButton = new MirButton
+            NoticeButton = new MirButton // Notice
             {
-                Library = Libraries.Prguse,
-                Index = 231,
-                PressedIndex = 231,
+                Library = Libraries.Title,
+                Index = 88,
+                HoverIndex = 87,
+                PressedIndex = 89,
                 Sound = SoundList.ButtonA,
                 Parent = this,
-                Text = "Notice",
-                Location = new Point(8, 404),
-                CenterText = true
-                
+                Location = new Point(210, 400)
             };
             NoticeButton.Click += (o, e) => ChangePage(0);
-            MembersButton = new MirButton
+            MembersButton = new MirButton // Members
             {
-                Library = Libraries.Prguse,
-                Index = 232,
-                PressedIndex = 232,
+                Library = Libraries.Title,
+                Index = 76,
+                HoverIndex = 77,
+                PressedIndex = 75,
                 Sound = SoundList.ButtonA,
                 Parent = this,
-                Text = "Members",
-                Location = new Point(104, 404),
-                CenterText = true
+                Location = new Point(125, 400),
             };
             MembersButton.Click += (o, e) => ChangePage(1);
-            StatusButton = new MirButton
+            StatusButton = new MirButton // Guild Stats
             {
-                Library = Libraries.Prguse,
-                Index = 232,
-                PressedIndex = 232,
+                Library = Libraries.Title,
+                Index = 67,
+                HoverIndex = 68,
+                PressedIndex = 66,
                 Sound = SoundList.ButtonA,
                 Parent = this,
-                Text = "Status",
-                Location = new Point(200, 404),
-                CenterText = true
+                Location = new Point(40, 400)
             };
             StatusButton.Click += (o, e) => ChangePage(2);
-            StorageButton = new MirButton
+            StorageButton = new MirButton // Storage
             {
-                Library = Libraries.Prguse,
-                Index = 232,
-                PressedIndex = 232,
+                Library = Libraries.Title,
+                Index = 79,
+                HoverIndex = 80,
+                PressedIndex = 78,
                 Sound = SoundList.ButtonA,
                 Parent = this,
-                Text = "Storage",
-                Location = new Point(296, 404),
-                Visible = false,
-                CenterText = true
+                Location = new Point(295, 400),
+                Visible = false
             };
             StorageButton.Click += (o, e) => ChangePage(3);
-            BuffsButton = new MirButton
+            BuffsButton = new MirButton // Buffs
             {
-                Library = Libraries.Prguse,
-                Index = 232,
-                PressedIndex = 232,
+                Library = Libraries.Title,
+                Index = 70,
+                HoverIndex = 71,
+                PressedIndex = 69,
                 Sound = SoundList.ButtonA,
                 Parent = this,
-                Text = "Buffs",
-                Location = new Point(392, 404),
+                Location = new Point(465, 400),
                 Visible = false,
-                CenterText = true
             };
             BuffsButton.Click += (o, e) => ChangePage(4);
-            RankButton = new MirButton
+            RankButton = new MirButton // Ranks
             {
-                Library = Libraries.Prguse,
-                Index = 232,
-                PressedIndex = 232,
+                Library = Libraries.Title,
+                Index = 73,
+                HoverIndex = 74,
+                PressedIndex = 72,
                 Sound = SoundList.ButtonA,
                 Parent = this,
-                Text = "Ranks",
-                Location = new Point(488, 404),
+                Location = new Point(380, 400),
                 Visible = false,
-                CenterText = true
             };
             RankButton.Click += (o, e) => ChangePage(5);
-            TitleLabel = new MirImageControl
-            {
-                // Index = 7,
-                Library = Libraries.Title,
-                Location = new Point(18, 4),
-                Parent = this
-            };
-
             GuildName = new MirLabel
             {
                 Location = new Point(302, 9),
@@ -10356,6 +10866,7 @@ namespace Client.MirScenes
                     GuildName.Text = "None";
             };
             #endregion
+
             CloseButton = new MirButton
             {
                 HoverIndex = 361,
@@ -10364,7 +10875,7 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse2,
                 Parent = this,
                 PressedIndex = 362,
-                Sound = SoundList.ButtonA,
+                Sound = SoundList.ButtonA
             };
             CloseButton.Click += (o, e) => Hide();
 
@@ -10374,7 +10885,7 @@ namespace Client.MirScenes
                 Parent = this,
                 Size = new Size(567, 368),
                 Location = new Point(13, 37),
-                Visible = true,
+                Visible = true
             };
             Notice = new MirTextBox()
             {
@@ -10384,28 +10895,38 @@ namespace Client.MirScenes
                 Visible = true,
                 Parent = NoticePage,
                 Size = new Size(550, 325),
-                Location = new Point(0, 0),      
+                Location = new Point(0, 0)
             };
             Notice.MultiLine();
 
             NoticeEditButton = new MirButton
             {
                 Visible = false,
-                Index = 2216,
-                HoverIndex = 2217,
-                PressedIndex = 2218,
-                Library = Libraries.Prguse,
+                Index = 85,
+                HoverIndex = 86,
+                PressedIndex = 84,
+                Library = Libraries.Title,
                 Sound = SoundList.ButtonA,
-                Text = "Edit Notice",
                 Parent = NoticePage,
-                Location = new Point(492, 345),
-                CenterText = true
+                Location = new Point(27, 337)
             };
             NoticeEditButton.Click += (o, e) => EditNotice();
 
+            NoticeSaveButton = new MirButton
+            {
+                Visible = false,
+                Index = 82,
+                HoverIndex = 83,
+                PressedIndex = 84,
+                Library = Libraries.Title,
+                Sound = SoundList.ButtonA,
+                Parent = NoticePage,
+                Location = new Point(27, 337)
+            };
+            NoticeSaveButton.Click += (o, e) => EditNotice();
+
             NoticeUpButton = new MirButton
             {
-                //Index = 312,
                 HoverIndex = 312,
                 Library = Libraries.Prguse,
                 Location = new Point(551, 0),
@@ -10424,11 +10945,10 @@ namespace Client.MirScenes
 
             NoticeDownButton = new MirButton
             {
-                //Index = 314,
                 HoverIndex = 314,
                 Library = Libraries.Prguse,
                 Location = new Point(551, 316),
-                Size = new Size(16,14),
+                Size = new Size(16, 14),
                 Parent = NoticePage,
                 PressedIndex = 315,
                 Sound = SoundList.ButtonA
@@ -10448,7 +10968,7 @@ namespace Client.MirScenes
                 Location = new Point(551, 15),
                 Parent = NoticePage,
                 Movable = true,
-                Sound = SoundList.None,
+                Sound = SoundList.None
             };
             NoticePositionBar.OnMoving += NoticePositionBar_OnMoving;
 
@@ -10456,68 +10976,67 @@ namespace Client.MirScenes
             NoticePage.MouseWheel += NoticePanel_MouseWheel;
             #endregion
 
-
-
             #region "members tab"
             MembersPage = new MirImageControl()
             {
                 Parent = this,
                 Size = new Size(567, 368),
                 Location = new Point(13, 37),
-                Visible = false,
+                Visible = false
             };
             MembersPage.BeforeDraw += (o, e) => RequestUpdateMembers();
 
             MembersHeaderRank = new MirLabel
             {
                 Parent = MembersPage,
-                BackColour = Color.DimGray,
+                BackColour = Color.FromArgb(0x00, 0x00, 0x33),
                 ForeColour = Color.White,
                 Text = "Rank:",
-                Location = new Point(10,10),
-                Size = new Size(150,14),
+                Location = new Point(10, 10),
+                Size = new Size(180, 14),
                 Font = new Font(Settings.FontName, 7F),
-                Visible = true,
+                Visible = true
             };
             MembersHeaderName = new MirLabel
             {
                 Parent = MembersPage,
-                BackColour = Color.DimGray,
+                BackColour = Color.FromArgb(0x00, 0x00, 0x33),
                 ForeColour = Color.White,
                 Text = "Name:",
-                Location = new Point(160, 10),
-                Size = new Size(160, 14),
+                Location = new Point(190, 10),
+                Size = new Size(180, 14),
                 Font = new Font(Settings.FontName, 7F),
-                Visible = true,
+                Visible = true
             };
             MembersHeaderStatus = new MirLabel
             {
                 Parent = MembersPage,
-                BackColour = Color.DimGray,
+                BackColour = Color.FromArgb(0x00, 0x00, 0x33),
                 ForeColour = Color.White,
                 Text = "Status:",
-                Location = new Point(320, 10),
-                Size = new Size(150, 14),
+                Location = new Point(370, 10),
+                Size = new Size(170, 14),
                 Font = new Font(Settings.FontName, 7F),
-                Visible = true,
+                Visible = true
             };
-            
+
             MembersRanks = new MirDropDownBox[MemberPageRows];
             MembersName = new MirLabel[MemberPageRows];
             MembersStatus = new MirLabel[MemberPageRows];
             MembersDelete = new MirButton[MemberPageRows];
-            for (int i = MembersRanks.Length-1; i >= 0; i--)
+
+            for (int i = MembersRanks.Length - 1; i >= 0; i--)
             {
                 int index = i;
                 MembersRanks[i] = new MirDropDownBox()
                 {
-                    BackColour = i%2 == 0? Color.Black: Color.DarkSlateGray,
+                    BackColour = i % 2 == 0 ? Color.FromArgb(0x0F, 0x0F, 0x42) : Color.FromArgb(0x00, 0x00, 0x66),
                     ForeColour = Color.White,
                     Parent = MembersPage,
-                    Size = new Size(150, 14),
-                    Location = new Point(10, 24 + (i*15)),
+                    Size = new Size(180, 14),
+                    Location = new Point(10, 24 + (i * 15)),
                     Visible = false,
-                    Enabled = false,
+                    Enabled = false
                 };
                 MembersRanks[index].ValueChanged += (o, e) => OnNewRank(index, MembersRanks[index]._WantedIndex);
             }
@@ -10525,11 +11044,11 @@ namespace Client.MirScenes
             {
                 MembersName[i] = new MirLabel()
                 {
-                    BackColour = i % 2 == 0 ? Color.Black : Color.DarkSlateGray,
+                    BackColour = i % 2 == 0 ? Color.FromArgb(0x0F, 0x0F, 0x42) : Color.FromArgb(0x00, 0x00, 0x66),
                     ForeColour = Color.White,
                     Parent = MembersPage,
-                    Size = new Size(160, 14),
-                    Location = new Point(160, 24 + (i * 15)),
+                    Size = new Size(180, 14),
+                    Location = new Point(190, 24 + (i * 15)),
                     Visible = false,
                     Enabled = false,
                     Font = new Font(Settings.FontName, 7F)
@@ -10540,11 +11059,11 @@ namespace Client.MirScenes
             {
                 MembersStatus[i] = new MirLabel()
                 {
-                    BackColour = i % 2 == 0 ? Color.Black : Color.DarkSlateGray,
+                    BackColour = i % 2 == 0 ? Color.FromArgb(0x0F, 0x0F, 0x42) : Color.FromArgb(0x00, 0x00, 0x66),
                     ForeColour = Color.White,
                     Parent = MembersPage,
-                    Size = new Size(200, 14),
-                    Location = new Point(320, 24 + (i * 15)),
+                    Size = new Size(170, 14),
+                    Location = new Point(370, 24 + (i * 15)),
                     Visible = false,
                     Enabled = false,
                     Font = new Font(Settings.FontName, 7F)
@@ -10557,10 +11076,10 @@ namespace Client.MirScenes
                 {
                     Enabled = true,
                     Visible = false,
-                    Location = new Point(530,24+(i*15)),
+                    Location = new Point(525, 24 + (i * 15)),
                     Library = Libraries.Prguse,
                     Index = 917,
-                    Parent = MembersPage,
+                    Parent = MembersPage
                 };
                 MembersDelete[index].Click += (o, e) => DeleteMember(index);
             }
@@ -10570,20 +11089,16 @@ namespace Client.MirScenes
                 Parent = MembersPage,
                 Enabled = true,
                 Visible = false,
-                Location = new Point(10,335),
-                Library = Libraries.Prguse2,
-                Index = 383,
-                HoverIndex = 384,
-                PressedIndex = 385,
-                Text = "Add Member",
-                
-                CenterText = true,
+                Location = new Point(27, 337),
+                Library = Libraries.Title,
+                Index = 64,
+                HoverIndex = 65,
+                PressedIndex = 63
             };
             MembersAddMember.Click += (o, e) => AddMember();
-            
+
             MembersUpButton = new MirButton
             {
-                //Index = 312,
                 HoverIndex = 312,
                 Library = Libraries.Prguse,
                 Location = new Point(551, 0),
@@ -10602,7 +11117,6 @@ namespace Client.MirScenes
 
             MembersDownButton = new MirButton
             {
-                //Index = 314,
                 HoverIndex = 314,
                 Library = Libraries.Prguse,
                 Location = new Point(551, 316),
@@ -10626,7 +11140,7 @@ namespace Client.MirScenes
                 Location = new Point(551, 15),
                 Parent = MembersPage,
                 Movable = true,
-                Sound = SoundList.None,
+                Sound = SoundList.None
             };
             MembersPositionBar.OnMoving += MembersPositionBar_OnMoving;
 
@@ -10637,7 +11151,7 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Sound = SoundList.ButtonA,
                 Parent = MembersPage,
-                Location = new Point(432, 345),
+                Location = new Point(432, 340)
             };
             MembersShowOfflineButton.Click += (o, e) => MembersShowOfflineSwitch();
 
@@ -10647,7 +11161,7 @@ namespace Client.MirScenes
                 Index = 1347,
                 Library = Libraries.Prguse,
                 Parent = MembersPage,
-                Location = new Point(432, 345)
+                Location = new Point(432, 340)
             };
             MembersShowOfflineStatus.Click += (o, e) => MembersShowOfflineSwitch();
 
@@ -10655,15 +11169,15 @@ namespace Client.MirScenes
             {
                 Visible = true,
                 Text = "Show Offline Members",
-                Location = new Point(449, 345),
+                Location = new Point(449, 340),
                 Parent = MembersPage,
-                Size = new Size(150,12),
+                Size = new Size(150, 12),
                 Font = new Font(Settings.FontName, 7F),
-                ForeColour = Color.White,
+                ForeColour = Color.White
             };
             MembersPage.KeyDown += MembersPanel_KeyDown;
             MembersPage.MouseWheel += MembersPanel_MouseWheel;
-            #endregion 
+            #endregion
 
             #region "status tab"
             StatusPage = new MirImageControl()
@@ -10671,42 +11185,42 @@ namespace Client.MirScenes
                 Parent = this,
                 Size = new Size(567, 368),
                 Location = new Point(13, 37),
-                Visible = false,
+                Visible = false
             };
             StatusPage.BeforeDraw += (o, e) =>
             {
                 if (MapControl.User.GuildName == "")
                     StatusData.Text = "";
                 else
-                    StatusData.Text = string.Format("{0}\n{1}\n{2}\n{3}", MapObject.User.GuildName, Level, MemberCount, MaxMembers == 0? "Unlimited": MaxMembers.ToString());
+                    StatusData.Text = string.Format("{0}\n{1}\n{2}\n{3}", MapObject.User.GuildName, Level, MemberCount, MaxMembers == 0 ? "Unlimited" : MaxMembers.ToString());
             };
             StatusHeaders = new MirLabel()
             {
-                Location = new Point(0,15),
-                Size = new Size(100,300),
+                Location = new Point(10, 25),
+                Size = new Size(100, 300),
                 NotControl = true,
-                Text = "GuildName:\nLevel:\nMembers:\nMaximum Members:\n",
+                Text = "Guild Name:\nLevel:\nMembers:\nMaximum Members:\n",
                 Visible = true,
-                Parent = StatusPage,
+                Parent = StatusPage
             };
             StatusData = new MirLabel()
             {
-                Location = new Point(101, 15),
+                Location = new Point(120, 25),
                 Size = new Size(100, 300),
                 NotControl = true,
                 Text = "",
                 Visible = true,
-                Parent = StatusPage,
+                Parent = StatusPage
             };
             StatusExpBar = new MirImageControl()
             {
                 Index = 7,
                 Library = Libraries.Prguse,
-                Location = new Point(0,0),
+                Location = new Point(0, 0),
                 DrawImage = false,
                 NotControl = true,
                 Parent = StatusPage,
-                Size = new Size(550,7),
+                Size = new Size(550, 7)
             };
             StatusExpBar.BeforeDraw += StatusExpBar_BeforeDraw;
             StatusExpLabel = new MirLabel()
@@ -10715,34 +11229,48 @@ namespace Client.MirScenes
                 Location = new Point(0, 0),
                 NotControl = true,
                 Parent = StatusPage,
-                Size = new Size(550, 12),
+                Size = new Size(550, 12)
             };
             #endregion
+
             #region "storage tab"
             StoragePage = new MirImageControl()
             {
                 Parent = this,
                 Size = new Size(567, 368),
                 Location = new Point(13, 37),
-                Visible = false,
+                Visible = false
             };
             StoragePage.BeforeDraw += (o, e) =>
-                {
-                    StorageGoldText.Text = Gold > 0? string.Format("{0:###,###,###} Gold.", Gold): "0 Gold.";
-                    if (MyRankId == 0)
-                        StorageGoldRemove.Visible = true;
-                    else
-                        StorageGoldRemove.Visible = false;
+            {
+                StorageGoldText.Text = Gold > 0 ? string.Format("{0:###,###,###} Gold", Gold) : "0 Gold";
+                if (MyRankId == 0)
+                    StorageGoldRemove.Visible = true;
+                else
+                    StorageGoldRemove.Visible = false;
 
-                };
+            };
+            StorageGoldIcon = new MirButton()
+            {
+                Parent = StoragePage,
+                Size = new Size(32, 17),
+                Location = new Point(10, 9),
+                Visible = true,
+                Library = Libraries.Prguse,
+                Index = 28,
+                NotControl = true,
+            };
             StorageGoldText = new MirLabel()
             {
                 Parent = StoragePage,
-                Size = new Size (150,20),
-                Location = new Point(0, 0),
+                Size = new Size(150, 15),
+                Location = new Point(47, 10),
                 Visible = true,
                 Text = "0",
                 NotControl = true,
+                BackColour = Color.FromArgb(0x0F, 0x0F, 0x42),
+                Border = true,
+                BorderColour = Color.FromArgb(0x54, 0x4F, 0x36)
             };
             StorageGoldAdd = new MirButton()
             {
@@ -10751,7 +11279,7 @@ namespace Client.MirScenes
                 Index = 918,
                 Visible = true,
                 Enabled = true,
-                Location = new Point(155,0),
+                Location = new Point(202, 10)
             };
             StorageGoldAdd.Click += (o, e) => StorageAddGold();
             StorageGoldRemove = new MirButton()
@@ -10761,7 +11289,7 @@ namespace Client.MirScenes
                 Index = 917,
                 Visible = false,
                 Enabled = true,
-                Location = new Point(171, 0),
+                Location = new Point(218, 10)
             };
             StorageGoldRemove.Click += (o, e) => StorageRemoveGold();
 
@@ -10769,20 +11297,20 @@ namespace Client.MirScenes
                 new MirLabel()
                 {
                     Parent = StoragePage,
-                    BackColour = Color.SlateGray,
-                    Location = new Point(0,(i*32) + 21 + i),
-                    Size = new Size(521,1),
-                    Text = " ",
+                    BackColour = Color.FromArgb(0x54, 0x4F, 0x36),
+                    Location = new Point(15, (i * 32) + 41 + i),
+                    Size = new Size(518, 1),
+                    Text = " "
                 };
 
             for (int i = 0; i < 15; i++)
                 new MirLabel()
                 {
                     Parent = StoragePage,
-                    BackColour = Color.SlateGray,
-                    Location = new Point((i * 36) + 1 + i, 21),
+                    BackColour = Color.FromArgb(0x54, 0x4F, 0x36),
+                    Location = new Point((i * 36) + 14 + i, 41),
                     Size = new Size(1, 265),
-                    Text = " ",
+                    Text = " "
                 };
 
             StorageGrid = new MirItemCell[112];
@@ -10790,78 +11318,78 @@ namespace Client.MirScenes
             {
                 StorageGrid[i] = new MirItemCell()
                 {
-                    BorderColour = Color.Snow,
+                    BorderColour = Color.Lime,
                     ItemSlot = i,
                     GridType = MirGridType.GuildStorage,
                     Library = Libraries.Items,
                     Parent = StoragePage,
-                    Location = new Point((i % 14) * 36 + 2 + (i % 14) , (i/14) * 32 + 22 + (i/14)),
+                    Location = new Point((i % 14) * 36 + 15 + (i % 14), (i / 14) * 32 + 42 + (i / 14))
                 };
             }
-            
+
             #endregion
+
             #region "buffs tab"
             BuffsPage = new MirImageControl()
             {
                 Parent = this,
                 Size = new Size(567, 368),
                 Location = new Point(13, 37),
-                Visible = false,
+                Visible = false
             };
             #endregion
+
             #region "Ranks tab"
             RankPage = new MirImageControl()
             {
                 Parent = this,
                 Size = new Size(567, 368),
                 Location = new Point(13, 37),
-                Visible = false,
+                Visible = false
             };
             RankPage.BeforeDraw += (o, e) => RequestUpdateMembers();
-
             RanksSelectText = new MirLabel()
             {
                 Text = "Select a rank:",
-                Location = new Point(0,0),
-                Size = new Size (150,16),
+                Location = new Point(50, 10),
+                Size = new Size(120, 20),
                 ForeColour = Color.White,
                 Parent = RankPage,
-                NotControl = true,
+                NotControl = true
             };
-
             RanksName = new MirTextBox()
             {
-                Location = new Point(0, 20),
-                Size = new Size(150, 0),
+                Location = new Point(300, 10),
+                Size = new Size(150, 20),
                 MaxLength = 20,
                 Parent = RankPage,
                 Visible = true,
                 Enabled = false,
                 Text = "",
+                BackColour = Color.FromArgb(0x0F, 0x0F, 0x42),
+                Border = true,
+                BorderColour = Color.FromArgb(0x54, 0x4F, 0x36)
             };
             RanksName.BeforeDraw += (o, e) => RanksName_BeforeDraw();
             RanksName.TextBox.KeyPress += RanksName_KeyPress;
-
             RanksSaveName = new MirButton()
             {
-                Location = new Point(160, 20),
-                Text = "Save",
+                Location = new Point(455, 8),
                 Enabled = false,
                 Visible = true,
                 Parent = RankPage,
-                Index = 2216,
-                HoverIndex = 2217,
-                PressedIndex = 2218,
-                Library = Libraries.Prguse,
-                Sound = SoundList.ButtonA,
-                CenterText = true
+                Index = 90,
+                HoverIndex = 91,
+                PressedIndex = 92,
+                Library = Libraries.Title,
+                Sound = SoundList.ButtonA
             };
             RanksSaveName.Click += (o, e) =>
-                {
-                    RanksChangeName();
-                };
-            
-            String[] Options = { "Edit ranks", "Recruit member", "Kick member", "Store item", "Retrieve item", "Alter alliance", "Change notice", "Activate Buff"};
+            {
+                RanksChangeName();
+            };
+
+            String[] Options = { "Edit ranks", "Recruit member", "Kick member", "Store item", "Retrieve item", "Alter alliance", "Change notice", "Activate Buff" };
             RanksOptionsButtons = new MirButton[8];
             RanksOptionsStatus = new MirImageControl[8];
             RanksOptionsTexts = new MirLabel[8];
@@ -10875,12 +11403,12 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Sound = SoundList.ButtonA,
                     Parent = RankPage,
-                    Location = new Point(i % 2 == 0? 0:200, i % 2 == 0?  50 + (i * 20): 50 + ((i-1)*20)),   
+                    Location = new Point(i % 2 == 0 ? 140 : 310, i % 2 == 0 ? 100 + (i * 20) : 100 + ((i - 1) * 20))
                 };
                 int index = i;
                 RanksOptionsButtons[i].Click += (o, e) => SwitchRankOption(index);
             }
-            
+
             for (int i = 0; i < RanksOptionsStatus.Length; i++)
             {
                 RanksOptionsStatus[i] = new MirImageControl()
@@ -10890,7 +11418,7 @@ namespace Client.MirScenes
                     Library = Libraries.Prguse,
                     Parent = RankPage,
                     NotControl = true,
-                    Location = new Point(i % 2 == 0 ? 0 : 200, i % 2 == 0 ? 50 + (i * 20) : 50 + ((i - 1) * 20)),
+                    Location = new Point(i % 2 == 0 ? 140 : 310, i % 2 == 0 ? 100 + (i * 20) : 100 + ((i - 1) * 20))
                 };
                 int index = i;
                 RanksOptionsStatus[i].Click += (o, e) => SwitchRankOption(index);
@@ -10902,25 +11430,25 @@ namespace Client.MirScenes
                     Visible = true,
                     NotControl = true,
                     Parent = RankPage,
-                    Location = new Point(17 + (i % 2 == 0 ? 0 : 200), i % 2 == 0 ? 50 + (i * 20) : 50 + ((i - 1) * 20)),
+                    Location = new Point(17 + (i % 2 == 0 ? 140 : 310), i % 2 == 0 ? 100 + (i * 20) : 100 + ((i - 1) * 20)),
                     AutoSize = true,
-                    Text = Options[i],
+                    Text = Options[i]
                 };
             }
 
             RanksSelectBox = new MirDropDownBox()
             {
                 Parent = RankPage,
-                Location = new Point(160, 0),
-                Size = new Size(150, 16),
+                Location = new Point(130, 11),
+                Size = new Size(150, 20),
                 ForeColour = Color.White,
                 Visible = true,
-                Enabled = true,
+                Enabled = true
             };
             RanksSelectBox.ValueChanged += (o, e) => OnRankSelect(RanksSelectBox._WantedIndex);
-            
+
             #endregion
-            
+
         }
         public void ResetButtonStats()
         {
@@ -10928,15 +11456,23 @@ namespace Client.MirScenes
                 StorageButton.Visible = true;
             else
                 StorageButton.Visible = false;
-            if(MyOptions.HasFlag(RankOptions.CanChangeRank))
+
+            if (MyOptions.HasFlag(RankOptions.CanChangeRank))
                 RankButton.Visible = true;
             else
                 RankButton.Visible = false;
+
             if (MyOptions.HasFlag(RankOptions.CanChangeNotice))
                 NoticeEditButton.Visible = true;
             else
                 NoticeEditButton.Visible = false;
+
+            if (MyOptions.HasFlag(RankOptions.CanActivateBuff))
+                BuffsButton.Visible = true;
+            else
+                BuffsButton.Visible = false;
         }
+
         #region "notice code"
         public void EditNotice()
         {
@@ -10944,18 +11480,21 @@ namespace Client.MirScenes
             {
                 Notice.Enabled = true;
                 Notice.SetFocus();
-                NoticeEditButton.Text = "Save";
+                NoticeEditButton.Visible = false;
+                NoticeSaveButton.Visible = true;
             }
             else
             {
                 Notice.Enabled = false;
-                NoticeEditButton.Text = "Edit";
+                NoticeEditButton.Index = 85;
+                NoticeEditButton.Visible = true;
+                NoticeSaveButton.Visible = false;
                 Network.Enqueue(new C.EditGuildNotice() { notice = Notice.MultiText.ToList() });
             }
         }
         public void NoticeChange(List<string> newnotice)
         {
-            NoticeEditButton.Text = "Edit";
+            NoticeEditButton.Index = 85;
             Notice.Enabled = false;
             NoticeScrollIndex = 0;
             Notice.Text = "";
@@ -10964,8 +11503,8 @@ namespace Client.MirScenes
             UpdateNotice();
         }
         public void UpdateNotice()
-        { 
-            if (NoticeScrollIndex >= Notice.MultiText.Length) NoticeScrollIndex = Math.Max(0,Notice.MultiText.Length - 1);
+        {
+            if (NoticeScrollIndex >= Notice.MultiText.Length) NoticeScrollIndex = Math.Max(0, Notice.MultiText.Length - 1);
             if (NoticeScrollIndex < 0) NoticeScrollIndex = 0;
             if (Notice.MultiText.Length != 0)
             {
@@ -10973,20 +11512,19 @@ namespace Client.MirScenes
                 Notice.TextBox.SelectionStart = Notice.TextBox.GetFirstCharIndexFromLine(NoticeScrollIndex);
                 Notice.TextBox.ScrollToCaret();
             }
-            
+
             if (Notice.MultiText.Length > 1)
             {
-                int h = 302-19;
+                int h = 302 - 19;
                 h = (int)((h / (float)(Notice.MultiText.Length - 1)) * NoticeScrollIndex);
                 NoticePositionBar.Location = new Point(551, 15 + h);
             }
-            
         }
         void NoticePositionBar_OnMoving(object sender, MouseEventArgs e)
         {
-            int x = 551;
+            const int x = 551;
             int y = NoticePositionBar.Location.Y;
-            if (y >= NoticeDownButton.Location.Y-19) y = NoticeDownButton.Location.Y-19;
+            if (y >= NoticeDownButton.Location.Y - 19) y = NoticeDownButton.Location.Y - 19;
             if (y < 15) y = 15;
 
             int h = 302;// NoticePositionBar.Size.Height;
@@ -11011,7 +11549,7 @@ namespace Client.MirScenes
             { if (NoticeScrollIndex >= 25) NoticeScrollIndex -= 24; }
             else
             { if (NoticeScrollIndex < 25) NoticeScrollIndex += 24; }
-                        NoticeScrollIndex -= count;
+            NoticeScrollIndex -= count;
             UpdateNotice();
         }
 
@@ -11035,7 +11573,7 @@ namespace Client.MirScenes
                     break;
                 case Keys.End:
                     if (NoticeScrollIndex == Notice.MultiText.Length - 1) break;
-                    NoticeScrollIndex = Notice.MultiText.Length -1;
+                    NoticeScrollIndex = Notice.MultiText.Length - 1;
                     break;
                 case Keys.PageUp:
                     if (NoticeScrollIndex == 0) break;
@@ -11051,8 +11589,8 @@ namespace Client.MirScenes
             UpdateNotice();
             e.Handled = true;
         }
-        #endregion 
-        
+        #endregion
+
         #region "members code"
         public void NewMembersList(List<Rank> NewRanks)
         {
@@ -11115,7 +11653,7 @@ namespace Client.MirScenes
         {
             if (!MyOptions.HasFlag(RankOptions.CanRecruit)) return;
             if (LastGuildMsg > CMain.Time) return;
-            MirInputBox messageBox = new MirInputBox("Who would you like to invite to guild?");
+            MirInputBox messageBox = new MirInputBox("Who would you like to invite to the guild?");
             messageBox.OKButton.Click += (o, e) =>
             {
                 Network.Enqueue(new C.EditGuildMember { ChangeType = 0, Name = messageBox.InputTextBox.Text });
@@ -11209,7 +11747,7 @@ namespace Client.MirScenes
                     {
 
                         if ((!MembersShowOfflinesetting) && (Ranks[i].Members[j].Online == false)) continue;
-                        if ((MyOptions.HasFlag(RankOptions.CanChangeRank)) && (Ranks[i].Index >= MyRankId) )
+                        if ((MyOptions.HasFlag(RankOptions.CanChangeRank)) && (Ranks[i].Index >= MyRankId))
                             MembersRanks[RowCount].Enabled = true;
                         else
                             MembersRanks[RowCount].Enabled = false;
@@ -11220,7 +11758,7 @@ namespace Client.MirScenes
                         MembersRanks[RowCount].SelectedIndex = Ranks[i].Index;
                         MembersName[RowCount].Text = Ranks[i].Members[j].name;
                         if (Ranks[i].Members[j].Online)
-                            MembersStatus[RowCount].ForeColour = Color.Green;
+                            MembersStatus[RowCount].ForeColour = Color.LimeGreen;
                         else
                             MembersStatus[RowCount].ForeColour = Color.White;
                         TimeSpan Diff = now - Ranks[i].Members[j].LastLogin.ToLocalTime();
@@ -11234,17 +11772,17 @@ namespace Client.MirScenes
                                 case 0:
                                     text = "Today";
                                     break;
-                                case 1: 
+                                case 1:
                                     text = "Yesterday";
                                     break;
                                 default:
-                                    text = Diff.Days.ToString() + "Days ago";
+                                    text = Diff.Days + "Days ago";
                                     break;
                             }
                         }
                         MembersStatus[RowCount].Text = text;
                         RowCount++;
-                        if (RowCount > MemberPageRows-1) return;
+                        if (RowCount > MemberPageRows - 1) return;
                     }
                 }
         }
@@ -11264,7 +11802,7 @@ namespace Client.MirScenes
         }
         public void MembersPositionBar_OnMoving(object sender, MouseEventArgs e)
         {
-            int x = 551;
+            const int x = 551;
             int y = MembersPositionBar.Location.Y;
             if (y >= MembersDownButton.Location.Y - 19) y = MembersDownButton.Location.Y - 19;
             if (y < 15) y = 15;
@@ -11277,14 +11815,14 @@ namespace Client.MirScenes
                 MemberScrollIndex = h;
                 UpdateMembers();
             }
-            MembersPositionBar.Location = new Point (x, y);
+            MembersPositionBar.Location = new Point(x, y);
         }
         private void UpdateMembersScrollPosition()
         {
             int h = 302;
             h = (int)(h / (float)(MembersShowCount - 1));
             int y = 15 + (h * MemberScrollIndex);
-            MembersPositionBar.Location = new Point (551, y);
+            MembersPositionBar.Location = new Point(551, y);
         }
         private void MembersPanel_MouseWheel(object sender, MouseEventArgs e)
         {
@@ -11292,7 +11830,7 @@ namespace Client.MirScenes
 
             if (MemberScrollIndex == 0 && count >= 0) return;
             if (MemberScrollIndex == MembersShowCount - MemberPageRows && count <= 0) return;
-            MemberScrollIndex -= count > 0? 1: -1;
+            MemberScrollIndex -= count > 0 ? 1 : -1;
             UpdateMembers();
             UpdateMembersScrollPosition();
         }
@@ -11303,7 +11841,6 @@ namespace Client.MirScenes
             {
                 case Keys.Up:
                     if (MemberScrollIndex == 0) break;
-                    //if (MemberScrollIndex >= 25) MemberScrollIndex -= 24;
                     MemberScrollIndex--;
                     break;
                 case Keys.Home:
@@ -11340,7 +11877,7 @@ namespace Client.MirScenes
         }
         #endregion
 
-        #region statuspage code
+        #region status page code
         private void StatusExpBar_BeforeDraw(object sender, EventArgs e)
         {
             if (MaxExperience == 0)
@@ -11349,8 +11886,8 @@ namespace Client.MirScenes
                 return;
             }
             if (StatusExpBar.Library == null) return;
-            StatusExpBar.Library.Draw(StatusExpBar.Index, StatusExpBar.DisplayLocation, new Size(550,7), Color.Red);
-            
+            StatusExpBar.Library.Draw(StatusExpBar.Index, StatusExpBar.DisplayLocation, new Size(550, 7), Color.Red);
+
             double percent = Experience / (double)MaxExperience;
             StatusExpLabel.Text = string.Format("{0:#0.##%}", percent);
             if (percent > 1) percent = 1;
@@ -11362,23 +11899,23 @@ namespace Client.MirScenes
             };
 
             StatusExpBar.Library.Draw(StatusExpBar.Index, section, StatusExpBar.DisplayLocation, Color.White, false);
-            
+
         }
         #endregion
 
         #region ranks page
         public void NewRankRecieved(Rank New)
         {
-            int NewIndex = Ranks.Count > 1? Ranks.Count-1: 1;
-            Ranks.Insert(NewIndex,New);
-            Ranks[Ranks.Count -1].Index = Ranks.Count-1;
+            int NewIndex = Ranks.Count > 1 ? Ranks.Count - 1 : 1;
+            Ranks.Insert(NewIndex, New);
+            Ranks[Ranks.Count - 1].Index = Ranks.Count - 1;
             RefreshMemberList();
             UpdateRanks();
         }
         public void MyRankChanged(Rank New)
         {
             MyOptions = New.Options;
-            
+
             MapObject.User.GuildRankName = New.Name;
             GuildMember Member = null;
             int OldRank = MyRankId;
@@ -11391,7 +11928,7 @@ namespace Client.MirScenes
                     Ranks[OldRank].Members.Remove(Member);
                     break;
                 }
-            
+
             if (Member == null) return;
             if (Ranks.Count <= New.Index)
             {
@@ -11433,7 +11970,7 @@ namespace Client.MirScenes
         }
         public void UpdateRanks()
         {
-            if ((RanksSelectBox.SelectedIndex == -1) ||(Ranks[RanksSelectBox.SelectedIndex].Index < MyRankId))
+            if ((RanksSelectBox.SelectedIndex == -1) || (Ranks[RanksSelectBox.SelectedIndex].Index < MyRankId))
             {
                 for (int i = 0; i < RanksOptionsButtons.Length; i++)
                     RanksOptionsButtons[i].Enabled = false;
@@ -11442,18 +11979,15 @@ namespace Client.MirScenes
                 if (RanksSelectBox.SelectedIndex == -1)
                     for (int i = 0; i < RanksOptionsStatus.Length; i++)
                         RanksOptionsStatus[i].Visible = false;
-                //RanksName.Enabled = false;
                 LastRankNameChange = long.MaxValue;
                 RanksName.Text = "";
                 return;
             }
             RanksName.Text = Ranks[RanksSelectBox.SelectedIndex].Name;
             if (Ranks[RanksSelectBox.SelectedIndex].Index >= MyRankId)
-                //RanksName.Enabled = true;
                 LastRankNameChange = 0;
             else
                 LastRankNameChange = long.MaxValue;
-                //RanksName.Enabled = false;
             for (int i = 0; i < RanksOptionsStatus.Length; i++)
             {
                 if (Ranks[RanksSelectBox.SelectedIndex].Options.HasFlag((RankOptions)(1 << i)))
@@ -11490,7 +12024,6 @@ namespace Client.MirScenes
             if (LastGuildMsg > CMain.Time) return;
             Network.Enqueue(new C.EditGuildMember { ChangeType = 5, RankIndex = (byte)Ranks[RanksSelectBox.SelectedIndex].Index, RankName = OptionIndex.ToString(), Name = RanksOptionsStatus[OptionIndex].Visible ? "false" : "true" });
             LastGuildMsg = CMain.Time + 300;
-            //UpdateRanks();
         }
         public void RanksChangeName()
         {
@@ -11505,14 +12038,14 @@ namespace Client.MirScenes
         {
             switch (e.KeyChar)
             {
-                case (char) '\\':
+                case (char)'\\':
                     e.Handled = true;
                     break;
-                case (char) Keys.Enter:
+                case (char)Keys.Enter:
                     e.Handled = true;
                     RanksChangeName();
                     break;
-                case (char) Keys.Escape:
+                case (char)Keys.Escape:
                     e.Handled = true;
                     UpdateRanks();
                     break;
@@ -11573,6 +12106,7 @@ namespace Client.MirScenes
             amountBox.Show();
         }
         #endregion
+
         public void RequestUpdateNotice()
         {
             if ((NoticeChanged) && (LastNoticeRequest < CMain.Time))
@@ -11600,42 +12134,42 @@ namespace Client.MirScenes
             BuffsPage.Visible = false;
             RankPage.Visible = false;
 
-            NoticeButton.Index = 232;
-            MembersButton.Index = 232;
-            StatusButton.Index = 232;
-            StorageButton.Index = 232;
-            BuffsButton.Index = 232;
-            RankButton.Index = 232;
+            NoticeButton.Index = 88;
+            MembersButton.Index = 76;
+            StatusButton.Index = 67;
+            StorageButton.Index = 79;
+            BuffsButton.Index = 70;
+            RankButton.Index = 73;
 
             switch (pageid)
             {
                 case 0:
                     NoticePage.Visible = true;
-                    NoticeButton.Index = 231;
-                    RequestUpdateNotice();       
+                    NoticeButton.Index = 88;
+                    RequestUpdateNotice();
                     break;
                 case 1:
                     MembersPage.Visible = true;
-                    MembersButton.Index = 231;
+                    MembersButton.Index = 76;
                     RequestUpdateMembers();
                     break;
                 case 2:
                     StatusPage.Visible = true;
-                    StatusButton.Index = 231;
+                    StatusButton.Index = 67;
                     break;
                 case 3:
                     StoragePage.Visible = true;
-                    StorageButton.Index = 231;
+                    StorageButton.Index = 79;
                     if (!StorageRequested)
                         Network.Enqueue(new C.GuildStorageItemChange() { Type = 2 });
                     break;
                 case 4:
                     BuffsPage.Visible = true;
-                    BuffsButton.Index = 231;
+                    BuffsButton.Index = 70;
                     break;
                 case 5:
                     RankPage.Visible = true;
-                    RankButton.Index = 231;
+                    RankButton.Index = 73;
                     RequestUpdateMembers();
                     break;
             }
@@ -11644,21 +12178,28 @@ namespace Client.MirScenes
         public void StatusChanged(RankOptions status)
         {
             Notice.Enabled = false;
-            NoticeEditButton.Text = "Edit";
+            NoticeEditButton.Index = 85;
             MyOptions = status;
+
             if (MyOptions.HasFlag(RankOptions.CanChangeNotice))
                 NoticeEditButton.Visible = true;
             else
                 NoticeEditButton.Visible = false;
+
             if (MyOptions.HasFlag(RankOptions.CanChangeRank))
                 RankButton.Visible = true;
             else
                 RankButton.Visible = false;
+
             if ((MyOptions.HasFlag(RankOptions.CanStoreItem)) || (MyOptions.HasFlag(RankOptions.CanRetrieveItem)))
                 StorageButton.Visible = true;
             else
                 StorageButton.Visible = false;
-            
+
+            if (MyOptions.HasFlag(RankOptions.CanActivateBuff))
+                BuffsButton.Visible = true;
+            else
+                BuffsButton.Visible = false;
         }
 
         public void Hide()
@@ -12320,6 +12861,290 @@ namespace Client.MirScenes
                 GameScene.Scene.DisposeItemLabel();
                 GameScene.HoverItem = null;
             }
+        }
+    }
+
+    public sealed class DuraStatusDialog : MirImageControl
+    {
+        public MirButton Character;
+
+        public DuraStatusDialog()
+        {
+            Size = new Size(40, 19);
+            Location = new Point((GameScene.Scene.MiniMapDialog.Location.X + 86), GameScene.Scene.MiniMapDialog.Size.Height);
+
+            Character = new MirButton()
+            {
+                Index = 2113,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Size = new Size(20, 19),
+                Location = new Point(20, 0),
+                HoverIndex = 2111,
+                PressedIndex = 2112,
+                Sound = SoundList.ButtonA
+            };
+            Character.Click += (o, e) =>
+            {
+                if (GameScene.Scene.CharacterDuraPanel.Visible == true)
+                {
+                    GameScene.Scene.CharacterDuraPanel.Hide();
+                    Character.Index = 2113;
+                }
+                else
+                {
+                    GameScene.Scene.CharacterDuraPanel.Show();
+                    Character.Index = 2110;
+                }
+            };
+        }
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+        }
+    }
+    public sealed class CharacterDuraPanel : MirImageControl
+    {
+        public MirImageControl GrayBackground, Background, Helmet, Armour, Belt, Boots, Weapon, Necklace, RightBracelet, LeftBracelet, RightRing, LeftRing, Torch, Stone, Amulet, Tiger, Item1, Item2;
+
+        public CharacterDuraPanel()
+        {
+            Index = 2105;
+            Library = Libraries.Prguse;
+            Movable = false;
+            Location = new Point(Settings.ScreenWidth - 61, 195);
+
+            GrayBackground = new MirImageControl()
+            {
+                Index = 2161,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Size = new Size(56, 80),
+                Location = new Point(3, 3),
+                Opacity = 0.4F
+            };
+            Background = new MirImageControl()
+            {
+                Index = 2162,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Size = new Size(56, 80),
+                Location = new Point(3, 3),
+            };
+
+            #region Pieces
+
+            Helmet = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(24, 3) };
+            Belt = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 7), Location = new Point(23, 23) };
+            Armour = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(28, 32), Location = new Point(16, 11) };
+            Boots = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(24, 9), Location = new Point(17, 43) };
+            Weapon = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 33), Location = new Point(4, 5) };
+            Necklace = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(3, 67) };
+            LeftBracelet = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 8), Location = new Point(3, 43) };
+            RightBracelet = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 8), Location = new Point(43, 43) };
+            LeftRing = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(3, 54) };
+            RightRing = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(43, 54) };
+            Torch = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(8, 32), Location = new Point(44, 5) };
+            Stone = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(30, 54) };
+            Amulet = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(16, 54) };
+            Tiger = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(43, 68) };
+            Item1 = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(8, 12), Location = new Point(19, 67) };
+            Item2 = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(8, 12), Location = new Point(31, 67) };
+
+            #endregion
+        }
+
+        public void GetCharacterDura()
+        {
+            if (GameScene.Scene.CharacterDialog.Grid[0].Item == null) { Weapon.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[1].Item == null) { Armour.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[2].Item == null) { Helmet.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[3].Item == null) { Torch.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[4].Item == null) { Necklace.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[5].Item == null) { LeftBracelet.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[6].Item == null) { RightBracelet.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[7].Item == null) { LeftRing.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[8].Item == null) { RightRing.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[9].Item == null) { Amulet.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[10].Item == null) { Belt.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[11].Item == null) { Boots.Index = -1; }
+            if (GameScene.Scene.CharacterDialog.Grid[12].Item == null) { Stone.Index = -1; }
+
+            for (int i = 0; i < MapObject.User.Equipment.Length; i++)
+            {
+                if (MapObject.User.Equipment[i] == null) continue;
+                UpdateCharacterDura(MapObject.User.Equipment[i]);
+            }
+        }
+        public void UpdateCharacterDura(UserItem item)
+        {
+            int Warning = item.MaxDura / 2;
+            int Danger = item.MaxDura / 5;
+
+            switch (item.Info.Type)
+            {
+                case ItemType.Amulet: //Based on stacks of 5000
+                    if (item.Count > 2500)
+                        Amulet.Index = 2134;
+                    if (item.Count <= 2500)
+                        Amulet.Index = 2135;
+                    if (item.Count <= 1000)
+                        Amulet.Index = 2136;
+                    if (item.Count == 0)
+                        Amulet.Index = -1;
+                    break;
+                case ItemType.Armour:
+                    if (item.CurrentDura > Warning)
+                        Armour.Index = 2149;
+                    if (item.CurrentDura <= Warning)
+                        Armour.Index = 2150;
+                    if (item.CurrentDura <= Danger)
+                        Armour.Index = 2151;
+                    if (item.CurrentDura == 0)
+                        Armour.Index = -1;
+                    break;
+                case ItemType.Belt:
+                    if (item.CurrentDura > Warning)
+                        Belt.Index = 2158;
+                    if (item.CurrentDura <= Warning)
+                        Belt.Index = 2159;
+                    if (item.CurrentDura <= Danger)
+                        Belt.Index = 2160;
+                    if (item.CurrentDura == 0)
+                        Belt.Index = -1;
+                    break;
+                case ItemType.Boots:
+                    if (item.CurrentDura > Warning)
+                        Boots.Index = 2152;
+                    if (item.CurrentDura <= Warning)
+                        Boots.Index = 2153;
+                    if (item.CurrentDura <= Danger)
+                        Boots.Index = 2154;
+                    if (item.CurrentDura == 0)
+                        Boots.Index = -1;
+                    break;
+                case ItemType.Bracelet:
+                    if (item.UniqueID == GameScene.Scene.CharacterDialog.Grid[6].Item.UniqueID)
+                    {
+                        if (item.CurrentDura > Warning)
+                            RightBracelet.Index = 2143;
+                        if (item.CurrentDura <= Warning)
+                            RightBracelet.Index = 2144;
+                        if (item.CurrentDura <= Danger)
+                            RightBracelet.Index = 2145;
+                        if (item.CurrentDura == 0)
+                            RightBracelet.Index = -1;
+                    }
+                    if (item.UniqueID == GameScene.Scene.CharacterDialog.Grid[5].Item.UniqueID)
+                    {
+                        if (item.CurrentDura > Warning)
+                            LeftBracelet.Index = 2143;
+                        if (item.CurrentDura <= Warning)
+                            LeftBracelet.Index = 2144;
+                        if (item.CurrentDura <= Danger)
+                            LeftBracelet.Index = 2145;
+                        if (item.CurrentDura == 0)
+                            LeftBracelet.Index = -1;
+                    }
+                    break;
+                case ItemType.Helmet:
+                    if (item.CurrentDura > Warning)
+                        Helmet.Index = 2155;
+                    if (item.CurrentDura <= Warning)
+                        Helmet.Index = 2156;
+                    if (item.CurrentDura <= Danger)
+                        Helmet.Index = 2157;
+                    if (item.CurrentDura == 0)
+                        Helmet.Index = -1;
+                    break;
+                case ItemType.Necklace:
+                    if (item.CurrentDura > Warning)
+                        Necklace.Index = 2122;
+                    if (item.CurrentDura <= Warning)
+                        Necklace.Index = 2123;
+                    if (item.CurrentDura <= Danger)
+                        Necklace.Index = 2124;
+                    if (item.CurrentDura == 0)
+                        Necklace.Index = -1;
+                    break;
+                case ItemType.Ring:
+                    if (item.UniqueID == GameScene.Scene.CharacterDialog.Grid[8].Item.UniqueID)
+                    {
+                        if (item.CurrentDura > Warning)
+                            RightRing.Index = 2131;
+                        if (item.CurrentDura <= Warning)
+                            RightRing.Index = 2132;
+                        if (item.CurrentDura <= Danger)
+                            RightRing.Index = 2133;
+                        if (item.CurrentDura == 0)
+                            RightRing.Index = -1;
+                    }
+                    if (item.UniqueID == GameScene.Scene.CharacterDialog.Grid[7].Item.UniqueID)
+                    {
+                        if (item.CurrentDura > Warning)
+                            LeftRing.Index = 2131;
+                        if (item.CurrentDura <= Warning)
+                            LeftRing.Index = 2132;
+                        if (item.CurrentDura <= Danger)
+                            LeftRing.Index = 2133;
+                        if (item.CurrentDura == 0)
+                            LeftRing.Index = -1;
+                    }
+                    break;
+                case ItemType.Stone:
+                    if (item.CurrentDura == 0)
+                        Stone.Index = 2137;
+                    break;
+                case ItemType.Tiger:
+                    if (item.CurrentDura > Warning)
+                        Tiger.Index = 2140;
+                    if (item.CurrentDura <= Warning)
+                        Tiger.Index = 2141;
+                    if (item.CurrentDura <= Danger)
+                        Tiger.Index = 2142;
+                    if (item.CurrentDura == 0)
+                        Tiger.Index = -1;
+                    break;
+                case ItemType.Torch:
+                    if (item.CurrentDura > Warning)
+                        Torch.Index = 2146;
+                    if (item.CurrentDura <= Warning)
+                        Torch.Index = 2147;
+                    if (item.CurrentDura <= Danger)
+                        Torch.Index = 2148;
+                    if (item.CurrentDura == 0)
+                        Torch.Index = -1;
+                    break;
+                case ItemType.Weapon:
+                    if (item.CurrentDura > Warning)
+                        Weapon.Index = 2125;
+                    if (item.CurrentDura <= Warning)
+                        Weapon.Index = 2126;
+                    if (item.CurrentDura <= Danger)
+                        Weapon.Index = 2127;
+                    if (item.CurrentDura == 0)
+                        Weapon.Index = -1;
+                    break;
+            }
+        }
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+            GetCharacterDura();
         }
     }
 

@@ -19,11 +19,11 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 30;
+        public const int Version = 31;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
-        public const string GuildPath = @".\guilds\";
+
         private static readonly Regex AccountIDReg, PasswordReg, EMailReg, CharacterReg;
 
         public static int LoadVersion;
@@ -86,6 +86,7 @@ namespace Server.MirEnvir
         public LightSetting Lights;
         public LinkedList<MapObject> Objects = new LinkedList<MapObject>();
         public Dragon DragonSystem;
+        public NPCObject DefaultNPC;
 
         static Envir()
         {
@@ -319,7 +320,7 @@ namespace Server.MirEnvir
 
         private void SaveGuilds(bool forced = false)
         {
-            if (!Directory.Exists(GuildPath)) Directory.CreateDirectory(GuildPath);
+            if (!Directory.Exists(Settings.GuildPath)) Directory.CreateDirectory(Settings.GuildPath);
             for (int i = 0; i < GuildList.Count; i++)
             {
                 if (GuildList[i].NeedSave)
@@ -328,7 +329,7 @@ namespace Server.MirEnvir
                     MemoryStream mStream = new MemoryStream();
                     BinaryWriter writer = new BinaryWriter(mStream);
                     GuildList[i].Save(writer); //mir guild data :p
-                    FileStream fStream = new FileStream(GuildPath + i.ToString() + ".mgd", FileMode.Create);
+                    FileStream fStream = new FileStream(Settings.GuildPath + i.ToString() + ".mgd", FileMode.Create);
                     byte[] data = mStream.ToArray();
                     fStream.BeginWrite(data, 0, data.Length, EndSaveGuilds, fStream);
                 }
@@ -495,11 +496,11 @@ namespace Server.MirEnvir
                 for (int i = 0; i < GuildCount; i++)
                 {
                     GuildObject newGuild;
-                    if (!File.Exists(GuildPath + i.ToString() + ".mgd"))
+                    if (!File.Exists(Settings.GuildPath + i.ToString() + ".mgd"))
                         newGuild = new GuildObject();
                     else
                     {
-                        using (FileStream stream = File.OpenRead(GuildPath + i.ToString() + ".mgd"))
+                        using (FileStream stream = File.OpenRead(Settings.GuildPath + i.ToString() + ".mgd"))
                         using (BinaryReader reader = new BinaryReader(stream))
                             newGuild = new GuildObject(reader);
                     }
@@ -566,13 +567,19 @@ namespace Server.MirEnvir
                     if (DragonSystem.Load()) DragonSystem.Info.LoadDrops();
                 }
             }
+
+            DefaultNPC = new NPCObject(new NPCInfo() { Name = "DefaultNPC", FileName = Settings.DefaultNPCFilename, IsDefault = true });
+
             SMain.Enqueue("Envir Started.");
         }
         private void StartNetwork()
         {
             Connections.Clear();
+
             LoadAccounts();
+
             LoadGuilds();
+
             _listener = new TcpListener(IPAddress.Parse(Settings.IPAddress), Settings.Port);
             _listener.Start();
             _listener.BeginAcceptTcpClient(Connection, null);

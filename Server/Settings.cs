@@ -15,6 +15,7 @@ namespace Server
                             ExportPath = @".\Exports\",
                             NPCPath = EnvirPath + @".\NPCs\",
                             QuestPath = EnvirPath + @".\Quests\",
+                            GuildPath = @".\Guilds\",
                             DropPath = EnvirPath + @".\Drops\",
                             NameListPath = EnvirPath + @".\NameLists\";
 
@@ -26,6 +27,7 @@ namespace Server
         public static bool CheckVersion = true;
         public static byte[] VersionHash;
         public static string GMPassword = "C#Mir 4.0";
+        public static string DefaultNPCFilename = "00Default";
 
         //Network
         public static string IPAddress = "127.0.0.1";

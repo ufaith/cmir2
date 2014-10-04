@@ -240,6 +240,12 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.StoreItem:
                     StoreItem((C.StoreItem) p);
                     break;
+                case (short)ClientPacketIds.DepositTradeItem:
+                    DepositTradeItem((C.DepositTradeItem)p);
+                    break;
+                case (short)ClientPacketIds.RetrieveTradeItem:
+                    RetrieveTradeItem((C.RetrieveTradeItem)p);
+                    break;
                 case (short)ClientPacketIds.TakeBackItem:
                     TakeBackItem((C.TakeBackItem) p);
                     break;
@@ -275,6 +281,9 @@ namespace Server.MirNetwork
                     break;
                 case (short)ClientPacketIds.ChangePMode:
                     ChangePMode((C.ChangePMode)p);
+                    break;
+                case (short)ClientPacketIds.ChangeTrade:
+                    ChangeTrade((C.ChangeTrade)p);
                     break;
                 case (short)ClientPacketIds.Attack:
                     Attack((C.Attack)p);
@@ -372,6 +381,22 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.GuildStorageItemChange:
                     GuildStorageItemChange((C.GuildStorageItemChange)p);
                     return;
+                case (short)ClientPacketIds.TradeRequest:
+                    TradeRequest((C.TradeRequest)p);
+                    return;
+                case (short)ClientPacketIds.TradeGold:
+                    TradeGold((C.TradeGold)p);
+                    return;
+                case (short)ClientPacketIds.TradeReply:
+                    TradeReply((C.TradeReply)p);
+                    return;
+                case (short)ClientPacketIds.TradeConfirm:
+                    TradeConfirm((C.TradeConfirm)p);
+                    return;
+                case (short)ClientPacketIds.TradeCancel:
+                    TradeCancel((C.TradeCancel)p);
+                    return;
+
                 default:
                     throw new NotImplementedException();
             }
@@ -567,11 +592,11 @@ namespace Server.MirNetwork
             long delay = (long) (SMain.Envir.Now - info.LastDate).TotalMilliseconds;
 
 
-            if (delay < Settings.RelogDelay)
-            {
-                Enqueue(new S.StartGameDelay { Milliseconds = Settings.RelogDelay - delay });
-                return;
-            }
+            //if (delay < Settings.RelogDelay)
+            //{
+            //    Enqueue(new S.StartGameDelay { Milliseconds = Settings.RelogDelay - delay });
+            //    return;
+            //}
 
             Player = new PlayerObject(info, this);
             Player.StartGame();
@@ -641,6 +666,18 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.StoreItem(p.From, p.To);
+        }
+        private void DepositTradeItem(C.DepositTradeItem p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.DepositTradeItem(p.From, p.To);
+        }
+        private void RetrieveTradeItem(C.RetrieveTradeItem p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.RetrieveTradeItem(p.From, p.To);
         }
         private void TakeBackItem(C.TakeBackItem p)
         {
@@ -721,6 +758,12 @@ namespace Server.MirNetwork
 
             Enqueue(new S.ChangePMode { Mode = Player.PMode });
         }
+        private void ChangeTrade(C.ChangeTrade p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.AllowTrade = p.AllowTrade;
+        }
         private void Attack(C.Attack p)
         {
             if (Stage != GameStage.Game) return;
@@ -753,6 +796,9 @@ namespace Server.MirNetwork
         {
             if (Stage != GameStage.Game) return;
 
+            //if (p.ObjectID == Player.DefaultNPC.ObjectID)
+            //    Player.CallDefaultNPC(p.Type);
+            //else
             Player.CallNPC(p.ObjectID, p.Key);
         }
         private void BuyItem(C.BuyItem p)
@@ -934,6 +980,37 @@ namespace Server.MirNetwork
         {
             if (Stage != GameStage.Game) return;
             Player.GuildStorageItemChange(p.Type, p.From, p.To);
+        }
+
+        private void TradeRequest(C.TradeRequest p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.TradeRequest(p.Name);
+        }
+        private void TradeGold(C.TradeGold p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.TradeGold(p.Amount);
+        }
+        private void TradeReply(C.TradeReply p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.TradeReply(p.AcceptInvite);
+        }
+        private void TradeConfirm(C.TradeConfirm p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.TradeConfirm(p.Locked);
+        }
+        private void TradeCancel(C.TradeCancel p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.TradeCancel();
         }
     }
 }

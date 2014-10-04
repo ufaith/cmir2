@@ -31,6 +31,9 @@ namespace Client.MirObjects
         public long Experience, MaxExperience;
         public byte LifeOnHit;
 
+        public bool TradeLocked;
+        public bool AllowTrade;
+
         public bool HasTeleportRing, HasProtectionRing, HasRevivalRing, HasClearRing,
             HasMuscleRing, HasParalysisRing, HasFireRing, HasHealRing, HasProbeNecklace, HasSkillNecklace, NoDuraLoss;
 
@@ -38,7 +41,7 @@ namespace Client.MirObjects
         public BaseStats CoreStats = new BaseStats(0);
 
 
-        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14];
+        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14], Trade = new UserItem[10];
         public List<ClientMagic> Magics = new List<ClientMagic>();
         public List<ItemSets> ItemSets = new List<ItemSets>();
         public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();

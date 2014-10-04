@@ -114,3 +114,43 @@ C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Server\obj\Release\Server.Monst
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Server\obj\Release\Server.SMain.resources
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Server\obj\Release\Server.Properties.Resources.resources
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csproj.GenerateResource.Cache
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.exe
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.pdb
+E:\Legend of Mir\Mir 2 Source\Release\Server\Server.exe
+E:\Legend of Mir\Mir 2 Source\Release\Server\Server.pdb
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csprojResolveAssemblyReference.cache
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.AccountInfoForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.BalanceConfigForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.ConfigForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.DragonInfoForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.ItemInfoForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MapInfoForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.Forms.MiningDetailForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.Forms.RespawnsDetailForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.MineEntry.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.RespawnEntry.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.VForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MonsterInfoForm.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.SMain.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.Properties.Resources.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csproj.GenerateResource.Cache
+C:\Mir 2\Mir 2 Server\Server.exe
+C:\Mir 2\Mir 2 Server\Server.pdb
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.AccountInfoForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.BalanceConfigForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.ConfigForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.DragonInfoForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.ItemInfoForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MapInfoForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.Forms.MiningDetailForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.Forms.RespawnsDetailForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.MineEntry.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.Control.RespawnEntry.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MirForms.VisualMapInfo.VForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.MonsterInfoForm.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.SMain.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.Properties.Resources.resources
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csproj.GenerateResource.Cache
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.exe
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.pdb
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csprojResolveAssemblyReference.cache

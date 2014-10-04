@@ -970,6 +970,55 @@ namespace ServerPackets
             writer.Write(Success);
         }
     }
+
+    public sealed class DepositTradeItem : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.DepositTradeItem; }
+        }
+
+        public int From, To;
+        public bool Success;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            From = reader.ReadInt32();
+            To = reader.ReadInt32();
+            Success = reader.ReadBoolean();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(From);
+            writer.Write(To);
+            writer.Write(Success);
+        }
+    }
+    public sealed class RetrieveTradeItem : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.RetrieveTradeItem; }
+        }
+
+        public int From, To;
+        public bool Success;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            From = reader.ReadInt32();
+            To = reader.ReadInt32();
+            Success = reader.ReadBoolean();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(From);
+            writer.Write(To);
+            writer.Write(Success);
+        }
+    }
     public sealed class SplitItem : Packet
     {
         public override short Index
@@ -1156,6 +1205,120 @@ namespace ServerPackets
 
         }
     }
+
+    public sealed class TradeRequest : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.TradeRequest; } }
+
+        public string Name;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Name = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Name);
+        }
+    }
+    public sealed class TradeAccept : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.TradeAccept; } }
+
+        public string Name;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Name = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Name);
+        }
+    }
+    public sealed class TradeGold : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.TradeGold; }
+        }
+
+        public uint Amount;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Amount = reader.ReadUInt32();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Amount);
+        }
+    }
+    public sealed class TradeItem : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.TradeItem; }
+        }
+
+        public UserItem[] TradeItems;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            TradeItems = new UserItem[reader.ReadInt32()];
+            for (int i = 0; i < TradeItems.Length; i++)
+            {
+                if (reader.ReadBoolean())
+                    TradeItems[i] = new UserItem(reader);
+            }
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(TradeItems.Length);
+            for (int i = 0; i < TradeItems.Length; i++)
+            {
+                UserItem T = TradeItems[i];
+                writer.Write(T != null);
+                if (T != null) T.Save(writer);
+            }
+        }
+    }
+    public sealed class TradeConfirm : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.TradeConfirm; }
+        }
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+        }
+    }
+    public sealed class TradeCancel : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.TradeCancel; }
+        }
+
+        public bool Unlock;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Unlock = reader.ReadBoolean();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Unlock);
+        }
+    }
+
+
     public sealed class LogOutSuccess : Packet
     {
         public override short Index
@@ -3235,5 +3398,36 @@ namespace ServerPackets
             }
         }
 
+    }
+
+    public sealed class DefaultNPC : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.DefaultNPC; } }
+
+        public uint ObjectID;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+        }
+    }
+
+    public sealed class NPCUpdate : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.NPCUpdate; } }
+
+        public uint NPCID;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            NPCID = reader.ReadUInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(NPCID);
+        }
     }
 }

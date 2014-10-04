@@ -63,7 +63,6 @@ namespace Client
         }
 
         //Game
-
         public static string AccountID = "",
                              Password = "";
         public static bool
@@ -73,6 +72,17 @@ namespace Client
             DropView = true,
             NameView = true,
             HPView = true;
+
+
+        //Chat
+        public static bool
+            ShowNormalChat = true,
+            ShowYellChat = true,
+            ShowWhisperChat = true,
+            ShowLoverChat = true,
+            ShowMentorChat = true,
+            ShowGroupChat = true,
+            ShowGuildChat = true;
 
         public static void Load()
         {
@@ -113,6 +123,15 @@ namespace Client
             NameView = Reader.ReadBoolean("Game", "NameView", NameView);
             HPView = Reader.ReadBoolean("Game", "HPMPView", HPView);
             FontName = Reader.ReadString("Game", "FontName", FontName);
+
+            //Chat
+            ShowNormalChat = Reader.ReadBoolean("Chat", "ShowNormalChat", ShowNormalChat);
+            ShowYellChat = Reader.ReadBoolean("Chat", "ShowYellChat", ShowYellChat);
+            ShowWhisperChat = Reader.ReadBoolean("Chat", "ShowWhisperChat", ShowWhisperChat);
+            ShowLoverChat = Reader.ReadBoolean("Chat", "ShowLoverChat", ShowLoverChat);
+            ShowMentorChat = Reader.ReadBoolean("Chat", "ShowMentorChat", ShowMentorChat);
+            ShowGroupChat = Reader.ReadBoolean("Chat", "ShowGroupChat", ShowGroupChat);
+            ShowGuildChat = Reader.ReadBoolean("Chat", "ShowGuildChat", ShowGuildChat);
         }
 
         public static void Save()
@@ -134,7 +153,16 @@ namespace Client
             Reader.Write("Game", "NameView", NameView);
             Reader.Write("Game", "HPMPView", HPView);
             Reader.Write("Game", "FontName", FontName);
-            
+
+            //Chat
+            Reader.Write("Chat", "ShowNormalChat", ShowNormalChat);
+            Reader.Write("Chat", "ShowYellChat", ShowYellChat);
+            Reader.Write("Chat", "ShowWhisperChat", ShowWhisperChat);
+            Reader.Write("Chat", "ShowLoverChat", ShowLoverChat);
+            Reader.Write("Chat", "ShowMentorChat", ShowMentorChat);
+            Reader.Write("Chat", "ShowGroupChat", ShowGroupChat);
+            Reader.Write("Chat", "ShowGuildChat", ShowGuildChat);
+
         }
     }
 }

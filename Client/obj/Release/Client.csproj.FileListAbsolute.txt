@@ -50,3 +50,22 @@ C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.Prope
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csproj.GenerateResource.Cache
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.exe
 C:\Users\ANDYHOME\Desktop\Mir 2 Source\trunk SVN\Client\obj\Release\Client.pdb
+E:\Legend of Mir\Mir 2 Source\Release\Client\Client.exe.config
+E:\Legend of Mir\Mir 2 Source\Release\Client\Client.exe
+E:\Legend of Mir\Mir 2 Source\Release\Client\Client.pdb
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csprojResolveAssemblyReference.cache
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Client\obj\Release\Client.CMain.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Client\obj\Release\Client.Properties.Resources.resources
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csproj.GenerateResource.Cache
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Client\obj\Release\Client.exe
+E:\Legend of Mir\Mir 2 Source\trunk SVN\Client\obj\Release\Client.pdb
+C:\Mir 2 Source\Release\Client\Client.exe.config
+C:\Mir 2\Mir 2 Client\Client.exe.config
+C:\Mir 2\Mir 2 Client\Client.exe
+C:\Mir 2\Mir 2 Client\Client.pdb
+C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.CMain.resources
+C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.Properties.Resources.resources
+C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csproj.GenerateResource.Cache
+C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.exe
+C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.pdb
+C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csprojResolveAssemblyReference.cache

@@ -15,6 +15,8 @@ namespace Server.MirDatabase
         public ushort Rate = 100;
         public byte Image;
 
+        public bool IsDefault;
+
         public float PriceRate
         {
             get { return Rate / 100F; }

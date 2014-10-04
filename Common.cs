@@ -8,6 +8,15 @@ using System.Text;
 using C = ClientPackets;
 using S = ServerPackets;
 
+public enum DefaultNPCType : byte
+{
+    Login = 0,
+    LevelUp = 1,
+    UseItem = 2,
+    MapCoord = 3,
+    Die = 4,
+    Trigger = 5
+}
 
 public enum Monster : ushort
 {
@@ -278,6 +287,7 @@ public enum ItemType : byte
     Gem = 18,
     Tiger = 19,
     Book = 20,
+    Script = 21
 }
 public enum MirGridType : byte
 {
@@ -291,6 +301,7 @@ public enum MirGridType : byte
     Inspect = 7,
     TrustMerchant = 8,
     GuildStorage = 9,
+    GuestTrade = 10
 }
 public enum EquipmentSlot : byte
 {
@@ -608,6 +619,8 @@ public enum ServerPacketIds : short
     StoreItem,
     SplitItem,
     SplitItem1,
+    DepositTradeItem,
+    RetrieveTradeItem,
     UseItem,
     DropItem,
     PlayerUpdate,
@@ -706,6 +719,14 @@ public enum ServerPacketIds : short
     GuildStorageGoldChange,
     GuildStorageItemChange,
     GuildStorageList,
+    DefaultNPC,
+    NPCUpdate,
+    TradeRequest,
+    TradeAccept,
+    TradeGold,
+    TradeItem,
+    TradeConfirm,
+    TradeCancel,
 }
 
 public enum ClientPacketIds : short
@@ -733,11 +754,14 @@ public enum ClientPacketIds : short
     SplitItem,
     UseItem,
     DropItem,
+    DepositTradeItem,
+    RetrieveTradeItem,
     DropGold,
     PickUp,
     Inspect,
     ChangeAMode,
     ChangePMode,
+    ChangeTrade,
     Attack,
     RangeAttack,
     Harvest,
@@ -770,6 +794,11 @@ public enum ClientPacketIds : short
     RequestGuildInfo,
     GuildStorageGoldChange,
     GuildStorageItemChange,
+    TradeRequest,
+    TradeReply,
+    TradeGold,
+    TradeConfirm,
+    TradeCancel
 }
 
 public class InIReader
@@ -2249,6 +2278,10 @@ public abstract class Packet
                 return new C.UseItem();
             case (short)ClientPacketIds.DropItem:
                 return new C.DropItem();
+            case (short)ClientPacketIds.DepositTradeItem:
+                return new C.DepositTradeItem();
+            case (short)ClientPacketIds.RetrieveTradeItem:
+                return new C.RetrieveTradeItem();
             case (short)ClientPacketIds.DropGold:
                 return new C.DropGold();
             case (short)ClientPacketIds.PickUp:
@@ -2259,6 +2292,8 @@ public abstract class Packet
                 return new C.ChangeAMode();
             case (short)ClientPacketIds.ChangePMode:
                 return new C.ChangePMode();
+            case (short)ClientPacketIds.ChangeTrade:
+                return new C.ChangeTrade();
             case (short)ClientPacketIds.Attack:
                 return new C.Attack();
             case (short)ClientPacketIds.RangeAttack:
@@ -2323,6 +2358,16 @@ public abstract class Packet
                 return new C.GuildStorageGoldChange();
             case (short)ClientPacketIds.GuildStorageItemChange:
                 return new C.GuildStorageItemChange();
+            case (short)ClientPacketIds.TradeRequest:
+                return new C.TradeRequest();
+            case (short)ClientPacketIds.TradeReply:
+                return new C.TradeReply();
+            case (short)ClientPacketIds.TradeGold:
+                return new C.TradeGold();
+            case (short)ClientPacketIds.TradeConfirm:
+                return new C.TradeConfirm();
+            case (short)ClientPacketIds.TradeCancel:
+                return new C.TradeCancel();
             default:
                 throw new NotImplementedException();
         }
@@ -2398,6 +2443,10 @@ public abstract class Packet
                 return new S.TakeBackItem();
             case (short)ServerPacketIds.StoreItem:
                 return new S.StoreItem();
+            case (short)ServerPacketIds.DepositTradeItem:
+                return new S.DepositTradeItem();
+            case (short)ServerPacketIds.RetrieveTradeItem:
+                return new S.RetrieveTradeItem();
             case (short)ServerPacketIds.SplitItem:
                 return new S.SplitItem();
             case (short)ServerPacketIds.SplitItem1:
@@ -2598,6 +2647,22 @@ public abstract class Packet
                 return new S.GuildStorageItemChange();
             case (short)ServerPacketIds.GuildStorageList:
                 return new S.GuildStorageList();
+            case (short)ServerPacketIds.DefaultNPC:
+                return new S.DefaultNPC();
+            case (short)ServerPacketIds.NPCUpdate:
+                return new S.NPCUpdate();
+            case (short)ServerPacketIds.TradeRequest:
+                return new S.TradeRequest();
+            case (short)ServerPacketIds.TradeAccept:
+                return new S.TradeAccept();
+            case (short)ServerPacketIds.TradeGold:
+                return new S.TradeGold();
+            case (short)ServerPacketIds.TradeItem:
+                return new S.TradeItem();
+            case (short)ServerPacketIds.TradeConfirm:
+                return new S.TradeConfirm();
+            case (short)ServerPacketIds.TradeCancel:
+                return new S.TradeCancel();
             default:
                 throw new NotImplementedException();
         }
