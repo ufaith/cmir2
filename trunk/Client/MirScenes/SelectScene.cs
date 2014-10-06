@@ -685,12 +685,12 @@ namespace Client.MirScenes
 
                 ArcherButton = new MirButton
                 {
-                    HoverIndex = 2442,
-                    Index = 2441,
+                    HoverIndex = 2439,
+                    Index = 2438,
                     Library = Libraries.Prguse,
                     Location = new Point(523, 296),
                     Parent = this,
-                    PressedIndex = 2443,
+                    PressedIndex = 2440,
                     Sound = SoundList.ButtonA,
                 };
                 ArcherButton.Click += (o, e) =>
@@ -793,7 +793,7 @@ namespace Client.MirScenes
                 WizardButton.Index = 2429;
                 TaoistButton.Index = 2432;
                 AssassinButton.Index = 2435;
-                ArcherButton.Index = 2441;
+                ArcherButton.Index = 2438;
 
                 switch (_gender)
                 {
@@ -828,7 +828,7 @@ namespace Client.MirScenes
                         CharacterDisplay.Index = (byte)_gender == 0 ? 280 : 560;
                         break;
                     case MirClass.Archer:
-                        ArcherButton.Index = 2442;
+                        ArcherButton.Index = 2439;
                         Description.Text = ArcherDescription;
                         CharacterDisplay.Index = (byte)_gender == 0 ? 160 : 180;
                         break;
@@ -878,6 +878,7 @@ namespace Client.MirScenes
                 if (info == null)
                 {
                     Index = 45;
+                    Library = Libraries.Prguse;
                     NameLabel.Text = string.Empty;
                     LevelLabel.Text = string.Empty;
                     ClassLabel.Text = string.Empty;
@@ -889,7 +890,9 @@ namespace Client.MirScenes
                     return;
                 }
 
-                Index = 90 + (byte) info.Class;
+                Library = Libraries.Title;
+
+                Index = 620 + (byte) info.Class;
 
                 if (Selected) Index += 5;
 

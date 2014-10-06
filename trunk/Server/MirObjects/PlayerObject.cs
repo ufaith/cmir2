@@ -228,8 +228,8 @@ namespace Server.MirObjects
         public PlayerObject TradeInvitation;
 
         public PlayerObject TradePartner = null;
-        public uint TradeGoldAmount = 0;
         public bool TradeLocked = false;
+        public uint TradeGoldAmount = 0;
 
         public PlayerObject(CharacterInfo info, MirConnection connection)
         {
@@ -2528,6 +2528,9 @@ namespace Server.MirObjects
                         {
                             CurrentMap.NPCs[i].LoadInfo(true);
                         }
+
+                        DefaultNPC.LoadInfo(true);
+
                         ReceiveChat("NPCs Reloaded.", ChatType.Hint);
                         break;
 
@@ -2618,11 +2621,11 @@ namespace Server.MirObjects
                         player.CanCreateGuild = false;
                         break;
 
-                    case "TRADE":
-                        if (parts.Length < 2) return;
+                    //case "TRADE":
+                    //    if (parts.Length < 2) return;
 
-                        TradeRequest(parts[1]);
-                        break;
+                    //    TradeRequest(parts[1]);
+                    //    break;
 
                     case "ALLOWTRADE":
                         AllowTrade = !AllowTrade;
@@ -2656,6 +2659,13 @@ namespace Server.MirObjects
                             pl.CallDefaultNPC(DefaultNPCType.Trigger, parts[1]);
                         }
 
+                        break;
+                    default:
+                        foreach (string command in Envir.CustomCommands)
+                        {
+                            if (parts[0] == command)
+                                CallDefaultNPC(DefaultNPCType.CustomCommand, parts[0]);
+                        }
                         break;
                 }
             }
@@ -2723,6 +2733,8 @@ namespace Server.MirObjects
                     break;
                 }
 
+                if (TradePartner != null) TradeCancel();
+
                 Broadcast(new S.ObjectTurn { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
             }
 
@@ -2730,7 +2742,6 @@ namespace Server.MirObjects
         }
         public void Harvest(MirDirection dir)
         {
-
             if (!CanMove)
             {
                 Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
@@ -2851,6 +2862,8 @@ namespace Server.MirObjects
             CellTime = Envir.Time + 500;
             ActionTime = Envir.Time + MoveDelay;
 
+            if (TradePartner != null) TradeCancel();
+
             Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
             Broadcast(new S.ObjectWalk { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
 
@@ -2960,8 +2973,9 @@ namespace Server.MirObjects
                 ChangeHP(-1);
             }
 
-            Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
+            if (TradePartner != null) TradeCancel();
 
+            Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
             Broadcast(new S.ObjectRun { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
 
 
@@ -3008,6 +3022,8 @@ namespace Server.MirObjects
                 CurrentLocation = location;
                 CurrentMap.GetCell(CurrentLocation).Add(this);
                 AddObjects(dir, 1);
+
+                if (TradePartner != null) TradeCancel();
 
                 Enqueue(new S.Pushed { Direction = Direction, Location = CurrentLocation });
                 Broadcast(new S.ObjectPushed { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
@@ -4890,6 +4906,8 @@ namespace Server.MirObjects
 
             if (effects) Enqueue(new S.TeleportIn());
 
+            if (TradePartner != null) TradeCancel();
+
             GetObjectsPassive();
 
             SafeZoneInfo szi = CurrentMap.GetSafeZone(CurrentLocation);
@@ -6689,6 +6707,9 @@ namespace Server.MirObjects
                     break;
                 case DefaultNPCType.LevelUp:
                     key = "LevelUp";
+                    break;
+                case DefaultNPCType.CustomCommand:
+                    key = string.Format("CustomCommand({0})", value[0]);
                     break;
             }
 
@@ -8588,7 +8609,7 @@ namespace Server.MirObjects
         #endregion
 
         #region Trading
-        public void TradeRequest(string name)
+        public void TradeRequest()
         {
             if (TradePartner != null)
             {
@@ -8596,16 +8617,32 @@ namespace Server.MirObjects
                 return;
             }
 
-            PlayerObject player = Envir.GetPlayer(name);
+            Point target = Functions.PointMove(CurrentLocation, Direction, 1);
+            Cell cell = CurrentMap.GetCell(target);
+            PlayerObject player = null;
+
+            for (int i = 0; i < cell.Objects.Count; i++)
+            {
+                MapObject ob = cell.Objects[i];
+                if (ob.Race != ObjectType.Player) continue;
+
+                player = Envir.GetPlayer(ob.Name);
+            }
 
             if (player == null)
             {
-                ReceiveChat(string.Format("Player {0} was not found.", name), ChatType.System);
+                ReceiveChat(string.Format("You must face someone to trade."), ChatType.System);
                 return;
             }
 
             if (player != null)
             {
+                if (!Functions.FacingEachOther(Direction, CurrentLocation, player.Direction, player.CurrentLocation))
+                {
+                    ReceiveChat(string.Format("You must face someone to trade."), ChatType.System);
+                    return;
+                }
+
                 if (player == this)
                 {
                     ReceiveChat("You cannot trade with your self.", ChatType.System);
@@ -8630,7 +8667,7 @@ namespace Server.MirObjects
                     return;
                 }
 
-                if (!Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange))
+                if (!Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) || player.CurrentMap != CurrentMap)
                 {
                     ReceiveChat(string.Format("Player {0} is not within trading range.", player.Info.Name), ChatType.System);
                     return;
@@ -8719,6 +8756,13 @@ namespace Server.MirObjects
                 return;
             }
 
+            if (!Functions.InRange(TradePartner.CurrentLocation, CurrentLocation, Globals.DataRange) || TradePartner.CurrentMap != CurrentMap ||
+                !Functions.FacingEachOther(Direction, CurrentLocation, TradePartner.Direction, TradePartner.CurrentLocation))
+            {
+                TradeCancel();
+                return;
+            }
+
             TradeLocked = locked;
 
             if (TradeLocked && !TradePartner.TradeLocked)
@@ -8727,13 +8771,6 @@ namespace Server.MirObjects
             }
 
             if (!TradeLocked || !TradePartner.TradeLocked) return;
-
-            if (!Functions.InRange(TradePartner.CurrentLocation, CurrentLocation, Globals.DataRange))
-            {
-                ReceiveChat(string.Format("Player {0} is no longer within trading range.", TradePartner.Info.Name), ChatType.System);
-                Enqueue(new S.TradeCancel { Unlock = true });
-                return;
-            }
 
             PlayerObject[] TradePair = new PlayerObject[2] { TradePartner, this };
 
@@ -8784,9 +8821,7 @@ namespace Server.MirObjects
                         if (u == null) continue;
 
                         TradePair[o].GainItem(u);
-
                         TradePair[p].Info.Trade[i] = null;
-                        //TradePair[p].Report.ItemChange(u, u.Count, true);
                     }
 
                     if (TradePair[p].TradeGoldAmount > 0)
@@ -8805,6 +8840,11 @@ namespace Server.MirObjects
         }
         public void TradeCancel()
         {
+            if (TradePartner == null)
+            {
+                return;
+            }
+
             PlayerObject[] TradePair = new PlayerObject[2] { TradePartner, this };
 
             for (int p = 0; p < 2; p++)
@@ -8854,6 +8894,7 @@ namespace Server.MirObjects
                 }
             }
         }
+
         #endregion
     }
 }

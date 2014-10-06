@@ -815,14 +815,14 @@ namespace ClientPackets
     {
         public override short Index { get { return (short)ClientPacketIds.TradeRequest; } }
 
-        public string Name;
+        //public string Name;
         protected override void ReadPacket(BinaryReader reader)
         {
-            Name = reader.ReadString();
+            //Name = reader.ReadString();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
-            writer.Write(Name);
+            //writer.Write(Name);
         }
     }
     public sealed class TradeGold : Packet

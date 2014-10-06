@@ -379,6 +379,9 @@ namespace Client.MirScenes
                 case Keys.B:
                     BigMapDialog.Toggle();
                     break;
+                case Keys.T:
+                    Network.Enqueue(new C.TradeRequest());
+                    break;
                 case Keys.A:
                     switch (PMode)
                     {
@@ -3064,6 +3067,9 @@ namespace Client.MirScenes
             else
             {
                 TradeDialog.TradeReset();
+
+                MirMessageBox messageBox = new MirMessageBox("Deal cancelled.\r\nTo deal correctly you must face the other party.", MirMessageBoxButtons.OK);
+                messageBox.Show();
             }
         }
 
@@ -5685,7 +5691,7 @@ namespace Client.MirScenes
         }
 
         public MirImageControl ExperienceBar, WeightBar;
-        public MirButton MenuButton, InventoryButton, CharacterButton, SkillButton, QuestButton, OptionButton;
+        public MirButton GameShopButton, MenuButton, InventoryButton, CharacterButton, SkillButton, QuestButton, OptionButton;
         public MirControl HealthOrb;
         public MirLabel HealthLabel, ManaLabel, LevelLabel, CharacterName, ExperienceLabel, GoldLabel, WeightLabel, AModeLabel, PModeLabel;
 
@@ -5803,6 +5809,21 @@ namespace Client.MirScenes
             {
                 if (!GameScene.Scene.MenuDialog.Visible) GameScene.Scene.MenuDialog.Show();
                 else GameScene.Scene.MenuDialog.Hide();
+            };
+
+            GameShopButton = new MirButton
+            {
+                HoverIndex = 827,
+                Index = 826,
+                Library = Libraries.Prguse,
+                Location = new Point(Settings.ScreenWidth - 105, 35),
+                Parent = this,
+                PressedIndex = 828,
+                Sound = SoundList.ButtonC,
+            };
+            GameShopButton.Click += (o, e) =>
+            {
+
             };
 
             HealthOrb = new MirControl
@@ -6054,6 +6075,7 @@ namespace Client.MirScenes
         public string LastPM = string.Empty;
 
         public int StartIndex, LineCount = 4, WindowSize;
+        public string ChatPrefix = "";
 
         public ChatDialog()
         {
@@ -6238,6 +6260,25 @@ namespace Client.MirScenes
 
         public void ReceiveChat(string text, ChatType type)
         {
+            //switch (type)
+            //{
+            //    case ChatType.Normal:
+            //        if (!Settings.ShowNormalChat) return;
+            //        break;
+            //    case ChatType.Shout:
+            //        if (!Settings.ShowYellChat) return;
+            //        break;
+            //    case ChatType.WhisperIn:
+            //        if (!Settings.ShowWhisperChat) return;
+            //        break;
+            //    case ChatType.Group:
+            //        if (!Settings.ShowGroupChat) return;
+            //        break;
+            //    case ChatType.Guild:
+            //        if (!Settings.ShowGuildChat) return;
+            //        break;
+            //}
+
             int chatWidth = Settings.HighResolution ? 614 : 390;
             List<string> chat = new List<string>();
 
@@ -6301,6 +6342,7 @@ namespace Client.MirScenes
             Update();
         }
 
+
         public void Update()
         {
             for (int i = 0; i < ChatLines.Count; i++)
@@ -6320,26 +6362,7 @@ namespace Client.MirScenes
 
             int y = 1;
             for (int i = StartIndex; i < History.Count; i++)
-            {
-                //switch (History[i].Type)
-                //{
-                //    case ChatType.Normal:
-                //        if (!Settings.ShowNormalChat) continue;
-                //        break;
-                //    case ChatType.Shout:
-                //        if (!Settings.ShowYellChat) continue;
-                //        break;
-                //    case ChatType.WhisperIn:
-                //        if (!Settings.ShowWhisperChat) continue;
-                //        break;
-                //    case ChatType.Group:
-                //        if (!Settings.ShowGroupChat) continue;
-                //        break;
-                //    case ChatType.Guild:
-                //        if (!Settings.ShowGuildChat) continue;
-                //        break;
-                //}
-
+            {             
                 MirLabel temp = new MirLabel
                     {
                         AutoSize = true,
@@ -6423,6 +6446,8 @@ namespace Client.MirScenes
                     ChatTextBox.SetFocus();
                     if (e.KeyChar == '!') ChatTextBox.Text = "!";
                     if (e.KeyChar == '@') ChatTextBox.Text = "@";
+                    if (ChatPrefix != "") ChatTextBox.Text = ChatPrefix;
+
                     ChatTextBox.Visible = true;
                     ChatTextBox.TextBox.SelectionLength = 0;
                     ChatTextBox.TextBox.SelectionStart = ChatTextBox.Text.Length;
@@ -6448,7 +6473,6 @@ namespace Client.MirScenes
             StartIndex -= count;
             Update();
         }
-
         private void ChatTextBox_KeyUp(object sender, KeyEventArgs e)
         {
             CMain.Shift = e.Shift;
@@ -6475,7 +6499,6 @@ namespace Client.MirScenes
 
             }
         }
-
         private void ChatTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             CMain.Shift = e.Shift;
@@ -6600,8 +6623,7 @@ namespace Client.MirScenes
                 };
             NormalButton.Click += (o, e) =>
             {
-                Settings.ShowNormalChat = !Settings.ShowNormalChat;
-                SetStates();
+                ToggleChatFilter("All");
             };
 
             ShoutButton = new MirButton
@@ -6616,8 +6638,7 @@ namespace Client.MirScenes
                 };
             ShoutButton.Click += (o, e) =>
             {
-                Settings.ShowYellChat = !Settings.ShowYellChat;
-                SetStates();
+                ToggleChatFilter("Shout");
             };
 
             WhisperButton = new MirButton
@@ -6632,8 +6653,7 @@ namespace Client.MirScenes
                 };
             WhisperButton.Click += (o, e) =>
             {
-                Settings.ShowWhisperChat = !Settings.ShowWhisperChat;
-                SetStates();
+                ToggleChatFilter("Whisper");
             };
 
             LoverButton = new MirButton
@@ -6648,8 +6668,7 @@ namespace Client.MirScenes
                 };
             LoverButton.Click += (o, e) =>
             {
-                Settings.ShowLoverChat = !Settings.ShowLoverChat;
-                SetStates();
+                ToggleChatFilter("Lover");
             };
 
             MentorButton = new MirButton
@@ -6664,8 +6683,7 @@ namespace Client.MirScenes
                 };
             MentorButton.Click += (o, e) =>
             {
-                Settings.ShowMentorChat = !Settings.ShowMentorChat;
-                SetStates();
+                ToggleChatFilter("Mentor");
             };
 
             GroupButton = new MirButton
@@ -6680,8 +6698,7 @@ namespace Client.MirScenes
                 };
             GroupButton.Click += (o, e) =>
             {
-                Settings.ShowGroupChat = !Settings.ShowGroupChat;
-                SetStates();
+                ToggleChatFilter("Group");
             };
 
             GuildButton = new MirButton
@@ -6697,10 +6714,59 @@ namespace Client.MirScenes
             GuildButton.Click += (o, e) =>
             {
                 Settings.ShowGuildChat = !Settings.ShowGuildChat;
-                SetStates();
+                ToggleChatFilter("Guild");
             };
 
-            SetStates();
+            ToggleChatFilter("All");
+        }
+
+        public void ToggleChatFilter(string chatFilter)
+        {
+            NormalButton.Index = 2036;
+            NormalButton.HoverIndex = 2037;
+            ShoutButton.Index = 2039;
+            ShoutButton.HoverIndex = 2040;
+            WhisperButton.Index = 2042;
+            WhisperButton.HoverIndex = 2043;
+            LoverButton.Index = 2045;
+            LoverButton.HoverIndex = 2046;
+            MentorButton.Index = 2048;
+            MentorButton.HoverIndex = 2049;
+            GroupButton.Index = 2051;
+            GroupButton.HoverIndex = 2052;
+            GuildButton.Index = 2054;
+            GuildButton.HoverIndex = 2055;
+
+            GameScene.Scene.ChatDialog.ChatPrefix = "";
+
+            switch (chatFilter)
+            {
+                case "All":
+                    NormalButton.Index = 2038;
+                    NormalButton.HoverIndex = 2038;
+                    GameScene.Scene.ChatDialog.ChatPrefix = "";
+                    break;
+                case "Shout":
+                    ShoutButton.Index = 2041;
+                    ShoutButton.HoverIndex = 2041;
+                    GameScene.Scene.ChatDialog.ChatPrefix = "!";
+                    break;
+                case "Whisper":
+                    WhisperButton.Index = 2044;
+                    WhisperButton.HoverIndex = 2044;
+                    GameScene.Scene.ChatDialog.ChatPrefix = "/";
+                    break;
+                case "Group":
+                    GroupButton.Index = 2053;
+                    GroupButton.HoverIndex = 2053;
+                    GameScene.Scene.ChatDialog.ChatPrefix = "!!";
+                    break;
+                case "Guild":
+                    GuildButton.Index = 2056;
+                    GuildButton.HoverIndex = 2056;
+                    GameScene.Scene.ChatDialog.ChatPrefix = "!~";
+                    break;
+            }
         }
 
         public void Show()
@@ -6713,26 +6779,7 @@ namespace Client.MirScenes
             Visible = false;
         }
 
-        public void SetStates()
-        {
-            NormalButton.Index = Settings.ShowNormalChat ? 2036 : 2300;
-            ShoutButton.Index = Settings.ShowYellChat ? 2039 : 2301;
-            WhisperButton.Index = Settings.ShowWhisperChat ? 2042 : 2302;
-            LoverButton.Index = Settings.ShowLoverChat ? 2045 : 2303;
-            MentorButton.Index = Settings.ShowMentorChat ? 2048 : 2304;
-            GroupButton.Index = Settings.ShowGroupChat ? 2051 : 2305;
-            GuildButton.Index = Settings.ShowGuildChat ? 2054 : 2306;
-
-            NormalButton.HoverIndex = Settings.ShowNormalChat ? 2037 : 2300;
-            ShoutButton.HoverIndex = Settings.ShowYellChat ? 2040 : 2301;
-            WhisperButton.HoverIndex = Settings.ShowWhisperChat ? 2043 : 2302;
-            LoverButton.HoverIndex = Settings.ShowLoverChat ? 2046 : 2303;
-            MentorButton.HoverIndex = Settings.ShowMentorChat ? 2049 : 2304;
-            GroupButton.HoverIndex = Settings.ShowGroupChat ? 2052 : 2305;
-            GuildButton.HoverIndex = Settings.ShowGuildChat ? 2055 : 2306;
-
-            GameScene.Scene.ChatDialog.Update();
-        }
+        
     }
 
     public sealed class TradeDialog : MirImageControl
@@ -8747,9 +8794,10 @@ namespace Client.MirScenes
             Index = 1963;
             Parent = GameScene.Scene;
             Library = Libraries.Prguse;
-            Location = new Point(Settings.ScreenWidth - Size.Width, 224);
+            Location = new Point(Settings.ScreenWidth - Size.Width, 200);
             Sort = true;
             Visible = false;
+            Movable = true;
 
             ExitButton = new MirButton
                 {
@@ -8967,9 +9015,13 @@ namespace Client.MirScenes
         public static Regex R = new Regex(@"<(.*?/\@.*?)>");
         public static Regex C = new Regex(@"{(.*?/.*?)}");
 
-        public MirButton CloseButton;
+        public MirButton CloseButton, UpButton, DownButton, PositionBar;
         public MirLabel[] TextLabel;
         public List<MirLabel> TextButtons;
+
+        public List<string> CurrentLines = new List<string>();
+        private int _index = 0;
+        public int MaximumLines = 8;
 
         public NPCDialog()
         {
@@ -8979,19 +9031,63 @@ namespace Client.MirScenes
             TextLabel = new MirLabel[12];
             TextButtons = new List<MirLabel>();
 
+            MouseWheel += NPCDialog_MouseWheel;
+
             Sort = true;
 
-            for (int i = 0; i < TextLabel.Length; i++)
+            UpButton = new MirButton
             {
-                TextLabel[i] = new MirLabel
-                    {
-                        DrawFormat = TextFormatFlags.WordBreak,
-                        Visible = true,
-                        Parent = this,
-                        Size = new Size(420, 18),
-                        Location = new Point(10, 34 + i*18),
-                    };
-            }
+                HoverIndex = 312,
+                PressedIndex = 313,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Size = new Size(16, 14),
+                Location = new Point(415, 34),
+                Sound = SoundList.ButtonA,
+                Visible = false
+            };
+            UpButton.Click += (o, e) =>
+            {
+                if (_index <= 0) return;
+
+                _index--;
+
+                NewText(CurrentLines, false);
+                UpdatePositionBar();
+            };
+
+            DownButton = new MirButton
+            {
+                HoverIndex = 314,
+                PressedIndex = 315,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Size = new Size(16, 14),
+                Location = new Point(415, 174),
+                Sound = SoundList.ButtonA,
+                Visible = false
+            };
+            DownButton.Click += (o, e) =>
+            {
+                if (_index + MaximumLines >= CurrentLines.Count) return;
+
+                _index++;
+
+                NewText(CurrentLines, false);
+                UpdatePositionBar();
+            };
+
+            PositionBar = new MirButton
+            {
+                Index = 955,
+                Library = Libraries.Prguse,
+                Location = new Point(415, 48),
+                Parent = this,
+                Movable = true,
+                Sound = SoundList.None,
+                Visible = false
+            };
+            PositionBar.OnMoving += PositionBar_OnMoving;
 
             CloseButton = new MirButton
                 {
@@ -9006,34 +9102,126 @@ namespace Client.MirScenes
             CloseButton.Click += (o, e) => Hide();
         }
 
-        public void NewText(List<string> lines)
+        void NPCDialog_MouseWheel(object sender, MouseEventArgs e)
         {
+            int count = e.Delta / SystemInformation.MouseWheelScrollDelta;
+
+            if (_index == 0 && count >= 0) return;
+            if (_index == CurrentLines.Count - 1 && count <= 0) return;
+            if (CurrentLines.Count - 1 <= MaximumLines) return;
+
+            _index -= count;
+
+            if (_index < 0) _index = 0;
+            if (_index + MaximumLines > CurrentLines.Count - 1) _index = CurrentLines.Count - MaximumLines;
+
+            NewText(CurrentLines, false);
+
+            UpdatePositionBar();
+        }
+
+        void PositionBar_OnMoving(object sender, MouseEventArgs e)
+        {
+            int x = 415;
+            int y = PositionBar.Location.Y;
+
+            if (y >= 156) y = 156;
+            if (y <= 48) y = 48;
+
+            int location = y - 48;
+            int interval = 108 / (CurrentLines.Count - MaximumLines);
+
+            double yPoint = location / interval;
+
+            _index = Convert.ToInt16(Math.Floor(yPoint));
+
+            NewText(CurrentLines, false);
+
+            PositionBar.Location = new Point(x, y);
+        }
+
+        private void UpdatePositionBar()
+        {
+            int interval = 108 / (CurrentLines.Count - MaximumLines);
+
+            int x = 415;
+            int y = 48 + (_index * interval);
+
+            if (y >= 156) y = 156;
+            if (y <= 48) y = 48;
+
+            PositionBar.Location = new Point(x, y);
+        }
+
+
+        public void NewText(List<string> lines, bool resetIndex = true)
+        {
+            if (resetIndex)
+            {
+                _index = 0;
+                CurrentLines = lines;
+            }
+
+            if (lines.Count > MaximumLines)
+            {
+                Index = 385;
+                UpButton.Visible = true;
+                DownButton.Visible = true;
+                PositionBar.Visible = true;
+            }
+            else
+            {
+                Index = 384;
+                UpButton.Visible = false;
+                DownButton.Visible = false;
+                PositionBar.Visible = false;
+            }
+
             for (int i = 0; i < TextButtons.Count; i++)
                 TextButtons[i].Dispose();
 
-            TextButtons.Clear();
-
             for (int i = 0; i < TextLabel.Length; i++)
             {
+                if (TextLabel[i] != null) TextLabel[i].Text = "";
+            }
+
+            TextButtons.Clear();
+
+            int lastLine = lines.Count > MaximumLines ? ((MaximumLines + _index) > lines.Count ? lines.Count : (MaximumLines + _index)) : lines.Count;
+
+            for (int i = _index; i < lastLine; i++)
+            {
+                TextLabel[i] = new MirLabel
+                {
+                    DrawFormat = TextFormatFlags.WordBreak,
+                    Visible = true,
+                    Parent = this,
+                    Size = new Size(420, 20),
+                    Location = new Point(20, 34 + (i - _index) * 20),
+                    NotControl = true
+                };
+                
                 if (i >= lines.Count)
                 {
                     TextLabel[i].Text = string.Empty;
                     continue;
                 }
 
-                List<Match> matchList = R.Matches(lines[i]).Cast<Match>().ToList();
-                matchList.AddRange(C.Matches(lines[i]).Cast<Match>());
+                string currentLine = lines[i];
 
-                int oldLength = lines[i].Length;
+                List<Match> matchList = R.Matches(currentLine).Cast<Match>().ToList();
+                matchList.AddRange(C.Matches(currentLine).Cast<Match>());
+
+                int oldLength = currentLine.Length;
 
                 foreach (Match match in matchList.OrderBy(o => o.Index).ToList())
                 {
-                    int offSet = oldLength - lines[i].Length;
+                    int offSet = oldLength - currentLine.Length;
 
                     Capture capture = match.Groups[1].Captures[0];
                     string[] values = capture.Value.Split('/');
-                    lines[i] = lines[i].Remove(capture.Index - 1 - offSet, capture.Length + 2).Insert(capture.Index - 1 - offSet, values[0]);
-                    string text = lines[i].Substring(0, capture.Index - 1 - offSet) + " ";
+                    currentLine = currentLine.Remove(capture.Index - 1 - offSet, capture.Length + 2).Insert(capture.Index - 1 - offSet, values[0]);
+                    string text = currentLine.Substring(0, capture.Index - 1 - offSet) + " ";
                     Size size = TextRenderer.MeasureText(CMain.Graphics, text, TextLabel[i].Font, TextLabel[i].Size, TextFormatFlags.TextBoxControl);
 
                     if (R.Match(match.Value).Success)
@@ -9042,8 +9230,10 @@ namespace Client.MirScenes
                     if (C.Match(match.Value).Success)
                         NewColour(values[0], values[1], TextLabel[i].Location.Add(new Point(size.Width - 10, 0)));
                 }
-                
-                TextLabel[i].Text = lines[i];
+
+                TextLabel[i].Text = currentLine;
+                TextLabel[i].MouseWheel += NPCDialog_MouseWheel;
+
             }
         }
 
@@ -9082,6 +9272,8 @@ namespace Client.MirScenes
                     GameScene.NPCTime = CMain.Time + 5000;
                     Network.Enqueue(new C.CallNPC {ObjectID = GameScene.NPCID, Key = key});
                 };
+            temp.MouseWheel += NPCDialog_MouseWheel;
+
             TextButtons.Add(temp);
         }
 
@@ -9099,6 +9291,7 @@ namespace Client.MirScenes
                 ForeColour = textColour,
                 Font = new Font(Settings.FontName, 8F)
             };
+            temp.MouseWheel += NPCDialog_MouseWheel;
 
             TextButtons.Add(temp);
         }

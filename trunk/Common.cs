@@ -15,7 +15,8 @@ public enum DefaultNPCType : byte
     UseItem = 2,
     MapCoord = 3,
     Die = 4,
-    Trigger = 5
+    Trigger = 5,
+    CustomCommand = 6
 }
 
 public enum Monster : ushort
@@ -726,7 +727,7 @@ public enum ServerPacketIds : short
     TradeGold,
     TradeItem,
     TradeConfirm,
-    TradeCancel,
+    TradeCancel
 }
 
 public enum ClientPacketIds : short
@@ -1319,6 +1320,16 @@ public static class Functions
     public static bool InRange(Point a, Point b, int i)
     {
         return Math.Abs(a.X - b.X) <= i && Math.Abs(a.Y - b.Y) <= i;
+    }
+
+    public static bool FacingEachOther(MirDirection dirA, Point pointA, MirDirection dirB, Point pointB)
+    {
+        if (dirA == DirectionFromPoint(pointA, pointB) && dirB == DirectionFromPoint(pointB, pointA))
+        {
+            return true;
+        }
+
+        return false;
     }
 
 

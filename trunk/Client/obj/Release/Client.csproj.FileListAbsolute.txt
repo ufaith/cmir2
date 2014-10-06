@@ -63,9 +63,9 @@ C:\Mir 2 Source\Release\Client\Client.exe.config
 C:\Mir 2\Mir 2 Client\Client.exe.config
 C:\Mir 2\Mir 2 Client\Client.exe
 C:\Mir 2\Mir 2 Client\Client.pdb
+C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csprojResolveAssemblyReference.cache
 C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.CMain.resources
 C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.Properties.Resources.resources
 C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csproj.GenerateResource.Cache
 C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.exe
 C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.pdb
-C:\Mir 2 Source\trunk SVN\Client\obj\Release\Client.csprojResolveAssemblyReference.cache
