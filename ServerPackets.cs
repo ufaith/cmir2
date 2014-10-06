@@ -1318,7 +1318,6 @@ namespace ServerPackets
         }
     }
 
-
     public sealed class LogOutSuccess : Packet
     {
         public override short Index

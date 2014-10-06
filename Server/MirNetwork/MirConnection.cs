@@ -986,7 +986,7 @@ namespace Server.MirNetwork
         {
             if (Stage != GameStage.Game) return;
 
-            Player.TradeRequest(p.Name);
+            Player.TradeRequest();
         }
         private void TradeGold(C.TradeGold p)
         {

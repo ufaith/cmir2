@@ -136,6 +136,7 @@ E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.Properties.Res
 E:\Legend of Mir\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csproj.GenerateResource.Cache
 C:\Mir 2\Mir 2 Server\Server.exe
 C:\Mir 2\Mir 2 Server\Server.pdb
+C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csprojResolveAssemblyReference.cache
 C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.AccountInfoForm.resources
 C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.BalanceConfigForm.resources
 C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.ConfigForm.resources
@@ -153,4 +154,3 @@ C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.Properties.Resources.resourc
 C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csproj.GenerateResource.Cache
 C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.exe
 C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.pdb
-C:\Mir 2 Source\trunk SVN\Server\obj\Release\Server.csprojResolveAssemblyReference.cache

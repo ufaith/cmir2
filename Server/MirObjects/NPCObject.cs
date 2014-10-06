@@ -136,7 +136,7 @@ namespace Server.MirObjects
             {
                 if (!lines[i].ToUpper().StartsWith("[@_")) continue;
 
-                if (lines[i].Contains("MAPCOORD"))
+                if (lines[i].ToUpper().Contains("MAPCOORD"))
                 {
                     Regex regex = new Regex(@"\((.*?),([0-9]{1,3}),([0-9]{1,3})\)");
                     Match match = regex.Match(lines[i]);
@@ -148,6 +148,15 @@ namespace Server.MirObjects
                     if (map == null) continue;
 
                     map.Info.ActiveCoords.Add(new Point(Convert.ToInt16(match.Groups[2].Value), Convert.ToInt16(match.Groups[3].Value)));
+                }
+                if (lines[i].ToUpper().Contains("CUSTOMCOMMAND"))
+                {
+                    Regex regex = new Regex(@"\((.*?)\)");
+                    Match match = regex.Match(lines[i]);
+
+                    if (!match.Success) continue;
+
+                    SMain.Envir.CustomCommands.Add(match.Groups[1].Value);
                 }
 
                 ParseScript(lines, lines[i]);
