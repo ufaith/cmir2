@@ -133,6 +133,9 @@ namespace Server
             LightningCheckbox.Checked = mi.Lightning;                      
             LightningTextbox.Text = mi.LightningDamage.ToString();
             MapDarkLighttextBox.Text = mi.MapDarkLight.ToString();
+
+            NoMountCheckbox.Checked = mi.NoMount;
+            NeedBridleCheckbox.Checked = mi.NeedBridle;
             //MineIndextextBox.Text = mi.MineIndex.ToString();
 
             for (int i = 1; i < _selectedMapInfos.Count; i++)
@@ -165,6 +168,9 @@ namespace Server
                 if (LightningCheckbox.Checked != mi.Lightning) LightningCheckbox.Checked = false;                             
                 if (LightningTextbox.Text != mi.LightningDamage.ToString()) LightningTextbox.Text = string.Empty;
                 if (MapDarkLighttextBox.Text != mi.MapDarkLight.ToString()) MapDarkLighttextBox.Text = string.Empty;
+
+                if (NoMountCheckbox.Checked != mi.NoMount) NoMountCheckbox.Checked = false;
+                if (NeedBridleCheckbox.Checked != mi.NeedBridle) NeedBridleCheckbox.Checked = false;
             }
 
             UpdateSafeZoneInterface();
@@ -1839,6 +1845,22 @@ namespace Server
                 _selectedMineZones[i].Mine = Convert.ToByte(MineZoneComboBox.SelectedIndex);
 
             RefreshMineZoneList();
+        }
+
+        private void NoMountCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoMount = NoMountCheckbox.Checked;
+        }
+
+        private void NeedBridleCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NeedBridle = NeedBridleCheckbox.Checked;
         }
     }
 }

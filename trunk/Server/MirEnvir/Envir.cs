@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 31;
+        public const int Version = 33;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -966,7 +966,7 @@ namespace Server.MirEnvir
                 {
                     UniqueID = ++NextUserItemID,
                     CurrentDura = info.Durability,
-                    MaxDura = info.Durability,
+                    MaxDura = info.Durability
                 };
         }
         public UserItem CreateDropItem(int index)
@@ -1036,9 +1036,24 @@ namespace Server.MirEnvir
                 ItemInfo info = ItemInfoList[i];
                 if (info.Index != item.ItemIndex) continue;
                 item.Info = info;
-                return true;
+
+                return BindSlotItems(item);
             }
             return false;
+        }
+
+        public bool BindSlotItems(UserItem item) //FAR - mount
+        {           
+            for (int i = 0; i < item.Slots.Length; i++)
+            {
+                if (item.Slots[i] == null) continue;
+
+                if (!BindItem(item.Slots[i])) return false;
+            }
+
+            item.SetSlotSize();
+
+            return true;
         }
 
 

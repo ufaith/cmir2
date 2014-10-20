@@ -19,7 +19,9 @@ using Effect = Client.MirObjects.Effect;
 
 namespace Client.MirScenes
 {
-    public enum PanelType { Sell, Repair, SpecialRepair,
+    public enum PanelType
+    {
+        Sell, Repair, SpecialRepair,
         Consign
     }
 
@@ -55,7 +57,7 @@ namespace Client.MirScenes
         public KeyboardLayoutDialog KeyboardLayoutDialog;
         public CraftingDialog CraftingDialog;
         public IntelligentCreatureDialog IntelligentCreatureDialog;
-        public RideDialog RideDialog;
+        public MountDialog MountDialog;
         public FishingDialog FishingDialog;
         public FriendDialog FriendDialog;
         public RelationshipDialog RelationshipDialog;
@@ -126,33 +128,33 @@ namespace Client.MirScenes
 
             KeyDown += GameScene_KeyDown;
 
-            MainDialog = new MainDialog {Parent = this};
-            ChatDialog = new ChatDialog {Parent = this};
-            ChatControl = new ChatControlBar {Parent = this};
-            InventoryDialog = new InventoryDialog {Parent = this};
-            CharacterDialog = new CharacterDialog {Parent = this, Visible = false};
-            BeltDialog = new BeltDialog {Parent = this};
-            StorageDialog = new StorageDialog {Parent = this, Visible = false};
-            MiniMapDialog = new MiniMapDialog {Parent = this};
-            InspectDialog = new InspectDialog {Parent = this, Visible = false};
-            OptionDialog = new OptionDialog {Parent = this, Visible = false};
-            MenuDialog = new MenuDialog {Parent = this, Visible = false};
-            NPCDialog = new NPCDialog {Parent = this, Visible = false};
+            MainDialog = new MainDialog { Parent = this };
+            ChatDialog = new ChatDialog { Parent = this };
+            ChatControl = new ChatControlBar { Parent = this };
+            InventoryDialog = new InventoryDialog { Parent = this };
+            CharacterDialog = new CharacterDialog { Parent = this, Visible = false };
+            BeltDialog = new BeltDialog { Parent = this };
+            StorageDialog = new StorageDialog { Parent = this, Visible = false };
+            MiniMapDialog = new MiniMapDialog { Parent = this };
+            InspectDialog = new InspectDialog { Parent = this, Visible = false };
+            OptionDialog = new OptionDialog { Parent = this, Visible = false };
+            MenuDialog = new MenuDialog { Parent = this, Visible = false };
+            NPCDialog = new NPCDialog { Parent = this, Visible = false };
             NPCGoodsDialog = new NPCGoodsDialog { Parent = this, Visible = false };
             NPCDropDialog = new NPCDropDialog { Parent = this, Visible = false };
             HelpDialog = new HelpDialog { Parent = this, Visible = false };
             KeyboardLayoutDialog = new KeyboardLayoutDialog { Parent = this, Visible = false };
             CraftingDialog = new CraftingDialog { Parent = this, Visible = false };
             IntelligentCreatureDialog = new IntelligentCreatureDialog { Parent = this, Visible = false };
-            RideDialog = new RideDialog { Parent = this, Visible = false };
+            MountDialog = new MountDialog { Parent = this, Visible = false };
             FishingDialog = new FishingDialog { Parent = this, Visible = false };
             FriendDialog = new FriendDialog { Parent = this, Visible = false };
             RelationshipDialog = new RelationshipDialog { Parent = this, Visible = false };
             MentorDialog = new MentorDialog { Parent = this, Visible = false };
             GroupDialog = new GroupDialog { Parent = this, Visible = false };
             GuildDialog = new GuildDialog { Parent = this, Visible = false };
-            BigMapDialog = new BigMapDialog {Parent = this, Visible = false};
-            TrustMerchantDialog = new TrustMerchantDialog {Parent = this, Visible = false};
+            BigMapDialog = new BigMapDialog { Parent = this, Visible = false };
+            TrustMerchantDialog = new TrustMerchantDialog { Parent = this, Visible = false };
             CharacterDuraPanel = new CharacterDuraPanel { Parent = this, Visible = false };
             DuraStatusPanel = new DuraStatusDialog { Parent = this, Visible = true };
             TradeDialog = new TradeDialog { Parent = this, Visible = false };
@@ -160,20 +162,20 @@ namespace Client.MirScenes
 
             for (int i = 0; i < OutputLines.Length; i++)
                 OutputLines[i] = new MirLabel
-                    {
-                        AutoSize = true,
-                        BackColour = Color.Transparent,
-                        Font = new Font(Settings.FontName, 10F),
-                        ForeColour = Color.LimeGreen,
-                        Location = new Point(20, 20 + i*13),
-                        OutLine = true,
-                    };
+                {
+                    AutoSize = true,
+                    BackColour = Color.Transparent,
+                    Font = new Font(Settings.FontName, 10F),
+                    ForeColour = Color.LimeGreen,
+                    Location = new Point(20, 20 + i * 13),
+                    OutLine = true,
+                };
 
         }
 
         public void OutputMessage(string message)
         {
-            OutputMessages.Add(new OutPutMessage {Message = message, ExpireTime = CMain.Time + 5000});
+            OutputMessages.Add(new OutPutMessage { Message = message, ExpireTime = CMain.Time + 5000 });
             if (OutputMessages.Count > 10)
                 OutputMessages.RemoveAt(0);
         }
@@ -205,29 +207,29 @@ namespace Client.MirScenes
             switch (e.KeyCode)
             {
                 case Keys.F1:
-                     UseSpell(CMain.Ctrl ? 9 : 1);
-                     break;
-                 case Keys.F2:
-                     UseSpell(CMain.Ctrl ? 10 : 2);
-                     break;
-                 case Keys.F3:
-                     UseSpell(CMain.Ctrl ? 11 : 3);
-                     break;
-                 case Keys.F4:
-                     UseSpell(CMain.Ctrl ? 12 : 4);
-                     break;
-                 case Keys.F5:
-                     UseSpell(CMain.Ctrl ? 13 : 5);
-                     break;
-                 case Keys.F6:
-                     UseSpell(CMain.Ctrl ? 14 : 6);
-                     break;
-                 case Keys.F7:
-                     UseSpell(CMain.Ctrl ? 15 : 7);
-                     break;
-                 case Keys.F8:
-                     UseSpell(CMain.Ctrl ? 16 : 8);
-                     break;
+                    UseSpell(CMain.Ctrl ? 9 : 1);
+                    break;
+                case Keys.F2:
+                    UseSpell(CMain.Ctrl ? 10 : 2);
+                    break;
+                case Keys.F3:
+                    UseSpell(CMain.Ctrl ? 11 : 3);
+                    break;
+                case Keys.F4:
+                    UseSpell(CMain.Ctrl ? 12 : 4);
+                    break;
+                case Keys.F5:
+                    UseSpell(CMain.Ctrl ? 13 : 5);
+                    break;
+                case Keys.F6:
+                    UseSpell(CMain.Ctrl ? 14 : 6);
+                    break;
+                case Keys.F7:
+                    UseSpell(CMain.Ctrl ? 15 : 7);
+                    break;
+                case Keys.F8:
+                    UseSpell(CMain.Ctrl ? 16 : 8);
+                    break;
                 case Keys.I:
                 case Keys.F9:
                     if (!InventoryDialog.Visible) InventoryDialog.Show();
@@ -257,13 +259,18 @@ namespace Client.MirScenes
                     break;
 
                 case Keys.J:
-                    if (!RideDialog.Visible) RideDialog.Show();
-                    else RideDialog.Hide();
+                    if (!MountDialog.Visible) MountDialog.Show();
+                    else MountDialog.Hide();
                     break;
-                
+
                 case Keys.N:
                     if (!FishingDialog.Visible) FishingDialog.Show();
                     else FishingDialog.Hide();
+                    break;
+
+                case Keys.M:
+                    if (GameScene.Scene.MountDialog.CanRide())
+                        GameScene.Scene.MountDialog.Ride();
                     break;
 
                 case Keys.W:
@@ -281,11 +288,6 @@ namespace Client.MirScenes
                     else MentorDialog.Hide();
                     break;
 
-               /* case Keys.P:
-                    if (!GroupDialog.Visible) GroupDialog.Show();
-                    else GroupDialog.Hide();
-                    break;
-                */
                 case Keys.G:
                     if (!GuildDialog.Visible) GuildDialog.Show();
                     else GuildDialog.Hide();
@@ -302,7 +304,7 @@ namespace Client.MirScenes
                     KeyboardLayoutDialog.Hide();
                     CraftingDialog.Hide();
                     IntelligentCreatureDialog.Hide();
-                    RideDialog.Hide();
+                    MountDialog.Hide();
                     FishingDialog.Hide();
                     FriendDialog.Hide();
                     RelationshipDialog.Hide();
@@ -322,8 +324,8 @@ namespace Client.MirScenes
                     else OptionDialog.Hide();
                     break;
                 case Keys.P:
-                     if (!GroupDialog.Visible) GroupDialog.Show();
-                     else GroupDialog.Hide();
+                    if (!GroupDialog.Visible) GroupDialog.Show();
+                    else GroupDialog.Hide();
                     break;
                 case Keys.Z:
                     if (CMain.Ctrl) BeltDialog.Flip();
@@ -386,16 +388,16 @@ namespace Client.MirScenes
                     switch (PMode)
                     {
                         case PetMode.Both:
-                            Network.Enqueue(new C.ChangePMode {Mode = PetMode.MoveOnly});
+                            Network.Enqueue(new C.ChangePMode { Mode = PetMode.MoveOnly });
                             return;
                         case PetMode.MoveOnly:
-                            Network.Enqueue(new C.ChangePMode {Mode = PetMode.AttackOnly});
+                            Network.Enqueue(new C.ChangePMode { Mode = PetMode.AttackOnly });
                             return;
                         case PetMode.AttackOnly:
-                            Network.Enqueue(new C.ChangePMode {Mode = PetMode.None});
+                            Network.Enqueue(new C.ChangePMode { Mode = PetMode.None });
                             return;
                         case PetMode.None:
-                            Network.Enqueue(new C.ChangePMode {Mode = PetMode.Both});
+                            Network.Enqueue(new C.ChangePMode { Mode = PetMode.Both });
                             return;
                     }
                     break;
@@ -403,19 +405,19 @@ namespace Client.MirScenes
                     switch (AMode)
                     {
                         case AttackMode.Peace:
-                            Network.Enqueue(new C.ChangeAMode {Mode = AttackMode.Group});
+                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Group });
                             return;
                         case AttackMode.Group:
-                            Network.Enqueue(new C.ChangeAMode {Mode = AttackMode.Guild});
+                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Guild });
                             return;
                         case AttackMode.Guild:
-                            Network.Enqueue(new C.ChangeAMode {Mode = AttackMode.RedBrown});
+                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.RedBrown });
                             return;
                         case AttackMode.RedBrown:
-                            Network.Enqueue(new C.ChangeAMode {Mode = AttackMode.All});
+                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.All });
                             return;
                         case AttackMode.All:
-                            Network.Enqueue(new C.ChangeAMode {Mode = AttackMode.Peace});
+                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Peace });
                             return;
                     }
                     break;
@@ -450,6 +452,7 @@ namespace Client.MirScenes
 
         private void UseSpell(int key)
         {
+            if (User.RidingMount) return;
 
             ClientMagic magic = null;
 
@@ -476,7 +479,7 @@ namespace Client.MirScenes
                     Thrusting = !Thrusting;
                     ChatDialog.ReceiveChat(Thrusting ? "Use Thrusting." : "Do not use Thrusting.", ChatType.Hint);
                     ToggleTime = CMain.Time + 1000;
-                    Network.Enqueue(new C.SpellToggle {Spell = magic.Spell, CanUse = Thrusting});
+                    Network.Enqueue(new C.SpellToggle { Spell = magic.Spell, CanUse = Thrusting });
                     break;
                 case Spell.HalfMoon:
                     if (CMain.Time < ToggleTime) return;
@@ -502,8 +505,8 @@ namespace Client.MirScenes
                 case Spell.TwinDrakeBlade:
                     if (CMain.Time < ToggleTime) return;
                     ToggleTime = CMain.Time + 500;
-                    
-                    cost = magic.Level*magic.LevelCost + magic.BaseCost;
+
+                    cost = magic.Level * magic.LevelCost + magic.BaseCost;
                     if (cost > MapObject.User.MP)
                     {
                         Scene.OutputMessage("Not Enough Mana to cast.");
@@ -546,10 +549,10 @@ namespace Client.MirScenes
             //If Last Combat < 10 CANCEL
             MirMessageBox messageBox = new MirMessageBox("Do you want to log out of Legend of Mir?", MirMessageBoxButtons.YesNo);
             messageBox.YesButton.Click += (o, e) =>
-                {
-                    Network.Enqueue(new C.LogOut());
-                    Enabled = false;
-                };
+            {
+                Network.Enqueue(new C.LogOut());
+                Enabled = false;
+            };
             messageBox.Show();
         }
 
@@ -565,7 +568,7 @@ namespace Client.MirScenes
             {
                 int image = PickedUpGold ? 116 : SelectedCell.Item.Info.Image;
                 Size imgSize = Libraries.Items.GetTrueSize(image);
-                Point p = CMain.MPoint.Add(-imgSize.Width/2, -imgSize.Height/2);
+                Point p = CMain.MPoint.Add(-imgSize.Width / 2, -imgSize.Height / 2);
 
                 if (p.X + imgSize.Width >= Settings.ScreenWidth)
                     p.X = Settings.ScreenWidth - imgSize.Width;
@@ -640,52 +643,52 @@ namespace Client.MirScenes
             switch (p.Index)
             {
                 case (short)ServerPacketIds.MapInformation: //MapInfo
-                    MapInformation((S.MapInformation) p);
+                    MapInformation((S.MapInformation)p);
                     break;
                 case (short)ServerPacketIds.UserInformation:
-                    UserInformation((S.UserInformation) p);
+                    UserInformation((S.UserInformation)p);
                     break;
                 case (short)ServerPacketIds.UserLocation:
-                    UserLocation((S.UserLocation) p);
+                    UserLocation((S.UserLocation)p);
                     break;
                 case (short)ServerPacketIds.ObjectPlayer:
-                    ObjectPlayer((S.ObjectPlayer) p);
+                    ObjectPlayer((S.ObjectPlayer)p);
                     break;
                 case (short)ServerPacketIds.ObjectRemove:
-                    ObjectRemove((S.ObjectRemove) p);
+                    ObjectRemove((S.ObjectRemove)p);
                     break;
                 case (short)ServerPacketIds.ObjectTurn:
-                    ObjectTurn((S.ObjectTurn) p);
+                    ObjectTurn((S.ObjectTurn)p);
                     break;
                 case (short)ServerPacketIds.ObjectWalk:
-                    ObjectWalk((S.ObjectWalk) p);
+                    ObjectWalk((S.ObjectWalk)p);
                     break;
                 case (short)ServerPacketIds.ObjectRun:
-                    ObjectRun((S.ObjectRun) p);
+                    ObjectRun((S.ObjectRun)p);
                     break;
                 case (short)ServerPacketIds.Chat:
-                    ReceiveChat((S.Chat) p);
+                    ReceiveChat((S.Chat)p);
                     break;
                 case (short)ServerPacketIds.ObjectChat:
-                    ObjectChat((S.ObjectChat) p);
+                    ObjectChat((S.ObjectChat)p);
                     break;
                 case (short)ServerPacketIds.MoveItem:
-                    MoveItem((S.MoveItem) p);
+                    MoveItem((S.MoveItem)p);
                     break;
                 case (short)ServerPacketIds.EquipItem:
-                    EquipItem((S.EquipItem) p);
+                    EquipItem((S.EquipItem)p);
                     break;
                 case (short)ServerPacketIds.MergeItem:
-                    MergeItem((S.MergeItem) p);
+                    MergeItem((S.MergeItem)p);
                     break;
                 case (short)ServerPacketIds.RemoveItem:
-                    RemoveItem((S.RemoveItem) p);
+                    RemoveItem((S.RemoveItem)p);
                     break;
                 case (short)ServerPacketIds.TakeBackItem:
-                    TakeBackItem((S.TakeBackItem) p);
+                    TakeBackItem((S.TakeBackItem)p);
                     break;
                 case (short)ServerPacketIds.StoreItem:
-                    StoreItem((S.StoreItem) p);
+                    StoreItem((S.StoreItem)p);
                     break;
                 case (short)ServerPacketIds.DepositTradeItem:
                     DepositTradeItem((S.DepositTradeItem)p);
@@ -694,139 +697,139 @@ namespace Client.MirScenes
                     RetrieveTradeItem((S.RetrieveTradeItem)p);
                     break;
                 case (short)ServerPacketIds.SplitItem:
-                    SplitItem((S.SplitItem) p);
+                    SplitItem((S.SplitItem)p);
                     break;
                 case (short)ServerPacketIds.SplitItem1:
-                    SplitItem1((S.SplitItem1) p);
+                    SplitItem1((S.SplitItem1)p);
                     break;
                 case (short)ServerPacketIds.UseItem:
-                    UseItem((S.UseItem) p);
+                    UseItem((S.UseItem)p);
                     break;
                 case (short)ServerPacketIds.DropItem:
-                    DropItem((S.DropItem) p);
+                    DropItem((S.DropItem)p);
                     break;
                 case (short)ServerPacketIds.PlayerUpdate:
-                    PlayerUpdate((S.PlayerUpdate) p);
+                    PlayerUpdate((S.PlayerUpdate)p);
                     break;
                 case (short)ServerPacketIds.PlayerInspect:
-                    PlayerInspect((S.PlayerInspect) p);
+                    PlayerInspect((S.PlayerInspect)p);
                     break;
                 case (short)ServerPacketIds.LogOutSuccess:
-                    LogOutSuccess((S.LogOutSuccess) p);
+                    LogOutSuccess((S.LogOutSuccess)p);
                     break;
                 case (short)ServerPacketIds.TimeOfDay:
-                    TimeOfDay((S.TimeOfDay) p);
+                    TimeOfDay((S.TimeOfDay)p);
                     break;
                 case (short)ServerPacketIds.ChangeAMode:
-                    ChangeAMode((S.ChangeAMode) p);
+                    ChangeAMode((S.ChangeAMode)p);
                     break;
                 case (short)ServerPacketIds.ChangePMode:
-                    ChangePMode((S.ChangePMode) p);
+                    ChangePMode((S.ChangePMode)p);
                     break;
                 case (short)ServerPacketIds.ObjectItem:
-                    ObjectItem((S.ObjectItem) p);
+                    ObjectItem((S.ObjectItem)p);
                     break;
                 case (short)ServerPacketIds.ObjectGold:
-                    ObjectGold((S.ObjectGold) p);
+                    ObjectGold((S.ObjectGold)p);
                     break;
                 case (short)ServerPacketIds.GainedItem:
-                    GainedItem((S.GainedItem) p);
+                    GainedItem((S.GainedItem)p);
                     break;
                 case (short)ServerPacketIds.GainedGold:
-                    GainedGold((S.GainedGold) p);
+                    GainedGold((S.GainedGold)p);
                     break;
                 case (short)ServerPacketIds.LoseGold:
-                    LoseGold((S.LoseGold) p);
+                    LoseGold((S.LoseGold)p);
                     break;
                 case (short)ServerPacketIds.ObjectMonster:
-                    ObjectMonster((S.ObjectMonster) p);
+                    ObjectMonster((S.ObjectMonster)p);
                     break;
                 case (short)ServerPacketIds.ObjectAttack:
-                    ObjectAttack((S.ObjectAttack) p);
+                    ObjectAttack((S.ObjectAttack)p);
                     break;
                 case (short)ServerPacketIds.Struck:
-                    Struck((S.Struck) p);
+                    Struck((S.Struck)p);
                     break;
                 case (short)ServerPacketIds.ObjectStruck:
-                    ObjectStruck((S.ObjectStruck) p);
+                    ObjectStruck((S.ObjectStruck)p);
                     break;
                 case (short)ServerPacketIds.DuraChanged:
-                    DuraChanged((S.DuraChanged) p);
+                    DuraChanged((S.DuraChanged)p);
                     break;
                 case (short)ServerPacketIds.HealthChanged:
-                    HealthChanged((S.HealthChanged) p);
+                    HealthChanged((S.HealthChanged)p);
                     break;
                 case (short)ServerPacketIds.DeleteItem:
-                    DeleteItem((S.DeleteItem) p);
+                    DeleteItem((S.DeleteItem)p);
                     break;
                 case (short)ServerPacketIds.Death:
-                    Death((S.Death) p);
+                    Death((S.Death)p);
                     break;
                 case (short)ServerPacketIds.ObjectDied:
-                    ObjectDied((S.ObjectDied) p);
+                    ObjectDied((S.ObjectDied)p);
                     break;
                 case (short)ServerPacketIds.ColourChanged:
-                    ColourChanged((S.ColourChanged) p);
+                    ColourChanged((S.ColourChanged)p);
                     break;
                 case (short)ServerPacketIds.ObjectColourChanged:
-                    ObjectColourChanged((S.ObjectColourChanged) p);
+                    ObjectColourChanged((S.ObjectColourChanged)p);
                     break;
                 case (short)ServerPacketIds.GainExperience:
-                    GainExperience((S.GainExperience) p);
+                    GainExperience((S.GainExperience)p);
                     break;
                 case (short)ServerPacketIds.LevelChanged:
-                    LevelChanged((S.LevelChanged) p);
+                    LevelChanged((S.LevelChanged)p);
                     break;
                 case (short)ServerPacketIds.ObjectLeveled:
-                    ObjectLeveled((S.ObjectLeveled) p);
+                    ObjectLeveled((S.ObjectLeveled)p);
                     break;
                 case (short)ServerPacketIds.ObjectHarvest:
-                    ObjectHarvest((S.ObjectHarvest) p);
+                    ObjectHarvest((S.ObjectHarvest)p);
                     break;
                 case (short)ServerPacketIds.ObjectHarvested:
-                    ObjectHarvested((S.ObjectHarvested) p);
+                    ObjectHarvested((S.ObjectHarvested)p);
                     break;
                 case (short)ServerPacketIds.ObjectNpc:
-                    ObjectNPC((S.ObjectNPC) p);
+                    ObjectNPC((S.ObjectNPC)p);
                     break;
                 case (short)ServerPacketIds.NPCResponse:
-                    NPCResponse((S.NPCResponse) p);
+                    NPCResponse((S.NPCResponse)p);
                     break;
                 case (short)ServerPacketIds.ObjectHide:
-                    ObjectHide((S.ObjectHide) p);
+                    ObjectHide((S.ObjectHide)p);
                     break;
                 case (short)ServerPacketIds.ObjectShow:
-                    ObjectShow((S.ObjectShow) p);
+                    ObjectShow((S.ObjectShow)p);
                     break;
                 case (short)ServerPacketIds.Poisoned:
-                    Poisoned((S.Poisoned) p);
+                    Poisoned((S.Poisoned)p);
                     break;
                 case (short)ServerPacketIds.ObjectPoisoned:
-                    ObjectPoisoned((S.ObjectPoisoned) p);
+                    ObjectPoisoned((S.ObjectPoisoned)p);
                     break;
                 case (short)ServerPacketIds.MapChanged:
-                    MapChanged((S.MapChanged) p);
+                    MapChanged((S.MapChanged)p);
                     break;
                 case (short)ServerPacketIds.ObjectTeleportOut:
-                    ObjectTeleportOut((S.ObjectTeleportOut) p);
+                    ObjectTeleportOut((S.ObjectTeleportOut)p);
                     break;
                 case (short)ServerPacketIds.ObjectTeleportIn:
-                    ObjectTeleportIn((S.ObjectTeleportIn) p);
+                    ObjectTeleportIn((S.ObjectTeleportIn)p);
                     break;
                 case (short)ServerPacketIds.TeleportIn:
                     TeleportIn();
                     break;
                 case (short)ServerPacketIds.NPCGoods:
-                    NPCGoods((S.NPCGoods) p);
+                    NPCGoods((S.NPCGoods)p);
                     break;
                 case (short)ServerPacketIds.NPCSell:
                     NPCSell();
                     break;
                 case (short)ServerPacketIds.NPCRepair:
-                    NPCRepair((S.NPCRepair) p);
+                    NPCRepair((S.NPCRepair)p);
                     break;
                 case (short)ServerPacketIds.NPCSRepair:
-                    NPCSRepair((S.NPCSRepair) p);
+                    NPCSRepair((S.NPCSRepair)p);
                     break;
                 case (short)ServerPacketIds.NPCStorage:
                     NPCStorage();
@@ -871,7 +874,7 @@ namespace Client.MirScenes
                     UserStorage((S.UserStorage)p);
                     break;
                 case (short)ServerPacketIds.SwitchGroup:
-                    SwitchGroup((S.SwitchGroup) p);
+                    SwitchGroup((S.SwitchGroup)p);
                     break;
                 case (short)ServerPacketIds.DeleteGroup:
                     DeleteGroup();
@@ -898,7 +901,7 @@ namespace Client.MirScenes
                     ObjectHealth((S.ObjectHealth)p);
                     break;
                 case (short)ServerPacketIds.MapEffect:
-                    MapEffect((S.MapEffect) p);
+                    MapEffect((S.MapEffect)p);
                     break;
                 case (short)ServerPacketIds.ObjectRangeAttack:
                     ObjectRangeAttack((S.ObjectRangeAttack)p);
@@ -910,10 +913,10 @@ namespace Client.MirScenes
                     RemoveBuff((S.RemoveBuff)p);
                     break;
                 case (short)ServerPacketIds.ObjectHidden:
-                    ObjectHidden((S.ObjectHidden) p);
+                    ObjectHidden((S.ObjectHidden)p);
                     break;
                 case (short)ServerPacketIds.RefreshItem:
-                    RefreshItem((S.RefreshItem) p);
+                    RefreshItem((S.RefreshItem)p);
                     break;
                 case (short)ServerPacketIds.ObjectSpell:
                     ObjectSpell((S.ObjectSpell)p);
@@ -1018,6 +1021,12 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.TradeCancel:
                     TradeCancel((S.TradeCancel)p);
                     break;
+                case (short)ServerPacketIds.MountUpdate:
+                    MountUpdate((S.MountUpdate)p);
+                    break;
+                case (short)ServerPacketIds.EquipSlotItem:
+                    EquipSlotItem((S.EquipSlotItem)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1026,22 +1035,22 @@ namespace Client.MirScenes
 
         public void CreateBuff(Buff buff)
         {
-            MirImageControl image =  new MirImageControl
-                {
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Visible = true,
-                };
+            MirImageControl image = new MirImageControl
+            {
+                Library = Libraries.Prguse,
+                Parent = this,
+                Visible = true,
+            };
 
             new MirLabel
-                {
-                    DrawFormat = TextFormatFlags.Right,
-                    NotControl = true,
-                    ForeColour = Color.Yellow,
-                    Location = new Point(-7, 10),
-                    Size = new Size(30, 20),
-                    Parent = image
-                };
+            {
+                DrawFormat = TextFormatFlags.Right,
+                NotControl = true,
+                ForeColour = Color.Yellow,
+                Location = new Point(-7, 10),
+                Size = new Size(30, 20),
+                Parent = image
+            };
 
             switch (buff.Type)
             {
@@ -1107,13 +1116,13 @@ namespace Client.MirScenes
 
             }
         }
-        
+
         private void MapInformation(S.MapInformation p)
         {
             if (MapControl != null && !MapControl.IsDisposed)
                 MapControl.Dispose();
 
-            MapControl = new MapControl { FileName = Path.Combine(Settings.MapPath, p.FileName + ".map"), Title = p.Title, MiniMap = p.MiniMap, BigMap = p.BigMap, Lights = p.Lights, Lightning = p.Lightning, Fire = p.Fire, MapDarkLight = p.MapDarkLight};
+            MapControl = new MapControl { FileName = Path.Combine(Settings.MapPath, p.FileName + ".map"), Title = p.Title, MiniMap = p.MiniMap, BigMap = p.BigMap, Lights = p.Lights, Lightning = p.Lightning, Fire = p.Fire, MapDarkLight = p.MapDarkLight };
             MapControl.LoadMap();
             InsertControl(0, MapControl);
         }
@@ -1130,8 +1139,8 @@ namespace Client.MirScenes
             if (User.CurrentLocation == p.Location && User.Direction == p.Direction) return;
 
 
-            ReceiveChat(new S.Chat {Message = "Displacement", Type = ChatType.System});
-            
+            ReceiveChat(new S.Chat { Message = "Displacement", Type = ChatType.System });
+
             MapControl.RemoveObject(User);
             User.CurrentLocation = p.Location;
             User.MapLocation = p.Location;
@@ -1182,7 +1191,7 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                ob.ActionFeed.Add(new QueuedAction {Action = MirAction.Standing, Direction = p.Direction, Location = p.Location});
+                ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Standing, Direction = p.Direction, Location = p.Location });
                 return;
             }
         }
@@ -1194,7 +1203,7 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                ob.ActionFeed.Add(new QueuedAction {Action = MirAction.Walking, Direction = p.Direction, Location = p.Location});
+                ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Walking, Direction = p.Direction, Location = p.Location });
                 return;
             }
         }
@@ -1206,7 +1215,7 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                ob.ActionFeed.Add(new QueuedAction {Action = MirAction.Running, Direction = p.Direction, Location = p.Location});
+                ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Running, Direction = p.Direction, Location = p.Location });
                 return;
             }
         }
@@ -1304,6 +1313,37 @@ namespace Client.MirScenes
             toCell.Item = i;
             User.RefreshStats();
         }
+        private void EquipSlotItem(S.EquipSlotItem p)
+        {
+            MirItemCell fromCell;
+
+            MirItemCell toCell = MountDialog.Grid[p.To];
+
+            switch (p.Grid)
+            {
+                case MirGridType.Inventory:
+                    fromCell = InventoryDialog.GetCell(p.UniqueID) ?? BeltDialog.GetCell(p.UniqueID);
+                    break;
+                case MirGridType.Storage:
+                    fromCell = StorageDialog.GetCell(p.UniqueID) ?? BeltDialog.GetCell(p.UniqueID);
+                    break;
+                default:
+                    return;
+            }
+
+            //if (toCell == null || fromCell == null) return;
+
+            toCell.Locked = false;
+            fromCell.Locked = false;
+
+            if (!p.Success) return;
+
+            UserItem i = fromCell.Item;
+            fromCell.Item = null;
+            toCell.Item = i;
+            User.RefreshStats();
+        }
+
         private void MergeItem(S.MergeItem p)
         {
             MirItemCell toCell, fromCell;
@@ -1560,6 +1600,29 @@ namespace Client.MirScenes
 
             User.RefreshStats();
         }
+
+
+        private void MountUpdate(S.MountUpdate p)
+        {
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                if (MapControl.Objects[i].ObjectID != p.ObjectID) continue;
+
+                PlayerObject player = MapControl.Objects[i] as PlayerObject;
+                if (player != null)
+                {
+                    player.MountUpdate(p);
+                }
+                break;
+            }
+
+            CanRun = false;
+
+            GameScene.Scene.MountDialog.RefreshDialog();
+            GameScene.Scene.Redraw();
+        }
+
+
         private void PlayerUpdate(S.PlayerUpdate p)
         {
             for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
@@ -1640,7 +1703,7 @@ namespace Client.MirScenes
         }
         private void ChangePMode(S.ChangePMode p)
         {
-            
+
             PMode = p.Mode;
             switch (p.Mode)
             {
@@ -1720,9 +1783,9 @@ namespace Client.MirScenes
                 }
                 else
                 {
-                    switch(p.Type)
+                    switch (p.Type)
                     {
-                        case 1: 
+                        case 1:
                             {
                                 action = new QueuedAction { Action = MirAction.Attack2, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
                                 break;
@@ -1751,14 +1814,14 @@ namespace Client.MirScenes
             User.BlizzardFreezeTime = 0;
             User.ClearMagic();
 
-            if (User.CurrentAction == MirAction.Struck) return; 
-            
+            if (User.CurrentAction == MirAction.Struck) return;
+
             MirDirection dir = User.Direction;
             Point location = User.CurrentLocation;
 
             for (int i = 0; i < User.ActionFeed.Count; i++)
                 if (User.ActionFeed[i].Action == MirAction.Struck) return;
-            
+
 
             if (User.ActionFeed.Count > 0)
             {
@@ -1784,7 +1847,7 @@ namespace Client.MirScenes
                 if (ob.CurrentAction == MirAction.Struck) return;
                 if (ob.ActionFeed.Count > 0 && ob.ActionFeed[ob.ActionFeed.Count - 1].Action == MirAction.Struck) return;
 
-                if (ob.Race == ObjectType.Player) 
+                if (ob.Race == ObjectType.Player)
                     ((PlayerObject)ob).BlizzardFreezeTime = 0;
                 QueuedAction action = new QueuedAction { Action = MirAction.Struck, Direction = p.Direction, Location = p.Location, Params = new List<object>() };
                 action.Params.Add(p.AttackerID);
@@ -1818,7 +1881,16 @@ namespace Client.MirScenes
             if (item.CurrentDura == 0)
             {
                 User.RefreshStats();
-                ChatDialog.ReceiveChat(string.Format("{0}'s dura has dropped to 0.", item.Info.Name), ChatType.System);
+                switch (item.Info.Type)
+                {
+                    case ItemType.Mount:
+                        ChatDialog.ReceiveChat(string.Format("{0} is no longer loyal to you.", item.Info.Name), ChatType.System);
+                        break;
+                    default:
+                        ChatDialog.ReceiveChat(string.Format("{0}'s dura has dropped to 0.", item.Info.Name), ChatType.System);
+                        break;
+                }
+                
             }
 
             if (HoverItem == item)
@@ -1843,7 +1915,7 @@ namespace Client.MirScenes
 
                 if (item.Count == p.Count)
                     User.Inventory[i] = null;
-                else 
+                else
                     item.Count -= p.Count;
                 break;
             }
@@ -1866,7 +1938,7 @@ namespace Client.MirScenes
         {
             User.Dead = true;
 
-            User.ActionFeed.Add(new QueuedAction {Action = MirAction.Die, Direction = p.Direction, Location = p.Location});
+            User.ActionFeed.Add(new QueuedAction { Action = MirAction.Die, Direction = p.Direction, Location = p.Location });
             ShowReviveMessage = true;
         }
         private void ObjectDied(S.ObjectDied p)
@@ -1981,6 +2053,8 @@ namespace Client.MirScenes
         {
             GameScene.DefaultNPCID = p.ObjectID; //Updates the client with the correct Default NPC ID
         }
+
+
         private void ObjectHide(S.ObjectHide p)
         {
             for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
@@ -2042,7 +2116,7 @@ namespace Client.MirScenes
             User.Direction = p.Direction;
 
             User.QueuedAction = null;
-            User.ActionFeed.Clear(); 
+            User.ActionFeed.Clear();
             User.ClearMagic();
             User.SetAction();
 
@@ -2198,7 +2272,7 @@ namespace Client.MirScenes
 
             item.MaxDura = p.MaxDura;
             item.CurrentDura = p.CurrentDura;
-            
+
             if (HoverItem == item)
             {
                 DisposeItemLabel();
@@ -2253,7 +2327,7 @@ namespace Client.MirScenes
                     break;
             }
         }
-        
+
         private void ObjectMagic(S.ObjectMagic p)
         {
             if (p.ObjectID == User.ObjectID) return;
@@ -2269,7 +2343,7 @@ namespace Client.MirScenes
                 action.Params.Add(p.Target);
                 action.Params.Add(p.Cast);
                 action.Params.Add(p.Level);
-                
+
 
                 ob.ActionFeed.Add(action);
                 return;
@@ -2305,7 +2379,7 @@ namespace Client.MirScenes
                         break;
                     case SpellEffect.MagicShieldUp:
                         if (ob.Race != ObjectType.Player) return;
-                        player = (PlayerObject) ob;
+                        player = (PlayerObject)ob;
                         if (player.ShieldEffect != null)
                         {
                             player.ShieldEffect.Clear();
@@ -2317,7 +2391,7 @@ namespace Client.MirScenes
                         break;
                     case SpellEffect.MagicShieldDown:
                         if (ob.Race != ObjectType.Player) return;
-                        player = (PlayerObject) ob;
+                        player = (PlayerObject)ob;
                         if (player.ShieldEffect != null)
                         {
                             player.ShieldEffect.Clear();
@@ -2346,7 +2420,7 @@ namespace Client.MirScenes
                         ob.Effects.Add(new Effect(Libraries.CustomEffects, 0, 12, 60, ob));
                         break;
                     case SpellEffect.Reflect:
-                        ob.Effects.Add(new Effect(Libraries.Effect, 580, 10, 70, ob)); 
+                        ob.Effects.Add(new Effect(Libraries.Effect, 580, 10, 70, ob));
                         break;
                 }
                 return;
@@ -2478,7 +2552,7 @@ namespace Client.MirScenes
                     break;
                 case Spell.FlamingSword:
                     FlamingSword = p.CanUse;
-                    if (FlamingSword) 
+                    if (FlamingSword)
                         ChatDialog.ReceiveChat("Your weapon is glowed by spirit of fire.", ChatType.Hint);
                     else
                         ChatDialog.ReceiveChat("The spirits of fire disappeared.", ChatType.System);
@@ -2502,7 +2576,7 @@ namespace Client.MirScenes
             {
                 case SpellEffect.Mine:
                     SoundManager.PlaySound(10091);
-                    Effect HitWall = new Effect(Libraries.Effect, 8 * p.Value, 3, 240, p.Location) { Light = 0};
+                    Effect HitWall = new Effect(Libraries.Effect, 8 * p.Value, 3, 240, p.Location) { Light = 0 };
                     MapControl.Effects.Add(HitWall);
                     break;
             }
@@ -2552,7 +2626,7 @@ namespace Client.MirScenes
         }
         private void AddBuff(S.AddBuff p)
         {
-            Buff buff = new Buff {Type = p.Type, Caster = p.Caster, Expire = CMain.Time + p.Expire, Value = p.Value, Infinite = p.Infinite};
+            Buff buff = new Buff { Type = p.Type, Caster = p.Caster, Expire = CMain.Time + p.Expire, Value = p.Value, Infinite = p.Infinite };
             for (int i = 0; i < Buffs.Count; i++)
             {
                 if (Buffs[i].Type != buff.Type) continue;
@@ -2627,10 +2701,10 @@ namespace Client.MirScenes
         {
             if (User.Direction == p.Direction && User.CurrentLocation == p.Location)
             {
-                MapControl.NextAction = 0; 
+                MapControl.NextAction = 0;
                 return;
             }
-            MirAction action = User.CurrentAction == MirAction.DashL ? MirAction.DashR :  MirAction.DashL;
+            MirAction action = User.CurrentAction == MirAction.DashL ? MirAction.DashR : MirAction.DashL;
             for (int i = User.ActionFeed.Count - 1; i >= 0; i--)
             {
                 if (User.ActionFeed[i].Action == MirAction.DashR)
@@ -2661,7 +2735,7 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                
+
                 MirAction action = MirAction.DashL;
 
                 if (ob.ActionFeed.Count > 0 && ob.ActionFeed[ob.ActionFeed.Count - 1].Action == action)
@@ -2680,7 +2754,7 @@ namespace Client.MirScenes
             {
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
-                
+
                 ob.ActionFeed.Add(new QueuedAction { Action = MirAction.DashFail, Direction = p.Direction, Location = p.Location });
 
                 return;
@@ -2712,7 +2786,7 @@ namespace Client.MirScenes
                 Bind(p.Listings[i].Item);
 
             TrustMerchantDialog.Listings.AddRange(p.Listings);
-            TrustMerchantDialog.Page = (TrustMerchantDialog.Listings.Count - 1)/10;
+            TrustMerchantDialog.Page = (TrustMerchantDialog.Listings.Count - 1) / 10;
             TrustMerchantDialog.UpdateInterface();
         }
         private void ConsignItem(S.ConsignItem p)
@@ -2724,7 +2798,7 @@ namespace Client.MirScenes
             cell.Locked = false;
 
             if (!p.Success) return;
-            
+
             cell.Item = null;
 
             User.RefreshStats();
@@ -2835,7 +2909,7 @@ namespace Client.MirScenes
             {
                 if (inputBox.InputTextBox.Text.Contains('\\'))
                 {
-                    ChatDialog.ReceiveChat("You cannot use the \\ sign in a guildname!",ChatType.System);
+                    ChatDialog.ReceiveChat("You cannot use the \\ sign in a guildname!", ChatType.System);
                     inputBox.InputTextBox.Text = "";
                 }
                 Network.Enqueue(new C.GuildNameReturn { Name = inputBox.InputTextBox.Text });
@@ -2856,7 +2930,7 @@ namespace Client.MirScenes
             switch (p.Status)
             {
                 case 0: // logged of
-                    GuildDialog.MemberStatusChange(p.Name,false);
+                    GuildDialog.MemberStatusChange(p.Name, false);
                     break;
                 case 1: // logged on
                     ChatDialog.ReceiveChat(String.Format("{0} logged on.", p.Name), ChatType.Guild);
@@ -2973,7 +3047,7 @@ namespace Client.MirScenes
                     User.RefreshStats();
                     break;
                 case 1://retrieve
-                    
+
 
                     fromCell = GuildDialog.StorageGrid[p.From];
 
@@ -3118,6 +3192,16 @@ namespace Client.MirScenes
                 if (ItemInfoList[i].Index != item.ItemIndex) continue;
 
                 item.Info = ItemInfoList[i];
+
+                item.SetSlotSize();
+
+                for (int s = 0; s < item.Slots.Length; s++)
+                {
+                    if (item.Slots[s] == null) continue;
+
+                    Bind(item.Slots[s]);
+                }
+
                 return;
             }
         }
@@ -3139,60 +3223,60 @@ namespace Client.MirScenes
             }
 
             if (item == HoverItem && ItemLabel != null && !ItemLabel.IsDisposed) return;
-            byte level = Inspect ? InspectDialog.Level: MapObject.User.Level;
-            MirClass job = Inspect ? InspectDialog.Class: MapObject.User.Class;
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
             HoverItem = item;
             ItemInfo RealItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
 
             ItemLabel = new MirControl
-                {
-                    BackColour = Color.FromArgb(255, 0, 24, 48),
-                    Border = true,
-                    BorderColour = Color.FromArgb(144, 148, 48),
-                    DrawControlTexture = true,
-                    NotControl = true,
-                    Parent = this,
-                    Opacity = 0.7F,
-                    Visible = false
-                };
+            {
+                BackColour = Color.FromArgb(255, 0, 24, 48),
+                Border = true,
+                BorderColour = Color.FromArgb(144, 148, 48),
+                DrawControlTexture = true,
+                NotControl = true,
+                Parent = this,
+                Opacity = 0.7F,
+                Visible = false
+            };
 
 
             MirLabel nameLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.Yellow,
-                    Location = new Point(4, 4),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = HoverItem.Info.Name
-                };
+            {
+                AutoSize = true,
+                ForeColour = Color.Yellow,
+                Location = new Point(4, 4),
+                OutLine = false,
+                Parent = ItemLabel,
+                Text = HoverItem.Info.Name
+            };
             ItemLabel.Size = new Size(nameLabel.DisplayRectangle.Right + 4, nameLabel.DisplayRectangle.Bottom);
 
             if (HoverItem.Weight > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format("W: {0}", HoverItem.Weight)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("W: {0}", HoverItem.Weight)
+                };
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
             }
 
             if (HoverItem.Info.StackSize > 1)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format("Count: {0}/{1}", HoverItem.Count, HoverItem.Info.StackSize)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Count: {0}/{1}", HoverItem.Count, HoverItem.Info.StackSize)
+                };
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
             }
 
@@ -3225,14 +3309,14 @@ namespace Client.MirScenes
                 }
 
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = colour,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format("Gender Required: {0}", HoverItem.Info.RequiredGender),
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = colour,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Gender Required: {0}", HoverItem.Info.RequiredGender),
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3240,7 +3324,7 @@ namespace Client.MirScenes
             if (RealItem.RequiredClass != RequiredClass.None)
             {
                 Color colour = Color.White;
-                
+
                 switch (MapObject.User.Class)
                 {
                     case MirClass.Warrior:
@@ -3265,14 +3349,14 @@ namespace Client.MirScenes
                         break;
                 }
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = colour,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format("Class Required: {0}", RealItem.RequiredClass),
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = colour,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Class Required: {0}", RealItem.RequiredClass),
+                };
 
                 if (RealItem.RequiredClass == RequiredClass.WarWizTao)
                     label.Text = string.Format("Class Required: {0}, {1}, {2}", RequiredClass.Warrior, RequiredClass.Wizard, RequiredClass.Taoist);
@@ -3323,14 +3407,14 @@ namespace Client.MirScenes
                         break;
                 }
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = colour,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = text
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = colour,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = text
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3363,7 +3447,7 @@ namespace Client.MirScenes
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontUpgrade))
                 {
-                    text += (text == "")? "can't upgrade": ", can't upgrade";
+                    text += (text == "") ? "can't upgrade" : ", can't upgrade";
                     count += 1;
                 }
                 if (count > 2)
@@ -3505,9 +3589,9 @@ namespace Client.MirScenes
                     ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
                 }
-                
+
             }
-            
+
             #endregion
             if ((HoverItem.Info.BindOnEquip) & HoverItem.SoulBoundId == -1)
             {
@@ -3518,7 +3602,7 @@ namespace Client.MirScenes
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                     OutLine = false,
                     Parent = ItemLabel,
-                    Text = "Soulbinds on equip!"
+                    Text = "Soulbinds on equip"
                 };
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                       label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3581,14 +3665,14 @@ namespace Client.MirScenes
             if (value > 0 || addedValue > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue > 0 ? "Health Restoration: +{0}HP (+{1})" : "Health Restoration: +{0}HP", value + addedValue, addedValue)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue > 0 ? "Health Restoration: +{0}HP (+{1})" : "Health Restoration: +{0}HP", value + addedValue, addedValue)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3601,14 +3685,14 @@ namespace Client.MirScenes
             if (value > 0 || addedValue > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue > 0 ? "Mana Restoration: +{0}MP (+{1})" : "Mana Restoration: +{0}MP", value + addedValue, addedValue)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue > 0 ? "Mana Restoration: +{0}MP (+{1})" : "Mana Restoration: +{0}MP", value + addedValue, addedValue)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3624,49 +3708,52 @@ namespace Client.MirScenes
                 switch (HoverItem.Info.Type)
                 {
                     case ItemType.Amulet:
-                        text = string.Format("Useage: {0}/{1}", HoverItem.CurrentDura, HoverItem.MaxDura);
+                        text = string.Format("Usage: {0}/{1}", HoverItem.CurrentDura, HoverItem.MaxDura);
                         break;
                     case ItemType.Ore:
-                        text = string.Format("Purity: {0}", Math.Round(HoverItem.CurrentDura/1000M));
+                        text = string.Format("Purity: {0}", Math.Round(HoverItem.CurrentDura / 1000M));
                         break;
                     case ItemType.Meat:
-                        text = string.Format("Quality: {0}", Math.Round(HoverItem.CurrentDura/1000M));
-                                break;
+                        text = string.Format("Quality: {0}", Math.Round(HoverItem.CurrentDura / 1000M));
+                        break;
+                    case ItemType.Mount:
+                        text = string.Format("Loyalty: {0} / {1}", HoverItem.CurrentDura, HoverItem.MaxDura);
+                        break;
                     default:
-                        text = string.Format("Durability: {0}/{1}", Math.Round(HoverItem.CurrentDura/1000M),
-                                                   Math.Round(HoverItem.MaxDura/1000M));
+                        text = string.Format("Durability: {0}/{1}", Math.Round(HoverItem.CurrentDura / 1000M),
+                                                   Math.Round(HoverItem.MaxDura / 1000M));
                         break;
 
                 }
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = HoverItem.CurrentDura == 0 ? Color.Red : Color.White,
-                        Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = text
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = HoverItem.CurrentDura == 0 ? Color.Red : Color.White,
+                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = text
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
             }
 
             int value1 = RealItem.MinAC;
             int value2 = RealItem.MaxAC;
-            int addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.AC: 0;
+            int addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AC : 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "AC: {0}-{1} (+{2})" : "AC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "AC: {0}-{1} (+{2})" : "AC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3674,20 +3761,20 @@ namespace Client.MirScenes
 
             value1 = RealItem.MinMAC;
             value2 = RealItem.MaxMAC;
-            addedValue1 =  (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.MAC: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MAC : 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "MAC: {0}-{1} (+{2})" : "MAC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "MAC: {0}-{1} (+{2})" : "MAC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3695,20 +3782,20 @@ namespace Client.MirScenes
 
             value1 = RealItem.MinDC;
             value2 = RealItem.MaxDC;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.DC: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.DC : 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "DC: {0}-{1} (+{2})" : "DC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "DC: {0}-{1} (+{2})" : "DC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3716,20 +3803,20 @@ namespace Client.MirScenes
 
             value1 = RealItem.MinMC;
             value2 = RealItem.MaxMC;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.MC: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MC : 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "MC: {0}-{1} (+{2})" : "MC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "MC: {0}-{1} (+{2})" : "MC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3737,107 +3824,107 @@ namespace Client.MirScenes
 
             value1 = RealItem.MinSC;
             value2 = RealItem.MaxSC;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.SC: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.SC : 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || value2 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "SC: {0}-{1} (+{2})" : "SC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "SC: {0}-{1} (+{2})" : "SC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
             value1 = RealItem.HP;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.HP: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.HP : 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "Health: +{0} (+{1})" : "Health: +{0}", value1 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Health: +{0} (+{1})" : "Health: +{0}", value1 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
             value1 = RealItem.MP;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.MP: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MP : 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "Mana: +{0} (+{1})" : "Mana: +{0}", value1 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Mana: +{0} (+{1})" : "Mana: +{0}", value1 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
             value1 = RealItem.Accuracy;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.Accuracy: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Accuracy : 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "Accuracy: +{0} (+{1})" : "Accuracy: +{0}", value1 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Accuracy: +{0} (+{1})" : "Accuracy: +{0}", value1 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
             value1 = RealItem.Agility;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.Agility: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Agility : 0;
 
 
             if (value1 > 0 || addedValue1 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "Agility: +{0} (+{1})" : "Agility: +{0}", value1 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "Agility: +{0} (+{1})" : "Agility: +{0}", value1 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
             value1 = RealItem.AttackSpeed;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified)? HoverItem.AttackSpeed: 0;
+            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AttackSpeed : 0;
 
 
             if (value1 > 0 || addedValue1 > 0 || (addedValue1 + value1 < 0))
@@ -3845,14 +3932,14 @@ namespace Client.MirScenes
                 string plus = (addedValue1 + value1 < 0) ? "" : "+";
 
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "A.Speed: " + plus + "{0} (+{1})" : "A.Speed: " + plus + "{0}", value1 + addedValue1, addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(addedValue1 > 0 ? "A.Speed: " + plus + "{0} (+{1})" : "A.Speed: " + plus + "{0}", value1 + addedValue1, addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3863,14 +3950,14 @@ namespace Client.MirScenes
             if (value1 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format("Bag Weight: +{0}", value1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Bag Weight: +{0}", value1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3881,14 +3968,14 @@ namespace Client.MirScenes
             if (value1 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format("Hand Weight: +{0}", value1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Hand Weight: +{0}", value1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3899,14 +3986,14 @@ namespace Client.MirScenes
             if (value1 > 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format("Wear Weight: +{0}", value1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Wear Weight: +{0}", value1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3919,14 +4006,14 @@ namespace Client.MirScenes
             if (value1 + addedValue1 != 0)
             {
                 MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = value1 + addedValue1 > 0 ? Color.Yellow : Color.Red,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(value1 + addedValue1 > 0 ? "Luck: +{0} " : "Curse: +{0}", value1 + addedValue1)
-                    };
+                {
+                    AutoSize = true,
+                    ForeColour = value1 + addedValue1 > 0 ? Color.Yellow : Color.Red,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format(value1 + addedValue1 > 0 ? "Luck: +{0} " : "Curse: +{0}", value1 + addedValue1)
+                };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -4111,7 +4198,7 @@ namespace Client.MirScenes
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                     OutLine = false,
                     Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Critcal Chance: +{0} (+{1})" : "Critical Chance: +{0}", value1 + addedValue1, addedValue1)
+                    Text = string.Format(addedValue1 > 0 ? "Critical Chance: +{0} (+{1})" : "Critical Chance: +{0}", value1 + addedValue1, addedValue1)
                 };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
@@ -4210,7 +4297,7 @@ namespace Client.MirScenes
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
-            
+
         }
 
         public class OutPutMessage
@@ -4359,7 +4446,7 @@ namespace Client.MirScenes
 
         public long OutputDelay;
 
-        private static bool _autoRun; 
+        private static bool _autoRun;
         public static bool AutoRun
         {
             get { return _autoRun; }
@@ -4423,8 +4510,8 @@ namespace Client.MirScenes
             {
                 MapObject ob = Objects[i];
                 if (ob == User) continue;
-              //  if (ob.ActionFeed.Count > 0 || ob.Effects.Count > 0 || GameScene.CanMove || CMain.Time >= ob.NextMotion)
-                    ob.Process();
+                //  if (ob.ActionFeed.Count > 0 || ob.Effects.Count > 0 || GameScene.CanMove || CMain.Time >= ob.NextMotion)
+                ob.Process();
             }
 
             for (int i = Effects.Count - 1; i >= 0; i--)
@@ -4539,7 +4626,7 @@ namespace Client.MirScenes
 
             LightSetting setting = Lights == LightSetting.Normal ? GameScene.Scene.Lights : Lights;
             if (setting != LightSetting.Day)
-                 DrawLights(setting);
+                DrawLights(setting);
 
             if (Settings.DropView)
             {
@@ -4618,15 +4705,15 @@ namespace Client.MirScenes
 
             for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY; y++)
             {
-                if (y <= 0 || y%2 == 1) continue;
+                if (y <= 0 || y % 2 == 1) continue;
                 if (y >= Height) break;
                 drawY = (y - User.Movement.Y + OffSetY) * CellHeight + User.OffSetMove.Y; //Moving OffSet
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x <= 0 || x%2 == 1) continue;
+                    if (x <= 0 || x % 2 == 1) continue;
                     if (x >= Width) break;
-                    drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
+                    drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X; //Moving OffSet
                     if ((M2CellInfo[x, y].BackImage == 0) || (M2CellInfo[x, y].BackIndex == -1)) continue;
                     index = (M2CellInfo[x, y].BackImage & 0x1FFFF) - 1;
                     Libraries.MapLibs[M2CellInfo[x, y].BackIndex].Draw(index, drawX, drawY);
@@ -4637,16 +4724,16 @@ namespace Client.MirScenes
             {
                 if (y <= 0) continue;
                 if (y >= Height) break;
-                drawY = (y - User.Movement.Y + OffSetY) * CellHeight+ User.OffSetMove.Y; //Moving OffSet
+                drawY = (y - User.Movement.Y + OffSetY) * CellHeight + User.OffSetMove.Y; //Moving OffSet
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
                     if (x <= 0) continue;
                     if (x >= Width) break;
-                    drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
+                    drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X; //Moving OffSet
 
                     index = M2CellInfo[x, y].MiddleImage - 1;
-                    
+
                     if ((index < 0) || (M2CellInfo[x, y].MiddleIndex == -1)) continue;
                     if (M2CellInfo[x, y].MiddleIndex > 199)
                     {//mir3 mid layer is same level as front layer not real middle + it cant draw index -1 so 2 birds in one stone :p
@@ -4661,13 +4748,13 @@ namespace Client.MirScenes
             {
                 if (y <= 0) continue;
                 if (y >= Height) break;
-                drawY = (y - User.Movement.Y + OffSetY) * CellHeight+ User.OffSetMove.Y; //Moving OffSet
+                drawY = (y - User.Movement.Y + OffSetY) * CellHeight + User.OffSetMove.Y; //Moving OffSet
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
                     if (x <= 0) continue;
                     if (x >= Width) break;
-                    drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX+ User.OffSetMove.X; //Moving OffSet
+                    drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X; //Moving OffSet
 
                     index = (M2CellInfo[x, y].FrontImage & 0x7FFF) - 1;
                     if (index == -1) continue;
@@ -4676,7 +4763,7 @@ namespace Client.MirScenes
                     Size s = Libraries.MapLibs[fileIndex].GetSize(index);
                     if (fileIndex == 200) //could break maps i have no clue anymore :( fixes random bad spots on old school 4.map tho
                         continue;
-                    if (index < 0 || ((s.Width != CellWidth || s.Height != CellHeight) && ((s.Width != CellWidth *2) || (s.Height != CellHeight * 2)))) continue;
+                    if (index < 0 || ((s.Width != CellWidth || s.Height != CellHeight) && ((s.Width != CellWidth * 2) || (s.Height != CellHeight * 2)))) continue;
                     Libraries.MapLibs[fileIndex].Draw(index, drawX, drawY);
                 }
             }
@@ -4688,7 +4775,7 @@ namespace Client.MirScenes
 
         private void DrawObjects()
         {
-             for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY + 25; y++)
+            for (int y = User.Movement.Y - ViewRangeY; y <= User.Movement.Y + ViewRangeY + 25; y++)
             {
                 if (y <= 0) continue;
                 if (y >= Height) break;
@@ -4718,7 +4805,7 @@ namespace Client.MirScenes
                     #region draw mir3 middle layer
                     if ((M2CellInfo[x, y].MiddleIndex > 199) && (M2CellInfo[x, y].MiddleIndex != -1))
                     {
-                        
+
                         index = M2CellInfo[x, y].MiddleImage - 1;
                         if (index > 0)
                         {
@@ -4738,7 +4825,7 @@ namespace Client.MirScenes
                                 }
                             }
                             s = Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].GetSize(index);
-                            if ((s.Width != CellWidth || s.Height != CellHeight) && (s.Width != (CellWidth*2) || s.Height != (CellHeight*2)))
+                            if ((s.Width != CellWidth || s.Height != CellHeight) && (s.Width != (CellWidth * 2) || s.Height != (CellHeight * 2)))
                             {
                                 Libraries.MapLibs[M2CellInfo[x, y].MiddleIndex].DrawUp(index, drawX, drawY);
                             }
@@ -4754,7 +4841,7 @@ namespace Client.MirScenes
                     int fileIndex = M2CellInfo[x, y].FrontIndex;
                     if (fileIndex == -1) continue;
                     animation = M2CellInfo[x, y].FrontAnimationFrame;
-                    
+
                     if ((animation & 0x80) > 0)
                     {
                         blend = true;
@@ -4766,7 +4853,7 @@ namespace Client.MirScenes
                     if (animation > 0)
                     {
                         byte animationTick = M2CellInfo[x, y].FrontAnimationTick;
-                        index += (AnimationCount%(animation + (animation*animationTick)))/(1 + animationTick);
+                        index += (AnimationCount % (animation + (animation * animationTick))) / (1 + animationTick);
                     }
                     s = Libraries.MapLibs[fileIndex].GetSize(index);
                     if (s.Width == CellWidth && s.Height == CellHeight && animation == 0) continue;
@@ -4826,7 +4913,7 @@ namespace Client.MirScenes
             }
 
             if (!Settings.Effect) return;
-            
+
             for (int i = Effects.Count - 1; i >= 0; i--)
                 Effects[i].Draw();
 
@@ -4865,7 +4952,7 @@ namespace Client.MirScenes
                     Darkness = Color.Black;
                     break;
             }
-            
+
             DXManager.Device.Clear(ClearFlags.Target, setting == LightSetting.Night ? Darkness : Color.FromArgb(255, 50, 50, 50), 0, 0);
 
             int light;
@@ -4879,7 +4966,7 @@ namespace Client.MirScenes
                 MapObject ob = Objects[i];
                 if (ob.Light > 0 && (!ob.Dead || ob == MapObject.User || ob.Race == ObjectType.Spell))
                 {
-                    
+
                     light = ob.Light;
                     int LightRange = light % 15;
                     if (LightRange >= DXManager.Lights.Count)
@@ -4917,9 +5004,9 @@ namespace Client.MirScenes
                         p.Offset(-(DXManager.LightSizes[LightRange].X / 2) - (CellWidth / 2) + 10, -(DXManager.LightSizes[LightRange].Y / 2) - (CellHeight / 2) - 5);
                         DXManager.Sprite.Draw2D(DXManager.Lights[LightRange], PointF.Empty, 0, p, ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : lightIntensity);
                     }
-               
+
                 }
-                
+
                 if (!Settings.Effect) continue;
                 for (int e = 0; e < ob.Effects.Count; e++)
                 {
@@ -4933,15 +5020,15 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
                     {
-                     //   p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - 68);
-                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, - (DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
+                        //   p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2), -(DXManager.LightSizes[light].Y / 2) - 68);
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, -(DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
                     }
 
                 }
             }
 
-            
+
             if (Settings.Effect)
                 for (int e = 0; e < Effects.Count; e++)
                 {
@@ -4955,11 +5042,11 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
                     {
-                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, - (DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, -(DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, Color.White);
                     }
                 }
-            
+
 
             for (int y = MapObject.User.Movement.Y - ViewRangeY - 24; y <= MapObject.User.Movement.Y + ViewRangeY + 24; y++)
             {
@@ -4975,13 +5062,13 @@ namespace Client.MirScenes
                     //this code would look great on chronicles shanda mir2 maps (give a blue glow to blue town lights), but it'll also give blue glow to mir3 maps
                     //if (M2CellInfo[x, y].Light == 4) 
                     //    lightIntensity = Color.FromArgb(255, 100,100,200);
-                    light = M2CellInfo[x, y].Light*3;
+                    light = M2CellInfo[x, y].Light * 3;
                     int fileIndex = M2CellInfo[x, y].FrontIndex;
 
                     p = new Point(
                         (x + OffSetX - MapObject.User.Movement.X) * CellWidth + MapObject.User.OffSetMove.X,
                         (y + OffSetY - MapObject.User.Movement.Y) * CellHeight + MapObject.User.OffSetMove.Y + 32);
-                    
+
 
                     if (M2CellInfo[x, y].FrontAnimationFrame > 0)
                         p.Offset(Libraries.MapLibs[fileIndex].GetOffSet(imageIndex));
@@ -4991,7 +5078,7 @@ namespace Client.MirScenes
 
                     if (DXManager.Lights[light] != null && !DXManager.Lights[light].Disposed)
                     {
-                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, - (DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
+                        p.Offset(-(DXManager.LightSizes[light].X / 2) - (CellWidth / 2) + 10, -(DXManager.LightSizes[light].Y / 2) - (CellHeight / 2) - 5);
                         DXManager.Sprite.Draw2D(DXManager.Lights[light], PointF.Empty, 0, p, lightIntensity);
                     }
                 }
@@ -5001,7 +5088,7 @@ namespace Client.MirScenes
 
             DXManager.Device.RenderState.SourceBlend = Blend.DestinationColor;
             DXManager.Device.RenderState.DestinationBlend = Blend.BothInvSourceAlpha;
-            
+
             DXManager.Sprite.Draw2D(_lightTexture, PointF.Empty, 0, PointF.Empty, Color.White);
             DXManager.Sprite.End();
             DXManager.Sprite.Begin(SpriteFlags.AlphaBlend);
@@ -5009,7 +5096,7 @@ namespace Client.MirScenes
 
 
         }
-        
+
         private static void OnMouseClick(object sender, EventArgs e)
         {
             MouseEventArgs me = e as MouseEventArgs;
@@ -5028,7 +5115,7 @@ namespace Client.MirScenes
 
                             GameScene.NPCTime = CMain.Time + 5000;
                             GameScene.NPCID = npc.ObjectID;
-                            Network.Enqueue(new C.CallNPC {ObjectID = npc.ObjectID, Key = "[@Main]"});
+                            Network.Enqueue(new C.CallNPC { ObjectID = npc.ObjectID, Key = "[@Main]" });
                         }
                     }
                     break;
@@ -5042,7 +5129,7 @@ namespace Client.MirScenes
 
                         GameScene.InspectTime = CMain.Time + 500;
                         InspectDialog.InspectID = player.ObjectID;
-                        Network.Enqueue(new C.Inspect {ObjectID = player.ObjectID});
+                        Network.Enqueue(new C.Inspect { ObjectID = player.ObjectID });
                     }
                     break;
                 case MouseButtons.Middle:
@@ -5080,11 +5167,11 @@ namespace Client.MirScenes
                     MirMessageBox messageBox = new MirMessageBox(string.Format("Are you sure you want to drop {0}?", cell.Item.Name), MirMessageBoxButtons.YesNo);
 
                     messageBox.YesButton.Click += (o, a) =>
-                        {
-                            Network.Enqueue(new C.DropItem {UniqueID = cell.Item.UniqueID, Count = 1});
+                    {
+                        Network.Enqueue(new C.DropItem { UniqueID = cell.Item.UniqueID, Count = 1 });
 
-                            cell.Locked = true;
-                        };
+                        cell.Locked = true;
+                    };
                     messageBox.Show();
                 }
                 else
@@ -5092,16 +5179,16 @@ namespace Client.MirScenes
                     MirAmountBox amountBox = new MirAmountBox("Drop Amount:", cell.Item.Info.Image, cell.Item.Count);
 
                     amountBox.OKButton.Click += (o, a) =>
+                    {
+                        if (amountBox.Amount <= 0) return;
+                        Network.Enqueue(new C.DropItem
                         {
-                            if (amountBox.Amount <= 0) return;
-                            Network.Enqueue(new C.DropItem
-                                {
-                                    UniqueID = cell.Item.UniqueID,
-                                    Count = amountBox.Amount
-                                });
+                            UniqueID = cell.Item.UniqueID,
+                            Count = amountBox.Amount
+                        });
 
-                            cell.Locked = true;
-                        };
+                        cell.Locked = true;
+                    };
 
                     amountBox.Show();
                 }
@@ -5114,12 +5201,12 @@ namespace Client.MirScenes
                 MirAmountBox amountBox = new MirAmountBox("Drop Amount:", 116, GameScene.Gold);
 
                 amountBox.OKButton.Click += (o, a) =>
+                {
+                    if (amountBox.Amount > 0)
                     {
-                        if (amountBox.Amount > 0)
-                        {
-                            Network.Enqueue(new C.DropGold {Amount = amountBox.Amount});
-                        }
-                    };
+                        Network.Enqueue(new C.DropGold { Amount = amountBox.Amount });
+                    }
+                };
 
                 amountBox.Show();
                 GameScene.PickedUpGold = false;
@@ -5139,11 +5226,12 @@ namespace Client.MirScenes
         }
 
         private void CheckInput()
-        {
+        {          
             if ((MouseControl == this) && (MapButtons != MouseButtons.None)) AutoHit = false;//mouse actions stop mining even when frozen!
+            if (!CanRideAttack()) AutoHit = false;
             if (CMain.Time < InputDelay || CMain.Time < User.BlizzardFreezeTime || User.Poison == PoisonType.Paralysis || User.Poison == PoisonType.Frozen) return;
-
-            if (User.NextMagic != null)
+            
+            if (User.NextMagic != null && !User.RidingMount)
             {
                 UseMagic(User.NextMagic);
                 return;
@@ -5154,7 +5242,7 @@ namespace Client.MirScenes
                 if (((MapObject.TargetObject.Name.EndsWith(")") || MapObject.TargetObject is PlayerObject) && CMain.Shift) ||
                     (!MapObject.TargetObject.Name.EndsWith(")") && MapObject.TargetObject is MonsterObject))
                 {
-                    if (User.Class == MirClass.Archer && User.HasClassWeapon)//ArcherTest - non aggressive targets (player / pets)
+                    if (User.Class == MirClass.Archer && User.HasClassWeapon && !User.RidingMount)//ArcherTest - non aggressive targets (player / pets)
                     {
                         if (Functions.InRange(MapObject.TargetObject.CurrentLocation, User.CurrentLocation, 9))
                         {
@@ -5165,7 +5253,7 @@ namespace Client.MirScenes
                                 User.QueuedAction.Params.Add(MapObject.TargetObject != null ? MapObject.TargetObject.ObjectID : (uint)0);
                                 User.QueuedAction.Params.Add(MapObject.TargetObject.CurrentLocation);
 
-                               // MapObject.TargetObject = null; //stop constant attack when close up
+                                // MapObject.TargetObject = null; //stop constant attack when close up
                             }
                         }
                         else
@@ -5176,12 +5264,12 @@ namespace Client.MirScenes
                                 GameScene.Scene.OutputMessage("Target is too far.");
                             }
                         }
-                      //  return;
+                        //  return;
                     }
 
                     else if (Functions.InRange(MapObject.TargetObject.CurrentLocation, User.CurrentLocation, 1))
                     {
-                        if (CMain.Time > GameScene.AttackTime)
+                        if (CMain.Time > GameScene.AttackTime && CanRideAttack())
                         {
                             User.QueuedAction = new QueuedAction { Action = MirAction.Attack1, Direction = Functions.DirectionFromPoint(User.CurrentLocation, MapObject.TargetObject.CurrentLocation), Location = User.CurrentLocation };
                             return;
@@ -5206,7 +5294,7 @@ namespace Client.MirScenes
                 {
                     if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10)
                     {
-                        User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, 2) };
+                        User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount ? 3 : 2) };
                         return;
                     }
                     if (CanWalk(direction))
@@ -5221,7 +5309,7 @@ namespace Client.MirScenes
                     }
                     return;
                 }
-                
+
                 switch (MapButtons)
                 {
                     case MouseButtons.Left:
@@ -5234,12 +5322,12 @@ namespace Client.MirScenes
                         }
                         if (CMain.Shift)
                         {
-                            if (CMain.Time > GameScene.AttackTime) //ArcherTest - shift click
+                            if (CMain.Time > GameScene.AttackTime && CanRideAttack()) //ArcherTest - shift click
                             {
                                 MapObject target = null;
                                 if (MapObject.MouseObject is MonsterObject || MapObject.MouseObject is PlayerObject) target = MapObject.MouseObject;
 
-                                if (User.Class == MirClass.Archer && User.HasClassWeapon)
+                                if (User.Class == MirClass.Archer && User.HasClassWeapon && !User.RidingMount)
                                 {
                                     if (target != null)
                                     {
@@ -5265,7 +5353,7 @@ namespace Client.MirScenes
                             return;
                         }
 
-                        if (MapObject.MouseObject is MonsterObject && User.Class == MirClass.Archer && User.HasClassWeapon) //ArcherTest - range attack
+                        if (MapObject.MouseObject is MonsterObject && User.Class == MirClass.Archer && User.HasClassWeapon && !User.RidingMount) //ArcherTest - range attack
                         {
                             if (Functions.InRange(MapObject.MouseObject.CurrentLocation, User.CurrentLocation, 9))
                             {
@@ -5285,7 +5373,7 @@ namespace Client.MirScenes
                                 }
                             }
                             return;
-                        }                        
+                        }
 
                         if (MapLocation == User.CurrentLocation)
                         {
@@ -5296,7 +5384,7 @@ namespace Client.MirScenes
                             }
                             return;
                         }
-                    
+
                         //mine
                         if (!ValidPoint(Functions.PointMove(User.CurrentLocation, direction, 1)))
                         {
@@ -5312,7 +5400,7 @@ namespace Client.MirScenes
                             }
                         }
 
-                        
+
 
                         if (CanWalk(direction))
                         {
@@ -5339,7 +5427,7 @@ namespace Client.MirScenes
                         }
                         if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10)
                         {
-                            User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, 2) };
+                            User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount ? 3 : 2) };
                             return;
                         }
                         if (CanWalk(direction))
@@ -5376,14 +5464,14 @@ namespace Client.MirScenes
                 return;
             }
 
-            int cost = magic.Level*magic.LevelCost + magic.BaseCost;
+            int cost = magic.Level * magic.LevelCost + magic.BaseCost;
 
             if (magic.Spell == Spell.Teleport)
             {
                 for (int i = 0; i < GameScene.Scene.Buffs.Count; i++)
                 {
                     if (GameScene.Scene.Buffs[i].Type != BuffType.Teleport) continue;
-                    cost += (int) (User.MaxMP*0.3F);
+                    cost += (int)(User.MaxMP * 0.3F);
                 }
             }
 
@@ -5457,9 +5545,9 @@ namespace Client.MirScenes
                         if (CMain.Time >= OutputDelay)
                         {
                             OutputDelay = CMain.Time + 1000;
-                            GameScene.Scene.OutputMessage(string.Format("You cannot cast Poison Field for another {0} seconds.", (GameScene.PoisonFieldTime - CMain.Time - 1)/1000 + 1));
+                            GameScene.Scene.OutputMessage(string.Format("You cannot cast Poison Field for another {0} seconds.", (GameScene.PoisonFieldTime - CMain.Time - 1) / 1000 + 1));
                         }
-                        
+
                         User.ClearMagic();
                         return;
                     }
@@ -5517,7 +5605,7 @@ namespace Client.MirScenes
             angle *= 180 / Math.PI;
 
             if (MouseLocation.X < c.X) angle = 360 - angle;
-            angle += ratio/2;
+            angle += ratio / 2;
             if (angle > 360) angle -= 360;
 
             return (MirDirection)(angle / ratio);
@@ -5550,7 +5638,7 @@ namespace Client.MirScenes
         {
             double x = p2.X - p1.X;
             double y = p2.Y - p1.Y;
-            return Math.Sqrt(x*x + y*y);
+            return Math.Sqrt(x * x + y * y);
         }
 
         private bool EmptyCell(Point p)
@@ -5576,7 +5664,31 @@ namespace Client.MirScenes
 
         private bool CanRun(MirDirection dir)
         {
-            return CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 2)) && !User.InTrapRock;
+            if (User.InTrapRock) return false;
+
+            if (CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 2)))
+            {
+                if (User.RidingMount)
+                {
+                    return EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 3));
+                }
+
+                return true;
+            }
+
+            return false;
+           // return CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, User.RidingMount ? 3 : 2)) && !User.InTrapRock;
+        }
+
+        private bool CanRideAttack()
+        {
+            if (GameScene.User.RidingMount)
+            {
+                UserItem item = GameScene.User.Equipment[(int)EquipmentSlot.Mount];
+                if (item == null || item.Slots.Length < 4 || item.Slots[(int)MountSlot.Bells] == null) return false;
+            }
+
+            return true;
         }
 
         public bool ValidPoint(Point p)
@@ -5667,7 +5779,7 @@ namespace Client.MirScenes
 
         #endregion
 
- 
+
 
         public void RemoveObject(MapObject ob)
         {
@@ -5989,8 +6101,8 @@ namespace Client.MirScenes
             HealthLabel.Text = string.Format("HP {0}/{1}", User.HP, User.MaxHP);
             ManaLabel.Text = string.Format("MP {0}/{1} ", User.MP, User.MaxMP);
             LevelLabel.Text = User.Level.ToString();
-            ExperienceLabel.Text = string.Format("{0:#0.##%}", User.Experience/(double) User.MaxExperience);
-            ExperienceLabel.Location = new Point((ExperienceBar.Size.Width/2) - 20, -10);
+            ExperienceLabel.Text = string.Format("{0:#0.##%}", User.Experience / (double)User.MaxExperience);
+            ExperienceLabel.Location = new Point((ExperienceBar.Size.Width / 2) - 20, -10);
             GoldLabel.Text = GameScene.Gold.ToString("###,###,##0");
             CharacterName.Text = User.Name;
             WeightLabel.Text = (User.MaxBagWeight - User.CurrentBagWeight).ToString();
@@ -6002,7 +6114,7 @@ namespace Client.MirScenes
 
             if (l == null) return;
 
-            l.Location = new Point(50 - (l.Size.Width/2), l.Location.Y);
+            l.Location = new Point(50 - (l.Size.Width / 2), l.Location.Y);
         }
 
         private void HealthOrb_BeforeDraw(object sender, EventArgs e)
@@ -6011,7 +6123,7 @@ namespace Client.MirScenes
 
             int height;
             if (User.HP != User.MaxHP)
-                height = (int) (80*User.HP/(float) User.MaxHP);
+                height = (int)(80 * User.HP / (float)User.MaxHP);
             else
                 height = 80;
 
@@ -6021,7 +6133,7 @@ namespace Client.MirScenes
             Libraries.Prguse.Draw(4, r, new Point(0, HealthOrb.DisplayLocation.Y + 80 - height), Color.White, false);
 
             if (User.MP != User.MaxMP)
-                height = (int) (80*User.MP/(float) User.MaxMP);
+                height = (int)(80 * User.MP / (float)User.MaxMP);
             else
                 height = 80;
 
@@ -6036,14 +6148,14 @@ namespace Client.MirScenes
         {
             if (ExperienceBar.Library == null) return;
 
-            double percent = MapObject.User.Experience/(double) MapObject.User.MaxExperience;
+            double percent = MapObject.User.Experience / (double)MapObject.User.MaxExperience;
             if (percent > 1) percent = 1;
             if (percent <= 0) return;
 
             Rectangle section = new Rectangle
-                {
-                    Size = new Size((int) ((ExperienceBar.Size.Width - 3)*percent), ExperienceBar.Size.Height)
-                };
+            {
+                Size = new Size((int)((ExperienceBar.Size.Width - 3) * percent), ExperienceBar.Size.Height)
+            };
 
             ExperienceBar.Library.Draw(ExperienceBar.Index, section, ExperienceBar.DisplayLocation, Color.White, false);
         }
@@ -6051,14 +6163,14 @@ namespace Client.MirScenes
         private void WeightBar_BeforeDraw(object sender, EventArgs e)
         {
             if (WeightBar.Library == null) return;
-            double percent = MapObject.User.CurrentBagWeight/(double) MapObject.User.MaxBagWeight;
+            double percent = MapObject.User.CurrentBagWeight / (double)MapObject.User.MaxBagWeight;
             if (percent > 1) percent = 1;
             if (percent <= 0) return;
 
             Rectangle section = new Rectangle
-                {
-                    Size = new Size((int) ((WeightBar.Size.Width - 2)*percent), WeightBar.Size.Height)
-                };
+            {
+                Size = new Size((int)((WeightBar.Size.Width - 2) * percent), WeightBar.Size.Height)
+            };
 
             WeightBar.Library.Draw(WeightBar.Index, section, WeightBar.DisplayLocation, Color.White, false);
         }
@@ -6090,30 +6202,30 @@ namespace Client.MirScenes
 
 
             ChatTextBox = new MirTextBox
-                {
-                    BackColour = Color.DarkGray,
-                    ForeColour = Color.Black,
-                    Parent = this,
-                    Size = new Size(Settings.HighResolution ? 627 : 403, 13),
-                    Location = new Point(1, 54),
-                    MaxLength = Globals.MaxChatLength,
-                    Visible = false,
-                    Font = ChatFont,
-                };
+            {
+                BackColour = Color.DarkGray,
+                ForeColour = Color.Black,
+                Parent = this,
+                Size = new Size(Settings.HighResolution ? 627 : 403, 13),
+                Location = new Point(1, 54),
+                MaxLength = Globals.MaxChatLength,
+                Visible = false,
+                Font = ChatFont,
+            };
             ChatTextBox.TextBox.KeyPress += ChatTextBox_KeyPress;
             ChatTextBox.TextBox.KeyDown += ChatTextBox_KeyDown;
             ChatTextBox.TextBox.KeyUp += ChatTextBox_KeyUp;
 
             HomeButton = new MirButton
-                {
-                    Index = 2018,
-                    HoverIndex = 2019,
-                    Library = Libraries.Prguse,
-                    Location = new Point(Settings.HighResolution ? 618 : 394, 1),
-                    Parent = this,
-                    PressedIndex = 2020,
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2018,
+                HoverIndex = 2019,
+                Library = Libraries.Prguse,
+                Location = new Point(Settings.HighResolution ? 618 : 394, 1),
+                Parent = this,
+                PressedIndex = 2020,
+                Sound = SoundList.ButtonA
+            };
             HomeButton.Click += (o, e) =>
             {
                 if (StartIndex == 0) return;
@@ -6123,15 +6235,15 @@ namespace Client.MirScenes
 
 
             UpButton = new MirButton
-                {
-                    Index = 2021,
-                    HoverIndex = 2022,
-                    Library = Libraries.Prguse,
-                    Location = new Point(Settings.HighResolution ? 618 : 394, 9),
-                    Parent = this,
-                    PressedIndex = 2023,
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2021,
+                HoverIndex = 2022,
+                Library = Libraries.Prguse,
+                Location = new Point(Settings.HighResolution ? 618 : 394, 9),
+                Parent = this,
+                PressedIndex = 2023,
+                Sound = SoundList.ButtonA
+            };
             UpButton.Click += (o, e) =>
             {
                 if (StartIndex == 0) return;
@@ -6141,15 +6253,15 @@ namespace Client.MirScenes
 
 
             EndButton = new MirButton
-                {
-                    Index = 2027,
-                    HoverIndex = 2028,
-                    Library = Libraries.Prguse,
-                    Location = new Point(Settings.HighResolution ? 618 : 394, 45),
-                    Parent = this,
-                    PressedIndex = 2029,
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2027,
+                HoverIndex = 2028,
+                Library = Libraries.Prguse,
+                Location = new Point(Settings.HighResolution ? 618 : 394, 45),
+                Parent = this,
+                PressedIndex = 2029,
+                Sound = SoundList.ButtonA
+            };
             EndButton.Click += (o, e) =>
             {
                 if (StartIndex == History.Count - 1) return;
@@ -6158,15 +6270,15 @@ namespace Client.MirScenes
             };
 
             DownButton = new MirButton
-                {
-                    Index = 2024,
-                    HoverIndex = 2025,
-                    Library = Libraries.Prguse,
-                    Location = new Point(Settings.HighResolution ? 618 : 394, 39),
-                    Parent = this,
-                    PressedIndex = 2026,
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2024,
+                HoverIndex = 2025,
+                Library = Libraries.Prguse,
+                Location = new Point(Settings.HighResolution ? 618 : 394, 39),
+                Parent = this,
+                PressedIndex = 2026,
+                Sound = SoundList.ButtonA
+            };
             DownButton.Click += (o, e) =>
             {
                 if (StartIndex == History.Count - 1) return;
@@ -6177,24 +6289,24 @@ namespace Client.MirScenes
 
 
             CountBar = new MirImageControl
-                {
-                    Index = 2012,
-                    Library = Libraries.Prguse,
-                    Location = new Point(Settings.HighResolution ? 622 : 398, 16),
-                    Parent = this,
-                };
+            {
+                Index = 2012,
+                Library = Libraries.Prguse,
+                Location = new Point(Settings.HighResolution ? 622 : 398, 16),
+                Parent = this,
+            };
 
             PositionBar = new MirButton
-                {
-                    Index = 2015,
-                    HoverIndex = 2016,
-                    Library = Libraries.Prguse,
-                    Location = new Point(Settings.HighResolution ? 619 : 395, 16),
-                    Parent = this,
-                    PressedIndex = 2017,
-                    Movable = true,
-                    Sound = SoundList.None,
-                };
+            {
+                Index = 2015,
+                HoverIndex = 2016,
+                Library = Libraries.Prguse,
+                Location = new Point(Settings.HighResolution ? 619 : 395, 16),
+                Parent = this,
+                PressedIndex = 2017,
+                Movable = true,
+                Sound = SoundList.None,
+            };
             PositionBar.OnMoving += PositionBar_OnMoving;
         }
 
@@ -6212,14 +6324,14 @@ namespace Client.MirScenes
         {
             switch (e.KeyChar)
             {
-                case (char) Keys.Enter:
+                case (char)Keys.Enter:
                     e.Handled = true;
                     if (!string.IsNullOrEmpty(ChatTextBox.Text))
                     {
                         Network.Enqueue(new C.Chat
-                            {
-                                Message = ChatTextBox.Text,
-                            });
+                        {
+                            Message = ChatTextBox.Text,
+                        });
 
                         if (ChatTextBox.Text[0] == '/')
                         {
@@ -6231,7 +6343,7 @@ namespace Client.MirScenes
                     ChatTextBox.Visible = false;
                     ChatTextBox.Text = string.Empty;
                     break;
-                case (char) Keys.Escape:
+                case (char)Keys.Escape:
                     e.Handled = true;
                     ChatTextBox.Visible = false;
                     ChatTextBox.Text = string.Empty;
@@ -6356,43 +6468,43 @@ namespace Client.MirScenes
             if (History.Count > 1)
             {
                 int h = CountBar.Size.Height - PositionBar.Size.Height;
-                h = (int) ((h/(float) (History.Count - 1))*StartIndex);
+                h = (int)((h / (float)(History.Count - 1)) * StartIndex);
                 PositionBar.Location = new Point(Settings.HighResolution ? 619 : 395, 16 + h);
             }
 
             int y = 1;
             for (int i = StartIndex; i < History.Count; i++)
-            {             
+            {
                 MirLabel temp = new MirLabel
-                    {
-                        AutoSize = true,
-                        BackColour = History[i].BackColour,
-                        ForeColour = History[i].ForeColour,
-                        Location = new Point(1, y),
-                        OutLine = false,
-                        Parent = this,
-                        Text = History[i].Text,
-                        Font = ChatFont,
-                    };
+                {
+                    AutoSize = true,
+                    BackColour = History[i].BackColour,
+                    ForeColour = History[i].ForeColour,
+                    Location = new Point(1, y),
+                    OutLine = false,
+                    Parent = this,
+                    Text = History[i].Text,
+                    Font = ChatFont,
+                };
                 temp.MouseWheel += ChatPanel_MouseWheel;
                 ChatLines.Add(temp);
 
                 temp.Click += (o, e) =>
-                    {
-                        MirLabel l = o as MirLabel;
-                        if (l == null) return;
+                {
+                    MirLabel l = o as MirLabel;
+                    if (l == null) return;
 
-                        string[] parts = l.Text.Split(':', ' ');
-                        if (parts.Length == 0) return;
+                    string[] parts = l.Text.Split(':', ' ');
+                    if (parts.Length == 0) return;
 
-                        string name = Regex.Replace(parts[0], "[^A-Za-z0-9]", "");
+                    string name = Regex.Replace(parts[0], "[^A-Za-z0-9]", "");
 
-                        ChatTextBox.SetFocus();
-                        ChatTextBox.Text = string.Format("/{0} ", name);
-                        ChatTextBox.Visible = true;
-                        ChatTextBox.TextBox.SelectionLength = 0;
-                        ChatTextBox.TextBox.SelectionStart = ChatTextBox.Text.Length;
-                    };
+                    ChatTextBox.SetFocus();
+                    ChatTextBox.Text = string.Format("/{0} ", name);
+                    ChatTextBox.Visible = true;
+                    ChatTextBox.TextBox.SelectionLength = 0;
+                    ChatTextBox.TextBox.SelectionStart = ChatTextBox.Text.Length;
+                };
 
 
                 y += 13;
@@ -6442,7 +6554,7 @@ namespace Client.MirScenes
                 case '@':
                 case '!':
                 case ' ':
-                case (char) Keys.Enter:
+                case (char)Keys.Enter:
                     ChatTextBox.SetFocus();
                     if (e.KeyChar == '!') ChatTextBox.Text = "!";
                     if (e.KeyChar == '@') ChatTextBox.Text = "@";
@@ -6465,7 +6577,7 @@ namespace Client.MirScenes
         }
         private void ChatPanel_MouseWheel(object sender, MouseEventArgs e)
         {
-            int count = e.Delta/SystemInformation.MouseWheelScrollDelta;
+            int count = e.Delta / SystemInformation.MouseWheelScrollDelta;
 
             if (StartIndex == 0 && count >= 0) return;
             if (StartIndex == History.Count - 1 && count <= 0) return;
@@ -6556,7 +6668,7 @@ namespace Client.MirScenes
                     CountBar.Index = 2014;
                     DownButton.Location = new Point(Settings.HighResolution ? 618 : 394, 39 + 96);
                     EndButton.Location = new Point(Settings.HighResolution ? 618 : 394, 45 + 96);
-                    ChatTextBox.Location = new Point(1, 54 + 96); 
+                    ChatTextBox.Location = new Point(1, 54 + 96);
                     break;
             }
             Location = new Point(Location.X, y - Size.Height);
@@ -6581,16 +6693,16 @@ namespace Client.MirScenes
             Location = new Point(230, Settings.ScreenHeight - 112);
 
             SizeButton = new MirButton
-                {
-                    Index = 2057,
-                    HoverIndex = 2058,
-                    PressedIndex = 2059,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(Settings.HighResolution ? 574 : 350, 1),
-                    Visible = true,
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2057,
+                HoverIndex = 2058,
+                PressedIndex = 2059,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(Settings.HighResolution ? 574 : 350, 1),
+                Visible = true,
+                Sound = SoundList.ButtonA
+            };
             SizeButton.Click += (o, e) =>
             {
                 GameScene.Scene.ChatDialog.ChangeSize();
@@ -6601,116 +6713,116 @@ namespace Client.MirScenes
 
 
             SettingsButton = new MirButton
-                {
-                    Index = 2060,
-                    HoverIndex = 2061,
-                    PressedIndex = 2062,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(Settings.HighResolution ? 596 : 372, 1),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2060,
+                HoverIndex = 2061,
+                PressedIndex = 2062,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(Settings.HighResolution ? 596 : 372, 1),
+                Sound = SoundList.ButtonA
+            };
 
             NormalButton = new MirButton
-                {
-                    Index = 2036,
-                    HoverIndex = 2037,
-                    PressedIndex = 2038,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(12, 1),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2036,
+                HoverIndex = 2037,
+                PressedIndex = 2038,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(12, 1),
+                Sound = SoundList.ButtonA
+            };
             NormalButton.Click += (o, e) =>
             {
                 ToggleChatFilter("All");
             };
 
             ShoutButton = new MirButton
-                {
-                    Index = 2039,
-                    HoverIndex = 2040,
-                    PressedIndex = 2041,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(34, 1),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2039,
+                HoverIndex = 2040,
+                PressedIndex = 2041,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(34, 1),
+                Sound = SoundList.ButtonA
+            };
             ShoutButton.Click += (o, e) =>
             {
                 ToggleChatFilter("Shout");
             };
 
             WhisperButton = new MirButton
-                {
-                    Index = 2042,
-                    HoverIndex = 2043,
-                    PressedIndex = 2044,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(56, 1),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2042,
+                HoverIndex = 2043,
+                PressedIndex = 2044,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(56, 1),
+                Sound = SoundList.ButtonA
+            };
             WhisperButton.Click += (o, e) =>
             {
                 ToggleChatFilter("Whisper");
             };
 
             LoverButton = new MirButton
-                {
-                    Index = 2045,
-                    HoverIndex = 2046,
-                    PressedIndex = 2047,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(78, 1),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2045,
+                HoverIndex = 2046,
+                PressedIndex = 2047,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(78, 1),
+                Sound = SoundList.ButtonA
+            };
             LoverButton.Click += (o, e) =>
             {
                 ToggleChatFilter("Lover");
             };
 
             MentorButton = new MirButton
-                {
-                    Index = 2048,
-                    HoverIndex = 2049,
-                    PressedIndex = 2050,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(100, 1),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2048,
+                HoverIndex = 2049,
+                PressedIndex = 2050,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(100, 1),
+                Sound = SoundList.ButtonA
+            };
             MentorButton.Click += (o, e) =>
             {
                 ToggleChatFilter("Mentor");
             };
 
             GroupButton = new MirButton
-                {
-                    Index = 2051,
-                    HoverIndex = 2052,
-                    PressedIndex = 2053,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(122, 1),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2051,
+                HoverIndex = 2052,
+                PressedIndex = 2053,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(122, 1),
+                Sound = SoundList.ButtonA
+            };
             GroupButton.Click += (o, e) =>
             {
                 ToggleChatFilter("Group");
             };
 
             GuildButton = new MirButton
-                {
-                    Index = 2054,
-                    HoverIndex = 2055,
-                    PressedIndex = 2056,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(144, 1),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 2054,
+                HoverIndex = 2055,
+                PressedIndex = 2056,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(144, 1),
+                Sound = SoundList.ButtonA
+            };
             GuildButton.Click += (o, e) =>
             {
                 Settings.ShowGuildChat = !Settings.ShowGuildChat;
@@ -6779,7 +6891,7 @@ namespace Client.MirScenes
             Visible = false;
         }
 
-        
+
     }
 
     public sealed class TradeDialog : MirImageControl
@@ -6837,6 +6949,7 @@ namespace Client.MirScenes
                 Location = new Point(20, 10),
                 Size = new Size(150, 14),
                 DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                NotControl = true,
             };
 
             GoldLabel = new MirLabel
@@ -7000,6 +7113,7 @@ namespace Client.MirScenes
                 Location = new Point(0, 10),
                 Size = new Size(204, 14),
                 DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                NotControl = true,
             };
 
             GuestGoldLabel = new MirLabel
@@ -7010,6 +7124,7 @@ namespace Client.MirScenes
                 Parent = this,
                 Size = new Size(90, 15),
                 Sound = SoundList.Gold,
+                NotControl = true,
             };
             #endregion
 
@@ -7085,64 +7200,64 @@ namespace Client.MirScenes
             Visible = false;
 
             WeightBar = new MirImageControl
-                {
-                    Index = 24,
-                    Library = Libraries.Prguse,
-                    Location = new Point(182, 217),
-                    Parent = this,
-                    DrawImage = false,
-                    NotControl = true,
-                };
+            {
+                Index = 24,
+                Library = Libraries.Prguse,
+                Location = new Point(182, 217),
+                Parent = this,
+                DrawImage = false,
+                NotControl = true,
+            };
 
             CloseButton = new MirButton
-                {
-                    HoverIndex = 361,
-                    Index = 360,
-                    Location = new Point(289, 3),
-                    Library = Libraries.Prguse2,
-                    Parent = this,
-                    PressedIndex = 362,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(289, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
             CloseButton.Click += (o, e) => Hide();
 
             GoldLabel = new MirLabel
-                {
-                    Parent = this,
-                    Location = new Point(40, 212),
-                    Size = new Size(111, 14),
-                    Sound = SoundList.Gold,
-                };
+            {
+                Parent = this,
+                Location = new Point(40, 212),
+                Size = new Size(111, 14),
+                Sound = SoundList.Gold,
+            };
             GoldLabel.Click += (o, e) =>
-                {
-                    if (GameScene.SelectedCell == null)
-                        GameScene.PickedUpGold = !GameScene.PickedUpGold && GameScene.Gold > 0;
-                };
+            {
+                if (GameScene.SelectedCell == null)
+                    GameScene.PickedUpGold = !GameScene.PickedUpGold && GameScene.Gold > 0;
+            };
 
 
-            Grid = new MirItemCell[8*5];
+            Grid = new MirItemCell[8 * 5];
 
             for (int x = 0; x < 8; x++)
             {
                 for (int y = 0; y < 5; y++)
                 {
-                    Grid[8*y + x] = new MirItemCell
-                        {
-                            ItemSlot = 8*y + x,
-                            GridType = MirGridType.Inventory,
-                            Library = Libraries.Items,
-                            Parent = this,
-                            Location = new Point(x*36 + 9 + x, y*32 + 37 + y),
-                        };
+                    Grid[8 * y + x] = new MirItemCell
+                    {
+                        ItemSlot = 8 * y + x,
+                        GridType = MirGridType.Inventory,
+                        Library = Libraries.Items,
+                        Parent = this,
+                        Location = new Point(x * 36 + 9 + x, y * 32 + 37 + y),
+                    };
                 }
             }
 
             WeightLabel = new MirLabel
-                {
-                    Parent = this,
-                    Location = new Point(268, 212),
-                    Size = new Size(26, 14)
-                };
+            {
+                Parent = this,
+                Location = new Point(268, 212),
+                Size = new Size(26, 14)
+            };
             WeightBar.BeforeDraw += WeightBar_BeforeDraw;
         }
 
@@ -7166,14 +7281,14 @@ namespace Client.MirScenes
         {
             if (WeightBar.Library == null) return;
 
-            double percent = MapObject.User.CurrentBagWeight/(double) MapObject.User.MaxBagWeight;
+            double percent = MapObject.User.CurrentBagWeight / (double)MapObject.User.MaxBagWeight;
             if (percent > 1) percent = 1;
             if (percent <= 0) return;
 
             Rectangle section = new Rectangle
-                {
-                    Size = new Size((int) ((WeightBar.Size.Width - 3)*percent), WeightBar.Size.Height)
-                };
+            {
+                Size = new Size((int)((WeightBar.Size.Width - 3) * percent), WeightBar.Size.Height)
+            };
 
             WeightBar.Library.Draw(WeightBar.Index, section, WeightBar.DisplayLocation, Color.White, false);
         }
@@ -7205,27 +7320,27 @@ namespace Client.MirScenes
 
             BeforeDraw += BeltPanel_BeforeDraw;
             RotateButton = new MirButton
-                {
-                    HoverIndex = 1927,
-                    Index = 1926,
-                    Location = new Point(222, 3),
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    PressedIndex = 1928,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 1927,
+                Index = 1926,
+                Location = new Point(222, 3),
+                Library = Libraries.Prguse,
+                Parent = this,
+                PressedIndex = 1928,
+                Sound = SoundList.ButtonA,
+            };
             RotateButton.Click += (o, e) => Flip();
 
             CloseButton = new MirButton
-                {
-                    HoverIndex = 1924,
-                    Index = 1923,
-                    Location = new Point(222, 19),
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    PressedIndex = 1925,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 1924,
+                Index = 1923,
+                Location = new Point(222, 19),
+                Library = Libraries.Prguse,
+                Parent = this,
+                PressedIndex = 1925,
+                Sound = SoundList.ButtonA,
+            };
             CloseButton.Click += (o, e) => Hide();
 
             Grid = new MirItemCell[6];
@@ -7233,14 +7348,14 @@ namespace Client.MirScenes
             for (int x = 0; x < 6; x++)
             {
                 Grid[x] = new MirItemCell
-                    {
-                        ItemSlot = 40 + x,
-                        Size = new Size(32, 32),
-                        GridType = MirGridType.Inventory,
-                        Library = Libraries.Items,
-                        Parent = this,
-                        Location = new Point(x*35 + 12, 3),
-                    };
+                {
+                    ItemSlot = 40 + x,
+                    Size = new Size(32, 32),
+                    GridType = MirGridType.Inventory,
+                    Library = Libraries.Items,
+                    Parent = this,
+                    Location = new Point(x * 35 + 12, 3),
+                };
             }
 
         }
@@ -7269,10 +7384,10 @@ namespace Client.MirScenes
             if (Index == 1932)
             {
                 Index = 1944;
-                Location = new Point(0, 224);
+                Location = new Point(0, 200);
 
                 for (int x = 0; x < 6; x++)
-                    Grid[x].Location = new Point(3, x*35 + 12);
+                    Grid[x].Location = new Point(3, x * 35 + 12);
 
                 CloseButton.Index = 1935;
                 CloseButton.HoverIndex = 1936;
@@ -7291,7 +7406,7 @@ namespace Client.MirScenes
                 Location = new Point(230, Settings.ScreenHeight - 150);
 
                 for (int x = 0; x < 6; x++)
-                    Grid[x].Location = new Point(x*35 + 12, 3);
+                    Grid[x].Location = new Point(x * 35 + 12, 3);
 
                 CloseButton.Index = 1923;
                 CloseButton.HoverIndex = 1924;
@@ -7343,378 +7458,386 @@ namespace Client.MirScenes
             BeforeDraw += (o, e) => RefreshInferface();
 
             CharacterPage = new MirImageControl
-                {
-                    Index = 345,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(8, 90),
-                };
+            {
+                Index = 340,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(8, 90),
+            };
             CharacterPage.AfterDraw += (o, e) =>
+            {
+                if (Libraries.StateItems == null) return;
+                ItemInfo RealItem = null;
+                if (Grid[(int)EquipmentSlot.Armour].Item != null)
                 {
-                    if (Libraries.StateItems == null) return;
-                    ItemInfo RealItem = null;
-                    if (Grid[(int)EquipmentSlot.Armour].Item != null)
-                    {
-                        RealItem = Functions.GetRealItem(Grid[(int)EquipmentSlot.Armour].Item.Info, MapObject.User.Level, MapObject.User.Class, GameScene.ItemInfoList);
-                        Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
-                    }
-                    if (Grid[(int)EquipmentSlot.Weapon].Item != null)
-                    {
-                        RealItem = Functions.GetRealItem(Grid[(int)EquipmentSlot.Weapon].Item.Info, MapObject.User.Level, MapObject.User.Class, GameScene.ItemInfoList);
-                        Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
-                    }
+                    RealItem = Functions.GetRealItem(Grid[(int)EquipmentSlot.Armour].Item.Info, MapObject.User.Level, MapObject.User.Class, GameScene.ItemInfoList);
+                    Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+                }
+                if (Grid[(int)EquipmentSlot.Weapon].Item != null)
+                {
+                    RealItem = Functions.GetRealItem(Grid[(int)EquipmentSlot.Weapon].Item.Info, MapObject.User.Level, MapObject.User.Class, GameScene.ItemInfoList);
+                    Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+                }
 
-                    if (Grid[(int)EquipmentSlot.Helmet].Item != null)
-                        Libraries.StateItems.Draw(Grid[(int)EquipmentSlot.Helmet].Item.Info.Image, DisplayLocation, Color.White, true, 1F);
-                    else
-                        Libraries.Prguse.Draw(440 + MapObject.User.Hair + (MapObject.User.Gender == MirGender.Male ? 0 : 40), DisplayLocation, Color.White, true, 1F);
-                };
+                if (Grid[(int)EquipmentSlot.Helmet].Item != null)
+                    Libraries.StateItems.Draw(Grid[(int)EquipmentSlot.Helmet].Item.Info.Image, DisplayLocation, Color.White, true, 1F);
+                else
+                    Libraries.Prguse.Draw(440 + MapObject.User.Hair + (MapObject.User.Gender == MirGender.Male ? 0 : 40), DisplayLocation, Color.White, true, 1F);
+            };
 
             StatusPage = new MirImageControl
-                {
-                    Index = 506,
-                    Parent = this,
-                    Library = Libraries.Title,
-                    Location = new Point(8, 90),
-                    Visible = false,
-                };
+            {
+                Index = 506,
+                Parent = this,
+                Library = Libraries.Title,
+                Location = new Point(8, 90),
+                Visible = false,
+            };
             StatusPage.BeforeDraw += (o, e) =>
-                {
-                    ACLabel.Text = string.Format("{0}-{1}", MapObject.User.MinAC, MapObject.User.MaxAC);
-                    MACLabel.Text = string.Format("{0}-{1}", MapObject.User.MinMAC, MapObject.User.MaxMAC);
-                    DCLabel.Text = string.Format("{0}-{1}", MapObject.User.MinDC, MapObject.User.MaxDC);
-                    MCLabel.Text = string.Format("{0}-{1}", MapObject.User.MinMC, MapObject.User.MaxMC);
-                    SCLabel.Text = string.Format("{0}-{1}", MapObject.User.MinSC, MapObject.User.MaxSC);
-                    HealthLabel.Text = string.Format("{0}/{1}", MapObject.User.HP, MapObject.User.MaxHP);
-                    ManaLabel.Text = string.Format("{0}/{1}", MapObject.User.MP, MapObject.User.MaxMP);
-                    StatuspageDataLabel.Text = string.Format("{0}\n{1}", MapObject.User.CriticalRate, MapObject.User.CriticalDamage);
-                };
+            {
+                ACLabel.Text = string.Format("{0}-{1}", MapObject.User.MinAC, MapObject.User.MaxAC);
+                MACLabel.Text = string.Format("{0}-{1}", MapObject.User.MinMAC, MapObject.User.MaxMAC);
+                DCLabel.Text = string.Format("{0}-{1}", MapObject.User.MinDC, MapObject.User.MaxDC);
+                MCLabel.Text = string.Format("{0}-{1}", MapObject.User.MinMC, MapObject.User.MaxMC);
+                SCLabel.Text = string.Format("{0}-{1}", MapObject.User.MinSC, MapObject.User.MaxSC);
+                HealthLabel.Text = string.Format("{0}/{1}", MapObject.User.HP, MapObject.User.MaxHP);
+                ManaLabel.Text = string.Format("{0}/{1}", MapObject.User.MP, MapObject.User.MaxMP);
+                StatuspageDataLabel.Text = string.Format("{0}\n{1}", MapObject.User.CriticalRate, MapObject.User.CriticalDamage);
+            };
 
             StatePage = new MirImageControl
-                {
-                    Index = 507,
-                    Parent = this,
-                    Library = Libraries.Title,
-                    Location = new Point(8, 90),
-                    Visible = false
-                };
+            {
+                Index = 507,
+                Parent = this,
+                Library = Libraries.Title,
+                Location = new Point(8, 90),
+                Visible = false
+            };
             StatePage.BeforeDraw += (o, e) =>
-                {
-                    StatLabel.Text = string.Format("{0:#0.##%}\n{1}/{2}\n{3}/{4}\n{5}/{6}\n{7}\n{8}\n+{9}\n+{10}\n+{11}\n+{12}\n+{13}\n+{14}\n+{15}\n+{16}\n+{17}\n+{18}",
-                                                   MapObject.User.Experience/(double) MapObject.User.MaxExperience,
-                                                   MapObject.User.CurrentBagWeight, MapObject.User.MaxBagWeight,
-                                                   MapObject.User.CurrentWearWeight, MapObject.User.MaxWearWeight,
-                                                   MapObject.User.CurrentHandWeight, MapObject.User.MaxHandWeight,
-                                                   MapObject.User.Accuracy, MapObject.User.Agility,
-                                                   MapObject.User.Luck, MapObject.User.ASpeed, 
-                                                   MapObject.User.MagicResist, MapObject.User.PoisonResist, 
-                                                   MapObject.User.HealthRecovery, MapObject.User.SpellRecovery, MapObject.User.PoisonRecovery, 
-                                                   MapObject.User.Holy, MapObject.User.Freezing, MapObject.User.PoisonAttack);
-                };
+            {
+                StatLabel.Text = string.Format("{0:#0.##%}\n{1}/{2}\n{3}/{4}\n{5}/{6}\n{7}\n{8}\n+{9}\n+{10}\n+{11}\n+{12}\n+{13}\n+{14}\n+{15}\n+{16}\n+{17}\n+{18}",
+                                               MapObject.User.Experience / (double)MapObject.User.MaxExperience,
+                                               MapObject.User.CurrentBagWeight, MapObject.User.MaxBagWeight,
+                                               MapObject.User.CurrentWearWeight, MapObject.User.MaxWearWeight,
+                                               MapObject.User.CurrentHandWeight, MapObject.User.MaxHandWeight,
+                                               MapObject.User.Accuracy, MapObject.User.Agility,
+                                               MapObject.User.Luck, MapObject.User.ASpeed,
+                                               MapObject.User.MagicResist, MapObject.User.PoisonResist,
+                                               MapObject.User.HealthRecovery, MapObject.User.SpellRecovery, MapObject.User.PoisonRecovery,
+                                               MapObject.User.Holy, MapObject.User.Freezing, MapObject.User.PoisonAttack);
+            };
 
 
             SkillPage = new MirImageControl
-                {
-                    Index = 508,
-                    Parent = this,
-                    Library = Libraries.Title,
-                    Location = new Point(8, 90),
-                    Visible = false
-                };
+            {
+                Index = 508,
+                Parent = this,
+                Library = Libraries.Title,
+                Location = new Point(8, 90),
+                Visible = false
+            };
 
 
             CharacterButton = new MirButton
-                {
-                    Index = 500,
-                    Library = Libraries.Title,
-                    Location = new Point(8, 70),
-                    Parent = this,
-                    PressedIndex = 500,
-                    Size = new Size(64, 20),
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                Index = 500,
+                Library = Libraries.Title,
+                Location = new Point(8, 70),
+                Parent = this,
+                PressedIndex = 500,
+                Size = new Size(64, 20),
+                Sound = SoundList.ButtonA,
+            };
             CharacterButton.Click += (o, e) => ShowCharacterPage();
             StatusButton = new MirButton
-                {
-                    Library = Libraries.Title,
-                    Location = new Point(70, 70),
-                    Parent = this,
-                    PressedIndex = 501,
-                    Size = new Size(64, 20),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Library = Libraries.Title,
+                Location = new Point(70, 70),
+                Parent = this,
+                PressedIndex = 501,
+                Size = new Size(64, 20),
+                Sound = SoundList.ButtonA
+            };
             StatusButton.Click += (o, e) => ShowStatusPage();
 
             StateButton = new MirButton
-                {
-                    Library = Libraries.Title,
-                    Location = new Point(132, 70),
-                    Parent = this,
-                    PressedIndex = 502,
-                    Size = new Size(64, 20),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Library = Libraries.Title,
+                Location = new Point(132, 70),
+                Parent = this,
+                PressedIndex = 502,
+                Size = new Size(64, 20),
+                Sound = SoundList.ButtonA
+            };
             StateButton.Click += (o, e) => ShowStatePage();
 
             SkillButton = new MirButton
-                {
-                    Library = Libraries.Title,
-                    Location = new Point(194, 70),
-                    Parent = this,
-                    PressedIndex = 503,
-                    Size = new Size(64, 20),
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Library = Libraries.Title,
+                Location = new Point(194, 70),
+                Parent = this,
+                PressedIndex = 503,
+                Size = new Size(64, 20),
+                Sound = SoundList.ButtonA
+            };
             SkillButton.Click += (o, e) => ShowSkillPage();
 
             CloseButton = new MirButton
-                {
-                    HoverIndex = 361,
-                    Index = 360,
-                    Location = new Point(241, 3),
-                    Library = Libraries.Prguse2,
-                    Parent = this,
-                    PressedIndex = 362,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(241, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
             CloseButton.Click += (o, e) => Hide();
 
             NameLabel = new MirLabel
-                {
-                    DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
-                    Parent = this,
-                    Location = new Point(50, 12),
-                    Size = new Size(190, 20),
-                    NotControl = true,
-                };
+            {
+                DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
+                Parent = this,
+                Location = new Point(50, 12),
+                Size = new Size(190, 20),
+                NotControl = true,
+            };
             GuildLabel = new MirLabel
             {
                 DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
                 Parent = this,
-                Location = new Point (50,33),
-                Size = new Size(190,30),
+                Location = new Point(50, 33),
+                Size = new Size(190, 30),
                 NotControl = true,
             };
             ClassImage = new MirImageControl
-                {
-                    Index = 100,
-                    Library = Libraries.Prguse,
-                    Location = new Point(15, 33),
-                    Parent = this,
-                    NotControl = true,
-                };
+            {
+                Index = 100,
+                Library = Libraries.Prguse,
+                Location = new Point(15, 33),
+                Parent = this,
+                NotControl = true,
+            };
 
-            Grid = new MirItemCell[Enum.GetNames(typeof (EquipmentSlot)).Length];
+            Grid = new MirItemCell[Enum.GetNames(typeof(EquipmentSlot)).Length];
 
             Grid[(int)EquipmentSlot.Weapon] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Weapon,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(125, 7),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Weapon,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(125, 7),
+            };
 
 
             Grid[(int)EquipmentSlot.Armour] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Armour,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(164, 7),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Armour,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(164, 7),
+            };
 
 
             Grid[(int)EquipmentSlot.Helmet] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Helmet,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 7),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Helmet,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(203, 7),
+            };
 
 
 
             Grid[(int)EquipmentSlot.Torch] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Torch,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 134),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Torch,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(203, 134),
+            };
 
 
             Grid[(int)EquipmentSlot.Necklace] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Necklace,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 98),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Necklace,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(203, 98),
+            };
 
 
             Grid[(int)EquipmentSlot.BraceletL] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.BraceletL,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(8, 170),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.BraceletL,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(8, 170),
+            };
 
             Grid[(int)EquipmentSlot.BraceletR] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.BraceletR,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 170),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.BraceletR,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(203, 170),
+            };
 
             Grid[(int)EquipmentSlot.RingL] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.RingL,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(8, 206),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.RingL,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(8, 206),
+            };
 
             Grid[(int)EquipmentSlot.RingR] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.RingR,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 206),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.RingR,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(203, 206),
+            };
 
 
             Grid[(int)EquipmentSlot.Amulet] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Amulet,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(8, 241),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Amulet,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(8, 241),
+            };
 
 
             Grid[(int)EquipmentSlot.Boots] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Boots,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(47, 241),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Boots,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(47, 241),
+            };
 
             Grid[(int)EquipmentSlot.Belt] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Belt,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(86, 241),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Belt,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(86, 241),
+            };
 
 
             Grid[(int)EquipmentSlot.Stone] = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Stone,
-                    GridType = MirGridType.Equipment,
-                    Parent = CharacterPage,
-                    Location = new Point(125, 241),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Stone,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(125, 241),
+            };
+
+            Grid[(int)EquipmentSlot.Mount] = new MirItemCell
+            {
+                ItemSlot = (int)EquipmentSlot.Mount,
+                GridType = MirGridType.Equipment,
+                Parent = CharacterPage,
+                Location = new Point(203, 62),
+            };
 
 
             ACLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(105, 63),
-                    NotControl = true,
-                    Text = "0-0"
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(105, 63),
+                NotControl = true,
+                Text = "0-0"
+            };
 
             MACLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(105, 90),
-                    NotControl = true,
-                    Text = "0-0"
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(105, 90),
+                NotControl = true,
+                Text = "0-0"
+            };
 
             DCLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(105, 117),
-                    NotControl = true,
-                    Text = "0-0"
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(105, 117),
+                NotControl = true,
+                Text = "0-0"
+            };
 
             MCLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(105, 144),
-                    NotControl = true,
-                    Text = "0-0"
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(105, 144),
+                NotControl = true,
+                Text = "0-0"
+            };
             SCLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(105, 171),
-                    NotControl = true,
-                    Text = "0-0"
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(105, 171),
+                NotControl = true,
+                Text = "0-0"
+            };
             HealthLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(105, 198),
-                    NotControl = true,
-                    Text = "0/0"
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(105, 198),
+                NotControl = true,
+                Text = "0/0"
+            };
             ManaLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(105, 222),
-                    NotControl = true,
-                    Text = "0/0"
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(105, 222),
+                NotControl = true,
+                Text = "0/0"
+            };
             StatuspageHeaderLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(20, 238),
-                    NotControl = true,
-                    Text = "Critical Rate\nCritical Damage"
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(20, 238),
+                NotControl = true,
+                Text = "Critical Rate\nCritical Damage"
+            };
             StatuspageDataLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatusPage,
-                    Location = new Point(105,238),
-                    NotControl = true
-                };
+            {
+                AutoSize = true,
+                Parent = StatusPage,
+                Location = new Point(105, 238),
+                NotControl = true
+            };
 
             HeadingLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatePage,
-                    Location = new Point(10, 59),
-                    NotControl = true,
-                    Text = "Experience\nBag Weight\nWear Weight\nHand Weight\nAccuracy\nAgility\nLuck\nAttack Speed\nMagicResist\nPoisonResist\nHealthRecovery\nManaRecovery\nPoisonRecovery\nHoly\nFreezing\nPoisonAttack"
-                };
+            {
+                AutoSize = true,
+                Parent = StatePage,
+                Location = new Point(10, 59),
+                NotControl = true,
+                Text = "Experience\nBag Weight\nWear Weight\nHand Weight\nAccuracy\nAgility\nLuck\nAttack Speed\nMagicResist\nPoisonResist\nHealthRecovery\nManaRecovery\nPoisonRecovery\nHoly\nFreezing\nPoisonAttack"
+            };
             StatLabel = new MirLabel
-                {
-                    AutoSize = true,
-                    Parent = StatePage,
-                    Location = new Point(120, 59),
-                    NotControl = true,
-                };
+            {
+                AutoSize = true,
+                Parent = StatePage,
+                Location = new Point(120, 59),
+                NotControl = true,
+            };
 
             Magics = new MagicButton[6];
 
             for (int i = 0; i < Magics.Length; i++)
-                Magics[i] = new MagicButton {Parent = SkillPage, Visible = false, Location = new Point(8, 40 + i*33)};
+                Magics[i] = new MagicButton { Parent = SkillPage, Visible = false, Location = new Point(8, 40 + i * 33) };
 
             NextButton = new MirButton
             {
@@ -7726,12 +7849,12 @@ namespace Client.MirScenes
                 Sound = SoundList.ButtonA,
             };
             NextButton.Click += (o, e) =>
-                {
-                    if (StartIndex + 6 >= MapObject.User.Magics.Count) return;
+            {
+                if (StartIndex + 6 >= MapObject.User.Magics.Count) return;
 
-                    StartIndex += 6;
-                    RefreshInferface();
-                };
+                StartIndex += 6;
+                RefreshInferface();
+            };
 
             BackButton = new MirButton
             {
@@ -7746,7 +7869,7 @@ namespace Client.MirScenes
             {
                 if (StartIndex - 6 < 0) return;
 
-                StartIndex -= 6; 
+                StartIndex -= 6;
                 RefreshInferface();
             };
         }
@@ -7817,7 +7940,7 @@ namespace Client.MirScenes
             int offSet = MapObject.User.Gender == MirGender.Male ? 0 : 1;
 
             Index = 504 + offSet;
-            CharacterPage.Index = 345 + offSet;
+            CharacterPage.Index = 340 + offSet;
 
             switch (MapObject.User.Class)
             {
@@ -7853,7 +7976,7 @@ namespace Client.MirScenes
                 Magics[i].Update(MapObject.User.Magics[i + StartIndex]);
             }
         }
-        
+
         public MirItemCell GetCell(ulong id)
         {
 
@@ -7864,7 +7987,7 @@ namespace Client.MirScenes
             }
             return null;
         }
-        
+
     }
     public sealed class StorageDialog : MirImageControl
     {
@@ -7879,33 +8002,33 @@ namespace Client.MirScenes
             Sort = true;
 
             CloseButton = new MirButton
-                {
-                    HoverIndex = 361,
-                    Index = 360,
-                    Location = new Point(363, 3),
-                    Library = Libraries.Prguse2,
-                    Parent = this,
-                    PressedIndex = 362,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(363, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
             CloseButton.Click += (o, e) => Hide();
 
 
 
-            Grid = new MirItemCell[10*8];
+            Grid = new MirItemCell[10 * 8];
 
             for (int x = 0; x < 10; x++)
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    Grid[10*y + x] = new MirItemCell
-                        {
-                            ItemSlot = 10*y + x,
-                            GridType = MirGridType.Storage,
-                            Library = Libraries.Items,
-                            Parent = this,
-                            Location = new Point(x*36 + 9 + x, y*32 + 60 + y),
-                        };
+                    Grid[10 * y + x] = new MirItemCell
+                    {
+                        ItemSlot = 10 * y + x,
+                        GridType = MirGridType.Storage,
+                        Library = Libraries.Items,
+                        Parent = this,
+                        Location = new Point(x * 36 + 9 + x, y * 32 + 60 + y),
+                    };
                 }
             }
         }
@@ -7952,65 +8075,65 @@ namespace Client.MirScenes
 
 
             MapNameLabel = new MirLabel
-                {
-                    DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
-                    Parent = this,
-                    Size = new Size(120, 18),
-                    Location = new Point(2, 2),
-                    NotControl = true,
-                };
+            {
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                Parent = this,
+                Size = new Size(120, 18),
+                Location = new Point(2, 2),
+                NotControl = true,
+            };
 
             LocationLabel = new MirLabel
-                {
-                    DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
-                    Parent = this,
-                    Size = new Size(56, 18),
-                    Location = new Point(46, 131),
-                    NotControl = true,
-                };
+            {
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                Parent = this,
+                Size = new Size(56, 18),
+                Location = new Point(46, 131),
+                NotControl = true,
+            };
 
             MailButton = new MirButton
-                {
-                    Index = 2099,
-                    HoverIndex = 2100,
-                    PressedIndex = 2101,
-                    Parent = this,
-                    Location = new Point(4, 131),
-                    Library = Libraries.Prguse,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                Index = 2099,
+                HoverIndex = 2100,
+                PressedIndex = 2101,
+                Parent = this,
+                Location = new Point(4, 131),
+                Library = Libraries.Prguse,
+                Sound = SoundList.ButtonA,
+            };
 
             BigMapButton = new MirButton
-                {
-                    Index = 2096,
-                    HoverIndex = 2097,
-                    PressedIndex = 2098,
-                    Parent = this,
-                    Location = new Point(25, 131),
-                    Library = Libraries.Prguse,
-                    Sound = SoundList.ButtonA,
-                };
-            BigMapButton.Click += (o, e) => GameScene.Scene.BigMapDialog.Toggle(); 
+            {
+                Index = 2096,
+                HoverIndex = 2097,
+                PressedIndex = 2098,
+                Parent = this,
+                Location = new Point(25, 131),
+                Library = Libraries.Prguse,
+                Sound = SoundList.ButtonA,
+            };
+            BigMapButton.Click += (o, e) => GameScene.Scene.BigMapDialog.Toggle();
 
             ToggleButton = new MirButton
-                {
-                    Index = 2102,
-                    HoverIndex = 2103,
-                    PressedIndex = 2104,
-                    Parent = this,
-                    Location = new Point(109, 3),
-                    Library = Libraries.Prguse,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                Index = 2102,
+                HoverIndex = 2103,
+                PressedIndex = 2104,
+                Parent = this,
+                Location = new Point(109, 3),
+                Library = Libraries.Prguse,
+                Sound = SoundList.ButtonA,
+            };
             ToggleButton.Click += (o, e) => Toggle();
 
             LightSetting = new MirImageControl
-                {
-                    Index = 2093,
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    Location = new Point(102, 131),
-                };
+            {
+                Index = 2093,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Location = new Point(102, 131),
+            };
         }
 
         private void MiniMap_BeforeDraw(object sender, EventArgs e)
@@ -8028,8 +8151,8 @@ namespace Client.MirScenes
             drawLocation.Offset(3, 22);
 
             Size miniMapSize = Libraries.MiniMap.GetTrueSize(map.MiniMap);
-            float scaleX = miniMapSize.Width/(float) map.Width;
-            float scaleY = miniMapSize.Height/(float) map.Height;
+            float scaleX = miniMapSize.Width / (float)map.Width;
+            float scaleY = miniMapSize.Height / (float)map.Height;
 
             viewRect.Location = new Point(
                 (int)(scaleX * MapObject.User.CurrentLocation.X) - viewRect.Width / 2,
@@ -8044,11 +8167,11 @@ namespace Client.MirScenes
             if (viewRect.X < 0) viewRect.X = 0;
             if (viewRect.Y < 0) viewRect.Y = 0;
 
-            Libraries.MiniMap.Draw(map.MiniMap, viewRect, drawLocation, Color.FromArgb(255,255,255), false);
+            Libraries.MiniMap.Draw(map.MiniMap, viewRect, drawLocation, Color.FromArgb(255, 255, 255), false);
 
 
-            int startPointX = (int) (viewRect.X/scaleX);
-            int startPointY = (int) (viewRect.Y/scaleY);
+            int startPointX = (int)(viewRect.X / scaleX);
+            int startPointY = (int)(viewRect.Y / scaleY);
 
             for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
             {
@@ -8063,15 +8186,15 @@ namespace Client.MirScenes
 
                 if ((GroupDialog.GroupList.Contains(ob.Name) && MapObject.User != ob) || ob.Name.EndsWith(string.Format("({0})", MapObject.User.Name)))
                     colour = Color.FromArgb(0, 0, 255);
-                else 
-                if (ob is PlayerObject)
-                    colour = Color.FromArgb(255, 255, 255);
-                else if (ob is NPCObject || ob.AI == 6)
-                    colour = Color.FromArgb(0, 255, 50);
                 else
-                    colour = Color.FromArgb(255, 0, 0);
+                    if (ob is PlayerObject)
+                        colour = Color.FromArgb(255, 255, 255);
+                    else if (ob is NPCObject || ob.AI == 6)
+                        colour = Color.FromArgb(0, 255, 50);
+                    else
+                        colour = Color.FromArgb(255, 0, 0);
 
-                DXManager.Sprite.Draw2D(DXManager.RadarTexture, Point.Empty, 0, new PointF((int) (x - 0.5F), (int) (y - 0.5F)), colour);
+                DXManager.Sprite.Draw2D(DXManager.RadarTexture, Point.Empty, 0, new PointF((int)(x - 0.5F), (int)(y - 0.5F)), colour);
             }
         }
 
@@ -8182,34 +8305,34 @@ namespace Client.MirScenes
             Sort = true;
 
             CharacterPage = new MirImageControl
-                {
-                    Index = 345,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(8, 90),
-                };
+            {
+                Index = 345,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(8, 90),
+            };
             CharacterPage.AfterDraw += (o, e) =>
+            {
+                if (Libraries.StateItems == null) return;
+
+                ItemInfo RealItem;
+                if (ArmorCell.Item != null)
                 {
-                    if (Libraries.StateItems == null) return;
+                    RealItem = Functions.GetRealItem(ArmorCell.Item.Info, Level, Class, GameScene.ItemInfoList);
+                    Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+                }
 
-                    ItemInfo RealItem;
-                    if (ArmorCell.Item != null)
-                    {
-                        RealItem = Functions.GetRealItem(ArmorCell.Item.Info, Level, Class, GameScene.ItemInfoList);
-                        Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
-                    }
+                if (WeaponCell.Item != null)
+                {
+                    RealItem = Functions.GetRealItem(WeaponCell.Item.Info, Level, Class, GameScene.ItemInfoList);
+                    Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+                }
 
-                    if (WeaponCell.Item != null)
-                    {
-                        RealItem = Functions.GetRealItem(WeaponCell.Item.Info, Level, Class, GameScene.ItemInfoList);                     
-                        Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
-                    }
-
-                    if (HelmetCell.Item != null)
-                        Libraries.StateItems.Draw(HelmetCell.Item.Info.Image, DisplayLocation, Color.White, true, 1F);
-                    else
-                        Libraries.Prguse.Draw(440 + Hair + (Gender == MirGender.Male ? 0 : 40), DisplayLocation, Color.White, true, 1F);
-                };
+                if (HelmetCell.Item != null)
+                    Libraries.StateItems.Draw(HelmetCell.Item.Info.Image, DisplayLocation, Color.White, true, 1F);
+                else
+                    Libraries.Prguse.Draw(440 + Hair + (Gender == MirGender.Male ? 0 : 40), DisplayLocation, Color.White, true, 1F);
+            };
 
 
             CloseButton = new MirButton
@@ -8237,22 +8360,22 @@ namespace Client.MirScenes
                 Sound = SoundList.ButtonA,
             };
             GroupButton.Click += (o, e) =>
+            {
+
+                if (GroupDialog.GroupList.Count >= Globals.MaxGroup)
+                {
+                    GameScene.Scene.ChatDialog.ReceiveChat("Your group already has the maximum number of members.", ChatType.System);
+                    return;
+                }
+                if (GroupDialog.GroupList.Count > 0 && GroupDialog.GroupList[0] != MapObject.User.Name)
                 {
 
-                    if (GroupDialog.GroupList.Count >= Globals.MaxGroup)
-                    {
-                        GameScene.Scene.ChatDialog.ReceiveChat("Your group already has the maximum number of members.", ChatType.System);
-                        return;
-                    }
-                    if (GroupDialog.GroupList.Count > 0 && GroupDialog.GroupList[0] != MapObject.User.Name)
-                    {
+                    GameScene.Scene.ChatDialog.ReceiveChat("You are not the leader of your group.", ChatType.System);
+                    return;
+                }
 
-                        GameScene.Scene.ChatDialog.ReceiveChat("You are not the leader of your group.", ChatType.System);
-                        return;
-                    }
-
-                    Network.Enqueue(new C.AddMember { Name = Name });
-                };
+                Network.Enqueue(new C.AddMember { Name = Name });
+            };
 
             FriendButton = new MirButton
             {
@@ -8277,140 +8400,140 @@ namespace Client.MirScenes
             };
 
             NameLabel = new MirLabel
-                {
-                    DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
-                    Parent = this,
-                    Location = new Point(50, 12),
-                    Size = new Size(190, 20),
-                };
+            {
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                Parent = this,
+                Location = new Point(50, 12),
+                Size = new Size(190, 20),
+            };
             NameLabel.Click += (o, e) =>
-                {
-                    GameScene.Scene.ChatDialog.ChatTextBox.SetFocus();
-                    GameScene.Scene.ChatDialog.ChatTextBox.Text = string.Format("/{0} ", Name);
-                    GameScene.Scene.ChatDialog.ChatTextBox.Visible = true;
-                    GameScene.Scene.ChatDialog.ChatTextBox.TextBox.SelectionLength = 0;
-                    GameScene.Scene.ChatDialog.ChatTextBox.TextBox.SelectionStart = Name.Length + 2;
+            {
+                GameScene.Scene.ChatDialog.ChatTextBox.SetFocus();
+                GameScene.Scene.ChatDialog.ChatTextBox.Text = string.Format("/{0} ", Name);
+                GameScene.Scene.ChatDialog.ChatTextBox.Visible = true;
+                GameScene.Scene.ChatDialog.ChatTextBox.TextBox.SelectionLength = 0;
+                GameScene.Scene.ChatDialog.ChatTextBox.TextBox.SelectionStart = Name.Length + 2;
 
-                };
+            };
             GuildLabel = new MirLabel
             {
                 DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
                 Parent = this,
                 Location = new Point(50, 33),
-                Size = new Size(190,30),
+                Size = new Size(190, 30),
                 NotControl = true,
             };
 
             ClassImage = new MirImageControl
-                {
-                    Index = 100,
-                    Library = Libraries.Prguse,
-                    Location = new Point(15, 33),
-                    Parent = this,
-                    NotControl = true,
-                };
+            {
+                Index = 100,
+                Library = Libraries.Prguse,
+                Location = new Point(15, 33),
+                Parent = this,
+                NotControl = true,
+            };
 
 
             WeaponCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Weapon,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(125, 7),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Weapon,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(125, 7),
+            };
 
             ArmorCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Armour,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(164, 7),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Armour,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(164, 7),
+            };
 
             HelmetCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Helmet,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 7),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Helmet,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(203, 7),
+            };
 
 
             TorchCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Torch,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 134),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Torch,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(203, 134),
+            };
 
             NecklaceCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Necklace,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 98),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Necklace,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(203, 98),
+            };
 
             BraceletLCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.BraceletL,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(8, 170),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.BraceletL,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(8, 170),
+            };
             BraceletRCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.BraceletR,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 170),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.BraceletR,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(203, 170),
+            };
             RingLCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.RingL,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(8, 206),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.RingL,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(8, 206),
+            };
             RingRCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.RingR,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(203, 206),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.RingR,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(203, 206),
+            };
 
             AmuletCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Amulet,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(8, 241),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Amulet,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(8, 241),
+            };
 
             BootsCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Boots,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(47, 241),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Boots,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(47, 241),
+            };
             BeltCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Belt,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(86, 241),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Belt,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(86, 241),
+            };
 
             StoneCell = new MirItemCell
-                {
-                    ItemSlot = (int) EquipmentSlot.Stone,
-                    GridType = MirGridType.Inspect,
-                    Parent = CharacterPage,
-                    Location = new Point(125, 241),
-                };
+            {
+                ItemSlot = (int)EquipmentSlot.Stone,
+                GridType = MirGridType.Inspect,
+                Parent = CharacterPage,
+                Location = new Point(125, 241),
+            };
         }
 
         public void RefreshInferface()
@@ -8422,16 +8545,16 @@ namespace Client.MirScenes
             switch (Class)
             {
                 case MirClass.Warrior:
-                    ClassImage.Index = 100 + offSet*5;
+                    ClassImage.Index = 100 + offSet * 5;
                     break;
                 case MirClass.Wizard:
-                    ClassImage.Index = 101 + offSet*5;
+                    ClassImage.Index = 101 + offSet * 5;
                     break;
                 case MirClass.Taoist:
-                    ClassImage.Index = 102 + offSet*5;
+                    ClassImage.Index = 102 + offSet * 5;
                     break;
                 case MirClass.Assassin:
-                    ClassImage.Index = 103 + offSet*5;
+                    ClassImage.Index = 103 + offSet * 5;
                     break;
                 case MirClass.Archer:
                     ClassImage.Index = 104 + offSet * 5;
@@ -8482,174 +8605,174 @@ namespace Client.MirScenes
             Movable = true;
             Sort = true;
 
-            Location = new Point((Settings.ScreenWidth - Size.Width)/2, (Settings.ScreenHeight - Size.Height)/2);
+            Location = new Point((Settings.ScreenWidth - Size.Width) / 2, (Settings.ScreenHeight - Size.Height) / 2);
 
             BeforeDraw += OptionPanel_BeforeDraw;
 
             CloseButton = new MirButton
-                {
-                    Index = 360,
-                    HoverIndex = 361,
-                    Library = Libraries.Prguse2,
-                    Location = new Point(Size.Width - 26, 5),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    PressedIndex = 362,
-                };
+            {
+                Index = 360,
+                HoverIndex = 361,
+                Library = Libraries.Prguse2,
+                Location = new Point(Size.Width - 26, 5),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                PressedIndex = 362,
+            };
             CloseButton.Click += (o, e) => Hide();
 
             SkillModeOn = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(159, 68),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 451,
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(159, 68),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 451,
+            };
             SkillModeOn.Click += (o, e) => Settings.SkillMode = true;
 
             SkillModeOff = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(201, 68),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 454
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(201, 68),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 454
+            };
             SkillModeOff.Click += (o, e) => Settings.SkillMode = false;
 
             SkillBarOn = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(159, 93),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 457,
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(159, 93),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 457,
+            };
             SkillBarOn.Click += (o, e) => Settings.SkillBar = true;
 
             SkillBarOff = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(201, 93),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 460
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(201, 93),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 460
+            };
             SkillBarOff.Click += (o, e) => Settings.SkillBar = false;
 
             EffectOn = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(159, 118),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 457,
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(159, 118),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 457,
+            };
             EffectOn.Click += (o, e) => Settings.Effect = true;
 
             EffectOff = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(201, 118),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 460
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(201, 118),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 460
+            };
             EffectOff.Click += (o, e) => Settings.Effect = false;
 
             DropViewOn = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(159, 168),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 457,
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(159, 168),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 457,
+            };
             DropViewOn.Click += (o, e) => Settings.DropView = true;
 
             DropViewOff = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(201, 168),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 460
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(201, 168),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 460
+            };
             DropViewOff.Click += (o, e) => Settings.DropView = false;
 
             NameViewOn = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(159, 193),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 457,
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(159, 193),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 457,
+            };
             NameViewOn.Click += (o, e) => Settings.NameView = true;
 
             NameViewOff = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(201, 193),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 460
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(201, 193),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 460
+            };
             NameViewOff.Click += (o, e) => Settings.NameView = false;
 
             HPViewOn = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(159, 218),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 463,
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(159, 218),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 463,
+            };
             HPViewOn.Click += (o, e) => Settings.HPView = true;
 
             HPViewOff = new MirButton
-                {
-                    Library = Libraries.Prguse2,
-                    Location = new Point(201, 218),
-                    Parent = this,
-                    Sound = SoundList.ButtonA,
-                    Size = new Size(36, 17),
-                    PressedIndex = 466
-                };
+            {
+                Library = Libraries.Prguse2,
+                Location = new Point(201, 218),
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(36, 17),
+                PressedIndex = 466
+            };
             HPViewOff.Click += (o, e) => Settings.HPView = false;
 
             SoundBar = new MirImageControl
-                {
-                    Index = 468,
-                    Library = Libraries.Prguse2,
-                    Location = new Point(159, 142),
-                    Parent = this,
-                    DrawImage = false,
-                };
+            {
+                Index = 468,
+                Library = Libraries.Prguse2,
+                Location = new Point(159, 142),
+                Parent = this,
+                DrawImage = false,
+            };
             SoundBar.MouseDown += SoundBar_MouseMove;
             SoundBar.MouseMove += SoundBar_MouseMove;
             SoundBar.BeforeDraw += SoundBar_BeforeDraw;
 
             VolumeBar = new MirImageControl
-                {
-                    Index = 20,
-                    Library = Libraries.Prguse,
-                    Location = new Point(155, 141),
-                    Parent = this,
-                    NotControl = true,
-                };
+            {
+                Index = 20,
+                Library = Libraries.Prguse,
+                Location = new Point(155, 141),
+                Parent = this,
+                NotControl = true,
+            };
 
         }
 
@@ -8660,14 +8783,14 @@ namespace Client.MirScenes
 
             Point p = e.Location.Subtract(SoundBar.DisplayLocation);
 
-            byte volume = (byte) (p.X/(double) SoundBar.Size.Width*100);
+            byte volume = (byte)(p.X / (double)SoundBar.Size.Width * 100);
             Settings.Volume = volume;
 
 
-            double percent = Settings.Volume/100D;
+            double percent = Settings.Volume / 100D;
             if (percent > 1) percent = 1;
 
-            VolumeBar.Location = percent > 0 ? new Point(159 + (int) ((SoundBar.Size.Width - 2)*percent), 142) : new Point(159, 142);
+            VolumeBar.Location = percent > 0 ? new Point(159 + (int)((SoundBar.Size.Width - 2) * percent), 142) : new Point(159, 142);
         }
 
 
@@ -8675,14 +8798,14 @@ namespace Client.MirScenes
         {
             if (SoundBar.Library == null) return;
 
-            double percent = Settings.Volume/100D;
+            double percent = Settings.Volume / 100D;
             if (percent > 1) percent = 1;
             if (percent > 0)
             {
                 Rectangle section = new Rectangle
-                    {
-                        Size = new Size((int) ((SoundBar.Size.Width - 2)*percent), SoundBar.Size.Height)
-                    };
+                {
+                    Size = new Size((int)((SoundBar.Size.Width - 2) * percent), SoundBar.Size.Height)
+                };
 
                 SoundBar.Library.Draw(SoundBar.Index, section, SoundBar.DisplayLocation, Color.White, false);
                 VolumeBar.Location = new Point(159 + section.Size.Width, 142);
@@ -8794,170 +8917,178 @@ namespace Client.MirScenes
             Index = 1963;
             Parent = GameScene.Scene;
             Library = Libraries.Prguse;
-            Location = new Point(Settings.ScreenWidth - Size.Width, 200);
+            Location = new Point(Settings.ScreenWidth - Size.Width, 180);
             Sort = true;
             Visible = false;
             Movable = true;
 
             ExitButton = new MirButton
-                {
-                    HoverIndex = 1965,
-                    Index = 1964,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 12),
-                    PressedIndex = 1966
-                };
+            {
+                HoverIndex = 1965,
+                Index = 1964,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 12),
+                PressedIndex = 1966
+            };
             ExitButton.Click += (o, e) => GameScene.Scene.QuitGame();
 
             LogOutButton = new MirButton
-                {
-                    HoverIndex = 1968,
-                    Index = 1967,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 31),
-                    PressedIndex = 1969
-                };
+            {
+                HoverIndex = 1968,
+                Index = 1967,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 31),
+                PressedIndex = 1969
+            };
             LogOutButton.Click += (o, e) => GameScene.Scene.LogOut();
 
 
             HelpButton = new MirButton
-                {
-                    Index = 1970,
-                    HoverIndex = 1971,
-                    PressedIndex = 1972,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 50),
-                };
+            {
+                Index = 1970,
+                HoverIndex = 1971,
+                PressedIndex = 1972,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 69),
+                Visible = false
+            };
             HelpButton.Click += (o, e) =>
-			            {
-				            if (GameScene.Scene.HelpDialog.Visible)
-					            GameScene.Scene.HelpDialog.Hide();
-				            else GameScene.Scene.HelpDialog.Show();
-			            };
+            {
+                if (GameScene.Scene.HelpDialog.Visible)
+                    GameScene.Scene.HelpDialog.Hide();
+                else GameScene.Scene.HelpDialog.Show();
+            };
             KeyboardLayoutButton = new MirButton
-                {
-                    Index = 1973,
-                    HoverIndex = 1974,
-                    PressedIndex = 1975,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 69),
-                };
+            {
+                Index = 1973,
+                HoverIndex = 1974,
+                PressedIndex = 1975,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 88),
+                Visible = false
+            };
             KeyboardLayoutButton.Click += (o, e) =>
-			            {
-				            if (GameScene.Scene.KeyboardLayoutDialog.Visible)
-					            GameScene.Scene.KeyboardLayoutDialog.Hide();
-				            else GameScene.Scene.KeyboardLayoutDialog.Show();
-			            };
+            {
+                if (GameScene.Scene.KeyboardLayoutDialog.Visible)
+                    GameScene.Scene.KeyboardLayoutDialog.Hide();
+                else GameScene.Scene.KeyboardLayoutDialog.Show();
+            };
 
             CraftingButton = new MirButton
-                {
-                    Index = 2000,
-                    HoverIndex = 2001,
-                    PressedIndex = 2002,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 88),
-                };
+            {
+                Index = 2000,
+                HoverIndex = 2001,
+                PressedIndex = 2002,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 107),
+                Visible = false
+            };
             CraftingButton.Click += (o, e) =>
-			        {
-				        if (GameScene.Scene.CraftingDialog.Visible)
-					        GameScene.Scene.CraftingDialog.Hide();
-				        else GameScene.Scene.CraftingDialog.Show();
-			        };
+            {
+                if (GameScene.Scene.CraftingDialog.Visible)
+                    GameScene.Scene.CraftingDialog.Hide();
+                else GameScene.Scene.CraftingDialog.Show();
+            };
 
             IntelligentCreatureButton = new MirButton
-                {
-                    Index = 431,
-                    HoverIndex = 432,
-                    PressedIndex = 433,
-                    Parent = this,
-                    Library = Libraries.Prguse2,
-                    Location = new Point(3, 107),
-                };
+            {
+                Index = 431,
+                HoverIndex = 432,
+                PressedIndex = 433,
+                Parent = this,
+                Library = Libraries.Prguse2,
+                Location = new Point(3, 126),
+                Visible = false
+            };
             IntelligentCreatureButton.Click += (o, e) =>
-		              {
-			             if (GameScene.Scene.IntelligentCreatureDialog.Visible)
-				             GameScene.Scene.IntelligentCreatureDialog.Hide();
-			             else GameScene.Scene.IntelligentCreatureDialog.Show();
-		              };
+            {
+                if (GameScene.Scene.IntelligentCreatureDialog.Visible)
+                    GameScene.Scene.IntelligentCreatureDialog.Hide();
+                else GameScene.Scene.IntelligentCreatureDialog.Show();
+            };
             RideButton = new MirButton
-                {
-                    Index = 1976,
-                    HoverIndex = 1977,
-                    PressedIndex = 1978,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 126),
-                };
+            {
+                Index = 1976,
+                HoverIndex = 1977,
+                PressedIndex = 1978,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 145),
+            };
             RideButton.Click += (o, e) =>
-		               {
-			               if (GameScene.Scene.RideDialog.Visible)
-				               GameScene.Scene.RideDialog.Hide();
-			               else GameScene.Scene.RideDialog.Show();
-		               };
+            {
+                if (GameScene.Scene.MountDialog.Visible)
+                    GameScene.Scene.MountDialog.Hide();
+                else GameScene.Scene.MountDialog.Show();
+            };
 
             FishingButton = new MirButton
-                {
-                    Index = 1979,
-                    HoverIndex = 1980,
-                    PressedIndex = 1981,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 145),
-                };
+            {
+                Index = 1979,
+                HoverIndex = 1980,
+                PressedIndex = 1981,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 164),
+                Visible = false
+            };
             FishingButton.Click += (o, e) =>
-                      {
-                          if (GameScene.Scene.FishingDialog.Visible)
-                              GameScene.Scene.FishingDialog.Hide();
-                          else GameScene.Scene.FishingDialog.Show();
-                      };
+            {
+                if (GameScene.Scene.FishingDialog.Visible)
+                    GameScene.Scene.FishingDialog.Hide();
+                else GameScene.Scene.FishingDialog.Show();
+            };
 
             FriendButton = new MirButton
-                {
-                    Index = 1982,
-                    HoverIndex = 1983,
-                    PressedIndex = 1984,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 164),
-                };
+            {
+                Index = 1982,
+                HoverIndex = 1983,
+                PressedIndex = 1984,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 183),
+                Visible = false
+            };
             FriendButton.Click += (o, e) =>
-                        {
-                            if (GameScene.Scene.FriendDialog.Visible)
-                                GameScene.Scene.FriendDialog.Hide();
-                            else GameScene.Scene.FriendDialog.Show();
-                        };
+            {
+                if (GameScene.Scene.FriendDialog.Visible)
+                    GameScene.Scene.FriendDialog.Hide();
+                else GameScene.Scene.FriendDialog.Show();
+            };
 
             MentorButton = new MirButton
-                {
-                    Index = 1985,
-                    HoverIndex = 1986,
-                    PressedIndex = 1987,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 183),
-                };
+            {
+                Index = 1985,
+                HoverIndex = 1986,
+                PressedIndex = 1987,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 202),
+                Visible = false
+            };
             MentorButton.Click += (o, e) =>
-                        {
-                            if (GameScene.Scene.MentorDialog.Visible)
-                                GameScene.Scene.MentorDialog.Hide();
-                            else GameScene.Scene.MentorDialog.Show();
-                        };
+            {
+                if (GameScene.Scene.MentorDialog.Visible)
+                    GameScene.Scene.MentorDialog.Hide();
+                else GameScene.Scene.MentorDialog.Show();
+            };
 
 
             RelationshipButton = new MirButton  /* lover button */
-                {
-                    Index = 1988,
-                    HoverIndex = 1989,
-                    PressedIndex = 1990,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 202),
-                };
+            {
+                Index = 1988,
+                HoverIndex = 1989,
+                PressedIndex = 1990,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 221),
+                Visible = false
+            };
             RelationshipButton.Click += (o, e) =>
             {
                 if (GameScene.Scene.RelationshipDialog.Visible)
@@ -8966,36 +9097,36 @@ namespace Client.MirScenes
             };
 
             GroupButton = new MirButton
-                {
-                    Index = 1991,
-                    HoverIndex = 1992,
-                    PressedIndex = 1993,
-                    Parent = this,
-                    Library = Libraries.Prguse,
-                    Location = new Point(3, 221),
-                };
+            {
+                Index = 1991,
+                HoverIndex = 1992,
+                PressedIndex = 1993,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 240),
+            };
             GroupButton.Click += (o, e) =>
-             {
-                 if (GameScene.Scene.GroupDialog.Visible)
-                     GameScene.Scene.GroupDialog.Hide();
-                 else GameScene.Scene.GroupDialog.Show();
-             };
+            {
+                if (GameScene.Scene.GroupDialog.Visible)
+                    GameScene.Scene.GroupDialog.Hide();
+                else GameScene.Scene.GroupDialog.Show();
+            };
 
             GuildButton = new MirButton
-               {
-                   Index = 1994,
-                   HoverIndex = 1995,
-                   PressedIndex = 1996,
-                   Parent = this,
-                   Library = Libraries.Prguse,
-                   Location = new Point(3, 240),
-               };
+            {
+                Index = 1994,
+                HoverIndex = 1995,
+                PressedIndex = 1996,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 259),
+            };
             GuildButton.Click += (o, e) =>
-               {
-                   if (GameScene.Scene.GuildDialog.Visible)
-                       GameScene.Scene.GuildDialog.Hide();
-                   else GameScene.Scene.GuildDialog.Show();
-               };
+            {
+                if (GameScene.Scene.GuildDialog.Visible)
+                    GameScene.Scene.GuildDialog.Hide();
+                else GameScene.Scene.GuildDialog.Show();
+            };
 
         }
 
@@ -9090,15 +9221,15 @@ namespace Client.MirScenes
             PositionBar.OnMoving += PositionBar_OnMoving;
 
             CloseButton = new MirButton
-                {
-                    HoverIndex = 361,
-                    Index = 360,
-                    Location = new Point(413, 3),
-                    Library = Libraries.Prguse2,
-                    Parent = this,
-                    PressedIndex = 362,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(413, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
             CloseButton.Click += (o, e) => Hide();
         }
 
@@ -9200,7 +9331,7 @@ namespace Client.MirScenes
                     Location = new Point(20, 34 + (i - _index) * 20),
                     NotControl = true
                 };
-                
+
                 if (i >= lines.Count)
                 {
                     TextLabel[i].Text = string.Empty;
@@ -9240,38 +9371,38 @@ namespace Client.MirScenes
         private void NewButton(string text, string key, Point p)
         {
             key = string.Format("[{0}]", key);
-            
+
             MirLabel temp = new MirLabel
-                {
-                    AutoSize = true,
-                    Visible = true,
-                    Parent = this,
-                    Location = p,
-                    Text = text,
-                    ForeColour = Color.Yellow,
-                    Sound = SoundList.ButtonC,
-                    Font = new Font(Settings.FontName, 8F)
-                };
+            {
+                AutoSize = true,
+                Visible = true,
+                Parent = this,
+                Location = p,
+                Text = text,
+                ForeColour = Color.Yellow,
+                Sound = SoundList.ButtonC,
+                Font = new Font(Settings.FontName, 8F)
+            };
             //Fontstyle.Underline;
-            
+
             temp.MouseEnter += (o, e) => temp.ForeColour = Color.Red;
             temp.MouseLeave += (o, e) => temp.ForeColour = Color.Yellow;
             temp.MouseDown += (o, e) => temp.ForeColour = Color.Yellow;
             temp.MouseUp += (o, e) => temp.ForeColour = Color.Red;
 
             temp.Click += (o, e) =>
+            {
+                if (key == "[@Exit]")
                 {
-                    if (key == "[@Exit]")
-                    {
-                        Hide();
-                        return;
-                    }
+                    Hide();
+                    return;
+                }
 
-                    if (CMain.Time <= GameScene.NPCTime) return;
+                if (CMain.Time <= GameScene.NPCTime) return;
 
-                    GameScene.NPCTime = CMain.Time + 5000;
-                    Network.Enqueue(new C.CallNPC {ObjectID = GameScene.NPCID, Key = key});
-                };
+                GameScene.NPCTime = CMain.Time + 5000;
+                Network.Enqueue(new C.CallNPC { ObjectID = GameScene.NPCID, Key = key });
+            };
             temp.MouseWheel += NPCDialog_MouseWheel;
 
             TextButtons.Add(temp);
@@ -9337,100 +9468,100 @@ namespace Client.MirScenes
             for (int i = 0; i < Cells.Length; i++)
             {
                 Cells[i] = new MirGoodsCell
-                    {
-                        Parent = this,
-                        Location = new Point(10, 34 + i*33),
-                        Sound = SoundList.ButtonC,
-                    };
+                {
+                    Parent = this,
+                    Location = new Point(10, 34 + i * 33),
+                    Sound = SoundList.ButtonC,
+                };
                 Cells[i].Click += (o, e) =>
-                    {
-                        SelectedItem = ((MirGoodsCell) o).Item;
-                        Update();
-                    };
+                {
+                    SelectedItem = ((MirGoodsCell)o).Item;
+                    Update();
+                };
                 Cells[i].MouseWheel += NPCGoodsPanel_MouseWheel;
                 Cells[i].DoubleClick += (o, e) => BuyItem();
             }
 
             CloseButton = new MirButton
-                {
-                    HoverIndex = 361,
-                    Index = 360,
-                    Location = new Point(216, 3),
-                    Library = Libraries.Prguse2,
-                    Parent = this,
-                    PressedIndex = 362,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(216, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
             CloseButton.Click += (o, e) => Hide();
 
             BuyButton = new MirButton
-                {
-                    HoverIndex = 313,
-                    Index = 312,
-                    Location = new Point(77, 304),
-                    Library = Libraries.Title,
-                    Parent = this,
-                    PressedIndex = 314,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 313,
+                Index = 312,
+                Location = new Point(77, 304),
+                Library = Libraries.Title,
+                Parent = this,
+                PressedIndex = 314,
+                Sound = SoundList.ButtonA,
+            };
             BuyButton.Click += (o, e) => BuyItem();
 
             BuyLabel = new MirImageControl
-                {
-                    Index = 459,
-                    Library = Libraries.Title,
-                    Parent = this,
-                    Location = new Point(20, 6),
-                };
+            {
+                Index = 459,
+                Library = Libraries.Title,
+                Parent = this,
+                Location = new Point(20, 6),
+            };
 
 
             UpButton = new MirButton
-                {
-                    Index = 197,
-                    HoverIndex = 198,
-                    Library = Libraries.Prguse2,
-                    Location = new Point(218, 35),
-                    Parent = this,
-                    PressedIndex = 199,
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 197,
+                HoverIndex = 198,
+                Library = Libraries.Prguse2,
+                Location = new Point(218, 35),
+                Parent = this,
+                PressedIndex = 199,
+                Sound = SoundList.ButtonA
+            };
             UpButton.Click += (o, e) =>
-                {
-                    if (StartIndex == 0) return;
-                    StartIndex--;
-                    Update();
-                };
+            {
+                if (StartIndex == 0) return;
+                StartIndex--;
+                Update();
+            };
 
             DownButton = new MirButton
-                {
-                    Index = 207,
-                    HoverIndex = 208,
-                    Library = Libraries.Prguse2,
-                    Location = new Point(218, 284),
-                    Parent = this,
-                    PressedIndex = 209,
-                    Sound = SoundList.ButtonA
-                };
+            {
+                Index = 207,
+                HoverIndex = 208,
+                Library = Libraries.Prguse2,
+                Location = new Point(218, 284),
+                Parent = this,
+                PressedIndex = 209,
+                Sound = SoundList.ButtonA
+            };
             DownButton.Click += (o, e) =>
-                {
-                    if (Goods.Count <= 8) return;
+            {
+                if (Goods.Count <= 8) return;
 
-                    if (StartIndex == Goods.Count - 8) return;
-                    StartIndex++;
-                    Update();
-                };
+                if (StartIndex == Goods.Count - 8) return;
+                StartIndex++;
+                Update();
+            };
 
             PositionBar = new MirButton
-                {
-                    Index = 205,
-                    HoverIndex = 206,
-                    Library = Libraries.Prguse2,
-                    Location = new Point(218, 49),
-                    Parent = this,
-                    PressedIndex = 206,
-                    Movable = true,
-                    Sound = SoundList.None
-                };
+            {
+                Index = 205,
+                HoverIndex = 206,
+                Library = Libraries.Prguse2,
+                Location = new Point(218, 49),
+                Parent = this,
+                PressedIndex = 206,
+                Movable = true,
+                Sound = SoundList.None
+            };
             PositionBar.OnMoving += PositionBar_OnMoving;
             PositionBar.MouseUp += (o, e) => Update();
         }
@@ -9440,7 +9571,7 @@ namespace Client.MirScenes
             if (SelectedItem == null) return;
             if (SelectedItem.StackSize > 1)
             {
-                UserItem temp = new UserItem(SelectedItem) {Count = SelectedItem.StackSize};
+                UserItem temp = new UserItem(SelectedItem) { Count = SelectedItem.StackSize };
 
                 if (temp.Price() > GameScene.Gold)
                 {
@@ -9459,12 +9590,12 @@ namespace Client.MirScenes
                 MirAmountBox amountBox = new MirAmountBox("Purchase Amount:", SelectedItem.Image, temp.Count);
 
                 amountBox.OKButton.Click += (o, e) =>
+                {
+                    if (amountBox.Amount > 0)
                     {
-                        if (amountBox.Amount > 0)
-                        {
-                            Network.Enqueue(new C.BuyItem {ItemIndex = SelectedItem.Index, Count = amountBox.Amount});
-                        }
-                    };
+                        Network.Enqueue(new C.BuyItem { ItemIndex = SelectedItem.Index, Count = amountBox.Amount });
+                    }
+                };
 
                 amountBox.Show();
             }
@@ -9498,7 +9629,7 @@ namespace Client.MirScenes
         }
         private void NPCGoodsPanel_MouseWheel(object sender, MouseEventArgs e)
         {
-            int count = e.Delta/SystemInformation.MouseWheelScrollDelta;
+            int count = e.Delta / SystemInformation.MouseWheelScrollDelta;
 
             if (StartIndex == 0 && count >= 0) return;
             if (StartIndex == Goods.Count - 1 && count <= 0) return;
@@ -9515,7 +9646,7 @@ namespace Client.MirScenes
             {
                 PositionBar.Visible = true;
                 int h = 233 - PositionBar.Size.Height;
-                h = (int) ((h/(float) (Goods.Count - 8))*StartIndex);
+                h = (int)((h / (float)(Goods.Count - 8)) * StartIndex);
                 PositionBar.Location = new Point(218, 49 + h);
             }
             else
@@ -9544,7 +9675,7 @@ namespace Client.MirScenes
             if (y < 49) y = 49;
 
             int h = 233 - PositionBar.Size.Height;
-            h = (int) Math.Round(((y - 49)/(h/(float) (Goods.Count - 8))));
+            h = (int)Math.Round(((y - 49) / (h / (float)(Goods.Count - 8))));
 
             PositionBar.Location = new Point(x, y);
 
@@ -9692,7 +9823,7 @@ namespace Client.MirScenes
                         GameScene.Scene.ChatDialog.ReceiveChat("Cannot repair this item.", ChatType.System);
                         return;
                     }
-                    if (GameScene.Gold >= TargetItem.RepairPrice()*GameScene.NPCRate)
+                    if (GameScene.Gold >= TargetItem.RepairPrice() * GameScene.NPCRate)
                     {
                         Network.Enqueue(new C.RepairItem { UniqueID = TargetItem.UniqueID });
                         TargetItem = null;
@@ -9712,7 +9843,7 @@ namespace Client.MirScenes
                         TargetItem = null;
                         return;
                     }
-                        GameScene.Scene.ChatDialog.ReceiveChat("You do not have enough gold.", ChatType.System);
+                    GameScene.Scene.ChatDialog.ReceiveChat("You do not have enough gold.", ChatType.System);
                     break;
                 case PanelType.Consign:
                     if (TargetItem.Info.Bind.HasFlag(BindMode.DontStore))
@@ -9721,17 +9852,17 @@ namespace Client.MirScenes
                         return;
                     }
                     MirAmountBox box = new MirAmountBox("Consignment Price:", TargetItem.Info.Image, Globals.MaxConsignment, Globals.MinConsignment)
-                        {
-                            InputTextBox = {Text = string.Empty},
-                            Amount = 0
-                        };
+                    {
+                        InputTextBox = { Text = string.Empty },
+                        Amount = 0
+                    };
 
                     box.Show();
                     box.OKButton.Click += (o, e) =>
-                        {
-                            Network.Enqueue(new C.ConsignItem {UniqueID = TargetItem.UniqueID, Price = box.Amount});
-                            TargetItem = null;
-                        };
+                    {
+                        Network.Enqueue(new C.ConsignItem { UniqueID = TargetItem.UniqueID, Price = box.Amount });
+                        TargetItem = null;
+                    };
                     return;
             }
 
@@ -9802,7 +9933,7 @@ namespace Client.MirScenes
                     InfoLabel.Text = "Consignment: ";
                     return;
                 default: return;
-                    
+
             }
 
             if (TargetItem != null)
@@ -9985,13 +10116,13 @@ namespace Client.MirScenes
             };
 
             TitleLabel = new MirLabel
-                {
-                    Location = new Point(49, 17),
-                    Parent = this,
-                    Size = new Size(230, 32),
-                    DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.WordBreak,
-                    Text = string.Format("Select the Key for: {0}", magic.Spell)
-                };
+            {
+                Location = new Point(49, 17),
+                Parent = this,
+                Size = new Size(230, 32),
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.WordBreak,
+                Text = string.Format("Select the Key for: {0}", magic.Spell)
+            };
 
             NoneButton = new MirButton
             {
@@ -10408,7 +10539,7 @@ namespace Client.MirScenes
                 Library = Libraries.Title,
                 Location = new Point(18, 4),
                 Parent = this
-            }; 
+            };
 
             HelpPetButton = new MirButton
             {
@@ -10448,39 +10579,221 @@ namespace Client.MirScenes
         }
     }
 
-    public sealed class RideDialog : MirImageControl
+    public sealed class MountDialog : MirImageControl
     {
-        public MirImageControl TitleLabel;
-        public MirButton CloseButton;
+        public MirLabel MountName, MountLoyalty;
+        public MirButton CloseButton, MountButton;
+        private MirAnimatedControl MountImage;
+        public MirItemCell[] Grid;
 
-        public RideDialog()
+        public int StartIndex = 0;
+
+        public MountDialog()
         {
             Index = 167;
             Library = Libraries.Prguse;
             Movable = true;
             Sort = true;
-            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+            Location = new Point(10, 30);
+            BeforeDraw += MountDialog_BeforeDraw;
 
-
-            TitleLabel = new MirImageControl
+            MountName = new MirLabel
             {
-                // Index = 7,
-                Library = Libraries.Title,
-                Location = new Point(18, 4),
-                Parent = this
+                Location = new Point(30, 10),
+                DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
+                Parent = this,
+                NotControl = true,
+            };
+            MountLoyalty = new MirLabel
+            {
+                Location = new Point(30, 30),
+                DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
+                Parent = this,
+                NotControl = true,
+            };
+
+            MountButton = new MirButton
+            {
+                Library = Libraries.Prguse,
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Location = new Point(262, 70)
+            };
+            MountButton.Click += (o, e) =>
+            {
+                if (CanRide())
+                {
+                    Ride();
+                }
             };
 
             CloseButton = new MirButton
             {
                 HoverIndex = 361,
                 Index = 360,
-                Location = new Point(297, 3),
                 Library = Libraries.Prguse2,
                 Parent = this,
                 PressedIndex = 362,
                 Sound = SoundList.ButtonA,
             };
             CloseButton.Click += (o, e) => Hide();
+
+            MountImage = new MirAnimatedControl
+            {
+                Animated = false,
+                AnimationCount = 16,
+                AnimationDelay = 100,
+                Index = 0,
+                Library = Libraries.Prguse,
+                Loop = true,
+                Parent = this,
+                NotControl = true,
+                UseOffSet = true
+            };
+            
+            Grid = new MirItemCell[Enum.GetNames(typeof(MountSlot)).Length];
+
+            Grid[(int)MountSlot.Reins] = new MirItemCell
+            {
+                ItemSlot = (int)MountSlot.Reins,
+                GridType = MirGridType.Mount,
+                Parent = this,
+                Size = new Size(34, 30)
+
+            };
+            Grid[(int)MountSlot.Bells] = new MirItemCell
+            {
+                ItemSlot = (int)MountSlot.Bells,
+                GridType = MirGridType.Mount,
+                Parent = this,
+                Size = new Size(34, 30)
+            };
+
+            Grid[(int)MountSlot.Saddle] = new MirItemCell
+            {
+                ItemSlot = (int)MountSlot.Saddle,
+                GridType = MirGridType.Mount,
+                Parent = this,
+                Size = new Size(34, 30)
+            };
+
+            Grid[(int)MountSlot.Ribbon] = new MirItemCell
+            {
+                ItemSlot = (int)MountSlot.Ribbon,
+                GridType = MirGridType.Mount,
+                Parent = this,
+                Size = new Size(34, 30)
+            };
+
+
+            Grid[(int)MountSlot.Mask] = new MirItemCell
+            {
+                ItemSlot = (int)MountSlot.Mask,
+                GridType = MirGridType.Mount,
+                Parent = this,
+                Size = new Size(34, 30)
+            };
+
+        }
+
+        void MountDialog_BeforeDraw(object sender, EventArgs e)
+        {
+            RefreshDialog();
+        }
+
+        public void RefreshDialog()
+        {
+            SwitchType();
+            DrawMountAnimation();
+        }
+
+        private void SwitchType()
+        {
+            UserItem MountItem = GameScene.User.Equipment[(int)EquipmentSlot.Mount];
+            UserItem[] MountSlots = null;
+
+            if (MountItem != null)
+            {
+                MountSlots = MountItem.Slots;
+            }
+
+            if (MountSlots == null) return;
+
+            int x = 0, y = 0;
+
+            switch (MountSlots.Length)
+            {
+                case 4:
+                    Index = 160;
+                    StartIndex = 1170;
+                    MountName.Size = new Size(208, 15);
+                    MountLoyalty.Size = new Size(208, 15);
+                    MountImage.Location = new Point(110, 250);
+                    MountButton.Index = 164;
+                    MountButton.HoverIndex = 165;
+                    MountButton.PressedIndex = 166;
+                    MountButton.Location = new Point(210, 70);
+                    CloseButton.Location = new Point(245, 3);
+                    Grid[(int)MountSlot.Mask].Visible = false;
+                    x = 1; y = 1;
+                    break;
+                case 5:
+                    Index = 167;
+                    StartIndex = 1330;
+                    MountName.Size = new Size(260, 15);
+                    MountLoyalty.Size = new Size(260, 15);
+                    MountImage.Location = new Point(0, 70);
+                    MountButton.Index = 155;
+                    MountButton.HoverIndex = 156;
+                    MountButton.PressedIndex = 157;
+                    MountButton.Location = new Point(262, 70);
+                    CloseButton.Location = new Point(297, 3);
+                    Grid[(int)MountSlot.Mask].Visible = true;
+                    x = 0; y = 0;
+                    break;
+            }
+
+            Grid[(int)MountSlot.Reins].Location = new Point(36 + x, 323 + y);
+            Grid[(int)MountSlot.Bells].Location = new Point(90 + x, 323 + y);
+            Grid[(int)MountSlot.Saddle].Location = new Point(144 + x, 323 + y);
+            Grid[(int)MountSlot.Ribbon].Location = new Point(198 + x, 323 + y);
+            Grid[(int)MountSlot.Mask].Location = new Point(252 + x, 323 + y);
+        }
+
+        private void DrawMountAnimation()
+        {
+            if (GameScene.User.MountType < 0)
+            {
+                MountImage.Index = 0;
+                MountImage.Animated = false;
+            }
+            else
+            {
+                MountImage.Index = StartIndex + (GameScene.User.MountType * 20);
+                MountImage.Animated = true;
+
+                UserItem item = MapObject.User.Equipment[(int)EquipmentSlot.Mount];
+
+                if (item != null)
+                {                    
+                    MountName.Text = item.Name;
+                    MountLoyalty.Text = string.Format("{0} / {1} Loyalty", item.CurrentDura, item.MaxDura);
+                }
+            }
+
+        }
+
+        public bool CanRide()
+        {
+            if (GameScene.User.MountType < 0 || GameScene.User.MountTime + 500 > CMain.Time) return false;
+            if (GameScene.User.CurrentAction != MirAction.Standing && GameScene.User.CurrentAction != MirAction.MountStanding) return false;
+
+            return true;
+        }
+
+        public void Ride()
+        {           
+            Network.Enqueue(new C.Chat { Message = "@ride" });
         }
 
 
@@ -10492,6 +10805,13 @@ namespace Client.MirScenes
         public void Show()
         {
             if (Visible) return;
+            if (GameScene.User.MountType < 0)
+            {
+                MirMessageBox messageBox = new MirMessageBox("You do not own a mount.", MirMessageBoxButtons.OK);
+                messageBox.Show();
+                return;
+            }
+
             Visible = true;
         }
     }
@@ -12402,8 +12722,15 @@ namespace Client.MirScenes
         }
         public void Show()
         {
-            if (MapControl.User.GuildName == "") return;
             if (Visible) return;
+
+            if (MapControl.User.GuildName == "")
+            {
+                MirMessageBox messageBox = new MirMessageBox("You are not in a guild.", MirMessageBoxButtons.OK);
+                messageBox.Show();
+                return;
+            }
+
             Visible = true;
             if (NoticePage.Visible)
                 if ((NoticeChanged) && (LastNoticeRequest < CMain.Time))
@@ -12450,7 +12777,7 @@ namespace Client.MirScenes
 
             Location = viewRect.Location;
             Size = viewRect.Size;
-            
+
             float scaleX = Size.Width / (float)map.Width;
             float scaleY = Size.Height / (float)map.Height;
 
@@ -12508,7 +12835,7 @@ namespace Client.MirScenes
     {
         public static bool UserMode = false;
 
-        public static long SearchTime, MarketTime; 
+        public static long SearchTime, MarketTime;
 
         public MirTextBox SearchTextBox;
         public MirButton FindButton, RefreshButton, MailButton, BuyButton, CloseButton, NextButton, BackButton;
@@ -12523,7 +12850,7 @@ namespace Client.MirScenes
 
         public int Page, PageCount;
         public static AuctionRow Selected;
-        public AuctionRow[] Rows = new AuctionRow[10]; 
+        public AuctionRow[] Rows = new AuctionRow[10];
 
         public TrustMerchantDialog()
         {
@@ -12532,174 +12859,174 @@ namespace Client.MirScenes
             Sort = true;
 
             SearchTextBox = new MirTextBox
-                {
-                    Location = new Point(19, 329),
-                    Parent = this,
-                    Size = new Size(104, 15),
-                    MaxLength = 20,
-                    CanLoseFocus = true
-                };
+            {
+                Location = new Point(19, 329),
+                Parent = this,
+                Size = new Size(104, 15),
+                MaxLength = 20,
+                CanLoseFocus = true
+            };
             SearchTextBox.TextBox.KeyPress += SearchTextBox_KeyPress;
             SearchTextBox.TextBox.KeyUp += SearchTextBox_KeyUp;
             SearchTextBox.TextBox.KeyDown += SearchTextBox_KeyDown;
 
             FindButton = new MirButton
-                {
-                    HoverIndex = 481,
-                    Index = 480,
-                    Location = new Point(130, 325),
-                    Library = Libraries.Title,
-                    Parent = this,
-                    PressedIndex = 482,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 481,
+                Index = 480,
+                Location = new Point(130, 325),
+                Library = Libraries.Title,
+                Parent = this,
+                PressedIndex = 482,
+                Sound = SoundList.ButtonA,
+            };
             FindButton.Click += (o, e) =>
+            {
+                if (string.IsNullOrEmpty(SearchTextBox.Text)) return;
+                if (CMain.Time < SearchTime)
                 {
-                    if (string.IsNullOrEmpty(SearchTextBox.Text)) return;
-                    if (CMain.Time < SearchTime)
-                    {
-                        GameScene.Scene.ChatDialog.ReceiveChat(string.Format("You can search again after {0} seconds.", Math.Ceiling((SearchTime - CMain.Time) / 1000D)), ChatType.System);
-                        return;
-                    }
+                    GameScene.Scene.ChatDialog.ReceiveChat(string.Format("You can search again after {0} seconds.", Math.Ceiling((SearchTime - CMain.Time) / 1000D)), ChatType.System);
+                    return;
+                }
 
-                    SearchTime = CMain.Time + Globals.SearchDelay;
-                    Network.Enqueue(new C.MarketSearch
-                    {
-                        Match = SearchTextBox.Text,
-                    });
-                };
+                SearchTime = CMain.Time + Globals.SearchDelay;
+                Network.Enqueue(new C.MarketSearch
+                {
+                    Match = SearchTextBox.Text,
+                });
+            };
 
             RefreshButton = new MirButton
-                {
-                    HoverIndex = 664,
-                    Index = 663,
-                    Location = new Point(190, 325),
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    PressedIndex = 665,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 664,
+                Index = 663,
+                Location = new Point(190, 325),
+                Library = Libraries.Prguse,
+                Parent = this,
+                PressedIndex = 665,
+                Sound = SoundList.ButtonA,
+            };
             RefreshButton.Click += (o, e) =>
+            {
+                if (CMain.Time < SearchTime)
                 {
-                    if (CMain.Time < SearchTime)
-                    {
-                        GameScene.Scene.ChatDialog.ReceiveChat(string.Format("You can search again after {0} seconds.", Math.Ceiling((SearchTime - CMain.Time)/1000D)), ChatType.System);
-                        return;
-                    }
-                    SearchTime = CMain.Time + Globals.SearchDelay;
-                    SearchTextBox.Text = string.Empty;
-                    Network.Enqueue(new C.MarketRefresh());
-                };
+                    GameScene.Scene.ChatDialog.ReceiveChat(string.Format("You can search again after {0} seconds.", Math.Ceiling((SearchTime - CMain.Time) / 1000D)), ChatType.System);
+                    return;
+                }
+                SearchTime = CMain.Time + Globals.SearchDelay;
+                SearchTextBox.Text = string.Empty;
+                Network.Enqueue(new C.MarketRefresh());
+            };
 
 
             MailButton = new MirButton
-                {
-                    HoverIndex = 667,
-                    Index = 666,
-                    Location = new Point(225, 325),
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    PressedIndex = 668,
-                    Sound = SoundList.ButtonA,
-                    Visible = false
-                };
+            {
+                HoverIndex = 667,
+                Index = 666,
+                Location = new Point(225, 325),
+                Library = Libraries.Prguse,
+                Parent = this,
+                PressedIndex = 668,
+                Sound = SoundList.ButtonA,
+                Visible = false
+            };
 
             BuyButton = new MirButton
-                {
-                    HoverIndex = 484,
-                    Index = 483,
-                    Location = new Point(400, 325),
-                    Library = Libraries.Title,
-                    Parent = this,
-                    PressedIndex = 485,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 484,
+                Index = 483,
+                Location = new Point(400, 325),
+                Library = Libraries.Title,
+                Parent = this,
+                PressedIndex = 485,
+                Sound = SoundList.ButtonA,
+            };
             BuyButton.Click += (o, e) =>
-                {
-                    if (Selected == null || CMain.Time < MarketTime) return;
+            {
+                if (Selected == null || CMain.Time < MarketTime) return;
 
-                    if (UserMode)
+                if (UserMode)
+                {
+                    if (Selected.Listing.Seller == "For Sale")
                     {
-                        if (Selected.Listing.Seller == "For Sale")
-                        {
-                            MirMessageBox box = new MirMessageBox(string.Format("{0} has not sold, Are you sure you want to get it back?", Selected.Listing.Item.Name), MirMessageBoxButtons.YesNo);
-                            box.YesButton.Click += (o1, e2) =>
-                                {
-                                    MarketTime = CMain.Time + 3000;
-                                    Network.Enqueue(new C.MarketGetBack {AuctionID = Selected.Listing.AuctionID});
-                                };
-                            box.Show();
-                        }
-                        else
+                        MirMessageBox box = new MirMessageBox(string.Format("{0} has not sold, Are you sure you want to get it back?", Selected.Listing.Item.Name), MirMessageBoxButtons.YesNo);
+                        box.YesButton.Click += (o1, e2) =>
                         {
                             MarketTime = CMain.Time + 3000;
                             Network.Enqueue(new C.MarketGetBack { AuctionID = Selected.Listing.AuctionID });
-                        }
-
-                    }
-                    else
-                    {
-                        MirMessageBox box = new MirMessageBox(string.Format("Are you sure you want to buy {0} for {1}?", Selected.Listing.Item.Name, Selected.Listing.Price));
-                        box.OKButton.Click += (o1, e2) =>
-                        {
-                            MarketTime = CMain.Time + 3000;
-                            Network.Enqueue(new C.MarketBuy { AuctionID = Selected.Listing.AuctionID });
                         };
                         box.Show();
                     }
-                };
+                    else
+                    {
+                        MarketTime = CMain.Time + 3000;
+                        Network.Enqueue(new C.MarketGetBack { AuctionID = Selected.Listing.AuctionID });
+                    }
+
+                }
+                else
+                {
+                    MirMessageBox box = new MirMessageBox(string.Format("Are you sure you want to buy {0} for {1}?", Selected.Listing.Item.Name, Selected.Listing.Price));
+                    box.OKButton.Click += (o1, e2) =>
+                    {
+                        MarketTime = CMain.Time + 3000;
+                        Network.Enqueue(new C.MarketBuy { AuctionID = Selected.Listing.AuctionID });
+                    };
+                    box.Show();
+                }
+            };
 
 
             BackButton = new MirButton
-                {
-                    Index = 398,
-                    Location = new Point(189, 298),
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    PressedIndex = 399,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                Index = 398,
+                Location = new Point(189, 298),
+                Library = Libraries.Prguse,
+                Parent = this,
+                PressedIndex = 399,
+                Sound = SoundList.ButtonA,
+            };
             BackButton.Click += (o, e) =>
-                {
-                    if (Page <= 0) return;
+            {
+                if (Page <= 0) return;
 
-                    Page--;
-                    UpdateInterface();
-                };
+                Page--;
+                UpdateInterface();
+            };
 
             NextButton = new MirButton
-                {
-                    Index = 396,
-                    Location = new Point(283, 298),
-                    Library = Libraries.Prguse,
-                    Parent = this,
-                    PressedIndex = 397,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                Index = 396,
+                Location = new Point(283, 298),
+                Library = Libraries.Prguse,
+                Parent = this,
+                PressedIndex = 397,
+                Sound = SoundList.ButtonA,
+            };
             NextButton.Click += (o, e) =>
             {
                 if (Page >= PageCount - 1) return;
-                if (Page < (Listings.Count - 1)/10)
+                if (Page < (Listings.Count - 1) / 10)
                 {
                     Page++;
                     UpdateInterface();
                     return;
                 }
 
-                Network.Enqueue(new C.MarketPage {Page = Page + 1});
+                Network.Enqueue(new C.MarketPage { Page = Page + 1 });
 
             };
 
             CloseButton = new MirButton
-                {
-                    HoverIndex = 361,
-                    Index = 360,
-                    Location = new Point(462, 3),
-                    Library = Libraries.Prguse2,
-                    Parent = this,
-                    PressedIndex = 362,
-                    Sound = SoundList.ButtonA,
-                };
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(462, 3),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
             CloseButton.Click += (o, e) => Hide();
 
             PageLabel = new MirLabel
@@ -12786,27 +13113,27 @@ namespace Client.MirScenes
 
             for (int i = 0; i < Rows.Length; i++)
             {
-                Rows[i]= new AuctionRow
-                    {
-                        Location = new Point(8, 54 + i*18),
-                        Parent = this
-                    };
+                Rows[i] = new AuctionRow
+                {
+                    Location = new Point(8, 54 + i * 18),
+                    Parent = this
+                };
                 Rows[i].Click += (o, e) =>
-                    {
-                        Selected = (AuctionRow) o;
-                        UpdateInterface();
-                    };
+                {
+                    Selected = (AuctionRow)o;
+                    UpdateInterface();
+                };
             }
 
 
             ItemCell = new MirItemCell
-                {
-                    ItemSlot = 0,
-                    GridType = MirGridType.TrustMerchant,
-                    Library = Libraries.Items,
-                    Parent = this,
-                    Location = new Point(195, 248),
-                };
+            {
+                ItemSlot = 0,
+                GridType = MirGridType.TrustMerchant,
+                Library = Libraries.Items,
+                Parent = this,
+                Location = new Point(195, 248),
+            };
         }
 
         public void UpdateInterface()
@@ -12819,20 +13146,20 @@ namespace Client.MirScenes
             PageLabel.Text = string.Format("{0}/{1}", Page + 1, PageCount);
 
             for (int i = 0; i < 10; i++)
-                if (i + Page*10 >= Listings.Count)
+                if (i + Page * 10 >= Listings.Count)
                 {
                     Rows[i].Clear();
                     if (Rows[i] == Selected) Selected = null;
                 }
                 else
                 {
-                    if (Rows[i] == Selected && Selected.Listing != Listings[i + Page*10])
+                    if (Rows[i] == Selected && Selected.Listing != Listings[i + Page * 10])
                     {
                         Selected.Border = false;
                         Selected = null;
                     }
 
-                    Rows[i].Update(Listings[i + Page*10]);
+                    Rows[i].Update(Listings[i + Page * 10]);
                 }
 
             for (int i = 0; i < Rows.Length; i++)
@@ -12852,7 +13179,7 @@ namespace Client.MirScenes
             NameLabel.Text = Selected.Listing.Item.Name;
 
             TotalPriceLabel.Text = string.Format("Price: {0:#,##0}", Selected.Listing.Price);
-            SplitPriceLabel.Text = string.Format("Each: {0:#,##0.#}", Selected.Listing.Price/(float) Selected.Listing.Item.Count);
+            SplitPriceLabel.Text = string.Format("Each: {0:#,##0.#}", Selected.Listing.Price / (float)Selected.Listing.Item.Count);
 
             DateLabel.Text = string.Format("Start Date: {0}", Selected.Listing.ConsignmentDate);
             ExpireLabel.Text = string.Format("Finish Date: {0}", Selected.Listing.ConsignmentDate.AddDays(Globals.ConsignmentLength));
@@ -12862,23 +13189,23 @@ namespace Client.MirScenes
         {
             if (CMain.Time < SearchTime)
             {
-                GameScene.Scene.ChatDialog.ReceiveChat(string.Format("You can search again after {0} seconds.", Math.Ceiling((SearchTime - CMain.Time)/1000D)), ChatType.System);
+                GameScene.Scene.ChatDialog.ReceiveChat(string.Format("You can search again after {0} seconds.", Math.Ceiling((SearchTime - CMain.Time) / 1000D)), ChatType.System);
                 return;
             }
 
             switch (e.KeyChar)
             {
-                case (char) Keys.Enter:
+                case (char)Keys.Enter:
                     e.Handled = true;
                     if (string.IsNullOrEmpty(SearchTextBox.Text)) return;
                     SearchTime = CMain.Time + Globals.SearchDelay;
                     Network.Enqueue(new C.MarketSearch
-                        {
-                            Match = SearchTextBox.Text,
-                        });
+                    {
+                        Match = SearchTextBox.Text,
+                    });
                     Program.Form.ActiveControl = null;
                     break;
-                case (char) Keys.Escape:
+                case (char)Keys.Escape:
                     e.Handled = true;
                     break;
             }
@@ -12941,7 +13268,7 @@ namespace Client.MirScenes
             }
         }
 
-        
+
         public void Hide()
         {
             if (!Visible) return;
@@ -12966,29 +13293,29 @@ namespace Client.MirScenes
                 BorderColour = Color.Lime;
 
                 NameLabel = new MirLabel
-                    {
-                        Size = new Size(140, 17),
-                        DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
-                        Parent = this,
-                        NotControl = true,
-                    };
+                {
+                    Size = new Size(140, 17),
+                    DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                    Parent = this,
+                    NotControl = true,
+                };
                 PriceLabel = new MirLabel
-                    {
-                        Location = new Point(141, 0),
-                        Size = new Size(178, 17),
-                        DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
-                        Parent = this,
-                        NotControl = true,
-                    };
+                {
+                    Location = new Point(141, 0),
+                    Size = new Size(178, 17),
+                    DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                    Parent = this,
+                    NotControl = true,
+                };
 
                 SellerLabel = new MirLabel
-                    {
-                        Location = new Point(320),
-                        Size = new Size(148, 17),
-                        DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
-                        Parent = this,
-                        NotControl = true,
-                    };
+                {
+                    Location = new Point(320),
+                    Size = new Size(148, 17),
+                    DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                    Parent = this,
+                    NotControl = true,
+                };
 
             }
 
@@ -13042,7 +13369,7 @@ namespace Client.MirScenes
             protected override void OnMouseEnter()
             {
                 if (Listing == null) return;
-                
+
                 base.OnMouseEnter();
                 GameScene.Scene.CreateItemLabel(Listing.Item);
             }
@@ -13105,7 +13432,7 @@ namespace Client.MirScenes
     }
     public sealed class CharacterDuraPanel : MirImageControl
     {
-        public MirImageControl GrayBackground, Background, Helmet, Armour, Belt, Boots, Weapon, Necklace, RightBracelet, LeftBracelet, RightRing, LeftRing, Torch, Stone, Amulet, Tiger, Item1, Item2;
+        public MirImageControl GrayBackground, Background, Helmet, Armour, Belt, Boots, Weapon, Necklace, RightBracelet, LeftBracelet, RightRing, LeftRing, Torch, Stone, Amulet, Mount, Item1, Item2;
 
         public CharacterDuraPanel()
         {
@@ -13147,7 +13474,7 @@ namespace Client.MirScenes
             Torch = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(8, 32), Location = new Point(44, 5) };
             Stone = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(30, 54) };
             Amulet = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(16, 54) };
-            Tiger = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(43, 68) };
+            Mount = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(12, 12), Location = new Point(43, 68) };
             Item1 = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(8, 12), Location = new Point(19, 67) };
             Item2 = new MirImageControl() { Index = -1, Library = Libraries.Prguse, Parent = Background, Size = new Size(8, 12), Location = new Point(31, 67) };
 
@@ -13295,15 +13622,15 @@ namespace Client.MirScenes
                     if (item.CurrentDura == 0)
                         Stone.Index = 2137;
                     break;
-                case ItemType.Tiger:
+                case ItemType.Mount:
                     if (item.CurrentDura > Warning)
-                        Tiger.Index = 2140;
+                        Mount.Index = 2140;
                     if (item.CurrentDura <= Warning)
-                        Tiger.Index = 2141;
+                        Mount.Index = 2141;
                     if (item.CurrentDura <= Danger)
-                        Tiger.Index = 2142;
+                        Mount.Index = 2142;
                     if (item.CurrentDura == 0)
-                        Tiger.Index = -1;
+                        Mount.Index = -1;
                     break;
                 case ItemType.Torch:
                     if (item.CurrentDura > Warning)
@@ -13356,7 +13683,7 @@ namespace Client.MirScenes
             switch (Type)
             {
                 case BuffType.Teleport:
-                    text = string.Format("Temporal Flux\nIncreases cost of next Teleport by: {0} MP.\n", (int) (MapObject.User.MaxMP*0.3F));
+                    text = string.Format("Temporal Flux\nIncreases cost of next Teleport by: {0} MP.\n", (int)(MapObject.User.MaxMP * 0.3F));
                     break;
                 case BuffType.Hiding:
                     text = "Hiding\nInvisible to many monsters.\n";
@@ -13381,7 +13708,7 @@ namespace Client.MirScenes
                     break;
             }
 
-            if(Infinite)
+            if (Infinite)
                 text += string.Format("Expire: Never\nCaster: {0}", Caster);
             else
                 text += string.Format("Expire: {0} (s)\nCaster: {1}", Math.Round((Expire - CMain.Time) / 1000D), Caster);

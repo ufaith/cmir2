@@ -1139,4 +1139,26 @@ namespace ClientPackets
             writer.Write(To);
         }
     }
+
+    public sealed class EquipSlotItem : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.EquipSlotItem; } }
+
+        public MirGridType Grid;
+        public ulong UniqueID;
+        public int To;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Grid = (MirGridType)reader.ReadByte();
+            UniqueID = reader.ReadUInt64();
+            To = reader.ReadInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write((byte)Grid);
+            writer.Write(UniqueID);
+            writer.Write(To);
+        }
+    }
 }

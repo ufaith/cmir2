@@ -60,6 +60,8 @@ namespace Client.MirControls
                         return GameScene.User.Trade;
                     case MirGridType.GuestTrade:
                         return GuestTradeDialog.GuestItems;
+                    case MirGridType.Mount:
+                        return MapObject.User.Equipment[(int)EquipmentSlot.Mount].Slots;
                     default:
                         throw new NotImplementedException();
                 }
@@ -246,6 +248,7 @@ namespace Client.MirControls
 
             amountBox.Show();
         }
+        
         public void UseItem()
         {
             if (Locked || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant || GridType == MirGridType.GuildStorage) return;
@@ -382,6 +385,7 @@ namespace Client.MirControls
                 case ItemType.Potion:
                 case ItemType.Scroll:
                 case ItemType.Book:
+                case ItemType.Food:
                     if (CanUseItem() && GridType == MirGridType.Inventory)
                     {
                         if (CMain.Time < GameScene.UseItemTime) return;
@@ -401,13 +405,79 @@ namespace Client.MirControls
                         Locked = true;
                     }
                     break;
-                case ItemType.Tiger:
+                case ItemType.Mount:
+                    if (dialog.Grid[(int)EquipmentSlot.Mount].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)EquipmentSlot.Mount });
+                        dialog.Grid[(int)EquipmentSlot.Mount].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Reins:
+                case ItemType.Bells:
+                case ItemType.Ribbon:
+                case ItemType.Saddle:
+                case ItemType.Mask:
+                    UseSlotItem();
                     break;
             }
 
             GameScene.UseItemTime = CMain.Time + 300;
             PlayItemSound();
         }
+        public void UseSlotItem()
+        {
+            MountDialog dialog = GameScene.Scene.MountDialog;
+
+            UserItem MountItem = GameScene.User.Equipment[(int)EquipmentSlot.Mount];
+
+            if (MountItem == null || MountItem.Slots == null || !CanUseItem()) return;
+
+            switch (Item.Info.Type)
+            {
+                case ItemType.Reins:
+                    if (dialog.Grid[(int)MountSlot.Reins].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Reins });
+                        dialog.Grid[(int)MountSlot.Reins].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Bells:
+                    if (dialog.Grid[(int)MountSlot.Bells].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Bells });
+                        dialog.Grid[(int)MountSlot.Bells].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Ribbon:
+                    if (dialog.Grid[(int)MountSlot.Ribbon].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Ribbon });
+                        dialog.Grid[(int)MountSlot.Ribbon].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Saddle:
+                    if (dialog.Grid[(int)MountSlot.Saddle].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Saddle });
+                        dialog.Grid[(int)MountSlot.Saddle].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Mask:
+                    if (dialog.Grid[(int)MountSlot.Mask].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Mask });
+                        dialog.Grid[(int)MountSlot.Mask].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+            }
+        }
+
         private void MoveItem()
         {
             if (GridType == MirGridType.BuyBack || GridType == MirGridType.DropPanel || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant) return;
@@ -978,6 +1048,8 @@ namespace Client.MirControls
                     return type == ItemType.Belt;
                 case EquipmentSlot.Stone:
                     return type == ItemType.Stone;
+                case EquipmentSlot.Mount:
+                    return type == ItemType.Mount;
                 default:
                     return false;
             }
@@ -1086,6 +1158,21 @@ namespace Client.MirControls
                     if (MapObject.User.MaxSC < Item.Info.RequiredAmount)
                     {
                         GameScene.Scene.ChatDialog.ReceiveChat("You do not have enough SC.", ChatType.System);
+                        return false;
+                    }
+                    break;
+            }
+
+            switch (Item.Info.Type)
+            {
+                case ItemType.Saddle:
+                case ItemType.Ribbon:
+                case ItemType.Bells:
+                case ItemType.Mask:
+                case ItemType.Reins:
+                    if (MapObject.User.Equipment[(int)EquipmentSlot.Mount] == null)
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("You do not have a mount equipped.", ChatType.System);
                         return false;
                     }
                     break;
@@ -1202,6 +1289,21 @@ namespace Client.MirControls
                     break;
             }
 
+            switch (i.Info.Type)
+            {
+                case ItemType.Saddle:
+                case ItemType.Ribbon:
+                case ItemType.Bells:
+                case ItemType.Mask:
+                case ItemType.Reins:
+                    if (MapObject.User.Equipment[(int)EquipmentSlot.Mount] == null)
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("You do not have a mount equipped.", ChatType.System);
+                        return false;
+                    }
+                    break;
+            }
+
             if (i.Info.Type == ItemType.Weapon || i.Info.Type == ItemType.Torch)
             {
                 if (i.Weight - (Item != null ? Item.Weight : 0) + MapObject.User.CurrentHandWeight > MapObject.User.MaxHandWeight)
@@ -1236,7 +1338,18 @@ namespace Client.MirControls
                 if (Library != null)
                 {
                     Size imgSize = Library.GetTrueSize(Item.Info.Image);
+
                     Point offSet = new Point((Size.Width - imgSize.Width) / 2, (Size.Height - imgSize.Height) / 2);
+
+                    //if (GridType == MirGridType.Equipment)
+                    //{
+                    //    if (Item.Info.Type == ItemType.Mount)
+                    //    {
+                    //        offSet.Y += 1;
+                    //    }
+                    //}
+
+
                     Library.Draw(Item.Info.Image, DisplayLocation.Add(offSet), ForeColour, UseOffSet, 1F);
                 }
 

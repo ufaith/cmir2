@@ -16,7 +16,7 @@ namespace Server.MirDatabase
         public byte MapDarkLight = 0, MineIndex = 0;
 
         public bool NoTeleport, NoReconnect, NoRandom, NoEscape, NoRecall, NoDrug, NoPosition, 
-            NoThrowItem, NoDropPlayer, NoDropMonster, NoNames, Fight, NeedHole, Fire, Lightning;
+            NoThrowItem, NoDropPlayer, NoDropMonster, NoNames, NoMount, NeedBridle, Fight, NeedHole, Fire, Lightning;
 
         public string NoReconnectMap = string.Empty;
         public int FireDamage, LightningDamage;
@@ -86,6 +86,10 @@ namespace Server.MirDatabase
                 MineZones.Add(new MineZone(reader));
             if (Envir.LoadVersion < 27) return;
             MineIndex = reader.ReadByte();
+
+            if (Envir.LoadVersion < 33) return;
+            NoMount = reader.ReadBoolean();
+            NeedBridle = reader.ReadBoolean();
         }
 
         public void Save(BinaryWriter writer)
@@ -135,6 +139,9 @@ namespace Server.MirDatabase
             for (int i = 0; i < MineZones.Count; i++)
                 MineZones[i].Save(writer);
             writer.Write(MineIndex);
+
+            writer.Write(NoMount);
+            writer.Write(NeedBridle);
         }
 
 

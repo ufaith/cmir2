@@ -162,6 +162,8 @@ namespace Server
             this.ImportNPCInfoButton = new System.Windows.Forms.Button();
             this.ExportNPCInfoButton = new System.Windows.Forms.Button();
             this.VisualizerButton = new System.Windows.Forms.Button();
+            this.NoMountCheckbox = new System.Windows.Forms.CheckBox();
+            this.NeedBridleCheckbox = new System.Windows.Forms.CheckBox();
             this.MapTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage6.SuspendLayout();
@@ -346,6 +348,8 @@ namespace Server
             // 
             // tabPage6
             // 
+            this.tabPage6.Controls.Add(this.NeedBridleCheckbox);
+            this.tabPage6.Controls.Add(this.NoMountCheckbox);
             this.tabPage6.Controls.Add(this.label19);
             this.tabPage6.Controls.Add(this.MapDarkLighttextBox);
             this.tabPage6.Controls.Add(this.NoNamesCheckbox);
@@ -1546,6 +1550,28 @@ namespace Server
             this.VisualizerButton.UseVisualStyleBackColor = true;
             this.VisualizerButton.Click += new System.EventHandler(this.VisualizerButton_Click);
             // 
+            // NoMountCheckbox
+            // 
+            this.NoMountCheckbox.AutoSize = true;
+            this.NoMountCheckbox.Location = new System.Drawing.Point(174, 113);
+            this.NoMountCheckbox.Name = "NoMountCheckbox";
+            this.NoMountCheckbox.Size = new System.Drawing.Size(73, 17);
+            this.NoMountCheckbox.TabIndex = 41;
+            this.NoMountCheckbox.Text = "No Mount";
+            this.NoMountCheckbox.UseVisualStyleBackColor = true;
+            this.NoMountCheckbox.CheckedChanged += new System.EventHandler(this.NoMountCheckbox_CheckedChanged);
+            // 
+            // NeedBridleCheckbox
+            // 
+            this.NeedBridleCheckbox.AutoSize = true;
+            this.NeedBridleCheckbox.Location = new System.Drawing.Point(174, 137);
+            this.NeedBridleCheckbox.Name = "NeedBridleCheckbox";
+            this.NeedBridleCheckbox.Size = new System.Drawing.Size(81, 17);
+            this.NeedBridleCheckbox.TabIndex = 42;
+            this.NeedBridleCheckbox.Text = "Need Bridle";
+            this.NeedBridleCheckbox.UseVisualStyleBackColor = true;
+            this.NeedBridleCheckbox.CheckedChanged += new System.EventHandler(this.NeedBridleCheckbox_CheckedChanged);
+            // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1722,6 +1748,8 @@ namespace Server
         private Button ImportNPCInfoButton;
         private Button ExportNPCInfoButton;
         private Button VisualizerButton;
+        private CheckBox NeedBridleCheckbox;
+        private CheckBox NoMountCheckbox;
 
     }
 }

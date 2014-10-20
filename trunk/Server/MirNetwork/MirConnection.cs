@@ -396,7 +396,9 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.TradeCancel:
                     TradeCancel((C.TradeCancel)p);
                     return;
-
+                case (short)ClientPacketIds.EquipSlotItem:
+                    EquipSlotItem((C.EquipSlotItem)p);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1011,6 +1013,12 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.TradeCancel();
+        }
+        private void EquipSlotItem(C.EquipSlotItem p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.EquipSlotItem(p.Grid, p.UniqueID, p.To);
         }
     }
 }

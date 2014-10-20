@@ -202,7 +202,26 @@ namespace Client.MirSounds
             FemaleDie = 10145,
 
             Revive = 20791,
-            ZombieRevive = 0705;
+            ZombieRevive = 0705,
+            
+            //Mounts
+            MountWalkL = 10176,
+            MountWalkR = 10177,
+            MountRun = 10178,
+            TigerStruck1 = 10179,
+            TigerStruck2 = 10180,
+            TigerAttack1 = 10181,
+            TigerAttack2 = 10182,
+            TigerAttack3 = 10183,
+            WolfRide1 = 10188,
+            WolfRide2 = 10189,
+            WolfAttack1 = 10190,
+            WolfAttack2 = 10191,
+            WolfAttack3 = 10192,
+            WolfStruck1 = 10193,
+            WolfStruck2 = 10194,
+            TigerRide1 = 10218,
+            TigerRide2 = 10219;
 
     }
 }

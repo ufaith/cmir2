@@ -54,7 +54,8 @@ namespace Client.MirGraphics
                                           ARHair = new MLibrary[9],
                                           Monsters = new MLibrary[142],
                                           NPCs = new MLibrary[173],
-                                          CHumEffect = new MLibrary[2];
+                                          CHumEffect = new MLibrary[2],
+                                          Mounts = new MLibrary[12];
 
         static Libraries()
         {
@@ -103,6 +104,9 @@ namespace Client.MirGraphics
 
             for (int i = 0; i < CHumEffect.Length; i++)
                 CHumEffect[i] = new MLibrary(Settings.CHumEffectPath + i.ToString("00"));
+
+            for (int i = 0; i < Mounts.Length; i++)
+                Mounts[i] = new MLibrary(Settings.MountPath + i.ToString("00"));
 
             #region Maplibs
             //wemade mir2 (allowed from 0-99)
@@ -279,6 +283,12 @@ namespace Client.MirGraphics
             for (int i = 0; i < CHumEffect.Length; i++)
             {
                 CHumEffect[i].Initialize();
+                Progress++;
+            }
+
+            for (int i = 0; i < Mounts.Length; i++)
+            {
+                Mounts[i].Initialize();
                 Progress++;
             }
 

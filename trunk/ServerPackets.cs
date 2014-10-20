@@ -599,6 +599,9 @@ namespace ServerPackets
         public byte WingEffect;
         public bool Extra;
 
+        public short MountType;
+        public bool RidingMount;
+
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
@@ -620,6 +623,8 @@ namespace ServerPackets
             Effect = (SpellEffect) reader.ReadByte();
             WingEffect = reader.ReadByte();
             Extra = reader.ReadBoolean();
+            MountType = reader.ReadInt16();
+            RidingMount = reader.ReadBoolean();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -644,6 +649,8 @@ namespace ServerPackets
             writer.Write((byte) Effect);
             writer.Write(WingEffect);
             writer.Write(Extra);
+            writer.Write(MountType);
+            writer.Write(RidingMount);
         }
     }
     public sealed class ObjectRemove : Packet
@@ -3427,6 +3434,57 @@ namespace ServerPackets
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(NPCID);
+        }
+    }
+
+    public sealed class MountUpdate : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.MountUpdate; } }
+
+        public long ObjectID;
+        public short MountType;
+        public bool RidingMount;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadInt64();
+            MountType = reader.ReadInt16();
+            RidingMount = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(MountType);
+            writer.Write(RidingMount);
+        }
+    }
+
+    public sealed class EquipSlotItem : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.EquipSlotItem; }
+        }
+
+        public MirGridType Grid;
+        public ulong UniqueID;
+        public int To;
+        public bool Success;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Grid = (MirGridType)reader.ReadByte();
+            UniqueID = reader.ReadUInt64();
+            To = reader.ReadInt32();
+            Success = reader.ReadBoolean();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write((byte)Grid);
+            writer.Write(UniqueID);
+            writer.Write(To);
+            writer.Write(Success);
         }
     }
 }

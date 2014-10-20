@@ -51,15 +51,16 @@ namespace Server.MirDatabase
         public bool Thrusting, HalfMoon, CrossHalfMoon;
         public bool DoubleSlash;
 
-        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[13], Trade = new UserItem[10];
+        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14], Trade = new UserItem[10];
         public List<UserMagic> Magics = new List<UserMagic>();
         public List<PetInfo> Pets = new List<PetInfo>();
+
 
         public bool[] Flags = new bool[Globals.FlagIndexCount];
 
         public AccountInfo AccountInfo;
         public PlayerObject Player;
-
+        public MountInfo Mount;
 
         public CharacterInfo()
         {
@@ -290,6 +291,7 @@ namespace Server.MirDatabase
             Level = reader.ReadByte();
             MaxPetLevel = reader.ReadByte();
         }
+
         public void Save(BinaryWriter writer)
         {
             writer.Write(MonsterIndex);
@@ -297,7 +299,55 @@ namespace Server.MirDatabase
             writer.Write(Experience);
             writer.Write(Level);
             writer.Write(MaxPetLevel);
+        }
+    }
 
+    public class MountInfo
+    {
+        public PlayerObject Player;
+        public short MountType = -1;
+
+        public bool CanRide
+        {
+            get { return HasMount && Slots[(int)MountSlot.Saddle] != null; }
+        }
+        public bool CanMapRide
+        {
+            get { return HasMount && !Player.CurrentMap.Info.NoMount; }
+        }
+        public bool CanDungeonRide
+        {
+            get { return HasMount && CanMapRide && (!Player.CurrentMap.Info.NeedBridle || Slots[(int)MountSlot.Reins] != null); }
+        }
+        public bool CanAttack
+        {
+            get { return HasMount && Slots[(int)MountSlot.Bells] != null || !RidingMount; }
+        }
+        public bool SlowLoyalty
+        {
+            get { return HasMount && Slots[(int)MountSlot.Ribbon] != null; }
+        }
+
+        public bool HasMount
+        {
+            get { return Player.Info.Equipment[(int)EquipmentSlot.Mount] != null; }
+        }
+
+        private bool RidingMount
+        {
+            get { return Player.RidingMount; }
+            set { Player.RidingMount = value; }
+        }
+
+        private UserItem[] Slots
+        {
+            get { return Player.Info.Equipment[(int)EquipmentSlot.Mount].Slots; }
+        }
+
+
+        public MountInfo(PlayerObject ob)
+        {
+            Player = ob;
         }
     }
 }
