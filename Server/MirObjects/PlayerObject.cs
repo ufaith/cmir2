@@ -22,7 +22,7 @@ namespace Server.MirObjects
 
         public short Looks_Armour = 0, Looks_Weapon = -1;
         public byte Looks_Wings = 0;
-
+        
         public override ObjectType Race
         {
             get { return ObjectType.Player; }
@@ -125,6 +125,18 @@ namespace Server.MirObjects
             set { Info.BindLocation = value; }
         }
 
+        public bool RidingMount;
+        public MountInfo Mount
+        {
+            get { return Info.Mount; }
+        }
+        public short MountType
+        {
+            get { return Mount.MountType; }
+            set { Mount.MountType = value; }
+        }
+
+
         public bool CanMove
         {
             get { return !Dead && Envir.Time >= ActionTime; }
@@ -137,9 +149,10 @@ namespace Server.MirObjects
         {
             get
             {
-                return !Dead && Envir.Time >= ActionTime && Envir.Time >= AttackTime && CurrentPoison != PoisonType.Paralysis && CurrentPoison != PoisonType.Frozen;
+                return !Dead && Envir.Time >= ActionTime && Envir.Time >= AttackTime && CurrentPoison != PoisonType.Paralysis && CurrentPoison != PoisonType.Frozen && Mount.CanAttack;
             }
         }
+
         public bool CanRegen
         {
             get { return Envir.Time >= RegenTime && _runCounter == 0; }
@@ -153,8 +166,8 @@ namespace Server.MirObjects
             }
         }
 
-        public const long TurnDelay = 350, MoveDelay = 600, HarvestDelay = 350, RegenDelay = 10000, PotDelay = 200, HealDelay = 600, DuraDelay = 10000, VampDelay = 500;
-        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, ShoutTime, SpellTime, VampTime, SearchTime, PoisonFieldTime;
+        public const long TurnDelay = 350, MoveDelay = 600, HarvestDelay = 350, RegenDelay = 10000, PotDelay = 200, HealDelay = 600, DuraDelay = 10000, VampDelay = 500, LoyaltyDelay = 1000;
+        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, LoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, PoisonFieldTime;
 
         public bool MagicShield;
         public byte MagicShieldLv;
@@ -191,6 +204,7 @@ namespace Server.MirObjects
         public bool ActiveBlizzard;
         public byte Reflect;
         public bool UnlockCurse = false;
+
         public bool CanCreateGuild = false;
         public GuildObject MyGuild = null;
         public Rank MyGuildRank = null;
@@ -237,6 +251,8 @@ namespace Server.MirObjects
                 throw new InvalidOperationException("Player.Info not Null.");
 
             info.Player = this;
+            info.Mount = new MountInfo(this);
+
             Connection = connection;
             Info = info;
             Account = Connection.Account;
@@ -992,6 +1008,7 @@ namespace Server.MirObjects
         }
 
 
+
         private static int FreeSpace(IList<UserItem> array)
         {
             int count = 0;
@@ -1090,6 +1107,18 @@ namespace Server.MirObjects
             Connection.SentItemInfo.Add(info);
         }
 
+        public void CheckItem(UserItem item)
+        {
+            CheckItemInfo(item.Info);
+
+            for (int i = 0; i < item.Slots.Length; i++)
+            {
+                if (item.Slots[i] == null) continue;
+
+                CheckItemInfo(item.Slots[i].Info);
+            }
+        }
+
 
         private void SetBind()
         {
@@ -1163,9 +1192,11 @@ namespace Server.MirObjects
                 }
             }
             Spawned();
+
             GetItemInfo();
             GetMapInfo();
             GetUserInfo();
+
             Enqueue(new S.BaseStatsInfo { Stats = Settings.ClassBaseStats[(byte)Class] });
             GetObjectsPassive();
             Enqueue(new S.TimeOfDay { Lights = Envir.Lights });
@@ -1257,7 +1288,8 @@ namespace Server.MirObjects
             {
                 item = Info.Inventory[i];
                 if (item == null) continue;
-                CheckItemInfo(item.Info);
+                //CheckItemInfo(item.Info);
+                CheckItem(item);
             }
 
             for (int i = 0; i < Info.Equipment.Length; i++)
@@ -1265,7 +1297,8 @@ namespace Server.MirObjects
                 item = Info.Equipment[i];
 
                 if (item == null) continue;
-                CheckItemInfo(item.Info);
+                //CheckItemInfo(item.Info);
+                CheckItem(item);
             }
         }
         private void GetUserInfo()
@@ -1389,6 +1422,7 @@ namespace Server.MirObjects
             RefreshLevelStats();
             RefreshBagWeight();
             RefreshEquipmentStats();
+            RefreshSlotStats();
             RefreshItemSetStats();
             RefreshMirSetStats();
             RefreshSkills();
@@ -1486,18 +1520,22 @@ namespace Server.MirObjects
                     CurrentBagWeight = (ushort)Math.Min(ushort.MaxValue, CurrentBagWeight + item.Weight);
             }
         }
+
         private void RefreshEquipmentStats()
         {
             short OldLooks_Weapon = Looks_Weapon;
             short OldLooks_Armour = Looks_Armour;
+            short Old_MountType = MountType;
             byte OldLooks_Wings = Looks_Wings;
             byte OldLight = Light;
+
             Looks_Armour = 0;
             Looks_Weapon = -1;
             Looks_Wings = 0;
             Light = 0;
             CurrentWearWeight = 0;
             CurrentHandWeight = 0;
+            MountType = -1;
 
             HasTeleportRing = false;
             HasProtectionRing = false;
@@ -1517,110 +1555,126 @@ namespace Server.MirObjects
 
             for (int i = 0; i < Info.Equipment.Length; i++)
             {
-                UserItem temp = Info.Equipment[i];
-                if (temp == null) continue;
-                ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
-                if (RealItem.Type == ItemType.Weapon || RealItem.Type == ItemType.Torch)
-                    CurrentHandWeight = (byte)Math.Min(byte.MaxValue, CurrentHandWeight + temp.Weight);
-                else
-                    CurrentWearWeight = (byte)Math.Min(byte.MaxValue, CurrentWearWeight + temp.Weight);
+                UserItem item = Info.Equipment[i];
+                if (item == null) continue;
 
-                if (temp.CurrentDura == 0 && temp.Info.Durability > 0) continue;
+                List<UserItem> items = new List<UserItem> { item };
+                if (item.Slots.Length > 0) items.AddRange(item.Slots);
 
-
-                MinAC = (byte)Math.Min(byte.MaxValue, MinAC + RealItem.MinAC);
-                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + RealItem.MaxAC + temp.AC);
-                MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + RealItem.MinMAC);
-                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + RealItem.MaxMAC + temp.MAC);
-
-                MinDC = (byte)Math.Min(byte.MaxValue, MinDC + RealItem.MinDC);
-                MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + RealItem.MaxDC + temp.DC);
-                MinMC = (byte)Math.Min(byte.MaxValue, MinMC + RealItem.MinMC);
-                MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + RealItem.MaxMC + temp.MC);
-                MinSC = (byte)Math.Min(byte.MaxValue, MinSC + RealItem.MinSC);
-                MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + RealItem.MaxSC + temp.SC);
-
-                Accuracy = (byte)Math.Min(byte.MaxValue, Accuracy + RealItem.Accuracy + temp.Accuracy);
-                Agility = (byte)Math.Min(byte.MaxValue, Agility + RealItem.Agility + temp.Agility);
-
-                MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + RealItem.HP + temp.HP);
-                MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + RealItem.MP + temp.MP);
-
-                ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + temp.AttackSpeed + RealItem.AttackSpeed)));
-                Luck = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, Luck + temp.Luck + RealItem.Luck)));
-
-                MaxBagWeight = (ushort)Math.Max(ushort.MinValue, (Math.Min(ushort.MaxValue, MaxBagWeight + RealItem.BagWeight)));
-                MaxWearWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxWearWeight + RealItem.WearWeight)));
-                MaxHandWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxHandWeight + RealItem.HandWeight)));
-                HPrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, HPrate + RealItem.HPrate));
-                MPrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, MPrate + RealItem.MPrate));
-                Acrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, Acrate + RealItem.MaxAcRate));
-                Macrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, Macrate + RealItem.MaxMacRate));
-                MagicResist = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MagicResist + temp.MagicResist + RealItem.MagicResist)));
-                PoisonResist = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonResist + temp.PoisonResist + RealItem.PoisonResist)));
-                HealthRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HealthRecovery + temp.HealthRecovery + RealItem.HealthRecovery)));
-                SpellRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, SpellRecovery + temp.ManaRecovery + RealItem.SpellRecovery)));
-                PoisonRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonRecovery + temp.PoisonRecovery + RealItem.PoisonRecovery)));
-                CriticalRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalRate + temp.CriticalRate + RealItem.CriticalRate)));
-                CriticalDamage = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalDamage + temp.CriticalDamage + RealItem.CriticalDamage)));
-                Holy = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Holy + RealItem.Holy)));
-                Freezing = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Freezing + temp.Freezing + RealItem.Freezing)));
-                PoisonAttack = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonAttack + temp.PoisonAttack + RealItem.PoisonAttack)));
-                Reflect = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Reflect + RealItem.Reflect)));
-                HpDrainRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HpDrainRate + RealItem.HpDrainRate)));
-
-                if (RealItem.Light > Light) Light = RealItem.Light;
-                if (RealItem.Unique != SpecialItemMode.none)
+                for (int s = 0; s < items.Count; s++)
                 {
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Paralize)) HasParalysisRing = true;
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Teleport)) HasTeleportRing = true;
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Clearring)) HasClearRing = true;
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Protection)) HasProtectionRing = true;
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Revival)) HasRevivalRing = true;
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Muscle)) HasMuscleRing = true;
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Flame))
+                    UserItem temp = items[s];
+                    if (temp == null) continue;
+
+                    ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+                    if (RealItem.Type == ItemType.Weapon || RealItem.Type == ItemType.Torch)
+                        CurrentHandWeight = (byte)Math.Min(byte.MaxValue, CurrentHandWeight + temp.Weight);
+                    else
+                        CurrentWearWeight = (byte)Math.Min(byte.MaxValue, CurrentWearWeight + temp.Weight);
+
+                    if (temp.CurrentDura == 0 && temp.Info.Durability > 0) continue;
+
+
+                    MinAC = (byte)Math.Min(byte.MaxValue, MinAC + RealItem.MinAC);
+                    MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + RealItem.MaxAC + temp.AC);
+                    MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + RealItem.MinMAC);
+                    MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + RealItem.MaxMAC + temp.MAC);
+
+                    MinDC = (byte)Math.Min(byte.MaxValue, MinDC + RealItem.MinDC);
+                    MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + RealItem.MaxDC + temp.DC);
+                    MinMC = (byte)Math.Min(byte.MaxValue, MinMC + RealItem.MinMC);
+                    MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + RealItem.MaxMC + temp.MC);
+                    MinSC = (byte)Math.Min(byte.MaxValue, MinSC + RealItem.MinSC);
+                    MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + RealItem.MaxSC + temp.SC);
+
+                    Accuracy = (byte)Math.Min(byte.MaxValue, Accuracy + RealItem.Accuracy + temp.Accuracy);
+                    Agility = (byte)Math.Min(byte.MaxValue, Agility + RealItem.Agility + temp.Agility);
+
+                    MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + RealItem.HP + temp.HP);
+                    MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + RealItem.MP + temp.MP);
+
+                    ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + temp.AttackSpeed + RealItem.AttackSpeed)));
+                    Luck = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, Luck + temp.Luck + RealItem.Luck)));
+
+                    MaxBagWeight = (ushort)Math.Max(ushort.MinValue, (Math.Min(ushort.MaxValue, MaxBagWeight + RealItem.BagWeight)));
+                    MaxWearWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxWearWeight + RealItem.WearWeight)));
+                    MaxHandWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxHandWeight + RealItem.HandWeight)));
+                    HPrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, HPrate + RealItem.HPrate));
+                    MPrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, MPrate + RealItem.MPrate));
+                    Acrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, Acrate + RealItem.MaxAcRate));
+                    Macrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, Macrate + RealItem.MaxMacRate));
+                    MagicResist = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MagicResist + temp.MagicResist + RealItem.MagicResist)));
+                    PoisonResist = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonResist + temp.PoisonResist + RealItem.PoisonResist)));
+                    HealthRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HealthRecovery + temp.HealthRecovery + RealItem.HealthRecovery)));
+                    SpellRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, SpellRecovery + temp.ManaRecovery + RealItem.SpellRecovery)));
+                    PoisonRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonRecovery + temp.PoisonRecovery + RealItem.PoisonRecovery)));
+                    CriticalRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalRate + temp.CriticalRate + RealItem.CriticalRate)));
+                    CriticalDamage = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalDamage + temp.CriticalDamage + RealItem.CriticalDamage)));
+                    Holy = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Holy + RealItem.Holy)));
+                    Freezing = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Freezing + temp.Freezing + RealItem.Freezing)));
+                    PoisonAttack = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonAttack + temp.PoisonAttack + RealItem.PoisonAttack)));
+                    Reflect = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Reflect + RealItem.Reflect)));
+                    HpDrainRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HpDrainRate + RealItem.HpDrainRate)));
+
+                    if (RealItem.Light > Light) Light = RealItem.Light;
+                    if (RealItem.Unique != SpecialItemMode.none)
                     {
-                        skillsToAdd.Add(Settings.FireRing);
-                        skillsToRemove.Remove(Settings.FireRing);
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Paralize)) HasParalysisRing = true;
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Teleport)) HasTeleportRing = true;
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Clearring)) HasClearRing = true;
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Protection)) HasProtectionRing = true;
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Revival)) HasRevivalRing = true;
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Muscle)) HasMuscleRing = true;
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Flame))
+                        {
+                            skillsToAdd.Add(Settings.FireRing);
+                            skillsToRemove.Remove(Settings.FireRing);
+                        }
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Healing))
+                        {
+                            skillsToAdd.Add(Settings.HealRing);
+                            skillsToRemove.Remove(Settings.HealRing);
+                        }
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Probe)) HasProbeNecklace = true;
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.Skill)) HasSkillNecklace = true;
+                        if (RealItem.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLoss = true;
                     }
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Healing))
+
+                    if (RealItem.Type == ItemType.Armour)
                     {
-                        skillsToAdd.Add(Settings.HealRing);
-                        skillsToRemove.Remove(Settings.HealRing);
+                        Looks_Armour = RealItem.Shape;
+                        Looks_Wings = RealItem.Effect;
                     }
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Probe)) HasProbeNecklace = true;
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.Skill)) HasSkillNecklace = true;
-                    if (RealItem.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLoss = true;
-                }
 
-                if (RealItem.Type == ItemType.Armour)
-                {
-                    Looks_Armour = RealItem.Shape;
-                    Looks_Wings = RealItem.Effect;
-                }
+                    if (RealItem.Type == ItemType.Weapon)
+                        Looks_Weapon = RealItem.Shape;
 
-                if (RealItem.Type == ItemType.Weapon)
-                    Looks_Weapon = RealItem.Shape;
+                    if (RealItem.Type == ItemType.Mount)
+                    {
+                        MountType = RealItem.Shape;
+                        //RealItem.Effect;
+                    }
 
-                if (RealItem.Set == ItemSet.None) continue;
+                    if (RealItem.Set == ItemSet.None) continue;
 
-                //Normal Sets
-                bool sameSetFound = false;
-                foreach (var set in ItemSets.Where(set => set.Set == RealItem.Set && !set.Type.Contains(RealItem.Type)).TakeWhile(set => !set.SetComplete))
-                {
-                    set.Type.Add(RealItem.Type);
-                    set.Count++;
-                    sameSetFound = true;
-                }
+                    //Normal Sets
+                    bool sameSetFound = false;
+                    foreach (var set in ItemSets.Where(set => set.Set == RealItem.Set && !set.Type.Contains(RealItem.Type)).TakeWhile(set => !set.SetComplete))
+                    {
+                        set.Type.Add(RealItem.Type);
+                        set.Count++;
+                        sameSetFound = true;
+                    }
 
-                if (!ItemSets.Any() || !sameSetFound)
-                    ItemSets.Add(new ItemSets { Count = 1, Set = RealItem.Set, Type = new List<ItemType> { RealItem.Type } });
+                    if (!ItemSets.Any() || !sameSetFound)
+                        ItemSets.Add(new ItemSets { Count = 1, Set = RealItem.Set, Type = new List<ItemType> { RealItem.Type } });
 
-                //Mir Set
-                if (RealItem.Set == ItemSet.Mir)
-                {
-                    if (!MirSet.Contains((EquipmentSlot)i))
-                        MirSet.Add((EquipmentSlot)i);
+                    //Mir Set
+                    if (RealItem.Set == ItemSet.Mir)
+                    {
+                        if (!MirSet.Contains((EquipmentSlot)i))
+                            MirSet.Add((EquipmentSlot)i);
+                    }
                 }
             }
 
@@ -1642,8 +1696,17 @@ namespace Server.MirObjects
             {
                 Broadcast(GetUpdateInfo());
             }
+
+            if (Old_MountType != MountType)
+            {
+                RefreshMount();
+            }
         }
 
+        private void RefreshSlotStats()
+        {
+
+        }
         private void RefreshItemSetStats()
         {
             foreach (var s in ItemSets)
@@ -1825,6 +1888,57 @@ namespace Server.MirObjects
             PoisonRecovery = Math.Min(Settings.MaxPoisonRecovery, PoisonRecovery);
             SpellRecovery = Math.Min(Settings.MaxManaRegen, SpellRecovery);
             HpDrainRate = Math.Min((byte)100, HpDrainRate);
+        }
+
+        public void RefreshMount()
+        {
+            if (RidingMount)
+            {
+                if (MountType < 0)
+                {
+                    RidingMount = false;
+                }
+                else if (!Mount.CanRide)
+                {
+                    RidingMount = false;
+                    ReceiveChat("You must have a saddle to ride your mount", ChatType.System);
+                }
+                else if (!Mount.CanMapRide)
+                {
+                    RidingMount = false;
+                    ReceiveChat("You cannot ride on this map", ChatType.System);
+                }
+                else if (!Mount.CanDungeonRide)
+                {
+                    RidingMount = false;
+                    ReceiveChat("You cannot ride here without a bridle", ChatType.System);
+                }
+            }
+            else
+            {
+                RidingMount = false;
+            }
+
+            Broadcast(GetMountInfo());
+            Enqueue(GetMountInfo());
+        }
+
+        public void DecreaseLoyalty(int amount)
+        {
+            if (Envir.Time > LoyaltyTime)
+            {
+                LoyaltyTime = Envir.Time + (Mount.SlowLoyalty ? 2000 : 1000);
+                UserItem item = Info.Equipment[(int)EquipmentSlot.Mount];
+                if (item != null && item.CurrentDura > 0)
+                {
+                    DamageItem(item, amount);
+
+                    if (item.CurrentDura == 0)
+                    {
+                        RefreshMount();
+                    }
+                }
+            }
         }
 
         private void AddTempSkills(IEnumerable<string> skillsToAdd)
@@ -2660,6 +2774,19 @@ namespace Server.MirObjects
                         }
 
                         break;
+
+                    case "RIDE":
+                        if (MountType > -1)
+                        {
+                            RidingMount = !RidingMount;
+
+                            RefreshMount();
+                        }
+                        else
+                            ReceiveChat("You haven't a mount...", ChatType.System);
+
+                        break;
+
                     default:
                         foreach (string command in Envir.CustomCommands)
                         {
@@ -2864,6 +2991,8 @@ namespace Server.MirObjects
 
             if (TradePartner != null) TradeCancel();
 
+            if (RidingMount) DecreaseLoyalty(1);
+
             Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
             Broadcast(new S.ObjectWalk { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
 
@@ -2882,6 +3011,8 @@ namespace Server.MirObjects
         }
         public void Run(MirDirection dir)
         {
+            var steps = 2;
+
             if (!CanMove || !CanWalk)
             {
                 Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
@@ -2907,7 +3038,7 @@ namespace Server.MirObjects
                     Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
                     return;
                 }
-            location = Functions.PointMove(CurrentLocation, dir, 2);
+            location = Functions.PointMove(CurrentLocation, dir, steps);
 
             if (!CurrentMap.ValidPoint(location))
             {
@@ -2927,6 +3058,32 @@ namespace Server.MirObjects
                     return;
                 }
 
+            if (RidingMount)
+            {
+                steps = 3;
+                location = Functions.PointMove(CurrentLocation, dir, steps);
+
+                if (!CurrentMap.ValidPoint(location))
+                {
+                    Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
+                    return;
+                }
+
+                cell = CurrentMap.GetCell(location);
+
+                if (cell.Objects != null)
+                    for (int i = 0; i < cell.Objects.Count; i++)
+                    {
+                        MapObject ob = cell.Objects[i];
+                        if (!ob.Blocking || ob.CellTime >= Envir.Time) continue;
+
+                        Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
+                        return;
+                    }
+
+                DecreaseLoyalty(2);
+            }
+
             if (Hidden && !HasClearRing)
             {
                 Hidden = false;
@@ -2944,11 +3101,11 @@ namespace Server.MirObjects
             if (CheckMovement(location)) return;
 
             CurrentMap.GetCell(CurrentLocation).Remove(this);
-            RemoveObjects(dir, 2);
+            RemoveObjects(dir, steps);
 
             CurrentLocation = location;
             CurrentMap.GetCell(CurrentLocation).Add(this);
-            AddObjects(dir, 2);
+            AddObjects(dir, steps);
 
 
             SafeZoneInfo szi = CurrentMap.GetSafeZone(CurrentLocation);
@@ -2966,7 +3123,9 @@ namespace Server.MirObjects
             CellTime = Envir.Time + 500;
             ActionTime = Envir.Time + MoveDelay;
 
-            _runCounter++;
+            if (!RidingMount)
+                _runCounter++;
+
             if (_runCounter > 10)
             {
                 _runCounter -= 8;
@@ -3194,6 +3353,7 @@ namespace Server.MirObjects
 
             Direction = dir;
 
+            if (RidingMount) DecreaseLoyalty(3);
 
             Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
             Broadcast(new S.ObjectAttack { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation, Spell = spell, Level = level });
@@ -4837,6 +4997,8 @@ namespace Server.MirObjects
 
                 if (temp == null || !temp.ValidPoint(info.Destination)) continue;
 
+                if (RidingMount) RefreshMount();
+
                 CurrentMap.RemoveObject(this);
                 Broadcast(new S.ObjectRemove { ObjectID = ObjectID });
 
@@ -4876,6 +5038,8 @@ namespace Server.MirObjects
 
             GetObjects();
 
+            //RefreshMount();
+
             SafeZoneInfo szi = CurrentMap.GetSafeZone(CurrentLocation);
 
             if (szi != null)
@@ -4907,6 +5071,8 @@ namespace Server.MirObjects
             if (effects) Enqueue(new S.TeleportIn());
 
             if (TradePartner != null) TradeCancel();
+
+            if (RidingMount) RefreshMount();
 
             GetObjectsPassive();
 
@@ -4940,6 +5106,16 @@ namespace Server.MirObjects
             return false;
         }
 
+        private Packet GetMountInfo()
+        {
+            return new S.MountUpdate
+            {
+                ObjectID = ObjectID,
+                RidingMount = RidingMount,
+                MountType = MountType
+            };
+        }
+
 
         private Packet GetUpdateInfo()
         {
@@ -4951,9 +5127,8 @@ namespace Server.MirObjects
                 Light = Light,
                 WingEffect = Looks_Wings
             };
-
-
         }
+
         public override Packet GetInfo()
         {
             return new S.ObjectPlayer
@@ -4975,7 +5150,9 @@ namespace Server.MirObjects
                 Dead = Dead,
                 Hidden = Hidden,
                 Effect = MagicShield ? SpellEffect.MagicShieldUp : SpellEffect.None,
-                WingEffect = Looks_Wings
+                WingEffect = Looks_Wings,
+                MountType = MountType,
+                RidingMount = RidingMount
             };
         }
 
@@ -5337,6 +5514,120 @@ namespace Server.MirObjects
                 Enqueue(p);
                 return;
             }
+            Enqueue(p);
+        }
+
+        public void EquipSlotItem(MirGridType grid, ulong id, int to)
+        {
+            S.EquipSlotItem p = new S.EquipSlotItem { Grid = grid, UniqueID = id, To = to, Success = false };
+
+            UserItem Item = Info.Equipment[(int)EquipmentSlot.Mount];
+
+            if (Item == null || Item.Slots == null)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (to < 0 || to >= Item.Slots.Length)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (Item.Slots[to] != null)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            UserItem[] array;
+            switch (grid)
+            {
+                case MirGridType.Inventory:
+                    array = Info.Inventory;
+                    break;
+                case MirGridType.Storage:
+                    if (NPCPage == null || !String.Equals(NPCPage.Key, NPCObject.StorageKey, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    NPCObject ob = null;
+                    for (int i = 0; i < CurrentMap.NPCs.Count; i++)
+                    {
+                        if (CurrentMap.NPCs[i].ObjectID != NPCID) continue;
+                        ob = CurrentMap.NPCs[i];
+                        break;
+                    }
+
+                    if (ob == null || !Functions.InRange(ob.CurrentLocation, CurrentLocation, Globals.DataRange))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    array = Account.Storage;
+                    break;
+                default:
+                    Enqueue(p);
+                    return;
+            }
+
+
+            int index = -1;
+            UserItem temp = null;
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                temp = array[i];
+                if (temp == null || temp.UniqueID != id) continue;
+                index = i;
+                break;
+            }
+
+            if (temp == null || index == -1)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (temp.Info.Type != ItemType.Mask && temp.Info.Type != ItemType.Reins && temp.Info.Type != ItemType.Ribbon && temp.Info.Type != ItemType.Saddle && temp.Info.Type != ItemType.Bells)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if ((temp.SoulBoundId != -1) && (temp.SoulBoundId != Info.Index))
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (CanUseItem(temp))
+            {
+                if (temp.Info.NeedIdentify && !temp.Identified)
+                {
+                    temp.Identified = true;
+                    Enqueue(new S.RefreshItem { Item = temp });
+                }
+                //if ((temp.Info.BindOnEquip) && (temp.SoulBoundId == -1))
+                //{
+                //    temp.SoulBoundId = Info.Index;
+                //    Enqueue(new S.RefreshItem { Item = temp });
+                //}
+                //if (UnlockCurse && Info.Equipment[to].Cursed)
+                //    UnlockCurse = false;
+
+                Item.Slots[to] = temp;
+                array[index] = null;
+
+                p.Success = true;
+                Enqueue(p);
+                RefreshStats();
+
+                return;
+            }
+
             Enqueue(p);
         }
 
@@ -5824,6 +6115,29 @@ namespace Server.MirObjects
                 case ItemType.Script:
                     CallDefaultNPC(DefaultNPCType.UseItem, item.Info.Shape);
                     break;
+                case ItemType.Food:
+                    temp = Info.Equipment[(int)EquipmentSlot.Mount];
+                    if (temp == null || temp.MaxDura == temp.CurrentDura)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    
+                    switch (item.Info.Shape)
+                    {
+                        case 0:
+                            temp.MaxDura = (ushort)Math.Max(0, temp.MaxDura - Math.Min(1000, temp.MaxDura - (temp.CurrentDura / 8)));
+                            break;
+                    }
+
+                    temp.CurrentDura = (ushort)Math.Min(temp.MaxDura, temp.CurrentDura + 5000);
+                    temp.DuraChanged = false;
+
+                    ReceiveChat("Your mount has been fed.", ChatType.Hint);
+                    Enqueue(new S.ItemRepaired { UniqueID = temp.UniqueID, MaxDura = temp.MaxDura, CurrentDura = temp.CurrentDura });
+
+                    RefreshStats();
+                    break;
                 default:
                     return;
             }
@@ -6216,9 +6530,12 @@ namespace Server.MirObjects
 
         public void GainItem(UserItem item)
         {
-            CheckItemInfo(item.Info);
+            //CheckItemInfo(item.Info);
+            CheckItem(item);
 
-            Enqueue(new S.GainedItem { Item = item.Clone() }); //Cloned because we are probably going to change the amount.
+            UserItem clonedItem = item.Clone();
+
+            Enqueue(new S.GainedItem { Item = clonedItem }); //Cloned because we are probably going to change the amount.
 
             AddItem(item);
             RefreshBagWeight();
@@ -6448,6 +6765,17 @@ namespace Server.MirObjects
                         return false;
                     }
                     break;
+                case ItemType.Saddle:
+                case ItemType.Ribbon:
+                case ItemType.Bells:
+                case ItemType.Mask:
+                case ItemType.Reins:
+                    if (Info.Equipment[(int)EquipmentSlot.Mount] == null)
+                    {
+                        ReceiveChat("Can only be used with a mount", ChatType.System);
+                        return false;
+                    }
+                    break;
             }
 
             //if (item.Info.Type == ItemType.Book)
@@ -6458,7 +6786,6 @@ namespace Server.MirObjects
         }
         private bool CanEquipItem(UserItem item, int slot)
         {
-
             switch ((EquipmentSlot)slot)
             {
                 case EquipmentSlot.Weapon:
@@ -6508,6 +6835,10 @@ namespace Server.MirObjects
                     break;
                 case EquipmentSlot.Stone:
                     if (item.Info.Type != ItemType.Stone)
+                        return false;
+                    break;
+                case EquipmentSlot.Mount:
+                    if (item.Info.Type != ItemType.Mount)
                         return false;
                     break;
                 default:
@@ -6892,7 +7223,8 @@ namespace Server.MirObjects
             {
                 UserItem item = Account.Storage[i];
                 if (item == null) continue;
-                CheckItemInfo(item.Info);
+                //CheckItemInfo(item.Info);
+                CheckItem(item);
             }
 
             Enqueue(new S.UserStorage { Storage = Account.Storage }); // Should be no alter before being sent.
@@ -7005,7 +7337,10 @@ namespace Server.MirObjects
                 }
 
                 for (int i = 0; i < listings.Count; i++)
-                    CheckItemInfo(listings[i].Item.Info);
+                {
+                    //CheckItemInfo(listings[i].Item.Info);
+                    CheckItem(listings[i].Item);
+                }
 
                 PageSent = page;
                 Enqueue(new S.NPCMarketPage { Listings = listings });
@@ -7037,7 +7372,10 @@ namespace Server.MirObjects
             }
 
             for (int i = 0; i < listings.Count; i++)
-                CheckItemInfo(listings[i].Item.Info);
+            {
+                //CheckItemInfo(listings[i].Item.Info);
+                CheckItem(listings[i].Item);
+            }
 
             Enqueue(new S.NPCMarket { Listings = listings, Pages = (Search.Count - 1) / 10 + 1, UserMode = UserMatch });
 
@@ -7244,7 +7582,8 @@ namespace Server.MirObjects
                 UserItem u = player.Info.Equipment[i];
                 if (u == null) continue;
 
-                CheckItemInfo(u.Info);
+                //CheckItemInfo(u.Info);
+                CheckItem(u);
             }
             string guildname = "";
             string guildrank = "";
@@ -8257,7 +8596,8 @@ namespace Server.MirObjects
                     MyGuild.StoredItems[to] = new GuildStorageItem() { Item = Info.Inventory[from], UserId = Info.Index };
                     Info.Inventory[from] = null;
                     RefreshBagWeight();
-                    MyGuild.SendItemInfo(MyGuild.StoredItems[to].Item.Info);
+                    //MyGuild.SendItemInfo(MyGuild.StoredItems[to].Item);
+                    MyGuild.SendItemInfo(MyGuild.StoredItems[to].Item);
                     MyGuild.SendServerPacket(new S.GuildStorageItemChange() { Type = 0, User = Info.Index, Item = MyGuild.StoredItems[to], To = to, From = from });
                     MyGuild.NeedSave = true;
                     break;
@@ -8308,7 +8648,8 @@ namespace Server.MirObjects
                         if (MyGuild.StoredItems[i] == null) continue;
                         UserItem item = MyGuild.StoredItems[i].Item;
                         if (item == null) continue;
-                        CheckItemInfo(item.Info);
+                        //CheckItemInfo(item.Info);
+                        CheckItem(item);
                     }
                     Enqueue(new S.GuildStorageList() { Items = MyGuild.StoredItems });
                     break;
@@ -8743,7 +9084,8 @@ namespace Server.MirObjects
                 UserItem u = Info.Trade[i];
                 if (u == null) continue;
 
-                TradePartner.CheckItemInfo(u.Info);
+                //TradePartner.CheckItemInfo(u.Info);
+                TradePartner.CheckItem(u);
             }
 
             TradePartner.Enqueue(new S.TradeItem { TradeItems = Info.Trade });

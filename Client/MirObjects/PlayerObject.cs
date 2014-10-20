@@ -28,8 +28,8 @@ namespace Client.MirObjects
         public MirClass Class;
         public byte Hair;
 
-        public MLibrary WeaponLibrary1, WeaponLibrary2, HairLibrary, WingLibrary;
-        public int Armour, Weapon, ArmourOffSet, HairOffSet, WeaponOffSet, WingOffset;
+        public MLibrary WeaponLibrary1, WeaponLibrary2, HairLibrary, WingLibrary, MountLibrary;
+        public int Armour, Weapon, ArmourOffSet, HairOffSet, WeaponOffSet, WingOffset, MountOffset;
 
         public int DieSound, FlinchSound, AttackSound;
 
@@ -69,8 +69,13 @@ namespace Client.MirObjects
 
         public string GuildName;
         public string GuildRankName;
-        
-        public PlayerObject(uint objectID) : base(objectID)
+
+        public short MountType;
+        public long MountTime;
+        public bool RidingMount;
+
+        public PlayerObject(uint objectID)
+            : base(objectID)
         {
             Frames = FrameSet.Players;
         }
@@ -101,7 +106,10 @@ namespace Client.MirObjects
             Hidden = info.Hidden;
 
             WingEffect = info.WingEffect;
-            
+
+            MountType = info.MountType;
+            RidingMount = info.RidingMount;
+
             SetLibraries();
 
             if (Dead) ActionFeed.Add(new QueuedAction { Action = MirAction.Dead, Direction = Direction, Location = CurrentLocation });
@@ -116,6 +124,24 @@ namespace Client.MirObjects
             Light = info.Light;
             WingEffect = info.WingEffect;
             SetLibraries();
+        }
+
+        public void MountUpdate(S.MountUpdate info)
+        {
+            MountType = info.MountType;
+            RidingMount = info.RidingMount;
+
+            QueuedAction action = new QueuedAction { Action = MirAction.Standing, Direction = Direction, Location = CurrentLocation };
+            ActionFeed.Insert(0, action);
+
+            MountTime = CMain.Time;
+
+            if (MountType < 0)
+                GameScene.Scene.MountDialog.Hide();
+
+            SetLibraries();
+
+            PlayMountSound();
         }
 
 
@@ -191,7 +217,7 @@ namespace Client.MirObjects
                     else
                         WeaponLibrary2 = Index < Libraries.ARWeapons.Length ? Libraries.ARWeapons[Index] : null;
 
-                        WeaponLibrary1 = null;
+                    WeaponLibrary1 = null;
                 }
                 else
                 {
@@ -203,7 +229,7 @@ namespace Client.MirObjects
                     WeaponLibrary2 = null;
                 }
 
-                
+
 
                 ArmourOffSet = Gender == MirGender.Male ? 0 : AltAnim ? 352 : 808;
                 HairOffSet = Gender == MirGender.Male ? 0 : AltAnim ? 352 : 808;
@@ -271,6 +297,7 @@ namespace Client.MirObjects
                 HairOffSet = Gender == MirGender.Male ? 0 : 512;
                 WeaponOffSet = Gender == MirGender.Male ? 0 : 512;
                 WingOffset = Gender == MirGender.Male ? 0 : 840;
+                MountOffset = 0;
             }
             else
             {
@@ -296,6 +323,11 @@ namespace Client.MirObjects
 
             if (CurrentAction == MirAction.Harvest)
                 WeaponLibrary1 = 1 < Libraries.CWeapons.Length ? Libraries.CWeapons[1] : null;
+
+            if (MountType > -1)
+                MountLibrary = MountType < Libraries.Mounts.Length ? Libraries.Mounts[MountType] : null;
+            else
+                MountLibrary = null;
 
             DieSound = Gender == MirGender.Male ? SoundList.MaleDie : SoundList.FemaleDie;
             FlinchSound = Gender == MirGender.Male ? SoundList.MaleFlinch : SoundList.FemaleFlinch;
@@ -327,6 +359,8 @@ namespace Client.MirObjects
             {
                 case MirAction.Walking:
                 case MirAction.Running:
+                case MirAction.MountWalking:
+                case MirAction.MountRunning:
                 case MirAction.Pushed:
                 case MirAction.DashL:
                 case MirAction.DashR:
@@ -336,7 +370,11 @@ namespace Client.MirObjects
                         Movement = CurrentLocation;
                         break;
                     }
-                    int i = CurrentAction == MirAction.Running ? 2 : 1;
+
+                    var i = 0;
+                    if (CurrentAction == MirAction.MountRunning) i = 3;
+                    else if (CurrentAction == MirAction.Running) i = 2;
+                    else i = 1;
 
                     Movement = Functions.PointMove(CurrentLocation, Direction, CurrentAction == MirAction.Pushed ? 0 : -i);
 
@@ -391,7 +429,7 @@ namespace Client.MirObjects
             DrawY = Movement.Y > CurrentLocation.Y ? Movement.Y : CurrentLocation.Y;
 
             DrawLocation = new Point((Movement.X - User.Movement.X + MapControl.OffSetX) * MapControl.CellWidth, (Movement.Y - User.Movement.Y + MapControl.OffSetY) * MapControl.CellHeight);
-  
+
             if (this != User)
             {
                 DrawLocation.Offset(User.OffSetMove);
@@ -439,12 +477,14 @@ namespace Client.MirObjects
         }
         public virtual void SetAction()
         {
-            if (NextAction != null &&   !GameScene.CanMove)
+            if (NextAction != null && !GameScene.CanMove)
             {
                 switch (NextAction.Action)
                 {
                     case MirAction.Walking:
                     case MirAction.Running:
+                    case MirAction.MountWalking:
+                    case MirAction.MountRunning:
                     case MirAction.Pushed:
                     case MirAction.DashL:
                     case MirAction.DashR:
@@ -458,17 +498,56 @@ namespace Client.MirObjects
                 return;
             }
 
+            if (ActionFeed.Any())
+                if (User.RidingMount)
+                    switch (ActionFeed.First().Action)
+                    {
+                        case MirAction.Spell:
+                        //case MirAction.Attack1:
+                        case MirAction.Attack2:
+                        case MirAction.Attack3:
+                        case MirAction.Attack4:
+                        case MirAction.AttackRange1:
+                        case MirAction.AttackRange2:
+                        case MirAction.Mine:
+                        case MirAction.Harvest:
+                            ActionFeed.RemoveAt(0);
+                            return;
+                    }
+
 
             if (ActionFeed.Count == 0)
             {
                 CurrentAction = CMain.Time > BlizzardFreezeTime ? MirAction.Standing : MirAction.Stance2; //ArcherTest
 
+                if (RidingMount)
+                {
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            CurrentAction = MirAction.MountStanding;
+                            break;
+                        case MirAction.Walking:
+                            CurrentAction = MirAction.MountWalking;
+                            break;
+                        case MirAction.Running:
+                            CurrentAction = MirAction.MountRunning;
+                            break;
+                        case MirAction.Struck:
+                            CurrentAction = MirAction.MountStruck;
+                            break;
+                        case MirAction.Attack1:
+                            CurrentAction = MirAction.MountAttack;
+                            break;
+                    }
+                }
+
                 if (CurrentAction == MirAction.Standing)
                 {
-                    if(Class == MirClass.Archer && HasClassWeapon)
+                    if (Class == MirClass.Archer && HasClassWeapon)
                         CurrentAction = MirAction.Standing;
                     else
-                    CurrentAction = CMain.Time > StanceTime ? MirAction.Standing : MirAction.Stance;
+                        CurrentAction = CMain.Time > StanceTime ? MirAction.Standing : MirAction.Stance;
                 }
 
                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
@@ -494,7 +573,31 @@ namespace Client.MirObjects
                 QueuedAction action = ActionFeed[0];
                 ActionFeed.RemoveAt(0);
 
+
                 CurrentAction = action.Action;
+
+                if (RidingMount)
+                {
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Standing:
+                            CurrentAction = MirAction.MountStanding;
+                            break;
+                        case MirAction.Walking:
+                            CurrentAction = MirAction.MountWalking;
+                            break;
+                        case MirAction.Running:
+                            CurrentAction = MirAction.MountRunning;
+                            break;
+                        case MirAction.Struck:
+                            CurrentAction = MirAction.MountStruck;
+                            break;
+                        case MirAction.Attack1:
+                            CurrentAction = MirAction.MountAttack;
+                            break;
+                    }
+                }
+
                 CurrentLocation = action.Location;
                 MirDirection olddirection = Direction;
                 Direction = action.Direction;
@@ -504,12 +607,18 @@ namespace Client.MirObjects
                 {
                     case MirAction.Walking:
                     case MirAction.Running:
+                    case MirAction.MountWalking:
+                    case MirAction.MountRunning:
                     case MirAction.Pushed:
                     case MirAction.DashL:
                     case MirAction.DashR:
-                        int i = CurrentAction == MirAction.Running ? 2 : 1;
-                        temp = Functions.PointMove(CurrentLocation, Direction, CurrentAction == MirAction.Pushed ? 0 : -i);
-                     
+                        var steps = 0;
+                        if (CurrentAction == MirAction.MountRunning) steps = 3;
+                        else if (CurrentAction == MirAction.Running) steps = 2;
+                        else steps = 1;
+
+                        temp = Functions.PointMove(CurrentLocation, Direction, CurrentAction == MirAction.Pushed ? 0 : -steps);
+
                         break;
                     default:
                         temp = CurrentLocation;
@@ -525,7 +634,7 @@ namespace Client.MirObjects
                     GameScene.Scene.MapControl.AddObject(this);
                 }
 
-                
+
 
                 switch (CurrentAction)
                 {
@@ -539,7 +648,8 @@ namespace Client.MirObjects
                         Frames.Frames.TryGetValue(MirAction.Running, out Frame);
                         break;
                     case MirAction.DashFail:
-                        Frames.Frames.TryGetValue(MirAction.Standing, out Frame);
+                        Frames.Frames.TryGetValue(RidingMount ? MirAction.MountStanding : MirAction.Standing, out Frame);
+                        //Frames.Frames.TryGetValue(MirAction.Standing, out Frame);
                         //CanSetAction = false;
                         break;
                     case MirAction.Attack4:
@@ -626,17 +736,20 @@ namespace Client.MirObjects
                             //CanSetAction = false;
                             break;
                         case MirAction.Standing:
-                            Network.Enqueue(new C.Turn {Direction = Direction});
+                        case MirAction.MountStanding:
+                            Network.Enqueue(new C.Turn { Direction = Direction });
                             MapControl.NextAction = CMain.Time + 2500;
                             break;
                         case MirAction.Walking:
-                            Network.Enqueue(new C.Walk {Direction = Direction});
+                        case MirAction.MountWalking:
+                            Network.Enqueue(new C.Walk { Direction = Direction });
                             GameScene.Scene.MapControl.FloorValid = false;
                             GameScene.CanRun = true;
                             MapControl.NextAction = CMain.Time + 2500;
                             break;
                         case MirAction.Running:
-                            Network.Enqueue(new C.Run {Direction = Direction});
+                        case MirAction.MountRunning:
+                            Network.Enqueue(new C.Run { Direction = Direction });
                             GameScene.Scene.MapControl.FloorValid = false;
                             MapControl.NextAction = CMain.Time + 2500;
                             break;
@@ -651,10 +764,11 @@ namespace Client.MirObjects
                             break;
                         case MirAction.Mine:
                             Network.Enqueue(new C.Attack { Direction = Direction, Spell = Spell.None });
-                            GameScene.AttackTime = CMain.Time + (1400 - Math.Min(370,(User.Level * 5)));
+                            GameScene.AttackTime = CMain.Time + (1400 - Math.Min(370, (User.Level * 5)));
                             MapControl.NextAction = CMain.Time + 2500;
                             break;
                         case MirAction.Attack1:
+                        case MirAction.MountAttack:
                             ClientMagic magic;
                             if (GameScene.Slaying && TargetObject != null)
                                 Spell = Spell.Slaying;
@@ -734,27 +848,27 @@ namespace Client.MirObjects
                         case MirAction.AttackRange1: //ArcherTest
                             GameScene.AttackTime = CMain.Time + User.AttackSpeed + 200;
 
-                            uint targetID = (uint) action.Params[0];
-                            Point location = (Point) action.Params[1];
+                            uint targetID = (uint)action.Params[0];
+                            Point location = (Point)action.Params[1];
 
                             Network.Enqueue(new C.RangeAttack { Direction = Direction, Location = CurrentLocation, TargetID = targetID, TargetLocation = location });
                             break;
                         case MirAction.AttackRange2:
                         case MirAction.Spell:
-                            Spell = (Spell) action.Params[0];
+                            Spell = (Spell)action.Params[0];
                             targetID = (uint)action.Params[1];
                             location = (Point)action.Params[2];
-                            Network.Enqueue(new C.Magic {Spell = Spell, Direction = Direction, TargetID = targetID, Location = location});
+                            Network.Enqueue(new C.Magic { Spell = Spell, Direction = Direction, TargetID = targetID, Location = location });
 
                             GameScene.SpellTime = Spell == Spell.FlameField ? CMain.Time + 2500 : CMain.Time + 1800;
 
                             MapControl.NextAction = CMain.Time + 2500;
                             break;
                         case MirAction.Harvest:
-                            Network.Enqueue(new C.Harvest {Direction = Direction});
+                            Network.Enqueue(new C.Harvest { Direction = Direction });
                             MapControl.NextAction = CMain.Time + 2500;
                             break;
-                        
+
                     }
                 }
 
@@ -778,6 +892,8 @@ namespace Client.MirObjects
                         break;
                     case MirAction.Walking:
                     case MirAction.Running:
+                    case MirAction.MountWalking:
+                    case MirAction.MountRunning:
                         GameScene.Scene.Redraw();
                         break;
                     case MirAction.Attack1:
@@ -790,30 +906,30 @@ namespace Client.MirObjects
                         switch (Spell)
                         {
                             case Spell.Slaying:
-                                SoundManager.PlaySound(20000 + (ushort) Spell*10 + (Gender == MirGender.Male ? 0 : 1));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 + (Gender == MirGender.Male ? 0 : 1));
                                 break;
                             case Spell.DoubleSlash:
-                                FrameInterval = FrameInterval*5/10; //50% Faster Animation
+                                FrameInterval = FrameInterval * 5 / 10; //50% Faster Animation
                                 EffectFrameInterval = EffectFrameInterval * 5 / 10;
-                                action = new QueuedAction {Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>()};
+                                action = new QueuedAction { Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>() };
                                 action.Params.Add(Spell);
                                 ActionFeed.Insert(0, action);
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
                             case Spell.Thrusting:
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
                             case Spell.HalfMoon:
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
-                                
+
                             case Spell.TwinDrakeBlade:
-                                FrameInterval = FrameInterval*7/10; //70% Faster Animation
+                                FrameInterval = FrameInterval * 7 / 10; //70% Faster Animation
                                 EffectFrameInterval = EffectFrameInterval * 7 / 10;
-                                action = new QueuedAction {Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>()};
+                                action = new QueuedAction { Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>() };
                                 action.Params.Add(Spell);
                                 ActionFeed.Insert(0, action);
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             case Spell.CrossHalfMoon:
@@ -826,7 +942,7 @@ namespace Client.MirObjects
                         }
                         break;
                     case MirAction.Attack4:
-                        Spell = (Spell) action.Params[0];
+                        Spell = (Spell)action.Params[0];
                         switch (Spell)
                         {
                             case Spell.DoubleSlash:
@@ -841,6 +957,7 @@ namespace Client.MirObjects
                         }
                         break;
                     case MirAction.Struck:
+                    case MirAction.MountStruck:
                         uint attackerID = (uint)action.Params[0];
                         StruckWeapon = -2;
                         for (int i = 0; i < MapControl.Objects.Count; i++)
@@ -848,7 +965,7 @@ namespace Client.MirObjects
                             MapObject ob = MapControl.Objects[i];
                             if (ob.ObjectID != attackerID) continue;
                             if (ob.Race != ObjectType.Player) break;
-                            PlayerObject player = ((PlayerObject) ob);
+                            PlayerObject player = ((PlayerObject)ob);
                             StruckWeapon = player.Weapon;
                             if (player.Class != MirClass.Assassin || StruckWeapon == -1) break;
                             StruckWeapon = 1;
@@ -863,7 +980,7 @@ namespace Client.MirObjects
                             TargetID = (uint)action.Params[0];
                             TargetPoint = (Point)action.Params[1];
                             Spell = (Spell)action.Params[2];
-                        }                    
+                        }
                         break;
                     case MirAction.AttackRange2:
                     case MirAction.Spell:
@@ -900,7 +1017,7 @@ namespace Client.MirObjects
 
                             case Spell.Repulsion:
                                 Effects.Add(new Effect(Libraries.Magic, 900, 6, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -918,7 +1035,7 @@ namespace Client.MirObjects
 
                             case Spell.Poisoning:
                                 Effects.Add(new Effect(Libraries.Magic, 600, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort) Spell*10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -936,7 +1053,7 @@ namespace Client.MirObjects
 
                             case Spell.HellFire:
                                 Effects.Add(new Effect(Libraries.Magic, 920, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -952,7 +1069,7 @@ namespace Client.MirObjects
                             #region SoulFireBall
 
                             case Spell.SoulFireBall:
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -961,7 +1078,7 @@ namespace Client.MirObjects
 
                             case Spell.SummonSkeleton:
                                 Effects.Add(new Effect(Libraries.Magic, 1500, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -979,7 +1096,7 @@ namespace Client.MirObjects
 
                             case Spell.Hiding:
                                 Effects.Add(new Effect(Libraries.Magic, 1520, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -997,7 +1114,7 @@ namespace Client.MirObjects
 
                             case Spell.FireBang:
                                 Effects.Add(new Effect(Libraries.Magic, 1650, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1006,7 +1123,7 @@ namespace Client.MirObjects
 
                             case Spell.FireWall:
                                 Effects.Add(new Effect(Libraries.Magic, 1620, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1015,7 +1132,7 @@ namespace Client.MirObjects
 
                             case Spell.TrapHexagon:
                                 Effects.Add(new Effect(Libraries.Magic, 1380, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1033,7 +1150,7 @@ namespace Client.MirObjects
 
                             case Spell.FireBurst:
                                 Effects.Add(new Effect(Libraries.Magic2, 2320, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1059,7 +1176,7 @@ namespace Client.MirObjects
 
                             case Spell.UltimateEnhancer:
                                 Effects.Add(new Effect(Libraries.Magic2, 160, 15, 1000, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1068,7 +1185,7 @@ namespace Client.MirObjects
 
                             case Spell.FrostCrunch:
                                 Effects.Add(new Effect(Libraries.Magic2, 400, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1086,7 +1203,7 @@ namespace Client.MirObjects
 
                             case Spell.FlameField:
                                 MapControl.Effects.Add(new Effect(Libraries.Magic2, 910, 23, 1800, CurrentLocation));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1104,7 +1221,7 @@ namespace Client.MirObjects
 
                             case Spell.Trap:
                                 Effects.Add(new Effect(Libraries.Magic2, 2230 + ((int)Direction * 10), 6, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1122,7 +1239,7 @@ namespace Client.MirObjects
 
                             case Spell.SwiftFeet:
                                 Effects.Add(new Effect(Libraries.Magic2, 2230, 15, 1000, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1131,7 +1248,7 @@ namespace Client.MirObjects
 
                             case Spell.LightBody:
                                 Effects.Add(new Effect(Libraries.Magic2, 2470, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1140,7 +1257,7 @@ namespace Client.MirObjects
 
                             case Spell.PoisonSword:
                                 Effects.Add(new Effect(Libraries.Magic2, 2490 + ((int)Direction * 10), 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1158,7 +1275,7 @@ namespace Client.MirObjects
 
                             case Spell.MassHealing:
                                 Effects.Add(new Effect(Libraries.Magic, 1790, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1167,7 +1284,7 @@ namespace Client.MirObjects
 
                             case Spell.IceStorm:
                                 Effects.Add(new Effect(Libraries.Magic, 3840, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1176,7 +1293,7 @@ namespace Client.MirObjects
 
                             case Spell.MagicShield:
                                 Effects.Add(new Effect(Libraries.Magic, 3880, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1185,7 +1302,7 @@ namespace Client.MirObjects
 
                             case Spell.TurnUndead:
                                 Effects.Add(new Effect(Libraries.Magic, 3920, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1194,7 +1311,7 @@ namespace Client.MirObjects
 
                             case Spell.Revelation:
                                 Effects.Add(new Effect(Libraries.Magic, 3960, 20, 1200, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1203,7 +1320,7 @@ namespace Client.MirObjects
 
                             case Spell.ProtectionField:
                                 Effects.Add(new Effect(Libraries.Magic2, 1520, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1212,7 +1329,7 @@ namespace Client.MirObjects
 
                             case Spell.Rage:
                                 Effects.Add(new Effect(Libraries.Magic2, 1510, 10, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1221,7 +1338,7 @@ namespace Client.MirObjects
 
                             case Spell.Vampirism:
                                 Effects.Add(new Effect(Libraries.Magic2, 1040, 7, Frame.Count * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -1230,7 +1347,7 @@ namespace Client.MirObjects
 
                             case Spell.LionRoar:
                                 Effects.Add(new Effect(Libraries.Magic2, 710, 20, 1200, this));
-                                SoundManager.PlaySound(20000 + (ushort) Spell*10 + (Gender == MirGender.Male ? 0 : 1));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 + (Gender == MirGender.Male ? 0 : 1));
                                 break;
 
                             #endregion
@@ -1299,7 +1416,7 @@ namespace Client.MirObjects
             }
 
             GameScene.Scene.MapControl.TextureValid = false;
-            
+
             NextMotion = CMain.Time + FrameInterval;
             NextMotion2 = CMain.Time + EffectFrameInterval;
 
@@ -1308,6 +1425,7 @@ namespace Client.MirObjects
             switch (CurrentAction)
             {
                 case MirAction.Struck:
+                case MirAction.MountStruck:
                     if (ShieldEffect != null)
                     {
                         ShieldEffect.Clear();
@@ -1332,6 +1450,8 @@ namespace Client.MirObjects
             {
                 case MirAction.Walking:
                 case MirAction.Running:
+                case MirAction.MountWalking:
+                case MirAction.MountRunning:
                     if (!GameScene.CanMove) return;
 
                     GameScene.Scene.MapControl.TextureValid = false;
@@ -1340,11 +1460,11 @@ namespace Client.MirObjects
 
                     if (SkipFrames) UpdateFrame();
 
-                    
+
 
                     if (UpdateFrame() >= Frame.Count)
                     {
-                       
+
 
                         FrameIndex = Frame.Count - 1;
                         SetAction();
@@ -1357,7 +1477,7 @@ namespace Client.MirObjects
                                 PlayStepSound();
                         }
                     }
-                    
+
                     if (WingEffect > 0 && CMain.Time >= NextMotion2)
                     {
                         if (this == User) GameScene.Scene.MapControl.TextureValid = false;
@@ -1415,9 +1535,10 @@ namespace Client.MirObjects
                         SetAction();
                     }
 
-                    if (FrameIndex < 0) EffectFrameIndex = 0;            
+                    if (FrameIndex < 0) EffectFrameIndex = 0;
                     break;
                 case MirAction.Standing:
+                case MirAction.MountStanding:
                 case MirAction.DashFail:
                 case MirAction.Harvest:
                 case MirAction.Stance:
@@ -1455,13 +1576,14 @@ namespace Client.MirObjects
                 case MirAction.Attack2:
                 case MirAction.Attack3:
                 case MirAction.Attack4:
+                case MirAction.MountAttack:
                 case MirAction.Mine:
                     if (CMain.Time >= NextMotion)
                     {
                         GameScene.Scene.MapControl.TextureValid = false;
 
                         if (SkipFrames) UpdateFrame();
-                        
+
                         if (UpdateFrame() >= Frame.Count)
                         {
                             //if (ActionFeed.Count == 0)
@@ -1495,9 +1617,9 @@ namespace Client.MirObjects
                     if (CMain.Time >= NextMotion)
                     {
                         GameScene.Scene.MapControl.TextureValid = false;
-                        
+
                         if (SkipFrames) UpdateFrame();
-                        
+
                         if (UpdateFrame() >= Frame.Count)
                         {
                             FrameIndex = Frame.Count - 1;
@@ -1517,7 +1639,7 @@ namespace Client.MirObjects
                                             SoundManager.PlaySound(20000 + 121 * 10 + 5);
                                             break;
                                     }
-                                    
+
                                     break;
                                 case 5:
                                     missile = CreateProjectile(1030, Libraries.Magic3, true, 5, 30, 5);
@@ -1595,7 +1717,7 @@ namespace Client.MirObjects
                         else
                         {
                             NextMotion += FrameInterval;
-                            
+
                         }
                     }
                     if (WingEffect > 0 && CMain.Time >= NextMotion2)
@@ -1609,9 +1731,10 @@ namespace Client.MirObjects
                         else
                             NextMotion2 += EffectFrameInterval;
                     }
-                    break;              
+                    break;
 
                 case MirAction.Struck:
+                case MirAction.MountStruck:
                     if (CMain.Time >= NextMotion)
                     {
                         GameScene.Scene.MapControl.TextureValid = false;
@@ -1689,7 +1812,7 @@ namespace Client.MirObjects
                                             {
                                                 if (missile.Target.CurrentAction == MirAction.Dead) return;
                                                 missile.Target.Effects.Add(new Effect(Libraries.Magic, 570, 10, 600, missile.Target));
-                                                SoundManager.PlaySound(20000 + (ushort) Spell.GreatFireBall*10 + 2);
+                                                SoundManager.PlaySound(20000 + (ushort)Spell.GreatFireBall * 10 + 2);
                                             };
                                         }
                                         break;
@@ -1722,7 +1845,7 @@ namespace Client.MirObjects
                                     #region Poisoning
 
                                     case Spell.Poisoning:
-                                        SoundManager.PlaySound(20000 + (ushort) Spell*10 + 1);
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 1);
                                         if (ob != null)
                                             ob.Effects.Add(new Effect(Libraries.Magic, 770, 10, 1000, ob));
                                         break;
@@ -1821,7 +1944,7 @@ namespace Client.MirObjects
                                     #region MassHiding
 
                                     case Spell.MassHiding:
-                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                         missile = CreateProjectile(1160, Libraries.Magic, true, 3, 30, 7);
                                         missile.Explode = true;
 
@@ -1837,7 +1960,7 @@ namespace Client.MirObjects
                                     #region SoulShield
 
                                     case Spell.SoulShield:
-                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                         missile = CreateProjectile(1160, Libraries.Magic, true, 3, 30, 7);
                                         missile.Explode = true;
 
@@ -1860,7 +1983,7 @@ namespace Client.MirObjects
                                         missile.Complete += (o, e) =>
                                         {
                                             MapControl.Effects.Add(new Effect(Libraries.Magic, 1340, 15, 1200, TargetPoint));
-                                            SoundManager.PlaySound(20000 + (ushort) Spell.BlessedArmour*10 + 1);
+                                            SoundManager.PlaySound(20000 + (ushort)Spell.BlessedArmour * 10 + 1);
                                         };
                                         break;
 
@@ -1920,7 +2043,7 @@ namespace Client.MirObjects
 
                                     case Spell.FlameDisruptor:
 
-                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10);
 
                                         if (ob == null)
                                             MapControl.Effects.Add(new Effect(Libraries.Magic2, 140, 10, 600, TargetPoint));
@@ -1986,7 +2109,7 @@ namespace Client.MirObjects
 
                                     case Spell.Lightning:
                                         Effects.Add(new Effect(Libraries.Magic, 970 + (int)Direction * 20, 6, Frame.Count * FrameInterval, this));
-                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                         break;
 
                                     #endregion
@@ -2015,7 +2138,7 @@ namespace Client.MirObjects
                                     #region PoisonField
 
                                     case Spell.PoisonField:
-                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 );
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                         break;
 
                                     #endregion
@@ -2055,7 +2178,7 @@ namespace Client.MirObjects
                         else
                         {
                             NextMotion += FrameInterval;
-                            
+
                         }
                     }
                     if (WingEffect > 0 && CMain.Time >= NextMotion2)
@@ -2074,7 +2197,7 @@ namespace Client.MirObjects
                     if (CMain.Time >= NextMotion)
                     {
                         GameScene.Scene.MapControl.TextureValid = false;
-                        
+
                         if (SkipFrames) UpdateFrame();
 
                         if (UpdateFrame() >= Frame.Count)
@@ -2128,10 +2251,10 @@ namespace Client.MirObjects
                     break;
 
             }
-            
+
             if (this == User) return;
 
-            if ((CurrentAction == MirAction.Standing || CurrentAction == MirAction.Stance || CurrentAction == MirAction.Stance2 || CurrentAction == MirAction.DashFail) && NextAction != null)
+            if ((CurrentAction == MirAction.Standing || CurrentAction == MirAction.MountStanding || CurrentAction == MirAction.Stance || CurrentAction == MirAction.Stance2 || CurrentAction == MirAction.DashFail) && NextAction != null)
                 SetAction();
             //if Revive and dead set action
 
@@ -2243,6 +2366,8 @@ namespace Client.MirObjects
             if (index >= 3316 && index <= 3589)
                 moveSound = SoundList.WalkRoomL;
 
+            if (RidingMount) moveSound = SoundList.MountWalkL;
+
             if (CurrentAction == MirAction.Running) moveSound += 2;
             if (FrameIndex == 4) moveSound++;
 
@@ -2250,16 +2375,26 @@ namespace Client.MirObjects
         }
         public void PlayStruckSound()
         {
+            if (RidingMount)
+            {
+                if (MountType < 7)
+                    SoundManager.PlaySound(CMain.Random.Next(10179, 10181));
+                else if (MountType < 12)
+                    SoundManager.PlaySound(CMain.Random.Next(10193, 10194));
+
+                return;
+            }
+
             int add = 0;
             if (Class != MirClass.Assassin) //Archer to add?
-            switch (Armour)
-            {
-                case 3:
-                case 6:
-                case 9:
-                    add = 10;
-                    break;
-            }
+                switch (Armour)
+                {
+                    case 3:
+                    case 6:
+                    case 9:
+                        add = 10;
+                        break;
+                }
 
             switch (StruckWeapon)
             {
@@ -2328,6 +2463,16 @@ namespace Client.MirObjects
         }
         public void PlayAttackSound()
         {
+            if (RidingMount)
+            {
+                if (MountType < 7)
+                    SoundManager.PlaySound(CMain.Random.Next(10181, 10184));
+                else if (MountType < 12)
+                    SoundManager.PlaySound(CMain.Random.Next(10190, 10193));
+
+                return;
+            }
+
             if (Weapon >= 0 && Class == MirClass.Assassin)
             {
                 SoundManager.PlaySound(SoundList.SwingShort);
@@ -2406,18 +2551,42 @@ namespace Client.MirObjects
 
         }
 
+        public void PlayMountSound()
+        {
+            if (RidingMount)
+            {
+                if(MountType < 7)
+                    SoundManager.PlaySound(10218);
+                else if (MountType < 12)
+                    SoundManager.PlaySound(10188);
+            }
+            else
+            {
+                if (MountType < 7)
+                    SoundManager.PlaySound(10219);
+                else if (MountType < 12)
+                    SoundManager.PlaySound(10189);
+            }
+        }
+
 
         public override void Draw()
         {
-            //ArcherTest
             float oldOpacity = DXManager.Opacity;
             if (Hidden && !DXManager.Blending) DXManager.SetOpacity(0.5F);
 
+            if (RidingMount)
+            {
+                DrawMount();
+            }
 
-            if ((Direction == MirDirection.Left || Direction == MirDirection.Up || Direction == MirDirection.UpLeft || Direction == MirDirection.DownLeft))
-                DrawWeapon();
-            else
-                DrawWeapon2();
+            if (!RidingMount)
+            {
+                if ((Direction == MirDirection.Left || Direction == MirDirection.Up || Direction == MirDirection.UpLeft || Direction == MirDirection.DownLeft))
+                    DrawWeapon();
+                else
+                    DrawWeapon2();
+            }
 
             DrawBody();
 
@@ -2425,18 +2594,21 @@ namespace Client.MirObjects
 
             if (this != User) DrawWings();
 
+            if (!RidingMount)
+            {
+                if ((Direction == MirDirection.UpRight || Direction == MirDirection.Right || Direction == MirDirection.DownRight || Direction == MirDirection.Down))
+                    DrawWeapon();
+                else
+                    DrawWeapon2();
 
-            if ((Direction == MirDirection.UpRight || Direction == MirDirection.Right || Direction == MirDirection.DownRight || Direction == MirDirection.Down))
-                DrawWeapon();
-            else
-                DrawWeapon2();
-
-            if ((Class == MirClass.Archer && HasClassWeapon))
-                DrawWeapon2();
+                if ((Class == MirClass.Archer && HasClassWeapon))
+                    DrawWeapon2();
+            }
 
             DXManager.SetOpacity(oldOpacity);
-            
+
         }
+
         public override void DrawEffects()
         {
             for (int i = 0; i < Effects.Count; i++)
@@ -2529,6 +2701,13 @@ namespace Client.MirObjects
             if (WingLibrary != null)
                 WingLibrary.DrawBlend(DrawWingFrame + WingOffset, DrawLocation, DrawColour, true);
         }
+
+
+        public void DrawMount()
+        {
+            MountLibrary.Draw(DrawFrame - 416 + MountOffset, DrawLocation, DrawColour, true);
+        }
+
 
         public override bool MouseOver(Point p)
         {

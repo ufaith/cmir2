@@ -46,6 +46,12 @@ namespace Client.MirObjects
             Players.Frames.Add(MirAction.AttackRange3, new Frame(224, 8, 0, 100));
             Players.Frames.Add(MirAction.Jump, new Frame(288, 8, 0, 100));
 
+            Players.Frames.Add(MirAction.MountStanding, new Frame(416, 4, 0, 500));
+            Players.Frames.Add(MirAction.MountWalking, new Frame(448, 8, 0, 100));
+            Players.Frames.Add(MirAction.MountRunning, new Frame(512, 6, 0, 100));
+            Players.Frames.Add(MirAction.MountStruck, new Frame(560, 3, 0, 100));
+            Players.Frames.Add(MirAction.MountAttack, new Frame(584, 6, 0, 100));
+
             /*
              * NPCS
              */

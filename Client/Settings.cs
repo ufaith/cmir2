@@ -24,7 +24,9 @@ namespace Client
                             ARWeaponPath = @".\Data\ARWeapon\",
                             ARHairPath = @".\Data\ARHair\",
                             CHumEffectPath = @".\Data\CHumEffect\",
-                            AHumEffectPath = @".\Data\AHumEffect\";
+                            AHumEffectPath = @".\Data\AHumEffect\",
+                            MountPath = @".\Data\Mount\";
+
         //Logs
         public static bool LogErrors = true;
         public static bool LogChat = true;

@@ -460,7 +460,7 @@ namespace Server.MirObjects
                 }
         }
 
-        public void SendItemInfo(ItemInfo Item)
+        public void SendItemInfo(UserItem Item)
         {
             PlayerObject player = null;
             for (int i = 0; i < Ranks.Count; i++)
@@ -468,7 +468,9 @@ namespace Server.MirObjects
                 {
                     player = (PlayerObject)Ranks[i].Members[j].Player;
                     if (player != null)
-                        player.CheckItemInfo(Item);
+                    {
+                        player.CheckItem(Item);
+                    }
                 }
         }
 

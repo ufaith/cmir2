@@ -200,7 +200,13 @@ public enum MirAction : byte
 
     WalkingBow,
     RunningBow,
-    Jump
+    Jump,
+
+    MountStanding,
+    MountWalking,
+    MountRunning,
+    MountStruck,
+    MountAttack
 }
 
 public enum CellAttribute : byte
@@ -286,9 +292,15 @@ public enum ItemType : byte
     CraftingMaterial = 16,
     Scroll = 17,
     Gem = 18,
-    Tiger = 19,
+    Mount = 19,
     Book = 20,
-    Script = 21
+    Script = 21,
+    Reins = 22,
+    Bells = 23,
+    Saddle = 24,
+    Ribbon = 25,
+    Mask = 26,
+    Food = 27
 }
 public enum MirGridType : byte
 {
@@ -302,7 +314,8 @@ public enum MirGridType : byte
     Inspect = 7,
     TrustMerchant = 8,
     GuildStorage = 9,
-    GuestTrade = 10
+    GuestTrade = 10,
+    Mount = 11,
 }
 public enum EquipmentSlot : byte
 {
@@ -319,7 +332,18 @@ public enum EquipmentSlot : byte
     Belt = 10,
     Boots = 11,
     Stone = 12,
+    Mount = 13
 }
+
+public enum MountSlot : byte
+{
+    Reins = 0,
+    Bells = 1,
+    Saddle = 2,
+    Ribbon = 3,
+    Mask = 4
+}
+
 [Obfuscation(Feature = "renaming", Exclude = true)]
 public enum AttackMode : byte
 {
@@ -727,7 +751,9 @@ public enum ServerPacketIds : short
     TradeGold,
     TradeItem,
     TradeConfirm,
-    TradeCancel
+    TradeCancel,
+    MountUpdate,
+    EquipSlotItem
 }
 
 public enum ClientPacketIds : short
@@ -799,7 +825,8 @@ public enum ClientPacketIds : short
     TradeReply,
     TradeGold,
     TradeConfirm,
-    TradeCancel
+    TradeCancel,
+    EquipSlotItem
 }
 
 public class InIReader
@@ -1593,9 +1620,10 @@ public class ItemInfo
     public byte RandomStatsId;
     public RandomItemStat RandomStats;
 
+
     public bool IsConsumable
     {
-        get { return Type == ItemType.Potion || Type == ItemType.Scroll; }
+        get { return Type == ItemType.Potion || Type == ItemType.Scroll || Type == ItemType.Food; }
     }
     
     public ItemInfo()
@@ -1696,7 +1724,7 @@ public class ItemInfo
         else
         {
             RandomStatsId = 255;
-            if ((Type == ItemType.Weapon) || (Type == ItemType.Armour) || (Type == ItemType.Helmet) || (Type == ItemType.Necklace) || (Type == ItemType.Bracelet) || (Type == ItemType.Ring))
+            if ((Type == ItemType.Weapon) || (Type == ItemType.Armour) || (Type == ItemType.Helmet) || (Type == ItemType.Necklace) || (Type == ItemType.Bracelet) || (Type == ItemType.Ring) || (Type == ItemType.Mount))
                 RandomStatsId = (byte)Type;
             if ((Type == ItemType.Belt) || (Type == ItemType.Boots))
                 RandomStatsId = 7;
@@ -1897,6 +1925,8 @@ public class UserItem
     public bool Identified = false;
     public bool Cursed = false;
 
+    public UserItem[] Slots = new UserItem[5];
+
     public bool IsAdded
     {
         get
@@ -1962,7 +1992,15 @@ public class UserItem
         CriticalDamage = reader.ReadByte();
         Freezing = reader.ReadByte();
         PoisonAttack = reader.ReadByte();
-        if (version <= 22) return;
+        if (version <= 31) return;
+
+        int count = reader.ReadInt32();
+        for (int i = 0; i < count; i++)
+        {
+            if (reader.ReadBoolean()) continue;
+            UserItem item = new UserItem(reader, version);
+            Slots[i] = item;
+        }
     }
     public void Save(BinaryWriter writer)
     {
@@ -2002,6 +2040,15 @@ public class UserItem
         writer.Write(CriticalDamage);
         writer.Write(Freezing);
         writer.Write(PoisonAttack);
+
+        writer.Write(Slots.Length);
+        for (int i = 0; i < Slots.Length; i++)
+        {
+            writer.Write(Slots[i] == null);
+            if (Slots[i] == null) continue;
+
+            Slots[i].Save(writer);
+        }
     }
 
 
@@ -2048,6 +2095,25 @@ public class UserItem
         return (p * Count) - Price();
     }
 
+    public void SetSlotSize() //set slot size in db?
+    {
+        int amount = 0;
+
+        switch (Info.Type)
+        {
+            case ItemType.Mount:
+                if (Info.Shape < 7)
+                    amount = 4;
+                else if (Info.Shape < 12)
+                    amount = 5;
+                break;
+        }
+
+        if (amount == Slots.Length) return;
+
+        Array.Resize(ref Slots, amount);
+    }
+
     public UserItem Clone()
     {
         UserItem item = new UserItem(Info)
@@ -2083,7 +2149,9 @@ public class UserItem
                 CriticalRate = CriticalRate,
                 CriticalDamage = CriticalDamage,
                 Freezing = Freezing,
-                PoisonAttack = PoisonAttack
+                PoisonAttack = PoisonAttack,
+
+                Slots = Slots
             };
 
         return item;
@@ -2379,6 +2447,8 @@ public abstract class Packet
                 return new C.TradeConfirm();
             case (short)ClientPacketIds.TradeCancel:
                 return new C.TradeCancel();
+            case (short)ClientPacketIds.EquipSlotItem:
+                return new C.EquipSlotItem();
             default:
                 throw new NotImplementedException();
         }
@@ -2674,6 +2744,10 @@ public abstract class Packet
                 return new S.TradeConfirm();
             case (short)ServerPacketIds.TradeCancel:
                 return new S.TradeCancel();
+            case (short)ServerPacketIds.MountUpdate:
+                return new S.MountUpdate();
+            case (short)ServerPacketIds.EquipSlotItem:
+                return new S.EquipSlotItem();
             default:
                 throw new NotImplementedException();
         }
@@ -2901,6 +2975,9 @@ public class RandomItemStat
             case ItemType.Ring:
                 SetRing();
                 break; 
+            case ItemType.Mount:
+                SetMount();
+                break;
         }
     }
 
@@ -3094,6 +3171,11 @@ public class RandomItemStat
         MaxScChance = 15;
         MaxScStatChance = 30;
         MaxScMaxStat = 6;
+    }
+
+    public void SetMount()
+    {
+        SetRing();
     }
 }
 
