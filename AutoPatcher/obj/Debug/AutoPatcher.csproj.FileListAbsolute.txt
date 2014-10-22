@@ -19,3 +19,12 @@ C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcher\obj\Debug\AutoPatcher.Pr
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcher\obj\Debug\AutoPatcher.csproj.GenerateResource.Cache
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcher\obj\Debug\AutoPatcher.exe
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcher\obj\Debug\AutoPatcher.pdb
+C:\Mir 2 Source\Debug\AutoPatcher\AutoPatcher.exe.config
+C:\Mir 2 Source\Debug\AutoPatcher\AutoPatcher.exe
+C:\Mir 2 Source\Debug\AutoPatcher\AutoPatcher.pdb
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Debug\AutoPatcher.csprojResolveAssemblyReference.cache
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Debug\AutoPatcher.AMain.resources
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Debug\AutoPatcher.Properties.Resources.resources
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Debug\AutoPatcher.csproj.GenerateResource.Cache
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Debug\AutoPatcher.exe
+C:\Mir 2 Source\trunk SVN\AutoPatcher\obj\Debug\AutoPatcher.pdb

@@ -44,17 +44,19 @@ namespace Client.MirGraphics
         public static readonly MLibrary[] CArmours = new MLibrary[42],
                                           CWeapons = new MLibrary[55],
                                           CHair = new MLibrary[9],
-                                          AArmours = new MLibrary[12],
+                                          CHumEffect = new MLibrary[3],
+                                          AArmours = new MLibrary[17],
                                           AWeaponsL = new MLibrary[19],
                                           AWeaponsR = new MLibrary[19],
                                           AHair = new MLibrary[9],
+                                          AHumEffect = new MLibrary[3],
                                           ARArmours = new MLibrary[17],
                                           ARWeapons = new MLibrary[19],
                                           ARWeaponsS = new MLibrary[19],
                                           ARHair = new MLibrary[9],
+                                          ARHumEffect = new MLibrary[3],
                                           Monsters = new MLibrary[142],
                                           NPCs = new MLibrary[173],
-                                          CHumEffect = new MLibrary[2],
                                           Mounts = new MLibrary[12];
 
         static Libraries()
@@ -69,6 +71,9 @@ namespace Client.MirGraphics
             for (int i = 0; i < CWeapons.Length; i++)
                 CWeapons[i] = new MLibrary(Settings.CWeaponPath + i.ToString("00"));
 
+            for (int i = 0; i < CHumEffect.Length; i++)
+                CHumEffect[i] = new MLibrary(Settings.CHumEffectPath + i.ToString("00"));
+
             //Assassin
             for (int i = 0; i < AArmours.Length; i++)
                 AArmours[i] = new MLibrary(Settings.AArmourPath + i.ToString("00"));
@@ -81,6 +86,9 @@ namespace Client.MirGraphics
 
             for (int i = 0; i < AWeaponsR.Length; i++)
                 AWeaponsR[i] = new MLibrary(Settings.AWeaponPath + i.ToString("00") + " R");
+
+            for (int i = 0; i < AHumEffect.Length; i++)
+                AHumEffect[i] = new MLibrary(Settings.AHumEffectPath + i.ToString("00"));
 
             //Archer
             for (int i = 0; i < ARArmours.Length; i++)
@@ -95,6 +103,9 @@ namespace Client.MirGraphics
             for (int i = 0; i < ARWeaponsS.Length; i++)
                 ARWeaponsS[i] = new MLibrary(Settings.ARWeaponPath + i.ToString("00") + " S");
 
+            for (int i = 0; i < ARHumEffect.Length; i++)
+                ARHumEffect[i] = new MLibrary(Settings.ARHumEffectPath + i.ToString("00"));
+
             //Other
             for (int i = 0; i < Monsters.Length; i++)
                 Monsters[i] = new MLibrary(Settings.MonsterPath + i.ToString("000"));
@@ -102,8 +113,6 @@ namespace Client.MirGraphics
             for (int i = 0; i < NPCs.Length; i++)
                 NPCs[i] = new MLibrary(Settings.NPCPath + i.ToString("00"));
 
-            for (int i = 0; i < CHumEffect.Length; i++)
-                CHumEffect[i] = new MLibrary(Settings.CHumEffectPath + i.ToString("00"));
 
             for (int i = 0; i < Mounts.Length; i++)
                 Mounts[i] = new MLibrary(Settings.MountPath + i.ToString("00"));

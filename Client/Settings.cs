@@ -25,6 +25,7 @@ namespace Client
                             ARHairPath = @".\Data\ARHair\",
                             CHumEffectPath = @".\Data\CHumEffect\",
                             AHumEffectPath = @".\Data\AHumEffect\",
+                            ARHumEffectPath = @".\Data\ARHumEffect\",
                             MountPath = @".\Data\Mount\";
 
         //Logs

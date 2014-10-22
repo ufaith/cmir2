@@ -39,18 +39,18 @@ namespace Client.MirObjects
             Players.Frames.Add(MirAction.Revive, new Frame(384, 4, 0, 100, 416, 4, 0, 100) { Reverse = true });
             Players.Frames.Add(MirAction.Mine,new Frame(184, 6, 0, 100, 216, 6, 0, 100));
 
-            Players.Frames.Add(MirAction.WalkingBow, new Frame(0, 6, 0, 100));
-            Players.Frames.Add(MirAction.RunningBow, new Frame(48, 6, 0, 100));
-            Players.Frames.Add(MirAction.AttackRange1, new Frame(96, 8, 0, 100));
-            Players.Frames.Add(MirAction.AttackRange2, new Frame(160, 8, 0, 100));
-            Players.Frames.Add(MirAction.AttackRange3, new Frame(224, 8, 0, 100));
-            Players.Frames.Add(MirAction.Jump, new Frame(288, 8, 0, 100));
+            Players.Frames.Add(MirAction.WalkingBow, new Frame(0, 6, 0, 100, 0, 6, 0, 100));
+            Players.Frames.Add(MirAction.RunningBow, new Frame(48, 6, 0, 100, 48, 6, 0, 100));
+            Players.Frames.Add(MirAction.AttackRange1, new Frame(96, 8, 0, 100, 96, 8, 0, 100));
+            Players.Frames.Add(MirAction.AttackRange2, new Frame(160, 8, 0, 100, 160, 8, 0, 100));
+            Players.Frames.Add(MirAction.AttackRange3, new Frame(224, 8, 0, 100, 224, 8, 0, 100));
+            Players.Frames.Add(MirAction.Jump, new Frame(288, 8, 0, 100, 288, 8, 0, 100));
 
-            Players.Frames.Add(MirAction.MountStanding, new Frame(416, 4, 0, 500));
-            Players.Frames.Add(MirAction.MountWalking, new Frame(448, 8, 0, 100));
-            Players.Frames.Add(MirAction.MountRunning, new Frame(512, 6, 0, 100));
-            Players.Frames.Add(MirAction.MountStruck, new Frame(560, 3, 0, 100));
-            Players.Frames.Add(MirAction.MountAttack, new Frame(584, 6, 0, 100));
+            Players.Frames.Add(MirAction.MountStanding, new Frame(416, 4, 0, 500, 448, 4, 0, 500));
+            Players.Frames.Add(MirAction.MountWalking, new Frame(448, 8, 0, 100, 480, 8, 0, 500));
+            Players.Frames.Add(MirAction.MountRunning, new Frame(512, 6, 0, 100, 544, 6, 0, 100));
+            Players.Frames.Add(MirAction.MountStruck, new Frame(560, 3, 0, 100, 592, 3, 0, 100));
+            Players.Frames.Add(MirAction.MountAttack, new Frame(584, 6, 0, 100, 616, 6, 0, 100));
 
             /*
              * NPCS

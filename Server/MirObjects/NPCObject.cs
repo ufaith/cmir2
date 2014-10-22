@@ -1005,7 +1005,7 @@ namespace Server.MirObjects
                     if (parts.Length < 2) return;
 
                     string petcount = parts.Length > 2 ? parts[2] : "1";
-                    string petlevel = parts.Length > 2 ? parts[2] : "0";
+                    string petlevel = parts.Length > 3 ? parts[3] : "0";
 
                     acts.Add(new NPCActions(ActionType.GivePet, parts[1], petcount, petlevel));
                     break;
