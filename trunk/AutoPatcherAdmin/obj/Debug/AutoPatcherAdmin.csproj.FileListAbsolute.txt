@@ -16,3 +16,12 @@ C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Debug\AutoPatch
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.csproj.GenerateResource.Cache
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.exe
 C:\Users\Dan\Documents\C# MIR Source\Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.pdb
+C:\Mir 2 Source\Debug\AutoPatcherAdmin\AutoPatcherAdmin.exe.config
+C:\Mir 2 Source\Debug\AutoPatcherAdmin\AutoPatcherAdmin.exe
+C:\Mir 2 Source\Debug\AutoPatcherAdmin\AutoPatcherAdmin.pdb
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.csprojResolveAssemblyReference.cache
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.AMain.resources
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.Properties.Resources.resources
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.csproj.GenerateResource.Cache
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.exe
+C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.pdb

@@ -1992,6 +1992,7 @@ public class UserItem
         CriticalDamage = reader.ReadByte();
         Freezing = reader.ReadByte();
         PoisonAttack = reader.ReadByte();
+
         if (version <= 31) return;
 
         int count = reader.ReadInt32();

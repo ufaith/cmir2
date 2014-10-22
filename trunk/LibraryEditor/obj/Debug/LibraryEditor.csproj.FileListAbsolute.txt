@@ -40,3 +40,12 @@ C:\Users\Dan\Documents\C# MIR Source\Source\LibraryEditor\obj\Debug\LibraryEdito
 C:\Users\Dan\Documents\C# MIR Source\Source\LibraryEditor\obj\Debug\LibraryEditor.csproj.GenerateResource.Cache
 C:\Users\Dan\Documents\C# MIR Source\Source\LibraryEditor\obj\Debug\LibraryEditor.exe
 C:\Users\Dan\Documents\C# MIR Source\Source\LibraryEditor\obj\Debug\LibraryEditor.pdb
+C:\Mir 2 Source\Debug\LibraryEditor\LibraryEditor.exe.config
+C:\Mir 2 Source\Debug\LibraryEditor\LibraryEditor.exe
+C:\Mir 2 Source\Debug\LibraryEditor\LibraryEditor.pdb
+C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.csprojResolveAssemblyReference.cache
+C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.LMain.resources
+C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.Properties.Resources.resources
+C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.csproj.GenerateResource.Cache
+C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.exe
+C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.pdb

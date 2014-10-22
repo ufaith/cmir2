@@ -216,7 +216,7 @@ namespace Server.MirObjects
         {
             get
             {
-                return !Dead;
+                return !Dead && !Observer;
             }
         }
         public bool AllowGroup
@@ -1373,6 +1373,9 @@ namespace Server.MirObjects
                     for (int i = 0; i < cell.Objects.Count; i++)
                     {
                         MapObject ob = cell.Objects[i];
+
+                        //if (ob.Race == ObjectType.Player && ob.Observer) continue;
+
                         ob.Add(this);
                     }
                 }
@@ -1400,7 +1403,7 @@ namespace Server.MirObjects
                         MapObject ob = cell.Objects[i];
                         if (ob == this) continue;
 
-                        if (ob.Race == ObjectType.Player && ob.Observer) continue;
+                        //if (ob.Race == ObjectType.Player && ob.Observer) continue;
 
                         Enqueue(ob.GetInfo());
 
@@ -8192,6 +8195,7 @@ namespace Server.MirObjects
             if (player == this) return;
 
             base.Add(player);
+
             Enqueue(player.GetInfo());
 
             player.SendHealth(this);

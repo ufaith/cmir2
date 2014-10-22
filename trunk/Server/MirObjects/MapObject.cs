@@ -405,7 +405,10 @@ namespace Server.MirObjects
 
             CurrentMap.AddObject(this);
 
-            Broadcast(GetInfo());
+            if (!Observer)
+            {
+                Broadcast(GetInfo());
+            }
 
             if (effects) Broadcast(new S.ObjectTeleportIn { ObjectID = ObjectID, Type = effectnumber });
             
