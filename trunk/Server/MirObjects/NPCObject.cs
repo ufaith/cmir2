@@ -586,7 +586,8 @@ namespace Server.MirObjects
         {
             key = key.ToUpper();
 
-            if (player.NPCJumpList.NextPage == null || !player.NPCJumpList.NextPage.Active)
+            if(!player.NPCDelayed)
+            //if (player.NPCJumpList.NextPage == null || !player.NPCJumpList.NextPage.Active)
             {
                 if (key != MainKey) // && ObjectID != player.DefaultNPC.ObjectID
                 {
@@ -602,10 +603,13 @@ namespace Server.MirObjects
                     }
                 }
             }
+            else
+            {
+                player.NPCDelayed = false;
+            }
 
             for (int i = 0; i < NPCSections.Count; i++)
             {
-
                 NPCPage page = NPCSections[i];
                 if (!String.Equals(page.Key, key, StringComparison.CurrentCultureIgnoreCase)) continue;
                 ProcessPage(player, page);
@@ -1961,7 +1965,10 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.Goto:
-                        player.NPCJumpList.AddPage(new NPCJumpPage { NPCID = player.NPCID, Page = "[" + param[0] + "]", TimePeriod = 0 });
+                        //player.NPCJumpList.AddPage(new NPCJumpPage { NPCID = player.NPCID, Page = "[" + param[0] + "]", TimePeriod = 0 });
+
+                        DelayedAction action = new DelayedAction(DelayedType.NPC, SMain.Envir.Time + 0, player.NPCID, "[" + param[0] + "]");
+                        player.ActionList.Add(action);
                         break;
 
                     case ActionType.Set:

@@ -601,6 +601,7 @@ namespace ServerPackets
 
         public short MountType;
         public bool RidingMount;
+        public bool Fishing;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -625,6 +626,7 @@ namespace ServerPackets
             Extra = reader.ReadBoolean();
             MountType = reader.ReadInt16();
             RidingMount = reader.ReadBoolean();
+            Fishing = reader.ReadBoolean();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -651,6 +653,7 @@ namespace ServerPackets
             writer.Write(Extra);
             writer.Write(MountType);
             writer.Write(RidingMount);
+            writer.Write(Fishing);
         }
     }
     public sealed class ObjectRemove : Packet
@@ -3459,6 +3462,8 @@ namespace ServerPackets
         }
     }
 
+    
+
     public sealed class EquipSlotItem : Packet
     {
         public override short Index
@@ -3470,12 +3475,14 @@ namespace ServerPackets
         public ulong UniqueID;
         public int To;
         public bool Success;
+        public MirGridType GridTo;
 
         protected override void ReadPacket(BinaryReader reader)
         {
             Grid = (MirGridType)reader.ReadByte();
             UniqueID = reader.ReadUInt64();
             To = reader.ReadInt32();
+            GridTo = (MirGridType)reader.ReadByte();
             Success = reader.ReadBoolean();
         }
 
@@ -3484,7 +3491,60 @@ namespace ServerPackets
             writer.Write((byte)Grid);
             writer.Write(UniqueID);
             writer.Write(To);
+            writer.Write((byte)GridTo);
             writer.Write(Success);
         }
     }
+
+    //public sealed class FishingCast : Packet
+    //{
+    //    public override short Index { get { return (short)ServerPacketIds.FishingCast; } }
+
+    //    public long ObjectID;
+    //    public bool CastOut;
+
+    //    protected override void ReadPacket(BinaryReader reader)
+    //    {
+    //        ObjectID = reader.ReadInt64();
+    //        CastOut = reader.ReadBoolean();
+    //    }
+    //    protected override void WritePacket(BinaryWriter writer)
+    //    {
+    //        writer.Write(ObjectID);
+    //        writer.Write(CastOut);
+    //    }
+    //}
+
+    public sealed class FishingUpdate : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.FishingUpdate; } }
+
+        public long ObjectID;
+        public bool Fishing;
+        public int ProgressPercent;
+        public int ChancePercent;
+        public Point FishingPoint;
+        public bool FoundFish;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadInt64();
+            Fishing = reader.ReadBoolean();
+            ProgressPercent = reader.ReadInt32();
+            ChancePercent = reader.ReadInt32();
+            FishingPoint = new Point(reader.ReadInt32(), reader.ReadInt32());
+            FoundFish = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Fishing);
+            writer.Write(ProgressPercent);
+            writer.Write(ChancePercent);
+            writer.Write(FishingPoint.X);
+            writer.Write(FishingPoint.Y);
+            writer.Write(FoundFish);
+        }
+    }
+
 }

@@ -59,6 +59,7 @@ namespace Client.MirScenes
         public IntelligentCreatureDialog IntelligentCreatureDialog;
         public MountDialog MountDialog;
         public FishingDialog FishingDialog;
+        public FishingStatusDialog FishingStatusDialog;
         public FriendDialog FriendDialog;
         public RelationshipDialog RelationshipDialog;
         public MentorDialog MentorDialog;
@@ -148,6 +149,7 @@ namespace Client.MirScenes
             IntelligentCreatureDialog = new IntelligentCreatureDialog { Parent = this, Visible = false };
             MountDialog = new MountDialog { Parent = this, Visible = false };
             FishingDialog = new FishingDialog { Parent = this, Visible = false };
+            FishingStatusDialog = new FishingStatusDialog { Parent = this, Visible = false };
             FriendDialog = new FriendDialog { Parent = this, Visible = false };
             RelationshipDialog = new RelationshipDialog { Parent = this, Visible = false };
             MentorDialog = new MentorDialog { Parent = this, Visible = false };
@@ -1027,6 +1029,12 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.EquipSlotItem:
                     EquipSlotItem((S.EquipSlotItem)p);
                     break;
+                //case (short)ServerPacketIds.FishingCast:
+                //    FishingCast((S.FishingCast)p);
+                //    break;
+                case (short)ServerPacketIds.FishingUpdate:
+                    FishingUpdate((S.FishingUpdate)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1316,8 +1324,19 @@ namespace Client.MirScenes
         private void EquipSlotItem(S.EquipSlotItem p)
         {
             MirItemCell fromCell;
+            MirItemCell toCell;
 
-            MirItemCell toCell = MountDialog.Grid[p.To];
+            switch (p.GridTo)
+            {
+                case MirGridType.Mount:
+                    toCell = MountDialog.Grid[p.To];
+                    break;
+                case MirGridType.Fishing:
+                    toCell = FishingDialog.Grid[p.To];
+                    break;
+                default:
+                    return;
+            }
 
             switch (p.Grid)
             {
@@ -1616,12 +1635,34 @@ namespace Client.MirScenes
                 break;
             }
 
+            if (p.ObjectID != User.ObjectID) return;
+
             CanRun = false;
+
+            User.RefreshStats();
 
             GameScene.Scene.MountDialog.RefreshDialog();
             GameScene.Scene.Redraw();
         }
 
+        private void FishingUpdate(S.FishingUpdate p)
+        {
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                if (MapControl.Objects[i].ObjectID != p.ObjectID) continue;
+
+                PlayerObject player = MapControl.Objects[i] as PlayerObject;
+                if (player != null)
+                {
+                    player.FishingUpdate(p);
+                }
+                break;
+            }
+
+            if (p.ObjectID != User.ObjectID) return;
+
+            GameScene.Scene.FishingStatusDialog.UpdateFishing(p);
+        }
 
         private void PlayerUpdate(S.PlayerUpdate p)
         {
@@ -1911,6 +1952,7 @@ namespace Client.MirScenes
             for (int i = 0; i < User.Inventory.Length; i++)
             {
                 UserItem item = User.Inventory[i];
+
                 if (item == null || item.UniqueID != p.UniqueID) continue;
 
                 if (item.Count == p.Count)
@@ -1923,6 +1965,23 @@ namespace Client.MirScenes
             for (int i = 0; i < User.Equipment.Length; i++)
             {
                 UserItem item = User.Equipment[i];
+
+                if (item != null && item.Slots.Length > 0)
+                {
+                    for (int j = 0; j < item.Slots.Length; j++)
+                    {
+                        UserItem slotItem = item.Slots[j];
+
+                        if (slotItem == null || slotItem.UniqueID != p.UniqueID) continue;
+
+                        if (slotItem.Count == p.Count)
+                            item.Slots[j] = null;
+                        else
+                            slotItem.Count -= p.Count;
+                        break;
+                    }
+                }
+
                 if (item == null || item.UniqueID != p.UniqueID) continue;
 
                 if (item.Count == p.Count)
@@ -3291,8 +3350,6 @@ namespace Client.MirScenes
                     break;
             }
 
-
-
             if (HoverItem.Info.RequiredGender != RequiredGender.None)
             {
                 Color colour = Color.White;
@@ -3702,6 +3759,44 @@ namespace Client.MirScenes
 
         private void EquipmentItemInfo(ItemInfo RealItem)
         {
+            bool mountItem = false;
+            bool fishingItem = false;
+
+            switch (HoverItem.Info.Type)
+            {
+                case ItemType.Reins:
+                case ItemType.Bells:
+                case ItemType.Saddle:
+                case ItemType.Ribbon:
+                case ItemType.Mask:
+                case ItemType.Food:
+                    mountItem = true;
+                    break;
+                case ItemType.Hook:
+                case ItemType.Float:
+                case ItemType.Bait:
+                case ItemType.Finder:
+                case ItemType.Reel:
+                    fishingItem = true;
+                    break;
+            }
+
+            if (mountItem || fishingItem)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Orange,
+                    Location = new Point(ItemLabel.DisplayRectangle.Right - 8, 4),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("({0} Item)", mountItem ? "Mount" : "Fishing"),
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+            }
+
             if (HoverItem.Info.Durability > 0)
             {
                 string text = "";
@@ -4005,15 +4100,32 @@ namespace Client.MirScenes
 
             if (value1 + addedValue1 != 0)
             {
-                MirLabel label = new MirLabel
+                MirLabel label = null;
+
+                if (fishingItem)
                 {
-                    AutoSize = true,
-                    ForeColour = value1 + addedValue1 > 0 ? Color.Yellow : Color.Red,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(value1 + addedValue1 > 0 ? "Luck: +{0} " : "Curse: +{0}", value1 + addedValue1)
-                };
+                    label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = value1 + addedValue1 > 0 ? Color.Yellow : Color.Red,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = string.Format(value1 + addedValue1 > 0 ? "Success: {0}% " : "Failure: {0}%", value1 + addedValue1)
+                    };
+                }
+                else
+                {
+                    label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = value1 + addedValue1 > 0 ? Color.Yellow : Color.Red,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = string.Format(value1 + addedValue1 > 0 ? "Luck: +{0} " : "Curse: +{0}", value1 + addedValue1)
+                    };
+                }
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -4191,15 +4303,32 @@ namespace Client.MirScenes
 
             if ((value1 > 0) || (addedValue1 > 0))
             {
-                MirLabel label = new MirLabel
+                MirLabel label = null;
+
+                if (fishingItem)
                 {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Critical Chance: +{0} (+{1})" : "Critical Chance: +{0}", value1 + addedValue1, addedValue1)
-                };
+                    label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = string.Format(addedValue1 > 0 ? "Flexibility: +{0} (+{1})" : "Flexibility: +{0}", value1 + addedValue1, addedValue1)
+                    };
+                }
+                else
+                {
+                    label = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = false,
+                        Parent = ItemLabel,
+                        Text = string.Format(addedValue1 > 0 ? "Critical Chance: +{0} (+{1})" : "Critical Chance: +{0}", value1 + addedValue1, addedValue1)
+                    };
+                }
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -5229,7 +5358,8 @@ namespace Client.MirScenes
         {          
             if ((MouseControl == this) && (MapButtons != MouseButtons.None)) AutoHit = false;//mouse actions stop mining even when frozen!
             if (!CanRideAttack()) AutoHit = false;
-            if (CMain.Time < InputDelay || CMain.Time < User.BlizzardFreezeTime || User.Poison == PoisonType.Paralysis || User.Poison == PoisonType.Frozen) return;
+            
+            if (CMain.Time < InputDelay || CMain.Time < User.BlizzardFreezeTime || User.Poison == PoisonType.Paralysis || User.Poison == PoisonType.Frozen || User.Fishing) return;
             
             if (User.NextMagic != null && !User.RidingMount)
             {
@@ -5286,6 +5416,7 @@ namespace Client.MirScenes
                 }
             }
 
+            
             MirDirection direction;
             if (MouseControl == this)
             {
@@ -5399,9 +5530,6 @@ namespace Client.MirScenes
                                 return;
                             }
                         }
-
-
-
                         if (CanWalk(direction))
                         {
                             //if (MapObject.MouseObject != null) return;
@@ -5413,6 +5541,14 @@ namespace Client.MirScenes
                             User.QueuedAction = new QueuedAction { Action = MirAction.Standing, Direction = direction, Location = User.CurrentLocation };
                             return;
                         }
+
+                        if (CanFish(direction))
+                        {
+                            User.FishingTime = CMain.Time;
+                            Network.Enqueue(new C.FishingCast { CastOut = true });
+                            return;
+                        }
+
                         break;
                     case MouseButtons.Right:
                         if (MapObject.MouseObject is PlayerObject && MapObject.MouseObject != User && CMain.Ctrl) break;
@@ -5662,6 +5798,7 @@ namespace Client.MirScenes
             return EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 1)) && !User.InTrapRock;
         }
 
+
         private bool CanRun(MirDirection dir)
         {
             if (User.InTrapRock) return false;
@@ -5677,7 +5814,6 @@ namespace Client.MirScenes
             }
 
             return false;
-           // return CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, User.RidingMount ? 3 : 2)) && !User.InTrapRock;
         }
 
         private bool CanRideAttack()
@@ -5690,6 +5826,19 @@ namespace Client.MirScenes
 
             return true;
         }
+
+        public bool CanFish(MirDirection dir)
+        {
+            if (!GameScene.User.HasFishingRod || GameScene.User.FishingTime + 1000 > CMain.Time) return false;
+            if (GameScene.User.CurrentAction != MirAction.Standing) return false;
+            if (GameScene.User.Direction != dir) return false;
+
+            Point point = Functions.PointMove(User.CurrentLocation, dir, 3);
+
+            if (!M2CellInfo[point.X, point.Y].FishingCell) return false;
+
+            return true;
+        } 
 
         public bool ValidPoint(Point p)
         {
@@ -7937,7 +8086,8 @@ namespace Client.MirScenes
 
         private void RefreshInferface()
         {
-            int offSet = MapObject.User.Gender == MirGender.Male ? 0 : 1;
+            //int offSet = MapObject.User.Gender == MirGender.Male ? 0 : 1;
+            int offSet = 0;
 
             Index = 504 + offSet;
             CharacterPage.Index = 340 + offSet;
@@ -8063,6 +8213,8 @@ namespace Client.MirScenes
         private float _fade = 1F;
         private bool _bigMode = true;
 
+        public MirLabel AModeLabel, PModeLabel;
+
         public MiniMapDialog()
         {
             Index = 2090;
@@ -8133,6 +8285,26 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(102, 131),
+            };
+
+
+            AModeLabel = new MirLabel
+            {
+                AutoSize = true,
+                ForeColour = Color.Yellow,
+                OutLineColour = Color.Black,
+                Parent = this,
+                Location = new Point(115, 125)
+            };
+
+            PModeLabel = new MirLabel
+            {
+                AutoSize = true,
+                ForeColour = Color.Yellow,
+                OutLineColour = Color.Black,
+                Parent = this,
+                Location = new Point(230, 125),
+                Visible = false
             };
         }
 
@@ -9035,7 +9207,6 @@ namespace Client.MirScenes
                 Parent = this,
                 Library = Libraries.Prguse,
                 Location = new Point(3, 164),
-                Visible = false
             };
             FishingButton.Click += (o, e) =>
             {
@@ -9168,12 +9339,13 @@ namespace Client.MirScenes
 
             UpButton = new MirButton
             {
-                HoverIndex = 312,
-                PressedIndex = 313,
+                Index = 197,
+                HoverIndex = 198,
+                PressedIndex = 199,
+                Library = Libraries.Prguse2,
                 Parent = this,
-                Library = Libraries.Prguse,
                 Size = new Size(16, 14),
-                Location = new Point(415, 34),
+                Location = new Point(416, 35),
                 Sound = SoundList.ButtonA,
                 Visible = false
             };
@@ -9189,12 +9361,13 @@ namespace Client.MirScenes
 
             DownButton = new MirButton
             {
-                HoverIndex = 314,
-                PressedIndex = 315,
+                Index = 207,
+                HoverIndex = 208,
+                Library = Libraries.Prguse2,
+                PressedIndex = 209,
                 Parent = this,
-                Library = Libraries.Prguse,
                 Size = new Size(16, 14),
-                Location = new Point(415, 174),
+                Location = new Point(416, 175),
                 Sound = SoundList.ButtonA,
                 Visible = false
             };
@@ -9210,9 +9383,11 @@ namespace Client.MirScenes
 
             PositionBar = new MirButton
             {
-                Index = 955,
-                Library = Libraries.Prguse,
-                Location = new Point(415, 48),
+                Index = 205,
+                HoverIndex = 206,
+                PressedIndex = 206,
+                Library = Libraries.Prguse2,
+                Location = new Point(416, 48),
                 Parent = this,
                 Movable = true,
                 Sound = SoundList.None,
@@ -9253,7 +9428,7 @@ namespace Client.MirScenes
 
         void PositionBar_OnMoving(object sender, MouseEventArgs e)
         {
-            int x = 415;
+            int x = 416;
             int y = PositionBar.Location.Y;
 
             if (y >= 156) y = 156;
@@ -9273,9 +9448,11 @@ namespace Client.MirScenes
 
         private void UpdatePositionBar()
         {
+            if (CurrentLines.Count <= MaximumLines) return;
+
             int interval = 108 / (CurrentLines.Count - MaximumLines);
 
-            int x = 415;
+            int x = 416;
             int y = 48 + (_index * interval);
 
             if (y >= 156) y = 156;
@@ -9291,6 +9468,7 @@ namespace Client.MirScenes
             {
                 _index = 0;
                 CurrentLines = lines;
+                UpdatePositionBar();
             }
 
             if (lines.Count > MaximumLines)
@@ -10819,8 +10997,11 @@ namespace Client.MirScenes
 
     public sealed class FishingDialog : MirImageControl
     {
-        public MirImageControl TitleLabel;
+        public MirLabel TitleLabel;
         public MirButton CloseButton;
+        public MirItemCell[] Grid;
+
+        public MirControl FishingRod;
 
         public FishingDialog()
         {
@@ -10829,15 +11010,24 @@ namespace Client.MirScenes
             Movable = true;
             Sort = true;
             Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
+            BeforeDraw += FishingDialog_BeforeDraw;
 
-
-            TitleLabel = new MirImageControl
+            TitleLabel = new MirLabel
             {
-                // Index = 7,
-                Library = Libraries.Title,
-                Location = new Point(17, 4),
-                Parent = this
+                Location = new Point(10, 5),
+                DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
+                Parent = this,
+                NotControl = true,
+                Size = new Size(180, 20),
             };
+
+            FishingRod = new MirControl
+            {
+                Parent = this,
+                Location = new Point(0, 30),
+                NotControl = true,
+            };
+            FishingRod.BeforeDraw += FishingRod_BeforeDraw;
 
             CloseButton = new MirButton
             {
@@ -10849,7 +11039,85 @@ namespace Client.MirScenes
                 PressedIndex = 362,
                 Sound = SoundList.ButtonA,
             };
+
             CloseButton.Click += (o, e) => Hide();
+
+            Grid = new MirItemCell[Enum.GetNames(typeof(FishingSlot)).Length];
+
+            Grid[(int)FishingSlot.Hook] = new MirItemCell
+            {
+                ItemSlot = (int)FishingSlot.Hook,
+                GridType = MirGridType.Fishing,
+                Parent = this,
+                Size = new Size(34, 30),
+                Location = new Point(17, 203),
+            };
+            Grid[(int)FishingSlot.Float] = new MirItemCell
+            {
+                ItemSlot = (int)FishingSlot.Float,
+                GridType = MirGridType.Fishing,
+                Parent = this,
+                Size = new Size(34, 30),
+                Location = new Point(17, 241),
+            };
+
+            Grid[(int)FishingSlot.Bait] = new MirItemCell
+            {
+                ItemSlot = (int)FishingSlot.Bait,
+                GridType = MirGridType.Fishing,
+                Parent = this,
+                Size = new Size(34, 30),
+                Location = new Point(57, 241),
+            };
+
+            Grid[(int)FishingSlot.Finder] = new MirItemCell
+            {
+                ItemSlot = (int)FishingSlot.Finder,
+                GridType = MirGridType.Fishing,
+                Parent = this,
+                Size = new Size(34, 30),
+                Location = new Point(97, 241),
+            };
+
+            Grid[(int)FishingSlot.Reel] = new MirItemCell
+            {
+                ItemSlot = (int)FishingSlot.Reel,
+                GridType = MirGridType.Fishing,
+                Parent = this,
+                Size = new Size(34, 30),
+                Location = new Point(137, 241),
+            };
+        }
+
+        void FishingDialog_BeforeDraw(object sender, EventArgs e)
+        {
+            UserItem item = MapObject.User.Equipment[(int)EquipmentSlot.Weapon];
+
+            if (MapObject.User.HasFishingRod && item != null)
+            {
+                TitleLabel.Text = item.Name;
+            }
+        }
+
+        void FishingRod_BeforeDraw(object sender, EventArgs e)
+        {
+            int FishingImage = 0;
+            if (MapObject.User.HasFishingRod)
+            {
+                UserItem rod = MapObject.User.Equipment[(int)EquipmentSlot.Weapon];
+
+                if (GameScene.User.Weapon == 49)
+                    FishingImage = 1333;
+                else if (GameScene.User.Weapon == 50)
+                    FishingImage = 1335;
+
+                if (rod != null && rod.Slots.Length >= 5 && rod.Slots[(int)FishingSlot.Hook] != null)
+                {
+                    FishingImage++;
+                }
+            }
+
+            Libraries.StateItems.Draw(FishingImage, new Point(Location.X + 10, Location.Y + 40), Color.White, false);
         }
 
 
@@ -10861,7 +11129,213 @@ namespace Client.MirScenes
         public void Show()
         {
             if (Visible) return;
+
+            if (!GameScene.User.HasFishingRod)
+            {
+                MirMessageBox messageBox = new MirMessageBox("You are not holding a fishing rod.", MirMessageBoxButtons.OK);
+                messageBox.Show();
+                return;
+            }
+
             Visible = true;
+        }
+    }
+
+    public sealed class FishingStatusDialog : MirImageControl
+    {
+        public MirImageControl TitleLabel, AutoCastBox, AutoCastTick;
+        public MirControl ChanceBar, ProgressBar;
+        public MirLabel ChanceLabel;
+        public MirButton CloseButton, AutoCastButton, FishButton;
+
+        public int ChancePercent = 0, ProgressPercent = 0;
+
+        private bool _canAutoCast = false;
+        private bool _autoCast = false;
+
+        public FishingStatusDialog()
+        {
+            Index = 1341;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Size = new Size(244, 128);
+            Location = new Point((800 - Size.Width) / 2, 300);
+            BeforeDraw += FishingStatusDialog_BeforeDraw;
+
+            ChanceBar = new MirControl
+            {
+                Parent = this,
+                Location = new Point(14, 64),
+                NotControl = true,
+            };
+            ChanceBar.BeforeDraw += ChanceBar_BeforeDraw;
+
+            ChanceLabel = new MirLabel
+            {
+                Location = new Point(14, 62),
+                Size = new Size(216, 12),
+                DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
+                Parent = this,
+                NotControl = true,
+            };
+
+            ProgressBar = new MirControl
+            {
+                Parent = this,
+                Location = new Point(14, 79),
+                NotControl = true,
+            };
+            ProgressBar.BeforeDraw += ProgressBar_BeforeDraw;
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(216, 4),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) =>
+            {
+                Hide();
+                Network.Enqueue(new C.FishingCast { CastOut = false } );
+            };
+
+            FishButton = new MirButton
+            {
+                Index = 140,
+                HoverIndex = 141,
+                PressedIndex = 142,
+                Library = Libraries.Title,
+                Sound = SoundList.ButtonA,
+                Location = new Point(40, 95),
+                Parent = this,
+            };
+            FishButton.Click += (o, e) =>
+            {
+                Network.Enqueue(new C.FishingCast { CastOut = false });
+            };
+
+            AutoCastButton = new MirButton
+            {
+                Index = 1344,
+                PressedIndex = 1345,
+                Location = new Point(160, 95),
+                Library = Libraries.Prguse,
+                Parent = this,
+                Sound = SoundList.ButtonA,
+            };
+            AutoCastButton.Click += (o, e) =>
+            {
+                if (_canAutoCast)
+                {
+                    _autoCast = !_autoCast;
+
+                    AutoCastTick.Visible = _autoCast;
+
+                    Network.Enqueue(new C.FishingChangeAutocast { AutoCast = _autoCast });
+                }
+            };
+
+            AutoCastBox = new MirImageControl
+            {
+                Index = 1346,
+                Location = new Point(190, 100),
+                Library = Libraries.Prguse,
+                Parent = this
+            };
+
+            AutoCastTick = new MirImageControl
+            {
+                Index = 1347,
+                Location = new Point(190, 100),
+                Library = Libraries.Prguse,
+                Parent = this,
+                Visible = false
+            };
+
+        }
+
+        void FishingStatusDialog_BeforeDraw(object sender, EventArgs e)
+        {
+            if (MapObject.User.HasFishingRod)
+            {
+                UserItem rod = MapObject.User.Equipment[(int)EquipmentSlot.Weapon];
+
+                if (rod == null || rod.Slots.Length < 5 || rod.Slots[(int)FishingSlot.Reel] == null)
+                {
+                    AutoCastButton.Index = 1343;
+                    AutoCastButton.PressedIndex = 1343;
+                    _canAutoCast = false;
+                    AutoCastBox.Visible = false;
+                }
+                else
+                {
+                    AutoCastButton.Index = 1344;
+                    AutoCastButton.PressedIndex = 1345;
+                    _canAutoCast = true;
+                    AutoCastBox.Visible = true;
+                }
+            }
+        }
+
+        void ChanceBar_BeforeDraw(object sender, EventArgs e)
+        {
+            if (Libraries.Prguse == null) return;
+
+            int width;
+
+            width = (int)(2.16 * ChancePercent);
+
+            if (width < 0) width = 0;
+            if (width > 216) width = 216;
+            Rectangle r = new Rectangle(0, 0, width, 12);
+            Libraries.Prguse.Draw(1342, r, new Point(ChanceBar.DisplayLocation.X, ChanceBar.DisplayLocation.Y), Color.White, false);
+        }
+
+        void ProgressBar_BeforeDraw(object sender, EventArgs e)
+        {
+            if (Libraries.Prguse == null) return;
+
+            int width;
+
+            width = (int)(2.16 * ProgressPercent);
+
+            if (width < 0) width = 0;
+            if (width > 216) width = 216;
+
+            Rectangle r = new Rectangle(0, 0, width, 8);
+            Libraries.Prguse.Draw(1349, r, new Point(ProgressBar.DisplayLocation.X, ProgressBar.DisplayLocation.Y), Color.White, false);
+        }
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+        public void Show()
+        {
+            if (Visible) return;
+
+            Visible = true;
+        }
+
+        public void UpdateFishing(S.FishingUpdate p)
+        {
+            ProgressPercent = p.ProgressPercent;
+            ChancePercent = p.ChancePercent;
+
+            ChanceLabel.Text = string.Format("{0}%", ChancePercent);
+
+            if (p.Fishing)
+                Show();
+            else
+                Hide();
+
+            Redraw();
         }
     }
 
@@ -10913,7 +11387,6 @@ namespace Client.MirScenes
             Visible = true;
         }
     }
-
 
     public sealed class RelationshipDialog : MirImageControl
     {

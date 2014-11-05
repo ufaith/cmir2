@@ -206,7 +206,11 @@ public enum MirAction : byte
     MountWalking,
     MountRunning,
     MountStruck,
-    MountAttack
+    MountAttack,
+
+    FishingCast,
+    FishingWait,
+    FishingReel
 }
 
 public enum CellAttribute : byte
@@ -300,7 +304,13 @@ public enum ItemType : byte
     Saddle = 24,
     Ribbon = 25,
     Mask = 26,
-    Food = 27
+    Food = 27,
+    Hook = 28,
+    Float = 29,
+    Bait = 30,
+    Finder = 31,
+    Reel = 32,
+    Fish = 33
 }
 public enum MirGridType : byte
 {
@@ -316,6 +326,7 @@ public enum MirGridType : byte
     GuildStorage = 9,
     GuestTrade = 10,
     Mount = 11,
+    Fishing = 12,
 }
 public enum EquipmentSlot : byte
 {
@@ -342,6 +353,15 @@ public enum MountSlot : byte
     Saddle = 2,
     Ribbon = 3,
     Mask = 4
+}
+
+public enum FishingSlot : byte
+{
+    Hook = 0,
+    Float = 1,
+    Bait = 2,
+    Finder = 3,
+    Reel = 4
 }
 
 [Obfuscation(Feature = "renaming", Exclude = true)]
@@ -753,7 +773,9 @@ public enum ServerPacketIds : short
     TradeConfirm,
     TradeCancel,
     MountUpdate,
-    EquipSlotItem
+    EquipSlotItem,
+    //FishingCast,
+    FishingUpdate,
 }
 
 public enum ClientPacketIds : short
@@ -826,7 +848,9 @@ public enum ClientPacketIds : short
     TradeGold,
     TradeConfirm,
     TradeCancel,
-    EquipSlotItem
+    EquipSlotItem,
+    FishingCast,
+    FishingChangeAutocast
 }
 
 public class InIReader
@@ -1428,6 +1452,8 @@ public static class Functions
 
         return source.Y < dest.Y ? MirDirection.Down : MirDirection.Up;
     }
+
+
 
     public static Size Add(this Size p1, Size p2)
     {
@@ -2108,6 +2134,10 @@ public class UserItem
                 else if (Info.Shape < 12)
                     amount = 5;
                 break;
+            case ItemType.Weapon:
+                if (Info.Shape == 49 || Info.Shape == 50)
+                    amount = 5;
+                break;
         }
 
         if (amount == Slots.Length) return;
@@ -2450,6 +2480,10 @@ public abstract class Packet
                 return new C.TradeCancel();
             case (short)ClientPacketIds.EquipSlotItem:
                 return new C.EquipSlotItem();
+            case (short)ClientPacketIds.FishingCast:
+                return new C.FishingCast();
+            case (short)ClientPacketIds.FishingChangeAutocast:
+                return new C.FishingChangeAutocast();
             default:
                 throw new NotImplementedException();
         }
@@ -2749,6 +2783,10 @@ public abstract class Packet
                 return new S.MountUpdate();
             case (short)ServerPacketIds.EquipSlotItem:
                 return new S.EquipSlotItem();
+            //case (short)ServerPacketIds.FishingCast:
+            //    return new S.FishingCast();
+            case (short)ServerPacketIds.FishingUpdate:
+                return new S.FishingUpdate();
             default:
                 throw new NotImplementedException();
         }

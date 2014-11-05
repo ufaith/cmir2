@@ -339,7 +339,7 @@ namespace Server.MirDatabase
             set { Player.RidingMount = value; }
         }
 
-        private UserItem[] Slots
+        public UserItem[] Slots
         {
             get { return Player.Info.Equipment[(int)EquipmentSlot.Mount].Slots; }
         }

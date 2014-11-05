@@ -22,6 +22,8 @@ namespace Client.MirObjects
             Monsters = new List<FrameSet>();
 
             Players = new FrameSet();
+
+            //Common
             Players.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500, 0, 8, 0, 250));
             Players.Frames.Add(MirAction.Walking, new Frame(32, 6, 0, 100, 64, 6, 0, 100));
             Players.Frames.Add(MirAction.Running, new Frame(80, 6, 0, 100, 112, 6, 0, 100));
@@ -30,15 +32,16 @@ namespace Client.MirObjects
             Players.Frames.Add(MirAction.Attack1, new Frame(136, 6, 0, 100, 168, 6, 0, 100));
             Players.Frames.Add(MirAction.Attack2, new Frame(184, 6, 0, 100, 216, 6, 0, 100));
             Players.Frames.Add(MirAction.Attack3, new Frame(232, 8, 0, 100, 264, 8, 0, 100));
+            Players.Frames.Add(MirAction.Attack4, new Frame(416, 6, 0, 100, 448, 6, 0, 100));
             Players.Frames.Add(MirAction.Spell, new Frame(296, 6, 0, 100, 328, 6, 0, 100));
             Players.Frames.Add(MirAction.Harvest, new Frame(344, 2, 0, 300, 376, 2, 0, 300));
             Players.Frames.Add(MirAction.Struck, new Frame(360, 3, 0, 100, 392, 3, 0, 100));
             Players.Frames.Add(MirAction.Die, new Frame(384, 4, 0, 100, 416, 4, 0, 100));
             Players.Frames.Add(MirAction.Dead, new Frame(387, 1, 3, 1000, 419, 1, 3, 1000));
-            Players.Frames.Add(MirAction.Attack4, new Frame(416, 6, 0, 100, 448, 6, 0, 100));
             Players.Frames.Add(MirAction.Revive, new Frame(384, 4, 0, 100, 416, 4, 0, 100) { Reverse = true });
             Players.Frames.Add(MirAction.Mine,new Frame(184, 6, 0, 100, 216, 6, 0, 100));
-
+            
+            //Archers
             Players.Frames.Add(MirAction.WalkingBow, new Frame(0, 6, 0, 100, 0, 6, 0, 100));
             Players.Frames.Add(MirAction.RunningBow, new Frame(48, 6, 0, 100, 48, 6, 0, 100));
             Players.Frames.Add(MirAction.AttackRange1, new Frame(96, 8, 0, 100, 96, 8, 0, 100));
@@ -46,11 +49,17 @@ namespace Client.MirObjects
             Players.Frames.Add(MirAction.AttackRange3, new Frame(224, 8, 0, 100, 224, 8, 0, 100));
             Players.Frames.Add(MirAction.Jump, new Frame(288, 8, 0, 100, 288, 8, 0, 100));
 
+            //Mounts
             Players.Frames.Add(MirAction.MountStanding, new Frame(416, 4, 0, 500, 448, 4, 0, 500));
             Players.Frames.Add(MirAction.MountWalking, new Frame(448, 8, 0, 100, 480, 8, 0, 500));
             Players.Frames.Add(MirAction.MountRunning, new Frame(512, 6, 0, 100, 544, 6, 0, 100));
             Players.Frames.Add(MirAction.MountStruck, new Frame(560, 3, 0, 100, 592, 3, 0, 100));
             Players.Frames.Add(MirAction.MountAttack, new Frame(584, 6, 0, 100, 616, 6, 0, 100));
+
+            //Fishing
+            Players.Frames.Add(MirAction.FishingCast, new Frame(632, 8, 0, 100));
+            Players.Frames.Add(MirAction.FishingWait, new Frame(696, 6, 0, 120));
+            Players.Frames.Add(MirAction.FishingReel, new Frame(744, 8, 0, 100));
 
             /*
              * NPCS

@@ -136,20 +136,22 @@ namespace Server.MirObjects
             set { Mount.MountType = value; }
         }
 
+        public int FishingChance, FishingChanceCounter, FishingProgressMax, FishingProgress;
+        public bool Fishing, FishingAutocast, FishFound;
 
         public bool CanMove
         {
-            get { return !Dead && Envir.Time >= ActionTime; }
+            get { return !Dead && Envir.Time >= ActionTime && !Fishing; }
         }
         public bool CanWalk
         {
-            get { return !Dead && Envir.Time >= ActionTime && !InTrapRock; }
+            get { return !Dead && Envir.Time >= ActionTime && !InTrapRock && !Fishing; }
         }
         public bool CanAttack
         {
             get
             {
-                return !Dead && Envir.Time >= ActionTime && Envir.Time >= AttackTime && CurrentPoison != PoisonType.Paralysis && CurrentPoison != PoisonType.Frozen && Mount.CanAttack;
+                return !Dead && Envir.Time >= ActionTime && Envir.Time >= AttackTime && CurrentPoison != PoisonType.Paralysis && CurrentPoison != PoisonType.Frozen && Mount.CanAttack && !Fishing;
             }
         }
 
@@ -162,18 +164,18 @@ namespace Server.MirObjects
             get
             {
                 return !Dead && Envir.Time >= ActionTime && Envir.Time >= SpellTime && CurrentPoison != PoisonType.Stun &&
-                    CurrentPoison != PoisonType.Paralysis && CurrentPoison != PoisonType.Frozen;
+                    CurrentPoison != PoisonType.Paralysis && CurrentPoison != PoisonType.Frozen && Mount.CanAttack && !Fishing;
             }
         }
 
-        public const long TurnDelay = 350, MoveDelay = 600, HarvestDelay = 350, RegenDelay = 10000, PotDelay = 200, HealDelay = 600, DuraDelay = 10000, VampDelay = 500, LoyaltyDelay = 1000;
-        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, LoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, PoisonFieldTime;
+        public const long TurnDelay = 350, MoveDelay = 600, HarvestDelay = 350, RegenDelay = 10000, PotDelay = 200, HealDelay = 600, DuraDelay = 10000, VampDelay = 500, LoyaltyDelay = 1000, FishingCastDelay = 750, FishingDelay = 200;
+        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, LoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, PoisonFieldTime, MountTime, FishingTime;
 
         public bool MagicShield;
         public byte MagicShieldLv;
         public long MagicShieldTime;
 
-        private int _runCounter;
+        private int _runCounter, _fishCounter;
 
         public NPCObject DefaultNPC
         {
@@ -186,6 +188,7 @@ namespace Server.MirObjects
         public uint NPCID;
         public NPCPage NPCPage;
         public bool NPCSuccess;
+        public bool NPCDelayed;
         public NPCJumpList NPCJumpList = new NPCJumpList();
         public NPCListener NPCListener;
 
@@ -321,6 +324,8 @@ namespace Server.MirObjects
 
             SMain.Enqueue(string.Format("{0} Has logged out.", Name));
 
+            Fishing = false;
+
             Info.LastIP = Connection.IPAddress;
             Info.LastDate = Envir.Now;
 
@@ -369,6 +374,12 @@ namespace Server.MirObjects
             {
                 RunTime = Envir.Time + 1500;
                 _runCounter--;
+            }
+
+            if (Envir.Time > FishingTime && Fishing)
+            {
+                _fishCounter++;
+                UpdateFish();
             }
 
             if (HasClearRing)
@@ -641,6 +652,9 @@ namespace Server.MirObjects
                     break;
                 case DelayedType.Mine:
                     CompleteMine(action.Params);
+                    break;
+                case DelayedType.NPC:
+                    CompleteNPC(action.Params);
                     break;
             }
         }
@@ -1425,12 +1439,14 @@ namespace Server.MirObjects
             RefreshLevelStats();
             RefreshBagWeight();
             RefreshEquipmentStats();
-            RefreshSlotStats();
             RefreshItemSetStats();
             RefreshMirSetStats();
             RefreshSkills();
             RefreshBuffs();
             RefreshStatCaps();
+            RefreshMountStats();
+            RefreshFishingStats();
+
             //Location Stats ?
 
             if (HP > MaxHP) SetHP(MaxHP);
@@ -1558,126 +1574,117 @@ namespace Server.MirObjects
 
             for (int i = 0; i < Info.Equipment.Length; i++)
             {
-                UserItem item = Info.Equipment[i];
-                if (item == null) continue;
+                UserItem temp = Info.Equipment[i];
+                if (temp == null) continue;
 
-                List<UserItem> items = new List<UserItem> { item };
-                if (item.Slots.Length > 0) items.AddRange(item.Slots);
+                ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+                if (RealItem.Type == ItemType.Weapon || RealItem.Type == ItemType.Torch)
+                    CurrentHandWeight = (byte)Math.Min(byte.MaxValue, CurrentHandWeight + temp.Weight);
+                else
+                    CurrentWearWeight = (byte)Math.Min(byte.MaxValue, CurrentWearWeight + temp.Weight);
 
-                for (int s = 0; s < items.Count; s++)
+                if (temp.CurrentDura == 0 && temp.Info.Durability > 0) continue;
+
+
+                MinAC = (byte)Math.Min(byte.MaxValue, MinAC + RealItem.MinAC);
+                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + RealItem.MaxAC + temp.AC);
+                MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + RealItem.MinMAC);
+                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + RealItem.MaxMAC + temp.MAC);
+
+                MinDC = (byte)Math.Min(byte.MaxValue, MinDC + RealItem.MinDC);
+                MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + RealItem.MaxDC + temp.DC);
+                MinMC = (byte)Math.Min(byte.MaxValue, MinMC + RealItem.MinMC);
+                MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + RealItem.MaxMC + temp.MC);
+                MinSC = (byte)Math.Min(byte.MaxValue, MinSC + RealItem.MinSC);
+                MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + RealItem.MaxSC + temp.SC);
+
+                Accuracy = (byte)Math.Min(byte.MaxValue, Accuracy + RealItem.Accuracy + temp.Accuracy);
+                Agility = (byte)Math.Min(byte.MaxValue, Agility + RealItem.Agility + temp.Agility);
+
+                MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + RealItem.HP + temp.HP);
+                MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + RealItem.MP + temp.MP);
+
+                ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + temp.AttackSpeed + RealItem.AttackSpeed)));
+                Luck = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, Luck + temp.Luck + RealItem.Luck)));
+
+                MaxBagWeight = (ushort)Math.Max(ushort.MinValue, (Math.Min(ushort.MaxValue, MaxBagWeight + RealItem.BagWeight)));
+                MaxWearWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxWearWeight + RealItem.WearWeight)));
+                MaxHandWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxHandWeight + RealItem.HandWeight)));
+                HPrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, HPrate + RealItem.HPrate));
+                MPrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, MPrate + RealItem.MPrate));
+                Acrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, Acrate + RealItem.MaxAcRate));
+                Macrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, Macrate + RealItem.MaxMacRate));
+                MagicResist = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MagicResist + temp.MagicResist + RealItem.MagicResist)));
+                PoisonResist = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonResist + temp.PoisonResist + RealItem.PoisonResist)));
+                HealthRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HealthRecovery + temp.HealthRecovery + RealItem.HealthRecovery)));
+                SpellRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, SpellRecovery + temp.ManaRecovery + RealItem.SpellRecovery)));
+                PoisonRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonRecovery + temp.PoisonRecovery + RealItem.PoisonRecovery)));
+                CriticalRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalRate + temp.CriticalRate + RealItem.CriticalRate)));
+                CriticalDamage = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalDamage + temp.CriticalDamage + RealItem.CriticalDamage)));
+                Holy = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Holy + RealItem.Holy)));
+                Freezing = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Freezing + temp.Freezing + RealItem.Freezing)));
+                PoisonAttack = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonAttack + temp.PoisonAttack + RealItem.PoisonAttack)));
+                Reflect = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Reflect + RealItem.Reflect)));
+                HpDrainRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HpDrainRate + RealItem.HpDrainRate)));
+
+                if (RealItem.Light > Light) Light = RealItem.Light;
+                if (RealItem.Unique != SpecialItemMode.none)
                 {
-                    UserItem temp = items[s];
-                    if (temp == null) continue;
-
-                    ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
-                    if (RealItem.Type == ItemType.Weapon || RealItem.Type == ItemType.Torch)
-                        CurrentHandWeight = (byte)Math.Min(byte.MaxValue, CurrentHandWeight + temp.Weight);
-                    else
-                        CurrentWearWeight = (byte)Math.Min(byte.MaxValue, CurrentWearWeight + temp.Weight);
-
-                    if (temp.CurrentDura == 0 && temp.Info.Durability > 0) continue;
-
-
-                    MinAC = (byte)Math.Min(byte.MaxValue, MinAC + RealItem.MinAC);
-                    MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + RealItem.MaxAC + temp.AC);
-                    MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + RealItem.MinMAC);
-                    MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + RealItem.MaxMAC + temp.MAC);
-
-                    MinDC = (byte)Math.Min(byte.MaxValue, MinDC + RealItem.MinDC);
-                    MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + RealItem.MaxDC + temp.DC);
-                    MinMC = (byte)Math.Min(byte.MaxValue, MinMC + RealItem.MinMC);
-                    MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + RealItem.MaxMC + temp.MC);
-                    MinSC = (byte)Math.Min(byte.MaxValue, MinSC + RealItem.MinSC);
-                    MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + RealItem.MaxSC + temp.SC);
-
-                    Accuracy = (byte)Math.Min(byte.MaxValue, Accuracy + RealItem.Accuracy + temp.Accuracy);
-                    Agility = (byte)Math.Min(byte.MaxValue, Agility + RealItem.Agility + temp.Agility);
-
-                    MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + RealItem.HP + temp.HP);
-                    MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + RealItem.MP + temp.MP);
-
-                    ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + temp.AttackSpeed + RealItem.AttackSpeed)));
-                    Luck = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, Luck + temp.Luck + RealItem.Luck)));
-
-                    MaxBagWeight = (ushort)Math.Max(ushort.MinValue, (Math.Min(ushort.MaxValue, MaxBagWeight + RealItem.BagWeight)));
-                    MaxWearWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxWearWeight + RealItem.WearWeight)));
-                    MaxHandWeight = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MaxHandWeight + RealItem.HandWeight)));
-                    HPrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, HPrate + RealItem.HPrate));
-                    MPrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, MPrate + RealItem.MPrate));
-                    Acrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, Acrate + RealItem.MaxAcRate));
-                    Macrate = (short)Math.Max(short.MinValue, Math.Min(short.MaxValue, Macrate + RealItem.MaxMacRate));
-                    MagicResist = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, MagicResist + temp.MagicResist + RealItem.MagicResist)));
-                    PoisonResist = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonResist + temp.PoisonResist + RealItem.PoisonResist)));
-                    HealthRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HealthRecovery + temp.HealthRecovery + RealItem.HealthRecovery)));
-                    SpellRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, SpellRecovery + temp.ManaRecovery + RealItem.SpellRecovery)));
-                    PoisonRecovery = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonRecovery + temp.PoisonRecovery + RealItem.PoisonRecovery)));
-                    CriticalRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalRate + temp.CriticalRate + RealItem.CriticalRate)));
-                    CriticalDamage = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalDamage + temp.CriticalDamage + RealItem.CriticalDamage)));
-                    Holy = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Holy + RealItem.Holy)));
-                    Freezing = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Freezing + temp.Freezing + RealItem.Freezing)));
-                    PoisonAttack = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, PoisonAttack + temp.PoisonAttack + RealItem.PoisonAttack)));
-                    Reflect = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, Reflect + RealItem.Reflect)));
-                    HpDrainRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HpDrainRate + RealItem.HpDrainRate)));
-
-                    if (RealItem.Light > Light) Light = RealItem.Light;
-                    if (RealItem.Unique != SpecialItemMode.none)
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Paralize)) HasParalysisRing = true;
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Teleport)) HasTeleportRing = true;
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Clearring)) HasClearRing = true;
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Protection)) HasProtectionRing = true;
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Revival)) HasRevivalRing = true;
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Muscle)) HasMuscleRing = true;
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Flame))
                     {
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Paralize)) HasParalysisRing = true;
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Teleport)) HasTeleportRing = true;
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Clearring)) HasClearRing = true;
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Protection)) HasProtectionRing = true;
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Revival)) HasRevivalRing = true;
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Muscle)) HasMuscleRing = true;
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Flame))
-                        {
-                            skillsToAdd.Add(Settings.FireRing);
-                            skillsToRemove.Remove(Settings.FireRing);
-                        }
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Healing))
-                        {
-                            skillsToAdd.Add(Settings.HealRing);
-                            skillsToRemove.Remove(Settings.HealRing);
-                        }
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Probe)) HasProbeNecklace = true;
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.Skill)) HasSkillNecklace = true;
-                        if (RealItem.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLoss = true;
+                        skillsToAdd.Add(Settings.FireRing);
+                        skillsToRemove.Remove(Settings.FireRing);
                     }
-
-                    if (RealItem.Type == ItemType.Armour)
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Healing))
                     {
-                        Looks_Armour = RealItem.Shape;
-                        Looks_Wings = RealItem.Effect;
+                        skillsToAdd.Add(Settings.HealRing);
+                        skillsToRemove.Remove(Settings.HealRing);
                     }
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Probe)) HasProbeNecklace = true;
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.Skill)) HasSkillNecklace = true;
+                    if (RealItem.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLoss = true;
+                }
 
-                    if (RealItem.Type == ItemType.Weapon)
-                        Looks_Weapon = RealItem.Shape;
+                if (RealItem.Type == ItemType.Armour)
+                {
+                    Looks_Armour = RealItem.Shape;
+                    Looks_Wings = RealItem.Effect;
+                }
 
-                    if (RealItem.Type == ItemType.Mount)
-                    {
-                        MountType = RealItem.Shape;
-                        //RealItem.Effect;
-                    }
+                if (RealItem.Type == ItemType.Weapon)
+                    Looks_Weapon = RealItem.Shape;
 
-                    if (RealItem.Set == ItemSet.None) continue;
+                if (RealItem.Type == ItemType.Mount)
+                {
+                    MountType = RealItem.Shape;
+                    //RealItem.Effect;
+                }
 
-                    //Normal Sets
-                    bool sameSetFound = false;
-                    foreach (var set in ItemSets.Where(set => set.Set == RealItem.Set && !set.Type.Contains(RealItem.Type)).TakeWhile(set => !set.SetComplete))
-                    {
-                        set.Type.Add(RealItem.Type);
-                        set.Count++;
-                        sameSetFound = true;
-                    }
+                if (RealItem.Set == ItemSet.None) continue;
 
-                    if (!ItemSets.Any() || !sameSetFound)
-                        ItemSets.Add(new ItemSets { Count = 1, Set = RealItem.Set, Type = new List<ItemType> { RealItem.Type } });
+                //Normal Sets
+                bool sameSetFound = false;
+                foreach (var set in ItemSets.Where(set => set.Set == RealItem.Set && !set.Type.Contains(RealItem.Type)).TakeWhile(set => !set.SetComplete))
+                {
+                    set.Type.Add(RealItem.Type);
+                    set.Count++;
+                    sameSetFound = true;
+                }
 
-                    //Mir Set
-                    if (RealItem.Set == ItemSet.Mir)
-                    {
-                        if (!MirSet.Contains((EquipmentSlot)i))
-                            MirSet.Add((EquipmentSlot)i);
-                    }
+                if (!ItemSets.Any() || !sameSetFound)
+                    ItemSets.Add(new ItemSets { Count = 1, Set = RealItem.Set, Type = new List<ItemType> { RealItem.Type } });
+
+                //Mir Set
+                if (RealItem.Set == ItemSet.Mir)
+                {
+                    if (!MirSet.Contains((EquipmentSlot)i))
+                        MirSet.Add((EquipmentSlot)i);
                 }
             }
 
@@ -1698,6 +1705,11 @@ namespace Server.MirObjects
             if ((OldLooks_Armour != Looks_Armour) || (OldLooks_Weapon != Looks_Weapon) || (OldLooks_Wings != Looks_Wings) || (OldLight != Light))
             {
                 Broadcast(GetUpdateInfo());
+
+                if ((OldLooks_Weapon == 49 || OldLooks_Weapon == 50) && (Looks_Weapon != 49 && Looks_Weapon != 50))
+                {
+                    Enqueue(GetFishInfo());
+                }
             }
 
             if (Old_MountType != MountType)
@@ -1706,10 +1718,6 @@ namespace Server.MirObjects
             }
         }
 
-        private void RefreshSlotStats()
-        {
-
-        }
         private void RefreshItemSetStats()
         {
             foreach (var s in ItemSets)
@@ -1893,6 +1901,67 @@ namespace Server.MirObjects
             HpDrainRate = Math.Min((byte)100, HpDrainRate);
         }
 
+        public void RefreshMountStats()
+        {
+            if (!RidingMount || !Mount.HasMount) return;
+
+            UserItem[] Slots = Mount.Slots;
+
+            for (int i = 0; i < Slots.Length; i++)
+            {
+                UserItem temp = Slots[i];
+                if (temp == null) continue;
+
+                ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+
+                if (temp.CurrentDura == 0 && temp.Info.Durability > 0) continue;
+
+                MinAC = (byte)Math.Min(byte.MaxValue, MinAC + RealItem.MinAC);
+                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + RealItem.MaxAC + temp.AC);
+                MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + RealItem.MinMAC);
+                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + RealItem.MaxMAC + temp.MAC);
+
+                MinDC = (byte)Math.Min(byte.MaxValue, MinDC + RealItem.MinDC);
+                MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + RealItem.MaxDC + temp.DC);
+                MinMC = (byte)Math.Min(byte.MaxValue, MinMC + RealItem.MinMC);
+                MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + RealItem.MaxMC + temp.MC);
+                MinSC = (byte)Math.Min(byte.MaxValue, MinSC + RealItem.MinSC);
+                MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + RealItem.MaxSC + temp.SC);
+
+                Accuracy = (byte)Math.Min(byte.MaxValue, Accuracy + RealItem.Accuracy + temp.Accuracy);
+                Agility = (byte)Math.Min(byte.MaxValue, Agility + RealItem.Agility + temp.Agility);
+
+                MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + RealItem.HP + temp.HP);
+                MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + RealItem.MP + temp.MP);
+
+                ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + temp.AttackSpeed + RealItem.AttackSpeed)));
+                Luck = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, Luck + temp.Luck + RealItem.Luck)));
+            }
+        }
+
+        public void RefreshFishingStats()
+        {
+            UserItem FishingRod = Info.Equipment[(int)EquipmentSlot.Weapon];
+
+            if (FishingRod == null) return;
+
+            UserItem[] Slots = FishingRod.Slots;
+
+            for (int i = 0; i < Slots.Length; i++)
+            {
+                UserItem temp = Slots[i];
+                if (temp == null) continue;
+
+                ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+
+                //flexibility
+                CriticalRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalRate + temp.CriticalRate + RealItem.CriticalRate)));
+
+                //success
+                Luck = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, Luck + temp.Luck + RealItem.Luck)));
+            }
+        }
+
         public void RefreshMount()
         {
             if (RidingMount)
@@ -1922,6 +1991,8 @@ namespace Server.MirObjects
                 RidingMount = false;
             }
 
+            RefreshStats();
+
             Broadcast(GetMountInfo());
             Enqueue(GetMountInfo());
         }
@@ -1942,6 +2013,172 @@ namespace Server.MirObjects
                     }
                 }
             }
+        }
+
+        public void FishingCast(bool cast, bool cancel = false)
+        {
+            UserItem Rod = Info.Equipment[(int)EquipmentSlot.Weapon];
+
+            byte FlexibilityStat = 0;
+            sbyte SuccessStat = 0;
+
+            FishingProgressMax = 30;
+
+            if (Rod == null || (Rod.Info.Shape != 49 && Rod.Info.Shape != 50))
+            {
+                Fishing = false;
+                return;
+            }
+
+            UserItem Hook = Rod.Slots[(int)FishingSlot.Hook];
+
+            if (Hook == null)
+            {
+                ReceiveChat("You need a hook.", ChatType.System);
+                return;
+            }
+
+            for (int i = 0; i < Rod.Slots.Length; i++) 
+            {
+                UserItem temp = Rod.Slots[i];
+                if (temp == null) continue;
+
+                ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+
+                FlexibilityStat = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, FlexibilityStat + temp.CriticalRate + RealItem.CriticalRate)));
+                SuccessStat = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, SuccessStat + temp.Luck + RealItem.Luck)));
+            }
+
+            FishingProgressMax += FlexibilityStat;
+            FishingChance = Envir.Random.Next(0,10) + (int)SuccessStat + FishingChanceCounter * 10;
+
+            if (FishingChance > 100)
+            {
+                FishingChance = 100;
+            }
+            else if (FishingChance < 0)
+            {
+                FishingChance = 0;
+            }
+
+            FishingTime = Envir.Time + FishingCastDelay;
+
+            if (cast)
+            {
+                _fishCounter = 0;
+                FishFound = false;
+
+                UserItem item = GetBait(1);
+                if (item == null)
+                {
+                    ReceiveChat("You need bait.", ChatType.System);
+                    return;
+                }
+
+                ConsumeItem(item, 1);
+
+                Fishing = true;
+            }
+            else
+            {
+                Fishing = false;
+
+                if (FishingProgress > 99)
+                {
+                    FishingChanceCounter++;
+                }
+
+                if (FishFound)
+                {
+                    if (FishingProgress < 100)
+                    {
+                        FishingChanceCounter = 0;
+
+                        for (int i = 0; i < Envir.FishingDrops.Count; i++)
+                        {
+                            DropInfo drop = Envir.FishingDrops[i];
+
+                            int rate = (int)(drop.Chance / Settings.DropRate); if (rate < 1) rate = 1;
+                            if (Envir.Random.Next(rate) != 0) continue;
+
+                            UserItem item = Envir.CreateDropItem(drop.Item);
+                            if (item == null) continue;
+
+                            GainItem(item);
+
+                            break;
+                        }
+
+                        if (Envir.Random.Next(20) == 0)
+                        {
+                            MonsterObject mob = MonsterObject.GetMonster(Envir.GetMonsterInfo(Settings.FishMonster));
+
+                            if (mob == null) return;
+
+                            mob.Spawn(CurrentMap, Back);
+                        }
+                    }
+                    FishFound = false;
+                }
+            }
+
+            Enqueue(GetFishInfo());
+            Broadcast(GetFishInfo());
+
+            if (FishingAutocast && !cast && !cancel)
+            {
+                FishingCast(true);
+                FishingTime = Envir.Time + (FishingCastDelay * 2);
+            }
+        }
+
+        public void FishingChangeAutocast(bool autoCast)
+        {
+            UserItem Rod = Info.Equipment[(int)EquipmentSlot.Weapon];
+
+            if (Rod.Info.Shape != 49 && Rod.Info.Shape != 50) return;
+
+            UserItem Reel = Rod.Slots[(int)FishingSlot.Reel];
+
+            if (Reel == null)
+            {
+                FishingAutocast = false;
+                return;
+            }
+
+            FishingAutocast = autoCast;
+        }
+
+        public void UpdateFish()
+        {
+            if (!FishFound)
+            {
+                FishFound = SMain.Envir.Random.Next(0, 100 - FishingChance) == 0;
+            }
+
+            FishingTime = Envir.Time + FishingDelay;
+
+            Enqueue(GetFishInfo());
+
+            if (FishingProgress > 100)
+            {
+                FishingCast(false);
+            }
+        }
+
+        Packet GetFishInfo()
+        {
+            FishingProgress = (int)(((decimal)_fishCounter / FishingProgressMax) * 100);
+
+            return new S.FishingUpdate
+            {
+                ObjectID = ObjectID,
+                Fishing = Fishing,
+                ProgressPercent = FishingProgress,
+                FishingPoint = Functions.PointMove(CurrentLocation, Direction, 3),
+                ChancePercent = FishingChance,
+                FoundFish = FishFound
+            };
         }
 
         private void AddTempSkills(IEnumerable<string> skillsToAdd)
@@ -4875,6 +5112,24 @@ namespace Server.MirObjects
             target.Attacked(this, damage, defence, damageWeapon);
         }
 
+        private void CompleteNPC(IList<object> data)
+        {
+            uint npcid = (uint)data[0];
+            string page = (string)data[1];
+
+            if (data.Count > 2)
+            {
+                Map map = (Map)data[2];
+                Point coords = (Point)data[3];
+
+                Teleport(map, coords);
+            }
+
+            NPCDelayed = true;
+
+            CallNPC(npcid, page);
+        }
+
 
         private UserItem GetAmulet(int count)
         {
@@ -4903,6 +5158,18 @@ namespace Server.MirObjects
 
             return null;
         }
+        private UserItem GetBait(int count)
+        {
+            UserItem item = Info.Equipment[(int)EquipmentSlot.Weapon];
+            if (item == null || item.Info.Type != ItemType.Weapon || (item.Info.Shape != 49 && item.Info.Shape != 50)) return null;
+
+            UserItem bait = item.Slots[(int)FishingSlot.Bait];
+
+            if (bait == null || bait.Count < count) return null;
+
+            return bait;
+        }
+
         private UserMagic GetMagic(Spell spell)
         {
             for (int i = 0; i < Info.Magics.Count; i++)
@@ -5041,8 +5308,6 @@ namespace Server.MirObjects
 
             GetObjects();
 
-            //RefreshMount();
-
             SafeZoneInfo szi = CurrentMap.GetSafeZone(CurrentLocation);
 
             if (szi != null)
@@ -5155,7 +5420,8 @@ namespace Server.MirObjects
                 Effect = MagicShield ? SpellEffect.MagicShieldUp : SpellEffect.None,
                 WingEffect = Looks_Wings,
                 MountType = MountType,
-                RidingMount = RidingMount
+                RidingMount = RidingMount,
+                Fishing = Fishing
             };
         }
 
@@ -5520,13 +5786,32 @@ namespace Server.MirObjects
             Enqueue(p);
         }
 
-        public void EquipSlotItem(MirGridType grid, ulong id, int to)
+        public void EquipSlotItem(MirGridType grid, ulong id, int to, MirGridType gridTo)
         {
-            S.EquipSlotItem p = new S.EquipSlotItem { Grid = grid, UniqueID = id, To = to, Success = false };
+            S.EquipSlotItem p = new S.EquipSlotItem { Grid = grid, UniqueID = id, To = to, GridTo = gridTo, Success = false };
 
-            UserItem Item = Info.Equipment[(int)EquipmentSlot.Mount];
+            UserItem Item = null;
+
+            switch (gridTo)
+            {
+                case MirGridType.Mount:
+                    Item = Info.Equipment[(int)EquipmentSlot.Mount];
+                    break;
+                case MirGridType.Fishing:
+                    Item = Info.Equipment[(int)EquipmentSlot.Weapon];
+                    break;
+                default:
+                    Enqueue(p);
+                    return;
+            }
 
             if (Item == null || Item.Slots == null)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (gridTo == MirGridType.Fishing && (Item.Info.Shape != 49 && Item.Info.Shape != 50))
             {
                 Enqueue(p);
                 return;
@@ -5589,12 +5874,6 @@ namespace Server.MirObjects
             }
 
             if (temp == null || index == -1)
-            {
-                Enqueue(p);
-                return;
-            }
-
-            if (temp.Info.Type != ItemType.Mask && temp.Info.Type != ItemType.Reins && temp.Info.Type != ItemType.Ribbon && temp.Info.Type != ItemType.Saddle && temp.Info.Type != ItemType.Bells)
             {
                 Enqueue(p);
                 return;
@@ -5889,6 +6168,13 @@ namespace Server.MirObjects
         public void EquipItem(MirGridType grid, ulong id, int to)
         {
             S.EquipItem p = new S.EquipItem { Grid = grid, UniqueID = id, To = to, Success = false };
+
+            if (RidingMount || Fishing)
+            {
+                Enqueue(p);
+                return;
+            }
+
             if (to < 0 || to >= Info.Equipment.Length)
             {
                 Enqueue(p);
@@ -6779,6 +7065,18 @@ namespace Server.MirObjects
                         return false;
                     }
                     break;
+                case ItemType.Hook:
+                case ItemType.Float:
+                case ItemType.Bait:
+                case ItemType.Finder:
+                case ItemType.Reel:
+                    if (Info.Equipment[(int)EquipmentSlot.Weapon] == null || 
+                        (Info.Equipment[(int)EquipmentSlot.Weapon].Info.Shape != 49 && Info.Equipment[(int)EquipmentSlot.Weapon].Info.Shape != 50))
+                    {
+                        ReceiveChat("Can only be used with a fishing rod", ChatType.System);
+                        return false;
+                    }
+                    break;
             }
 
             //if (item.Info.Type == ItemType.Book)
@@ -6973,8 +7271,19 @@ namespace Server.MirObjects
 
             for (int i = 0; i < Info.Equipment.Length; i++)
             {
+                if (Info.Equipment[i] != null && Info.Equipment[i].Slots.Length > 0)
+                {
+                    for (int j = 0; j < Info.Equipment[i].Slots.Length; j++)
+                    {
+                        if (Info.Equipment[i].Slots[j] != item) continue;
+                        Info.Equipment[i].Slots[j] = null;
+                        return;
+                    }
+                }
+
                 if (Info.Equipment[i] != item) continue;
                 Info.Equipment[i] = null;
+
                 return;
             }
 
@@ -8232,6 +8541,57 @@ namespace Server.MirObjects
             Info = null;
         }
 
+        public void Enqueue(Packet p)
+        {
+            if (Connection == null) return;
+            Connection.Enqueue(p);
+        }
+
+        public void SpellToggle(Spell spell, bool use)
+        {
+            UserMagic magic;
+            int cost;
+            switch (spell)
+            {
+                case Spell.Thrusting:
+                    Info.Thrusting = use;
+                    break;
+                case Spell.HalfMoon:
+                    Info.HalfMoon = use;
+                    break;
+                case Spell.CrossHalfMoon:
+                    Info.CrossHalfMoon = use;
+                    break;
+                case Spell.DoubleSlash:
+                    Info.DoubleSlash = use;
+                    break;
+                case Spell.TwinDrakeBlade:
+                    if (TwinDrakeBlade) return;
+                    magic = GetMagic(spell);
+                    if (magic == null) return;
+                    cost = magic.Info.BaseCost + magic.Level * magic.Info.LevelCost;
+                    if (cost >= MP) return;
+
+                    TwinDrakeBlade = true;
+                    ChangeMP(-cost);
+                    break;
+                case Spell.FlamingSword:
+                    if (FlamingSword || Envir.Time < FlamingSwordTime) return;
+                    magic = GetMagic(spell);
+                    if (magic == null) return;
+                    cost = magic.Info.BaseCost + magic.Level * magic.Info.LevelCost;
+                    if (cost >= MP) return;
+
+                    FlamingSword = true;
+                    FlamingSwordTime = Envir.Time + 10000;
+                    Enqueue(new S.SpellToggle { Spell = Spell.FlamingSword, CanUse = true });
+                    ChangeMP(-cost);
+                    break;
+            }
+        }
+
+
+        #region Groups
         public void SwitchGroup(bool allow)
         {
             Enqueue(new S.SwitchGroup { AllowGroup = allow });
@@ -8423,292 +8783,7 @@ namespace Server.MirObjects
 
             Enqueue(p);
         }
-
-        public void GuildInvite(bool accept)
-        {
-            if (PendingGuildInvite == null)
-            {
-                ReceiveChat("You have not been invited to a guild.", ChatType.System);
-                return;
-            }
-            if (!accept) return;
-            if (!PendingGuildInvite.HasRoom())
-            {
-                ReceiveChat(String.Format("{0} is full.", PendingGuildInvite.Name), ChatType.System);
-                return;
-            }
-            PendingGuildInvite.NewMember(this);
-            Info.GuildIndex = PendingGuildInvite.Guildindex;
-            MyGuild = PendingGuildInvite;
-            MyGuildRank = PendingGuildInvite.FindRank(Name);
-            GuildMembersChanged = true;
-            GuildNoticeChanged = true;
-            //tell us we now have a guild
-            Broadcast(GetInfo());
-            MyGuild.SendGuildStatus(this);
-            PendingGuildInvite = null;
-            EnableGuildInvite = false;
-            GuildCanRequestItems = true;
-        }
-
-        public void RequestGuildInfo(byte Type)
-        {
-            if (MyGuild == null) return;
-            if (MyGuildRank == null) return;
-            switch (Type)
-            {
-                case 0://notice
-                    if (GuildNoticeChanged)
-                        Enqueue(new S.GuildNoticeChange() { notice = MyGuild.Notice });
-                    GuildNoticeChanged = false;
-                    break;
-                case 1://memberlist
-                    if (GuildMembersChanged)
-                        Enqueue(new S.GuildMemberChange() { Status = 255, Ranks = MyGuild.Ranks });
-                    break;
-            }
-        }
-
-        public void GuildNameReturn(string Name)
-        {
-            if (Name == "") CanCreateGuild = false;
-            if (!CanCreateGuild) return;
-            if ((Name.Length < 3) || (Name.Length > 20))
-            {
-                ReceiveChat("Guild name to long.", ChatType.System);
-                CanCreateGuild = false;
-                return;
-            }
-            if (Name.Contains('\\'))
-            {
-                CanCreateGuild = false;
-                return;
-            }
-            if (MyGuild != null)
-            {
-                ReceiveChat("You are already part of a guild.", ChatType.System);
-                CanCreateGuild = false;
-                return;
-            }
-            GuildObject guild = Envir.GetGuild(Name);
-            if (guild != null)
-            {
-                ReceiveChat(string.Format("Guild {0} already exists.", Name), ChatType.System);
-                CanCreateGuild = false;
-                return;
-            }
-
-
-            CreateGuild(Name);
-            CanCreateGuild = false;
-        }
-
-        public void GuildStorageGoldChange(Byte Type, uint Amount)
-        {
-            if ((MyGuild == null) || (MyGuildRank == null))
-            {
-                ReceiveChat("You are not part of a guild.", ChatType.System);
-                return;
-            }
-            if (Type == 0)//donate
-            {
-                if (Account.Gold < Amount)
-                {
-                    ReceiveChat("Insufficient gold.", ChatType.System);
-                    return;
-                }
-                if ((MyGuild.Gold + (UInt64)Amount) > uint.MaxValue)
-                {
-                    ReceiveChat("Guild gold limit reached.", ChatType.System);
-                    return;
-                }
-                Account.Gold -= Amount;
-                MyGuild.Gold += Amount;
-                Enqueue(new S.LoseGold { Gold = Amount });
-                MyGuild.SendServerPacket(new S.GuildStorageGoldChange() { Type = 0, Name = Info.Name, Amount = Amount });
-                MyGuild.NeedSave = true;
-            }
-            else
-            {
-                if (MyGuild.Gold < Amount)
-                {
-                    ReceiveChat("Insufficient gold.", ChatType.System);
-                    return;
-                }
-                if (!CanGainGold(Amount))
-                {
-                    ReceiveChat("Gold limit reached.", ChatType.System);
-                    return;
-                }
-                if (MyGuildRank.Index != 0)
-                {
-                    ReceiveChat("Insufficient rank.", ChatType.System);
-                    return;
-                }
-                MyGuild.Gold -= Amount;
-                GainGold(Amount);
-                MyGuild.SendServerPacket(new S.GuildStorageGoldChange() { Type = 1, Name = Info.Name, Amount = Amount });
-                MyGuild.NeedSave = true;
-            }
-        }
-
-        public void GuildStorageItemChange(Byte Type, int from, int to)
-        {
-            S.GuildStorageItemChange p = new S.GuildStorageItemChange { Type = (byte)(3 + Type), From = from, To = to };
-            if ((MyGuild == null) || (MyGuildRank == null))
-            {
-                Enqueue(p);
-                ReceiveChat("You are not part of a guild.", ChatType.System);
-                return;
-            }
-
-            switch (Type)
-            {
-                case 0://store
-                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanStoreItem))
-                    {
-                        Enqueue(p);
-                        ReceiveChat("You do not have permission to store items in guild storage.", ChatType.System);
-                        return;
-                    }
-                    if (from < 0 || from >= Info.Inventory.Length)
-                    {
-                        Enqueue(p);
-                        return;
-                    }
-                    if (to < 0 || to >= MyGuild.StoredItems.Length)
-                    {
-                        Enqueue(p);
-                        return;
-                    }
-                    if (Info.Inventory[from] == null)
-                    {
-                        Enqueue(p);
-                        return;
-                    }
-                    if (Info.Inventory[from].Info.Bind.HasFlag(BindMode.DontStore))
-                    {
-                        Enqueue(p);
-                        return;
-                    }
-                    if (MyGuild.StoredItems[to] != null)
-                    {
-                        ReceiveChat("Target slot not empty.", ChatType.System);
-                        Enqueue(p);
-                        return;
-                    }
-                    MyGuild.StoredItems[to] = new GuildStorageItem() { Item = Info.Inventory[from], UserId = Info.Index };
-                    Info.Inventory[from] = null;
-                    RefreshBagWeight();
-                    //MyGuild.SendItemInfo(MyGuild.StoredItems[to].Item);
-                    MyGuild.SendItemInfo(MyGuild.StoredItems[to].Item);
-                    MyGuild.SendServerPacket(new S.GuildStorageItemChange() { Type = 0, User = Info.Index, Item = MyGuild.StoredItems[to], To = to, From = from });
-                    MyGuild.NeedSave = true;
-                    break;
-                case 1://retrieve
-                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanRetrieveItem))
-                    {
-
-                        ReceiveChat("You do not have permission to retrieve items from guild storage.", ChatType.System);
-                        return;
-                    }
-                    if (from < 0 || from >= MyGuild.StoredItems.Length)
-                    {
-                        Enqueue(p);
-                        return;
-                    }
-                    if (to < 0 || to >= Info.Inventory.Length)
-                    {
-                        Enqueue(p);
-                        return;
-                    }
-                    if (Info.Inventory[to] != null)
-                    {
-                        ReceiveChat("Target slot not empty.", ChatType.System);
-                        Enqueue(p);
-                        return;
-                    }
-                    if (MyGuild.StoredItems[from] == null)
-                    {
-                        Enqueue(p);
-                        return;
-                    }
-                    if (MyGuild.StoredItems[from].Item.Info.Bind.HasFlag(BindMode.DontStore))
-                    {
-                        Enqueue(p);
-                        return;
-                    }
-                    Info.Inventory[to] = MyGuild.StoredItems[from].Item;
-                    MyGuild.StoredItems[from] = null;
-                    MyGuild.SendServerPacket(new S.GuildStorageItemChange() { Type = 1, User = Info.Index, To = to, From = from });
-                    RefreshBagWeight();
-                    MyGuild.NeedSave = true;
-                    break;
-                case 2://request list
-                    if (!GuildCanRequestItems) return;
-                    GuildCanRequestItems = false;
-                    for (int i = 0; i < MyGuild.StoredItems.Length; i++)
-                    {
-                        if (MyGuild.StoredItems[i] == null) continue;
-                        UserItem item = MyGuild.StoredItems[i].Item;
-                        if (item == null) continue;
-                        //CheckItemInfo(item.Info);
-                        CheckItem(item);
-                    }
-                    Enqueue(new S.GuildStorageList() { Items = MyGuild.StoredItems });
-                    break;
-            }
-
-        }
-
-        public void Enqueue(Packet p)
-        {
-            if (Connection == null) return;
-            Connection.Enqueue(p);
-        }
-
-        public void SpellToggle(Spell spell, bool use)
-        {
-            UserMagic magic;
-            int cost;
-            switch (spell)
-            {
-                case Spell.Thrusting:
-                    Info.Thrusting = use;
-                    break;
-                case Spell.HalfMoon:
-                    Info.HalfMoon = use;
-                    break;
-                case Spell.CrossHalfMoon:
-                    Info.CrossHalfMoon = use;
-                    break;
-                case Spell.DoubleSlash:
-                    Info.DoubleSlash = use;
-                    break;
-                case Spell.TwinDrakeBlade:
-                    if (TwinDrakeBlade) return;
-                    magic = GetMagic(spell);
-                    if (magic == null) return;
-                    cost = magic.Info.BaseCost + magic.Level * magic.Info.LevelCost;
-                    if (cost >= MP) return;
-
-                    TwinDrakeBlade = true;
-                    ChangeMP(-cost);
-                    break;
-                case Spell.FlamingSword:
-                    if (FlamingSword || Envir.Time < FlamingSwordTime) return;
-                    magic = GetMagic(spell);
-                    if (magic == null) return;
-                    cost = magic.Info.BaseCost + magic.Level * magic.Info.LevelCost;
-                    if (cost >= MP) return;
-
-                    FlamingSword = true;
-                    FlamingSwordTime = Envir.Time + 10000;
-                    Enqueue(new S.SpellToggle { Spell = Spell.FlamingSword, CanUse = true });
-                    ChangeMP(-cost);
-                    break;
-            }
-        }
+        #endregion
 
         #region Guilds
         public bool CreateGuild(string GuildName)
@@ -8951,6 +9026,238 @@ namespace Server.MirObjects
             }
             MyGuild.NewNotice(notice);
         }
+        public void GuildInvite(bool accept)
+        {
+            if (PendingGuildInvite == null)
+            {
+                ReceiveChat("You have not been invited to a guild.", ChatType.System);
+                return;
+            }
+            if (!accept) return;
+            if (!PendingGuildInvite.HasRoom())
+            {
+                ReceiveChat(String.Format("{0} is full.", PendingGuildInvite.Name), ChatType.System);
+                return;
+            }
+            PendingGuildInvite.NewMember(this);
+            Info.GuildIndex = PendingGuildInvite.Guildindex;
+            MyGuild = PendingGuildInvite;
+            MyGuildRank = PendingGuildInvite.FindRank(Name);
+            GuildMembersChanged = true;
+            GuildNoticeChanged = true;
+            //tell us we now have a guild
+            Broadcast(GetInfo());
+            MyGuild.SendGuildStatus(this);
+            PendingGuildInvite = null;
+            EnableGuildInvite = false;
+            GuildCanRequestItems = true;
+        }
+        public void RequestGuildInfo(byte Type)
+        {
+            if (MyGuild == null) return;
+            if (MyGuildRank == null) return;
+            switch (Type)
+            {
+                case 0://notice
+                    if (GuildNoticeChanged)
+                        Enqueue(new S.GuildNoticeChange() { notice = MyGuild.Notice });
+                    GuildNoticeChanged = false;
+                    break;
+                case 1://memberlist
+                    if (GuildMembersChanged)
+                        Enqueue(new S.GuildMemberChange() { Status = 255, Ranks = MyGuild.Ranks });
+                    break;
+            }
+        }
+        public void GuildNameReturn(string Name)
+        {
+            if (Name == "") CanCreateGuild = false;
+            if (!CanCreateGuild) return;
+            if ((Name.Length < 3) || (Name.Length > 20))
+            {
+                ReceiveChat("Guild name to long.", ChatType.System);
+                CanCreateGuild = false;
+                return;
+            }
+            if (Name.Contains('\\'))
+            {
+                CanCreateGuild = false;
+                return;
+            }
+            if (MyGuild != null)
+            {
+                ReceiveChat("You are already part of a guild.", ChatType.System);
+                CanCreateGuild = false;
+                return;
+            }
+            GuildObject guild = Envir.GetGuild(Name);
+            if (guild != null)
+            {
+                ReceiveChat(string.Format("Guild {0} already exists.", Name), ChatType.System);
+                CanCreateGuild = false;
+                return;
+            }
+
+
+            CreateGuild(Name);
+            CanCreateGuild = false;
+        }
+        public void GuildStorageGoldChange(Byte Type, uint Amount)
+        {
+            if ((MyGuild == null) || (MyGuildRank == null))
+            {
+                ReceiveChat("You are not part of a guild.", ChatType.System);
+                return;
+            }
+            if (Type == 0)//donate
+            {
+                if (Account.Gold < Amount)
+                {
+                    ReceiveChat("Insufficient gold.", ChatType.System);
+                    return;
+                }
+                if ((MyGuild.Gold + (UInt64)Amount) > uint.MaxValue)
+                {
+                    ReceiveChat("Guild gold limit reached.", ChatType.System);
+                    return;
+                }
+                Account.Gold -= Amount;
+                MyGuild.Gold += Amount;
+                Enqueue(new S.LoseGold { Gold = Amount });
+                MyGuild.SendServerPacket(new S.GuildStorageGoldChange() { Type = 0, Name = Info.Name, Amount = Amount });
+                MyGuild.NeedSave = true;
+            }
+            else
+            {
+                if (MyGuild.Gold < Amount)
+                {
+                    ReceiveChat("Insufficient gold.", ChatType.System);
+                    return;
+                }
+                if (!CanGainGold(Amount))
+                {
+                    ReceiveChat("Gold limit reached.", ChatType.System);
+                    return;
+                }
+                if (MyGuildRank.Index != 0)
+                {
+                    ReceiveChat("Insufficient rank.", ChatType.System);
+                    return;
+                }
+                MyGuild.Gold -= Amount;
+                GainGold(Amount);
+                MyGuild.SendServerPacket(new S.GuildStorageGoldChange() { Type = 1, Name = Info.Name, Amount = Amount });
+                MyGuild.NeedSave = true;
+            }
+        }
+        public void GuildStorageItemChange(Byte Type, int from, int to)
+        {
+            S.GuildStorageItemChange p = new S.GuildStorageItemChange { Type = (byte)(3 + Type), From = from, To = to };
+            if ((MyGuild == null) || (MyGuildRank == null))
+            {
+                Enqueue(p);
+                ReceiveChat("You are not part of a guild.", ChatType.System);
+                return;
+            }
+
+            switch (Type)
+            {
+                case 0://store
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanStoreItem))
+                    {
+                        Enqueue(p);
+                        ReceiveChat("You do not have permission to store items in guild storage.", ChatType.System);
+                        return;
+                    }
+                    if (from < 0 || from >= Info.Inventory.Length)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (to < 0 || to >= MyGuild.StoredItems.Length)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (Info.Inventory[from] == null)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (Info.Inventory[from].Info.Bind.HasFlag(BindMode.DontStore))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (MyGuild.StoredItems[to] != null)
+                    {
+                        ReceiveChat("Target slot not empty.", ChatType.System);
+                        Enqueue(p);
+                        return;
+                    }
+                    MyGuild.StoredItems[to] = new GuildStorageItem() { Item = Info.Inventory[from], UserId = Info.Index };
+                    Info.Inventory[from] = null;
+                    RefreshBagWeight();
+                    //MyGuild.SendItemInfo(MyGuild.StoredItems[to].Item);
+                    MyGuild.SendItemInfo(MyGuild.StoredItems[to].Item);
+                    MyGuild.SendServerPacket(new S.GuildStorageItemChange() { Type = 0, User = Info.Index, Item = MyGuild.StoredItems[to], To = to, From = from });
+                    MyGuild.NeedSave = true;
+                    break;
+                case 1://retrieve
+                    if (!MyGuildRank.Options.HasFlag(RankOptions.CanRetrieveItem))
+                    {
+
+                        ReceiveChat("You do not have permission to retrieve items from guild storage.", ChatType.System);
+                        return;
+                    }
+                    if (from < 0 || from >= MyGuild.StoredItems.Length)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (to < 0 || to >= Info.Inventory.Length)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (Info.Inventory[to] != null)
+                    {
+                        ReceiveChat("Target slot not empty.", ChatType.System);
+                        Enqueue(p);
+                        return;
+                    }
+                    if (MyGuild.StoredItems[from] == null)
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    if (MyGuild.StoredItems[from].Item.Info.Bind.HasFlag(BindMode.DontStore))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    Info.Inventory[to] = MyGuild.StoredItems[from].Item;
+                    MyGuild.StoredItems[from] = null;
+                    MyGuild.SendServerPacket(new S.GuildStorageItemChange() { Type = 1, User = Info.Index, To = to, From = from });
+                    RefreshBagWeight();
+                    MyGuild.NeedSave = true;
+                    break;
+                case 2://request list
+                    if (!GuildCanRequestItems) return;
+                    GuildCanRequestItems = false;
+                    for (int i = 0; i < MyGuild.StoredItems.Length; i++)
+                    {
+                        if (MyGuild.StoredItems[i] == null) continue;
+                        UserItem item = MyGuild.StoredItems[i].Item;
+                        if (item == null) continue;
+                        //CheckItemInfo(item.Info);
+                        CheckItem(item);
+                    }
+                    Enqueue(new S.GuildStorageList() { Items = MyGuild.StoredItems });
+                    break;
+            }
+
+        }
         #endregion
 
         #region Trading
@@ -8965,6 +9272,8 @@ namespace Server.MirObjects
             Point target = Functions.PointMove(CurrentLocation, Direction, 1);
             Cell cell = CurrentMap.GetCell(target);
             PlayerObject player = null;
+
+            if (cell.Objects == null || cell.Objects.Count < 1) return;
 
             for (int i = 0; i < cell.Objects.Count; i++)
             {

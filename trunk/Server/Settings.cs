@@ -19,6 +19,8 @@ namespace Server
                             DropPath = EnvirPath + @".\Drops\",
                             NameListPath = EnvirPath + @".\NameLists\";
 
+
+
         private static readonly InIReader Reader = new InIReader(@".\Setup.ini");
 
 
@@ -28,6 +30,7 @@ namespace Server
         public static byte[] VersionHash;
         public static string GMPassword = "C#Mir 4.0";
         public static string DefaultNPCFilename = "00Default";
+        public static string FishingDropFilename = "00Fishing";
 
         //Network
         public static string IPAddress = "127.0.0.1";
@@ -76,7 +79,8 @@ namespace Server
                              WhiteSnake = "White Serpent",
                              AngelName = "Holy Deva",
                              BombSpiderName = "Bomb Spider",
-                             CloneName = "Clone";
+                             CloneName = "Clone",
+                             FishMonster = "Giant Keratoid";
 
         public static string HealRing = "Healing",
                              FireRing = "FireBall",
@@ -84,7 +88,7 @@ namespace Server
                             
 
         //character settings
-        private static String[] BaseStatClassNames = { "Warrior", "Wizard", "Taoist", "Assassin","Archer" };
+        private static String[] BaseStatClassNames = { "Warrior", "Wizard", "Taoist", "Assassin", "Archer" };
         public static BaseStats[] ClassBaseStats = new BaseStats[5] { new BaseStats(MirClass.Warrior), new BaseStats(MirClass.Wizard), new BaseStats(MirClass.Taoist), new BaseStats(MirClass.Assassin), new BaseStats(MirClass.Archer) };
         public static List<RandomItemStat> RandomItemStatsList = new List<RandomItemStat>();
         public static List<MineSet> MineSetList = new List<MineSet>();
@@ -167,6 +171,7 @@ namespace Server
             AngelName = Reader.ReadString("Game", "AngelName", AngelName);
             BombSpiderName = Reader.ReadString("Game", "BombSpiderName", BombSpiderName);
             CloneName = Reader.ReadString("Game", "CloneName", CloneName);
+            FishMonster = Reader.ReadString("Game", "FishMonster", FishMonster);
 
             //Items
             HealRing = Reader.ReadString("Items", "HealRing", HealRing);
@@ -316,6 +321,7 @@ namespace Server
             Reader.Write("Game", "AngelName", AngelName);
             Reader.Write("Game", "BombSpiderName", BombSpiderName);
             Reader.Write("Game", "CloneName", CloneName);
+            Reader.Write("Game", "FishMonster", FishMonster);
 
             Reader.Write("Items", "HealRing", HealRing);
             Reader.Write("Items", "FireRing", FireRing);
@@ -362,7 +368,7 @@ namespace Server
             Reader.Write("Items", "HealthRegenWeight", HealthRegenWeight);
             Reader.Write("Items", "MaxManaRegen", MaxManaRegen);
             Reader.Write("Items", "ManaRegenWeight", ManaRegenWeight);
-            Reader.Write("ITems", "MaxPoisonRecovery", MaxPoisonRecovery);
+            Reader.Write("Items", "MaxPoisonRecovery", MaxPoisonRecovery);
             Reader.Write("Items", "PvpCanResistMagic", PvpCanResistMagic);
             Reader.Write("Items", "PvpCanResistPoison", PvpCanResistPoison);
             Reader.Write("Items", "PvpCanFreeze", PvpCanFreeze);

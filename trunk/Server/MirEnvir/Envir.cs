@@ -89,6 +89,8 @@ namespace Server.MirEnvir
         public Dragon DragonSystem;
         public NPCObject DefaultNPC;
 
+        public List<DropInfo> FishingDrops = new List<DropInfo>();
+
         static Envir()
         {
             AccountIDReg =
@@ -510,6 +512,45 @@ namespace Server.MirEnvir
             }
         }
 
+        public void LoadFishingDrops()
+        {
+            FishingDrops.Clear();
+
+            string path = Path.Combine(Settings.DropPath, Settings.FishingDropFilename + ".txt");
+
+            if (!File.Exists(path))
+            {
+                SMain.Enqueue(string.Format("Fishing File Not Found: {0}", path));
+                return;
+            }
+
+            string[] lines = File.ReadAllLines(path);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].StartsWith(";") || string.IsNullOrWhiteSpace(lines[i])) continue;
+
+                DropInfo drop = DropInfo.FromLine(lines[i]);
+                if (drop == null)
+                {
+                    SMain.Enqueue(string.Format("Could not load fishing drop: {0}", lines[i]));
+                    continue;
+                }
+
+                FishingDrops.Add(drop);
+            }
+
+            FishingDrops.Sort((drop1, drop2) =>
+            {
+                if (drop1.Chance > 0 && drop2.Chance == 0)
+                    return 1;
+                if (drop1.Chance == 0 && drop2.Chance > 0)
+                    return -1;
+
+                return drop1.Item.Type.CompareTo(drop2.Item.Type);
+            });
+        }
+
         private bool BindCharacter(AuctionInfo auction)
         {
             for (int i = 0; i < CharacterList.Count; i++)
@@ -570,6 +611,8 @@ namespace Server.MirEnvir
             }
 
             DefaultNPC = new NPCObject(new NPCInfo() { Name = "DefaultNPC", FileName = Settings.DefaultNPCFilename, IsDefault = true });
+
+            LoadFishingDrops();
 
             SMain.Enqueue("Envir Started.");
         }

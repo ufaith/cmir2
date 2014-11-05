@@ -399,6 +399,12 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.EquipSlotItem:
                     EquipSlotItem((C.EquipSlotItem)p);
                     break;
+                case (short)ClientPacketIds.FishingCast:
+                    FishingCast((C.FishingCast)p);
+                    break;
+                case (short)ClientPacketIds.FishingChangeAutocast:
+                    FishingChangeAutocast((C.FishingChangeAutocast)p);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1018,7 +1024,21 @@ namespace Server.MirNetwork
         {
             if (Stage != GameStage.Game) return;
 
-            Player.EquipSlotItem(p.Grid, p.UniqueID, p.To);
+            Player.EquipSlotItem(p.Grid, p.UniqueID, p.To, p.GridTo);
+        }
+
+        private void FishingCast(C.FishingCast p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.FishingCast(p.CastOut, true);
+        }
+
+        private void FishingChangeAutocast(C.FishingChangeAutocast p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.FishingChangeAutocast(p.AutoCast);
         }
     }
 }

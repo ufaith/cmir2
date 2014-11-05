@@ -1147,18 +1147,53 @@ namespace ClientPackets
         public MirGridType Grid;
         public ulong UniqueID;
         public int To;
+        public MirGridType GridTo;
 
         protected override void ReadPacket(BinaryReader reader)
         {
             Grid = (MirGridType)reader.ReadByte();
             UniqueID = reader.ReadUInt64();
             To = reader.ReadInt32();
+            GridTo = (MirGridType)reader.ReadByte();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write((byte)Grid);
             writer.Write(UniqueID);
             writer.Write(To);
+            writer.Write((byte)GridTo);
+        }
+    }
+
+    public sealed class FishingCast : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.FishingCast; } }
+
+        public bool CastOut;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            CastOut = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(CastOut);
+        }
+    }
+
+    public sealed class FishingChangeAutocast : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.FishingChangeAutocast; } }
+
+        public bool AutoCast;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            AutoCast = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(AutoCast);
         }
     }
 }

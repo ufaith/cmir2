@@ -57,7 +57,8 @@ namespace Client.MirGraphics
                                           ARHumEffect = new MLibrary[3],
                                           Monsters = new MLibrary[142],
                                           NPCs = new MLibrary[173],
-                                          Mounts = new MLibrary[12];
+                                          Mounts = new MLibrary[12],
+                                          Fishing = new MLibrary[2];
 
         static Libraries()
         {
@@ -116,6 +117,9 @@ namespace Client.MirGraphics
 
             for (int i = 0; i < Mounts.Length; i++)
                 Mounts[i] = new MLibrary(Settings.MountPath + i.ToString("00"));
+
+            for (int i = 0; i < Fishing.Length; i++)
+                Fishing[i] = new MLibrary(Settings.FishingPath + i.ToString("00"));
 
             #region Maplibs
             //wemade mir2 (allowed from 0-99)

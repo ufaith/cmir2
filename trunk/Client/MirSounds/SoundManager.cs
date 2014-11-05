@@ -213,6 +213,11 @@ namespace Client.MirSounds
             TigerAttack1 = 10181,
             TigerAttack2 = 10182,
             TigerAttack3 = 10183,
+
+            FishingThrow = 10184,
+            FishingPull = 10185,
+            Fishing = 10186,
+
             WolfRide1 = 10188,
             WolfRide2 = 10189,
             WolfAttack1 = 10190,

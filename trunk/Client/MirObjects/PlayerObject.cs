@@ -54,6 +54,14 @@ namespace Client.MirObjects
             }
         }
 
+        public bool HasFishingRod
+        {
+            get
+            {
+                return Weapon == 49 || Weapon == 50;
+            }
+        }
+
         public Spell Spell;
         public byte SpellLevel;
         public bool Cast;
@@ -73,6 +81,11 @@ namespace Client.MirObjects
         public short MountType;
         public long MountTime;
         public bool RidingMount;
+
+        public long FishingTime;
+        public bool Fishing;
+        public Point FishingPoint;
+        public bool FoundFish;
 
         public PlayerObject(uint objectID)
             : base(objectID)
@@ -110,6 +123,8 @@ namespace Client.MirObjects
             MountType = info.MountType;
             RidingMount = info.RidingMount;
 
+            Fishing = info.Fishing;
+
             SetLibraries();
 
             if (Dead) ActionFeed.Add(new QueuedAction { Action = MirAction.Dead, Direction = Direction, Location = CurrentLocation });
@@ -142,6 +157,39 @@ namespace Client.MirObjects
             SetLibraries();
 
             PlayMountSound();
+        }
+
+        public void FishingUpdate(S.FishingUpdate p)
+        {
+            if (Fishing != p.Fishing)
+            {
+                MirDirection dir = Functions.DirectionFromPoint(CurrentLocation, p.FishingPoint);
+
+                if (p.Fishing)
+                {        
+                    QueuedAction action = new QueuedAction { Action = MirAction.FishingCast, Direction = dir, Location = CurrentLocation };
+                    ActionFeed.Add(action);
+                }
+                else
+                {
+                    QueuedAction action = new QueuedAction { Action = MirAction.FishingReel, Direction = dir, Location = CurrentLocation };
+                    ActionFeed.Add(action);
+
+                    if (p.FoundFish)
+                        GameScene.Scene.ChatDialog.ReceiveChat("Found fish!!", ChatType.Hint);
+                }
+
+                Fishing = p.Fishing;
+                SetLibraries();
+            }
+
+            if (!HasFishingRod)
+            {
+                GameScene.Scene.FishingDialog.Hide();
+            }          
+
+            FishingPoint = p.FishingPoint;
+            FoundFish = p.FoundFish;
         }
 
 
@@ -405,15 +453,30 @@ namespace Client.MirObjects
             }
 
             #region Common
+            //Harvest
             if (CurrentAction == MirAction.Harvest)
                 WeaponLibrary1 = 1 < Libraries.CWeapons.Length ? Libraries.CWeapons[1] : null;
 
+            //Mounts
             if (MountType > -1 && RidingMount)
             {
                 MountLibrary = MountType < Libraries.Mounts.Length ? Libraries.Mounts[MountType] : null;
             }
             else
+            {
                 MountLibrary = null;
+            }
+
+            //Fishing
+            if (HasFishingRod)
+            {
+                if (CurrentAction == MirAction.FishingCast || CurrentAction == MirAction.FishingWait || CurrentAction == MirAction.FishingReel)
+                {
+                    WeaponLibrary1 = 0 < Libraries.Fishing.Length ? Libraries.Fishing[Weapon - 49] : null;
+                    WeaponLibrary2 = null;
+                    WeaponOffSet = -632;
+                }
+            }
 
             DieSound = Gender == MirGender.Male ? SoundList.MaleDie : SoundList.FemaleDie;
             FlinchSound = Gender == MirGender.Male ? SoundList.MaleFlinch : SoundList.FemaleFlinch;
@@ -636,6 +699,8 @@ namespace Client.MirObjects
                     else
                         CurrentAction = CMain.Time > StanceTime ? MirAction.Standing : MirAction.Stance;
                 }
+
+                if (Fishing) CurrentAction = MirAction.FishingWait;
 
                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
                 FrameIndex = 0;
@@ -1624,6 +1689,7 @@ namespace Client.MirObjects
 
                     if (FrameIndex < 0) EffectFrameIndex = 0;
                     break;
+
                 case MirAction.Standing:
                 case MirAction.MountStanding:
                 case MirAction.DashFail:
@@ -1658,7 +1724,69 @@ namespace Client.MirObjects
                         else
                             NextMotion2 += EffectFrameInterval;
                     }
-                    break;
+                    break;  
+
+
+                case MirAction.FishingCast:             
+                case MirAction.FishingReel:
+                case MirAction.FishingWait:
+                    if (CMain.Time >= NextMotion)
+                    {
+                        GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame();
+
+                        if (UpdateFrame() >= Frame.Count)
+                        {
+                            FrameIndex = Frame.Count - 1;
+                            SetAction();
+                        }
+                        else
+                        {
+                            switch (FrameIndex)
+                            {
+                                case 1:
+                                    switch (CurrentAction)
+                                    {
+                                        case MirAction.FishingCast:
+                                            SoundManager.PlaySound(SoundList.FishingThrow);
+                                            break;
+                                        case MirAction.FishingReel:
+                                            SoundManager.PlaySound(SoundList.FishingPull);
+                                            break;
+                                        case MirAction.FishingWait:
+                                            if (FoundFish)
+                                            {
+                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 671, 6, 720, FishingPoint));
+                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 665, 6, 720, FishingPoint));
+                                                SoundManager.PlaySound(SoundList.Fishing);
+                                            }
+                                            else
+                                            {
+                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 650, 6, 720, FishingPoint));
+                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 640, 6, 720, FishingPoint));
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            NextMotion += FrameInterval;
+                        }
+                    }
+
+                    if (WingEffect > 0 && CMain.Time >= NextMotion2)
+                    {
+                        GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame2();
+
+                        if (UpdateFrame2() >= Frame.EffectCount)
+                            EffectFrameIndex = Frame.EffectCount - 1;
+                        else
+                            NextMotion2 += EffectFrameInterval;
+                    }
+                    break;     
+
                 case MirAction.Attack1:
                 case MirAction.Attack2:
                 case MirAction.Attack3:
