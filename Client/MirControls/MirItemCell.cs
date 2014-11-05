@@ -62,6 +62,8 @@ namespace Client.MirControls
                         return GuestTradeDialog.GuestItems;
                     case MirGridType.Mount:
                         return MapObject.User.Equipment[(int)EquipmentSlot.Mount].Slots;
+                    case MirGridType.Fishing:
+                        return MapObject.User.Equipment[(int)EquipmentSlot.Weapon].Slots;
                     default:
                         throw new NotImplementedException();
                 }
@@ -253,6 +255,8 @@ namespace Client.MirControls
         {
             if (Locked || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant || GridType == MirGridType.GuildStorage) return;
 
+            if (MapObject.User.RidingMount || MapObject.User.Fishing) return;
+
             if (GridType == MirGridType.BuyBack)
             {
                 BuyItem();
@@ -418,6 +422,11 @@ namespace Client.MirControls
                 case ItemType.Ribbon:
                 case ItemType.Saddle:
                 case ItemType.Mask:
+                case ItemType.Hook:
+                case ItemType.Float:
+                case ItemType.Bait:
+                case ItemType.Finder:
+                case ItemType.Reel:
                     UseSlotItem();
                     break;
             }
@@ -427,51 +436,100 @@ namespace Client.MirControls
         }
         public void UseSlotItem()
         {
-            MountDialog dialog = GameScene.Scene.MountDialog;
+            MountDialog mountDialog = null;
+            FishingDialog fishingDialog = null;
 
-            UserItem MountItem = GameScene.User.Equipment[(int)EquipmentSlot.Mount];
-
-            if (MountItem == null || MountItem.Slots == null || !CanUseItem()) return;
+            if (!CanUseItem()) return;
 
             switch (Item.Info.Type)
             {
                 case ItemType.Reins:
-                    if (dialog.Grid[(int)MountSlot.Reins].CanWearItem(Item))
+                    mountDialog = GameScene.Scene.MountDialog;
+                    if (mountDialog.Grid[(int)MountSlot.Reins].CanWearItem(Item))
                     {
-                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Reins });
-                        dialog.Grid[(int)MountSlot.Reins].Locked = true;
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Reins, GridTo = MirGridType.Mount });
+                        mountDialog.Grid[(int)MountSlot.Reins].Locked = true;
                         Locked = true;
                     }
                     break;
                 case ItemType.Bells:
-                    if (dialog.Grid[(int)MountSlot.Bells].CanWearItem(Item))
+                    mountDialog = GameScene.Scene.MountDialog;
+                    if (mountDialog.Grid[(int)MountSlot.Bells].CanWearItem(Item))
                     {
-                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Bells });
-                        dialog.Grid[(int)MountSlot.Bells].Locked = true;
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Bells, GridTo = MirGridType.Mount });
+                        mountDialog.Grid[(int)MountSlot.Bells].Locked = true;
                         Locked = true;
                     }
                     break;
                 case ItemType.Ribbon:
-                    if (dialog.Grid[(int)MountSlot.Ribbon].CanWearItem(Item))
+                    mountDialog = GameScene.Scene.MountDialog;
+                    if (mountDialog.Grid[(int)MountSlot.Ribbon].CanWearItem(Item))
                     {
-                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Ribbon });
-                        dialog.Grid[(int)MountSlot.Ribbon].Locked = true;
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Ribbon, GridTo = MirGridType.Mount });
+                        mountDialog.Grid[(int)MountSlot.Ribbon].Locked = true;
                         Locked = true;
                     }
                     break;
                 case ItemType.Saddle:
-                    if (dialog.Grid[(int)MountSlot.Saddle].CanWearItem(Item))
+                    mountDialog = GameScene.Scene.MountDialog;
+                    if (mountDialog.Grid[(int)MountSlot.Saddle].CanWearItem(Item))
                     {
-                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Saddle });
-                        dialog.Grid[(int)MountSlot.Saddle].Locked = true;
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Saddle, GridTo = MirGridType.Mount });
+                        mountDialog.Grid[(int)MountSlot.Saddle].Locked = true;
                         Locked = true;
                     }
                     break;
                 case ItemType.Mask:
-                    if (dialog.Grid[(int)MountSlot.Mask].CanWearItem(Item))
+                    mountDialog = GameScene.Scene.MountDialog;
+                    if (mountDialog.Grid[(int)MountSlot.Mask].CanWearItem(Item))
                     {
-                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Mask });
-                        dialog.Grid[(int)MountSlot.Mask].Locked = true;
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)MountSlot.Mask, GridTo = MirGridType.Mount });
+                        mountDialog.Grid[(int)MountSlot.Mask].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Hook:
+                    fishingDialog = GameScene.Scene.FishingDialog;
+                    if (fishingDialog.Grid[(int)FishingSlot.Hook].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)FishingSlot.Hook, GridTo = MirGridType.Fishing });
+                        fishingDialog.Grid[(int)FishingSlot.Hook].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Float:
+                    fishingDialog = GameScene.Scene.FishingDialog;
+                    if (fishingDialog.Grid[(int)FishingSlot.Float].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)FishingSlot.Float, GridTo = MirGridType.Fishing });
+                        fishingDialog.Grid[(int)FishingSlot.Float].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Bait:
+                    fishingDialog = GameScene.Scene.FishingDialog;
+                    if (fishingDialog.Grid[(int)FishingSlot.Bait].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)FishingSlot.Bait, GridTo = MirGridType.Fishing });
+                        fishingDialog.Grid[(int)FishingSlot.Bait].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Finder:
+                    fishingDialog = GameScene.Scene.FishingDialog;
+                    if (fishingDialog.Grid[(int)FishingSlot.Finder].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)FishingSlot.Finder, GridTo = MirGridType.Fishing });
+                        fishingDialog.Grid[(int)FishingSlot.Finder].Locked = true;
+                        Locked = true;
+                    }
+                    break;
+                case ItemType.Reel:
+                    fishingDialog = GameScene.Scene.FishingDialog;
+                    if (fishingDialog.Grid[(int)FishingSlot.Reel].CanWearItem(Item))
+                    {
+                        Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)FishingSlot.Reel, GridTo = MirGridType.Fishing });
+                        fishingDialog.Grid[(int)FishingSlot.Reel].Locked = true;
                         Locked = true;
                     }
                     break;
@@ -1176,6 +1234,18 @@ namespace Client.MirControls
                         return false;
                     }
                     break;
+                case ItemType.Hook:
+                case ItemType.Float:
+                case ItemType.Bait:
+                case ItemType.Finder:
+                case ItemType.Reel:
+                    if (MapObject.User.Equipment[(int)EquipmentSlot.Weapon] == null || 
+                        (MapObject.User.Equipment[(int)EquipmentSlot.Weapon].Info.Shape != 49 && MapObject.User.Equipment[(int)EquipmentSlot.Weapon].Info.Shape != 50))
+                    {
+                        GameScene.Scene.ChatDialog.ReceiveChat("You do not have a fishing rod equipped.", ChatType.System);
+                        return false;
+                    }
+                    break;
             }
             return true;
         }
@@ -1284,21 +1354,6 @@ namespace Client.MirControls
                     if (MapObject.User.MaxSC < i.Info.RequiredAmount)
                     {
                         GameScene.Scene.ChatDialog.ReceiveChat("You do not have enough SC.", ChatType.System);
-                        return false;
-                    }
-                    break;
-            }
-
-            switch (i.Info.Type)
-            {
-                case ItemType.Saddle:
-                case ItemType.Ribbon:
-                case ItemType.Bells:
-                case ItemType.Mask:
-                case ItemType.Reins:
-                    if (MapObject.User.Equipment[(int)EquipmentSlot.Mount] == null)
-                    {
-                        GameScene.Scene.ChatDialog.ReceiveChat("You do not have a mount equipped.", ChatType.System);
                         return false;
                     }
                     break;

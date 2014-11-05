@@ -251,7 +251,7 @@ namespace Server.MirDatabase
             if (!int.TryParse(parts[0].Substring(2), out info.Chance)) return null;
             if (string.Compare(parts[1], "Gold", StringComparison.OrdinalIgnoreCase) == 0)
             {
-                if (parts.Length < 2) return null;
+                if (parts.Length < 3) return null;
                 if (!uint.TryParse(parts[2], out info.Gold) || info.Gold == 0) return null;
             }
             else

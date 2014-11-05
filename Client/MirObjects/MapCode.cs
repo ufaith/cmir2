@@ -32,6 +32,8 @@ namespace Client.MirObjects
         public byte Unknown;
         public List<MapObject> CellObjects;
 
+        public bool FishingCell;
+
         public void AddObject(MapObject ob)
         {
             if (CellObjects == null) CellObjects = new List<MapObject>();
@@ -231,6 +233,9 @@ namespace Client.MirObjects
                                 Unknown = Bytes[++offSet],
                             };
                         offSet++;
+
+                        if (MapCells[x, y].Light == 100 || MapCells[x, y].Light == 101)
+                            MapCells[x, y].FishingCell = true;
                     }
             }
             catch (Exception ex)

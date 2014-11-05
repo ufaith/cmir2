@@ -34,12 +34,12 @@ C:\Users\Dan\Documents\C# MIR Source\Source\Client\obj\Debug\Client.csproj.Gener
 C:\clients\c#mir\Client\Client.exe.config
 C:\clients\c#mir\Client\Client.exe
 C:\clients\c#mir\Client\Client.pdb
+C:\Mir 2\Mir 2 Client\Client.exe.config
+C:\Mir 2\Mir 2 Client\Client.exe
+C:\Mir 2\Mir 2 Client\Client.pdb
 C:\Mir 2 Source\trunk SVN\Client\obj\Debug\Client.csprojResolveAssemblyReference.cache
 C:\Mir 2 Source\trunk SVN\Client\obj\Debug\Client.CMain.resources
 C:\Mir 2 Source\trunk SVN\Client\obj\Debug\Client.Properties.Resources.resources
 C:\Mir 2 Source\trunk SVN\Client\obj\Debug\Client.csproj.GenerateResource.Cache
 C:\Mir 2 Source\trunk SVN\Client\obj\Debug\Client.exe
 C:\Mir 2 Source\trunk SVN\Client\obj\Debug\Client.pdb
-C:\Mir 2\Mir 2 Client\Client.exe.config
-C:\Mir 2\Mir 2 Client\Client.exe
-C:\Mir 2\Mir 2 Client\Client.pdb

@@ -12,7 +12,8 @@ namespace Server.MirObjects
         Spawn,
         Recall,
         MapMovement,
-        Mine
+        Mine,
+        NPC
     }
 
     public class DelayedAction
