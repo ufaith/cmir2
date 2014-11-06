@@ -1029,9 +1029,6 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.EquipSlotItem:
                     EquipSlotItem((S.EquipSlotItem)p);
                     break;
-                //case (short)ServerPacketIds.FishingCast:
-                //    FishingCast((S.FishingCast)p);
-                //    break;
                 case (short)ServerPacketIds.FishingUpdate:
                     FishingUpdate((S.FishingUpdate)p);
                     break;
@@ -8086,28 +8083,27 @@ namespace Client.MirScenes
 
         private void RefreshInferface()
         {
-            //int offSet = MapObject.User.Gender == MirGender.Male ? 0 : 1;
-            int offSet = 0;
+            int offSet = MapObject.User.Gender == MirGender.Male ? 0 : 1;
 
-            Index = 504 + offSet;
+            Index = 504;// +offSet;
             CharacterPage.Index = 340 + offSet;
 
             switch (MapObject.User.Class)
             {
                 case MirClass.Warrior:
-                    ClassImage.Index = 100 + offSet * 5;
+                    ClassImage.Index = 100;// + offSet * 5;
                     break;
                 case MirClass.Wizard:
-                    ClassImage.Index = 101 + offSet * 5;
+                    ClassImage.Index = 101;// + offSet * 5;
                     break;
                 case MirClass.Taoist:
-                    ClassImage.Index = 102 + offSet * 5;
+                    ClassImage.Index = 102;// + offSet * 5;
                     break;
                 case MirClass.Assassin:
-                    ClassImage.Index = 103 + offSet * 5;
+                    ClassImage.Index = 103;// + offSet * 5;
                     break;
                 case MirClass.Archer:
-                    ClassImage.Index = 104 + offSet * 5;
+                    ClassImage.Index = 104;// + offSet * 5;
                     break;
             }
 

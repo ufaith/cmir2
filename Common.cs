@@ -774,7 +774,6 @@ public enum ServerPacketIds : short
     TradeCancel,
     MountUpdate,
     EquipSlotItem,
-    //FishingCast,
     FishingUpdate,
 }
 
@@ -2783,8 +2782,6 @@ public abstract class Packet
                 return new S.MountUpdate();
             case (short)ServerPacketIds.EquipSlotItem:
                 return new S.EquipSlotItem();
-            //case (short)ServerPacketIds.FishingCast:
-            //    return new S.FishingCast();
             case (short)ServerPacketIds.FishingUpdate:
                 return new S.FishingUpdate();
             default:
