@@ -2168,7 +2168,7 @@ namespace Server.MirObjects
 
         Packet GetFishInfo()
         {
-            FishingProgress = (int)(((decimal)_fishCounter / FishingProgressMax) * 100);
+            FishingProgress = _fishCounter > 0 ? (int)(((decimal)_fishCounter / FishingProgressMax) * 100) : 0;
 
             return new S.FishingUpdate
             {

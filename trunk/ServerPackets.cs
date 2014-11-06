@@ -3496,25 +3496,6 @@ namespace ServerPackets
         }
     }
 
-    //public sealed class FishingCast : Packet
-    //{
-    //    public override short Index { get { return (short)ServerPacketIds.FishingCast; } }
-
-    //    public long ObjectID;
-    //    public bool CastOut;
-
-    //    protected override void ReadPacket(BinaryReader reader)
-    //    {
-    //        ObjectID = reader.ReadInt64();
-    //        CastOut = reader.ReadBoolean();
-    //    }
-    //    protected override void WritePacket(BinaryWriter writer)
-    //    {
-    //        writer.Write(ObjectID);
-    //        writer.Write(CastOut);
-    //    }
-    //}
-
     public sealed class FishingUpdate : Packet
     {
         public override short Index { get { return (short)ServerPacketIds.FishingUpdate; } }
