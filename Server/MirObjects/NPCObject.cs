@@ -1013,6 +1013,9 @@ namespace Server.MirObjects
 
                     acts.Add(new NPCActions(ActionType.GivePet, parts[1], petcount, petlevel));
                     break;
+                case "CLEARPETS":
+                    acts.Add(new NPCActions(ActionType.ClearPets));
+                    break;
 
                 case "GOTO":
                     if (parts.Length < 2) return;
@@ -1863,6 +1866,15 @@ namespace Server.MirObjects
                         }
                         break;
 
+                    case ActionType.ClearPets:
+
+                        for (int c = 0; c < player.Pets.Count; c++)
+                        {
+                            MonsterObject pet = player.Pets[c];
+                            pet.Die();
+                        }
+                        break;
+
                     case ActionType.AddNameList:
                         path = param[0];
                         if (File.ReadAllLines(path).All(t => player.Name != t))
@@ -2262,6 +2274,7 @@ namespace Server.MirObjects
         TakeItem,
         GiveExp,
         GivePet,
+        ClearPets,
         AddNameList,
         DelNameList,
         ClearNameList,
