@@ -1757,14 +1757,14 @@ namespace Client.MirObjects
                                         case MirAction.FishingWait:
                                             if (FoundFish)
                                             {
-                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 671, 6, 720, FishingPoint));
-                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 665, 6, 720, FishingPoint));
+                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 671, 6, 720, FishingPoint) { Light = 0 });
+                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 665, 6, 720, FishingPoint) { Light = 0 });
                                                 SoundManager.PlaySound(SoundList.Fishing);
                                             }
                                             else
                                             {
-                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 650, 6, 720, FishingPoint));
-                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 640, 6, 720, FishingPoint));
+                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 650, 6, 720, FishingPoint) { Light = 0 });
+                                                MapControl.Effects.Add(new Effect(Libraries.Effect, 640, 6, 720, FishingPoint) { Light = 0 });
                                             }
                                             break;
                                     }
