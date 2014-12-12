@@ -64,6 +64,8 @@ namespace Client.MirControls
                         return MapObject.User.Equipment[(int)EquipmentSlot.Mount].Slots;
                     case MirGridType.Fishing:
                         return MapObject.User.Equipment[(int)EquipmentSlot.Weapon].Slots;
+                    case MirGridType.QuestInventory:
+                        return MapObject.User.QuestInventory;
                     default:
                         throw new NotImplementedException();
                 }

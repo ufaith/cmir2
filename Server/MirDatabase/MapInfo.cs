@@ -50,9 +50,12 @@ namespace Server.MirDatabase
             for (int i = 0; i < count; i++)
                 Respawns.Add(new RespawnInfo(reader));
 
-            count = reader.ReadInt32();
-            for (int i = 0; i < count; i++)
-                NPCs.Add(new NPCInfo(reader));
+            if (Envir.LoadVersion <= 33)
+            {
+                count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                    NPCs.Add(new NPCInfo(reader));
+            }
 
             count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
@@ -109,9 +112,9 @@ namespace Server.MirDatabase
             for (int i = 0; i < Respawns.Count; i++)
                 Respawns[i].Save(writer);
 
-            writer.Write(NPCs.Count);
-            for (int i = 0; i < NPCs.Count; i++)
-                NPCs[i].Save(writer);
+            //writer.Write(NPCs.Count);
+            //for (int i = 0; i < NPCs.Count; i++)
+            //    NPCs[i].Save(writer);
 
             writer.Write(Movements.Count);
             for (int i = 0; i < Movements.Count; i++)
@@ -147,6 +150,13 @@ namespace Server.MirDatabase
 
         public void CreateMap()
         {
+            for (int j = 0; j < SMain.Envir.NPCInfoList.Count; j++)
+            {
+                if (SMain.Envir.NPCInfoList[j].MapIndex != Index) continue;
+
+                NPCs.Add(SMain.Envir.NPCInfoList[j]);
+            }
+
             Map map = new Map(this);
             if (!map.Load()) return;
 

@@ -110,6 +110,7 @@
     <Compile Include="MirControls\MirLabel.cs" />
     <Compile Include="MirControls\MirMessageBox.cs" />
     <Compile Include="MirControls\MirScene.cs" />
+    <Compile Include="MirControls\MirScrollingLabel.cs" />
     <Compile Include="MirControls\MirTextBox.cs" />
     <Compile Include="MirGraphics\DXManager.cs" />
     <Compile Include="MirGraphics\MLibrary.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="MirScenes\GameScene.cs" />
     <Compile Include="MirScenes\LoginScene.cs" />
     <Compile Include="MirNetwork\Network.cs" />
+    <Compile Include="MirScenes\Dialogs\QuestDialogs.cs" />
     <Compile Include="MirScenes\SelectScene.cs" />
     <Compile Include="MirSounds\SoundLibrary.cs" />
     <Compile Include="MirSounds\SoundManager.cs" />
@@ -181,6 +183,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

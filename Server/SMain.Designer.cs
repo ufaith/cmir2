@@ -55,12 +55,14 @@ namespace Server
             this.mapInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.itemInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.monsterInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nPCInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dragonInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.accountsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.configToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.balanceConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.InterfaceTimer = new System.Windows.Forms.Timer(this.components);
+            this.questInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -131,7 +133,7 @@ namespace Server
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(535, 349);
+            this.tabPage3.Size = new System.Drawing.Size(535, 347);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Chat Logs";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -144,7 +146,7 @@ namespace Server
             this.ChatLogTextBox.Name = "ChatLogTextBox";
             this.ChatLogTextBox.ReadOnly = true;
             this.ChatLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ChatLogTextBox.Size = new System.Drawing.Size(529, 343);
+            this.ChatLogTextBox.Size = new System.Drawing.Size(529, 341);
             this.ChatLogTextBox.TabIndex = 4;
             // 
             // StatusBar
@@ -240,6 +242,8 @@ namespace Server
             this.mapInfoToolStripMenuItem,
             this.itemInfoToolStripMenuItem,
             this.monsterInfoToolStripMenuItem,
+            this.nPCInfoToolStripMenuItem,
+            this.questInfoToolStripMenuItem,
             this.dragonInfoToolStripMenuItem,
             this.accountsToolStripMenuItem,
             this.toolStripMenuItem2,
@@ -269,6 +273,13 @@ namespace Server
             this.monsterInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.monsterInfoToolStripMenuItem.Text = "Monster Info";
             this.monsterInfoToolStripMenuItem.Click += new System.EventHandler(this.monsterInfoToolStripMenuItem_Click);
+            // 
+            // nPCInfoToolStripMenuItem
+            // 
+            this.nPCInfoToolStripMenuItem.Name = "nPCInfoToolStripMenuItem";
+            this.nPCInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.nPCInfoToolStripMenuItem.Text = "NPC Info";
+            this.nPCInfoToolStripMenuItem.Click += new System.EventHandler(this.nPCInfoToolStripMenuItem_Click);
             // 
             // dragonInfoToolStripMenuItem
             // 
@@ -307,6 +318,13 @@ namespace Server
             // 
             this.InterfaceTimer.Enabled = true;
             this.InterfaceTimer.Tick += new System.EventHandler(this.InterfaceTimer_Tick);
+            // 
+            // questInfoToolStripMenuItem
+            // 
+            this.questInfoToolStripMenuItem.Name = "questInfoToolStripMenuItem";
+            this.questInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.questInfoToolStripMenuItem.Text = "Quest Info";
+            this.questInfoToolStripMenuItem.Click += new System.EventHandler(this.questInfoToolStripMenuItem_Click);
             // 
             // SMain
             // 
@@ -364,6 +382,8 @@ namespace Server
         private TextBox ChatLogTextBox;
         private ToolStripMenuItem dragonInfoToolStripMenuItem;
         private ToolStripMenuItem balanceConfigToolStripMenuItem;
+        private ToolStripMenuItem nPCInfoToolStripMenuItem;
+        private ToolStripMenuItem questInfoToolStripMenuItem;
     }
 }
 

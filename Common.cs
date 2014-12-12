@@ -3,10 +3,25 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using C = ClientPackets;
 using S = ServerPackets;
+
+public enum QuestType : byte
+{
+    General = 0,
+    Daily = 1,
+    Repeatable = 2
+}
+
+public enum QuestIcon : byte
+{
+    None = 0,
+    QuestionWhite = 1,
+    ExclamationYellow = 2,
+    QuestionYellow = 3,
+    ExclamationBlue = 5,
+    QuestionBlue = 6
+}
 
 public enum DefaultNPCType : byte
 {
@@ -16,7 +31,9 @@ public enum DefaultNPCType : byte
     MapCoord = 3,
     Die = 4,
     Trigger = 5,
-    CustomCommand = 6
+    CustomCommand = 6,
+    OnAcceptQuest = 7,
+    OnFinishQuest = 8
 }
 
 public enum Monster : ushort
@@ -327,6 +344,7 @@ public enum MirGridType : byte
     GuestTrade = 10,
     Mount = 11,
     Fishing = 12,
+    QuestInventory = 13
 }
 public enum EquipmentSlot : byte
 {
@@ -775,6 +793,10 @@ public enum ServerPacketIds : short
     MountUpdate,
     EquipSlotItem,
     FishingUpdate,
+    UpdateQuests,
+    NewQuestInfo,
+    GainedQuestItem,
+    DeleteQuestItem
 }
 
 public enum ClientPacketIds : short
@@ -849,7 +871,9 @@ public enum ClientPacketIds : short
     TradeCancel,
     EquipSlotItem,
     FishingCast,
-    FishingChangeAutocast
+    FishingChangeAutocast,
+    AcceptQuest,
+    FinishQuest
 }
 
 public class InIReader
@@ -1302,7 +1326,9 @@ public static class Globals
 
         MaxDragonLevel = 13,
 
-        FlagIndexCount = 999,
+        FlagIndexCount = 1999,
+
+        MaxConcurrentQuests = 20,
 
         DataRange = 24;
 
@@ -1977,6 +2003,8 @@ public class UserItem
         SoulBoundId = -1;
         ItemIndex = info.Index;
         Info = info;
+
+        SetSlotSize();
     }
     public UserItem(BinaryReader reader, int version = int.MaxValue)
     {
@@ -2273,6 +2301,194 @@ public class ClientAuction
     }
 }
 
+public class ClientQuestInfo
+{
+    public int Index;
+
+    public uint NPCIndex;
+
+    public string Name, Group;
+    public List<string> Description = new List<string>();
+    public List<string> TaskDescription = new List<string>();
+    public List<string> CompletionDescription = new List<string>(); 
+
+    public int LevelNeeded;
+    public int QuestNeeded;
+    public RequiredClass ClassNeeded;
+
+    public QuestType Type;
+
+    public uint RewardGold;
+    public uint RewardExp;
+    public List<ItemInfo> RewardsFixedItem = new List<ItemInfo>();
+    public List<ItemInfo> RewardsSelectItem = new List<ItemInfo>();
+
+    public uint FinishNPCIndex;
+
+    public bool SameFinishNPC
+    {
+        get { return NPCIndex == FinishNPCIndex; }
+    }
+
+    public ClientQuestInfo()
+    {
+    }
+
+    public ClientQuestInfo(BinaryReader reader)
+    {
+        Index = reader.ReadInt32();
+        NPCIndex = reader.ReadUInt32();
+        Name = reader.ReadString();
+        Group = reader.ReadString();
+
+        int count = reader.ReadInt32();
+        for (int i = 0; i < count; i++)
+            Description.Add(reader.ReadString());
+
+        count = reader.ReadInt32();
+        for (int i = 0; i < count; i++)
+            TaskDescription.Add(reader.ReadString());
+
+        count = reader.ReadInt32();
+        for (int i = 0; i < count; i++)
+            CompletionDescription.Add(reader.ReadString());
+
+        LevelNeeded = reader.ReadInt32();
+        QuestNeeded = reader.ReadInt32();
+        ClassNeeded = (RequiredClass)reader.ReadByte();
+        Type = (QuestType)reader.ReadByte();
+        RewardGold = reader.ReadUInt32();
+        RewardExp = reader.ReadUInt32();
+
+        count = reader.ReadInt32();
+
+        for (int i = 0; i < count; i++ )
+            RewardsFixedItem.Add(new ItemInfo(reader));
+
+        count = reader.ReadInt32();
+
+        for (int i = 0; i < count; i++)
+            RewardsSelectItem.Add(new ItemInfo(reader));
+
+        FinishNPCIndex = reader.ReadUInt32();
+    }
+    public void Save(BinaryWriter writer)
+    {
+        writer.Write(Index);
+        writer.Write(NPCIndex);
+        writer.Write(Name);
+        writer.Write(Group);
+
+        writer.Write(Description.Count);
+        for (int i = 0; i < Description.Count; i++)
+            writer.Write(Description[i]);
+
+        writer.Write(TaskDescription.Count);
+        for (int i = 0; i < TaskDescription.Count; i++)
+            writer.Write(TaskDescription[i]);
+
+        writer.Write(CompletionDescription.Count);
+        for (int i = 0; i < CompletionDescription.Count; i++)
+            writer.Write(CompletionDescription[i]);
+
+        writer.Write(LevelNeeded);
+        writer.Write(QuestNeeded);
+        writer.Write((byte)ClassNeeded);
+        writer.Write((byte)Type);
+        writer.Write(RewardGold);
+        writer.Write(RewardExp);
+
+        writer.Write(RewardsFixedItem.Count);
+
+        for (int i = 0; i < RewardsFixedItem.Count; i++)
+            RewardsFixedItem[i].Save(writer);
+
+        writer.Write(RewardsSelectItem.Count);
+
+        for (int i = 0; i < RewardsSelectItem.Count; i++)
+            RewardsSelectItem[i].Save(writer);
+
+        writer.Write(FinishNPCIndex);
+    }
+
+    public QuestIcon GetQuestIcon(bool taken = false, bool completed = false)
+    {
+        QuestIcon icon = QuestIcon.None;
+
+        switch (Type)
+        {
+            case QuestType.General:           
+                if (completed)
+                    icon = QuestIcon.QuestionYellow;
+                else if (taken)
+                    icon = QuestIcon.QuestionWhite;
+                else
+                    icon = QuestIcon.ExclamationYellow;
+                break;
+            case QuestType.Daily:
+                if (completed)
+                    icon = QuestIcon.QuestionBlue;
+                else if (taken)
+                    icon = QuestIcon.QuestionWhite;
+                else
+                    icon = QuestIcon.ExclamationBlue;
+                break;
+        }
+
+        return icon;
+    }
+}
+
+public class ClientQuestProgress
+{
+    public int Id;
+
+    public ClientQuestInfo QuestInfo;
+
+    public List<string> TaskList = new List<string>();
+
+    public bool Taken;
+    public bool Completed;
+
+    public QuestIcon Icon
+    {
+        get 
+        {
+            return QuestInfo.GetQuestIcon(Taken, Completed); 
+        }
+    }
+
+    public ClientQuestProgress()
+    {
+    }
+
+    public ClientQuestProgress(BinaryReader reader)
+    {
+        Id = reader.ReadInt32();
+
+        int count = reader.ReadInt32();
+
+        for (int i = 0; i < count; i++)
+            TaskList.Add(reader.ReadString());
+
+        Taken = reader.ReadBoolean();
+        Completed = reader.ReadBoolean();
+    }
+
+    public void Save(BinaryWriter writer)
+    {
+        writer.Write(Id);
+
+        writer.Write(TaskList.Count);
+
+        for (int i = 0; i < TaskList.Count; i++)
+            writer.Write(TaskList[i]);
+
+        writer.Write(Taken);
+        writer.Write(Completed);
+    }
+}
+
 
 public abstract class Packet
 {
@@ -2483,6 +2699,10 @@ public abstract class Packet
                 return new C.FishingCast();
             case (short)ClientPacketIds.FishingChangeAutocast:
                 return new C.FishingChangeAutocast();
+            case (short)ClientPacketIds.AcceptQuest:
+                return new C.AcceptQuest();
+            case (short)ClientPacketIds.FinishQuest:
+                return new C.FinishQuest();
             default:
                 throw new NotImplementedException();
         }
@@ -2784,6 +3004,14 @@ public abstract class Packet
                 return new S.EquipSlotItem();
             case (short)ServerPacketIds.FishingUpdate:
                 return new S.FishingUpdate();
+            case (short)ServerPacketIds.UpdateQuests:
+                return new S.UpdateQuests();
+            case (short)ServerPacketIds.NewQuestInfo:
+                return new S.NewQuestInfo();
+            case (short)ServerPacketIds.GainedQuestItem:
+                return new S.GainedQuestItem();
+            case (short)ServerPacketIds.DeleteQuestItem:
+                return new S.DeleteQuestItem();
             default:
                 throw new NotImplementedException();
         }

@@ -186,12 +186,20 @@ namespace Client.MirControls
                 case (short)ServerPacketIds.NewItemInfo:
                     NewItemInfo((S.NewItemInfo) p);
                     break;
+                case (short)ServerPacketIds.NewQuestInfo:
+                    NewQuestInfo((S.NewQuestInfo)p);
+                    break;
             }
         }
 
         private void NewItemInfo(S.NewItemInfo info)
         {
             GameScene.ItemInfoList.Add(info.Info);
+        }
+
+        private void NewQuestInfo(S.NewQuestInfo info)
+        {
+            GameScene.QuestInfoList.Add(info.Info);
         }
 
         private static void Disconnect(S.Disconnect p)

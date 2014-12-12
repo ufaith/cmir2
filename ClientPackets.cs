@@ -1196,4 +1196,42 @@ namespace ClientPackets
             writer.Write(AutoCast);
         }
     }
+
+    public sealed class AcceptQuest : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.AcceptQuest; } }
+
+        public uint NPCIndex;
+        public int QuestIndex;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            NPCIndex = reader.ReadUInt32();
+            QuestIndex = reader.ReadInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(NPCIndex);
+            writer.Write(QuestIndex);
+        }
+    }
+
+    public sealed class FinishQuest : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.FinishQuest; } }
+
+        public int QuestIndex;
+        public int SelectedItemIndex;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            QuestIndex = reader.ReadInt32();
+            SelectedItemIndex = reader.ReadInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(QuestIndex);
+            writer.Write(SelectedItemIndex);
+        }
+    }
 }

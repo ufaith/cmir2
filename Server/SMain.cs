@@ -138,6 +138,13 @@ namespace Server
             form.ShowDialog();
         }
 
+        private void nPCInfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            NPCInfoForm form = new NPCInfoForm();
+
+            form.ShowDialog();
+        }
+
         private void dragonInfoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DragonInfoForm form = new DragonInfoForm();
@@ -148,6 +155,13 @@ namespace Server
         private void balanceConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             BalanceConfigForm form = new BalanceConfigForm();
+
+            form.ShowDialog();
+        }
+
+        private void questInfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            QuestInfoForm form = new QuestInfoForm();
 
             form.ShowDialog();
         }
