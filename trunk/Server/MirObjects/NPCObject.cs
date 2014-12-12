@@ -34,7 +34,10 @@ namespace Server.MirObjects
             ConsignmentsKey = "[@CONSIGNMENT]",
             TradeKey = "[TRADE]",
             TypeKey = "[TYPES]",
-            GuildCreateKey = "[@CREATEGUILD]";
+            GuildCreateKey = "[@CREATEGUILD]",
+            QuestKey = "[QUESTS]";
+            //CollectQuestKey = "[COLLECTQUESTS]",
+            //FinishQuestKey = "[FINISHQUESTS]";
 
 
         //public static Regex Regex = new Regex(@"[^\{\}]<.*?/(.*?)>");
@@ -47,6 +50,7 @@ namespace Server.MirObjects
         public List<int> GoodsIndex = new List<int>();
         public List<ItemType> Types = new List<ItemType>();
         public List<NPCPage> NPCSections = new List<NPCPage>();
+        public List<QuestInfo> Quests = new List<QuestInfo>();
 
         public static List<string> Args = new List<string>();
 
@@ -143,7 +147,7 @@ namespace Server.MirObjects
 
                     if (!match.Success) continue;
 
-                    Map map = Envir.MapList.Where(m => m.Info.FileName == match.Groups[1].Value).FirstOrDefault();
+                    Map map = Envir.MapList.FirstOrDefault(m => m.Info.FileName == match.Groups[1].Value);
 
                     if (map == null) continue;
 
@@ -171,13 +175,7 @@ namespace Server.MirObjects
             {
                 string section = buttons[i].ToUpper();
 
-                bool match = false;
-                for (int a = 0; a < NPCSections.Count; a++)
-                {
-                    if (NPCSections[a].Key != section) continue;
-                    match = true;
-                    break;
-                }
+                bool match = NPCSections.Any(t => t.Key == section);
 
                 if (match) continue;
 
@@ -189,6 +187,8 @@ namespace Server.MirObjects
 
             for (int i = 0; i < Goods.Count; i++)
                 GoodsIndex.Add(Goods[i].Index);
+
+            ParseQuests(lines);
         }
 
         private List<string> ParseSection(List<string> lines, string sectionName)
@@ -203,7 +203,7 @@ namespace Server.MirObjects
                 elseButtons = new List<string>(),
                 gotoButtons = new List<string>();
 
-            //List<string> lines = scriptLines.ToList();
+            //Group<string> lines = scriptLines.ToList();
             List<string> currentSay = say, currentButtons = buttons;
 
             //Used to fake page name
@@ -215,7 +215,7 @@ namespace Server.MirObjects
 
                 for (int x = i + 1; x < lines.Count; x++)
                 {
-                    if (string.IsNullOrEmpty(lines[x])) continue;
+                    if (string.IsNullOrEmpty(lines[x]) || lines[x].StartsWith(";")) continue;
 
                     if (lines[x].StartsWith("#"))
                     {
@@ -427,6 +427,7 @@ namespace Server.MirObjects
 
                 while (++i < lines.Count)
                 {
+                    if (lines[i].StartsWith("[")) return;
                     if (String.IsNullOrEmpty(lines[i])) continue;
 
                     ItemInfo info = SMain.Envir.GetItemInfo(lines[i]);
@@ -437,6 +438,38 @@ namespace Server.MirObjects
                     }
 
                     Goods.Add(info);
+                }
+            }
+        }
+
+        private void ParseQuests(IList<string> lines)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (!lines[i].ToUpper().StartsWith(QuestKey)) continue;
+
+                while (++i < lines.Count)
+                {
+                    if (lines[i].StartsWith("[")) return;
+                    if (String.IsNullOrEmpty(lines[i])) continue;
+
+                    int index;
+
+                    int.TryParse(lines[i], out index);
+
+                    if (index == 0) continue;
+
+                    QuestInfo info = SMain.Envir.GetQuestInfo(Math.Abs(index));
+
+                    if (info == null) return;
+
+                    if (index > 0)
+                        info.NpcIndex = ObjectID;
+                    else
+                        info.FinishNpcIndex = ObjectID;
+
+                    if (Quests.All(x => x != info))
+                        Quests.Add(info);
                 }
             }
         }
@@ -569,6 +602,8 @@ namespace Server.MirObjects
                     Image = Info.Image,
                     Location = CurrentLocation,
                     Direction = Direction,
+                    QuestIDs = (from q in Quests
+                              select q.Index).ToList()
                 };
         }
 

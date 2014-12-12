@@ -369,7 +369,6 @@ namespace Client.MirObjects
             }
         }
 
-
         private void LoadMapType5()
         {
             try
@@ -433,6 +432,7 @@ namespace Client.MirObjects
                 if (Settings.LogErrors) CMain.SaveError(ex.ToString());
             }
         }
+
         private void LoadMapType6()
         {
             try

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Server.MirDatabase;
 using S = ServerPackets;
 
@@ -25,11 +26,33 @@ namespace Server.MirObjects.Monsters
             if (RemainingSkinCount == 0)
             {
                 for (int i = _drops.Count - 1; i >= 0; i--)
-                    if (player.CanGainItem(_drops[i]))
+                {
+                    bool addedToQuestBag = false;
+
+                    int i1 = i;
+                    foreach (QuestProgressInfo quest in player.CurrentQuests.
+                        Where(e => e.ItemTaskCount.Count > 0).
+                        Where(quest => quest.NeedItem(_drops[i1])).
+                        Where(quest => player.CanGainQuestItem(_drops[i1])))
                     {
-                        player.GainItem(_drops[i]);
+                        player.GainQuestItem(_drops[i]);
                         _drops.RemoveAt(i);
+
+                        quest.ProcessItem(player.Info.QuestInventory);
+                        player.SendQuestUpdate();
+                        addedToQuestBag = true;
+                        break;
                     }
+
+                    if (!addedToQuestBag)
+                    {
+                        if (player.CanGainItem(_drops[i]))
+                        {
+                            player.GainItem(_drops[i]);
+                            _drops.RemoveAt(i);
+                        }
+                    }
+                }
 
                 if (_drops.Count == 0)
                 {

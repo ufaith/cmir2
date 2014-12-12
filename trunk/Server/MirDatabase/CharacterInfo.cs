@@ -51,10 +51,11 @@ namespace Server.MirDatabase
         public bool Thrusting, HalfMoon, CrossHalfMoon;
         public bool DoubleSlash;
 
-        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14], Trade = new UserItem[10];
+        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14], Trade = new UserItem[10], QuestInventory = new UserItem[40];
         public List<UserMagic> Magics = new List<UserMagic>();
         public List<PetInfo> Pets = new List<PetInfo>();
 
+        public List<QuestProgressInfo> CurrentQuests = new List<QuestProgressInfo>();
 
         public bool[] Flags = new bool[Globals.FlagIndexCount];
 
@@ -135,6 +136,15 @@ namespace Server.MirDatabase
             count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
+                if (!reader.ReadBoolean()) continue;
+                UserItem item = new UserItem(reader, Envir.LoadVersion);
+                if (SMain.Envir.BindItem(item) && i < QuestInventory.Length)
+                    QuestInventory[i] = item;
+            }
+
+            count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
                 UserMagic magic = new UserMagic(reader);
                 if (magic.Info == null) continue;
                 Magics.Add(magic);
@@ -170,6 +180,13 @@ namespace Server.MirDatabase
 
             if (Envir.LoadVersion > 30)
                 AllowTrade = reader.ReadBoolean();
+
+            if (Envir.LoadVersion > 33)
+            {
+                count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                    CurrentQuests.Add(new QuestProgressInfo(reader));
+            }
         }
 
 
@@ -229,6 +246,14 @@ namespace Server.MirDatabase
                 Equipment[i].Save(writer);
             }
 
+            writer.Write(QuestInventory.Length);
+            for (int i = 0; i < QuestInventory.Length; i++)
+            {
+                writer.Write(QuestInventory[i] != null);
+                if (QuestInventory[i] == null) continue;
+
+                QuestInventory[i].Save(writer);
+            }
 
             writer.Write(Magics.Count);
             for (int i = 0; i < Magics.Count; i++)
@@ -251,6 +276,10 @@ namespace Server.MirDatabase
             writer.Write(GuildIndex);
 
             writer.Write(AllowTrade);
+
+            writer.Write(CurrentQuests.Count);
+            for (int i = 0; i < CurrentQuests.Count; i++)
+                CurrentQuests[i].Save(writer);
         }
 
         public SelectInfo ToSelectInfo()

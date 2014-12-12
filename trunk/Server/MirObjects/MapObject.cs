@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using Server.MirDatabase;
 using Server.MirEnvir;
 using Server.MirObjects.Monsters;
 using S = ServerPackets;
@@ -215,7 +216,6 @@ namespace Server.MirObjects
         public virtual void Add(PlayerObject player)
         {
             player.Enqueue(GetInfo());
-
         }
         public virtual void Remove(MonsterObject monster)
         {
@@ -328,6 +328,11 @@ namespace Server.MirObjects
         {
 
 
+        }
+
+        public virtual void CheckGroupQuestKill(MonsterInfo mInfo)
+        {
+            
         }
 
         public virtual bool CanGainGold(uint gold)

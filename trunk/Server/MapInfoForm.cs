@@ -49,7 +49,7 @@ namespace Server
 
         private void UpdateInterface()
         {
-            //List<MapInfo> orderedMapInfoList = Envir.MapInfoList.OrderBy(m => m.Title).ToList();
+            //Group<MapInfo> orderedMapInfoList = Envir.MapInfoList.OrderBy(m => m.Title).ToList();
 
             if (MapInfoListBox.Items.Count != Envir.MapInfoList.Count)
             {
@@ -1722,7 +1722,7 @@ namespace Server
                 {
                     for (int j = 0; j < _selectedMapInfos[i].NPCs.Count; j++)
                     {
-                        string Output = string.Format("{0} {1} {2} {3} {4} {5} {6}",
+                        string Output = string.Format("{0},{1},{2},{3},{4},{5},{6}",
                             _selectedMapInfos[i].NPCs[j].FileName,
                             _selectedMapInfos[i].FileName,
                             _selectedMapInfos[i].NPCs[j].Location.X,

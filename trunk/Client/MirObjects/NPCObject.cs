@@ -10,7 +10,7 @@ using S = ServerPackets;
 
 namespace Client.MirObjects
 {
-    class NPCObject :MapObject
+    class NPCObject : MapObject
     {
         public override ObjectType Race
         {
@@ -23,23 +23,29 @@ namespace Client.MirObjects
 
         public FrameSet Frames;
         public Frame Frame;
+
+        public long QuestTime;
         public int BaseIndex, FrameIndex, FrameInterval, 
-            EffectFrameIndex, EffectFrameInterval;
+            EffectFrameIndex, EffectFrameInterval, QuestIndex;
 
         public MirLabel TempLabel;
         public byte Image;
+        public QuestIcon QuestIcon = QuestIcon.None;
 
-        private bool _CanChangeDir = true;
+        private bool _canChangeDir = true;
 
         public bool CanChangeDir
         {
-            get { return _CanChangeDir; }
+            get { return _canChangeDir; }
             set
             {
-                _CanChangeDir = value;
+                _canChangeDir = value;
                 if (value == false) Direction = 0;
             }
         }
+
+        public List<ClientQuestInfo> Quests;
+
 
         public NPCObject(uint objectID) : base(objectID)
         {
@@ -54,6 +60,8 @@ namespace Client.MirObjects
             Movement = info.Location;
             MapLocation = info.Location;
             GameScene.Scene.MapControl.AddObject(this);
+
+            Quests = GameScene.QuestInfoList.Where(c => c.NPCIndex == ObjectID).ToList(); // && info.QuestIDs.All(w => w == c.Index)
 
             Image = info.Image;
             if (info.Image < Libraries.NPCs.Length)
@@ -300,12 +308,22 @@ namespace Client.MirObjects
             SetAction();
         }
 
+        public void BindQuests()
+        {
+
+        }
+
 
         public override void Process()
         {
             bool update = CMain.Time >= NextMotion || GameScene.CanMove;
 
             ProcessFrames();
+
+            if (update)
+            {
+                UpdateBestQuestIcon();
+            }
 
             if (Frame == null)
             {
@@ -363,11 +381,17 @@ namespace Client.MirObjects
 
 
             if (colour != DrawColour) GameScene.Scene.MapControl.TextureValid = false;
+
+
+            if (CMain.Time > QuestTime)
+            {
+                QuestTime = CMain.Time + 500;
+                if (++QuestIndex > 1) QuestIndex = 0;
+            }
         }
         public virtual void ProcessFrames()
         {
             if (Frame == null) return;
-
 
             switch (CurrentAction)
             {
@@ -482,6 +506,13 @@ namespace Client.MirObjects
             if (BodyLibrary == null) return;
 
             BodyLibrary.Draw(DrawFrame, DrawLocation, DrawColour, true);
+
+            if (QuestIcon == QuestIcon.None) return;
+
+            var offSet = BodyLibrary.GetOffSet(BaseIndex);
+            var size = BodyLibrary.GetSize(BaseIndex);
+
+            Libraries.Prguse.Draw(981 + ((int)QuestIcon * 2) + QuestIndex, DrawLocation.Add(offSet).Add(0, -40), Color.White, false);
         }
 
         public override bool MouseOver(Point p)
@@ -544,5 +575,135 @@ namespace Client.MirObjects
             TempLabel.Disposing += (o, e) => LabelList.Remove(TempLabel);
             LabelList.Add(TempLabel);
         }
+
+
+        //Quests
+
+        #region Quest System
+        public void UpdateBestQuestIcon()
+        {
+            ClientQuestProgress quests = GetAvailableQuests(true).FirstOrDefault();
+            QuestIcon bestIcon = QuestIcon.None;
+
+            if (quests != null)
+            {
+                bestIcon = quests.Icon;
+            }
+
+            QuestIcon = bestIcon;
+        }
+
+        public MirLabel GetMiniMapIcon()
+        {
+            string text = "";
+            Color color = Color.Empty;
+
+            switch (QuestIcon)
+            {
+                case QuestIcon.ExclamationBlue:
+                    color = Color.DodgerBlue;
+                    text = "!";
+                    break;
+                case QuestIcon.ExclamationYellow:
+                    color = Color.Yellow;
+                    text = "!";
+                    break;
+                case QuestIcon.QuestionBlue:
+                    color = Color.DodgerBlue;
+                    text = "?";
+                    break;
+                case QuestIcon.QuestionWhite:
+                    color = Color.White;
+                    text = "?";
+                    break;
+                case QuestIcon.QuestionYellow:
+                    color = Color.Yellow;
+                    text = "?";
+                    break;
+            }
+
+            return new MirLabel
+            {
+                AutoSize = true,
+                Font = new Font(Settings.FontName, 8f, FontStyle.Bold),
+                Text = text,
+                ForeColour = color,        
+                NotControl = true,
+                Visible = true
+            };
+        }
+
+        public List<ClientQuestProgress> GetAvailableQuests(bool returnFirst = false)
+        {
+            List<ClientQuestProgress> quests = new List<ClientQuestProgress>();
+
+            foreach (ClientQuestProgress q in User.CurrentQuests.Where(q => !User.CompletedQuests.Contains(q.QuestInfo.Index)))
+            {
+                if (q.QuestInfo.FinishNPCIndex == ObjectID)
+                {
+                    quests.Add(q);
+                }
+                else if (q.QuestInfo.NPCIndex == ObjectID && q.QuestInfo.SameFinishNPC)
+                {
+                    quests.Add(q);
+
+                    if (returnFirst) return quests;
+                }
+            }
+
+            foreach (ClientQuestProgress quest in (
+                from q in Quests
+                where !quests.Exists(p => p.QuestInfo.Index == q.Index) 
+                where CanAccept(q) 
+                where !User.CompletedQuests.Contains(q.Index) 
+                select q).Select(
+                q => User.CurrentQuests.Exists(p => p.QuestInfo.Index == q.Index) ? 
+                    new ClientQuestProgress { QuestInfo = q, Taken = true, Completed = false } : 
+                    new ClientQuestProgress { QuestInfo = q }))
+            {
+                quests.Add(quest);
+
+                if (returnFirst) return quests;
+            }
+
+            return quests;
+        }
+
+        public bool CanAccept(ClientQuestInfo quest)
+        {
+            if (quest.LevelNeeded > User.Level)
+                return false;
+
+            if (!quest.ClassNeeded.HasFlag(RequiredClass.None))
+            {
+                switch (User.Class)
+                {
+                    case MirClass.Warrior:
+                        if (!quest.ClassNeeded.HasFlag(RequiredClass.Warrior))
+                            return false;
+                        break;
+                    case MirClass.Wizard:
+                        if (!quest.ClassNeeded.HasFlag(RequiredClass.Wizard))
+                            return false;
+                        break;
+                    case MirClass.Taoist:
+                        if (!quest.ClassNeeded.HasFlag(RequiredClass.Taoist))
+                            return false;
+                        break;
+                    case MirClass.Assassin:
+                        if (!quest.ClassNeeded.HasFlag(RequiredClass.Assassin))
+                            return false;
+                        break;
+                    case MirClass.Archer:
+                        if (!quest.ClassNeeded.HasFlag(RequiredClass.Archer))
+                            return false;
+                        break;
+                }
+            }
+
+            //check against active quest list
+            return quest.QuestNeeded <= 0 || User.CompletedQuests.Contains(quest.QuestNeeded);
+        }
+        #endregion
     }
 }

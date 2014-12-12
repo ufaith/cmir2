@@ -41,10 +41,13 @@ namespace Client.MirObjects
         public BaseStats CoreStats = new BaseStats(0);
 
 
-        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14], Trade = new UserItem[10];
+        public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14], Trade = new UserItem[10], QuestInventory = new UserItem[40];
         public List<ClientMagic> Magics = new List<ClientMagic>();
         public List<ItemSets> ItemSets = new List<ItemSets>();
         public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();
+
+        public List<ClientQuestProgress> CurrentQuests = new List<ClientQuestProgress>();
+        public List<int> CompletedQuests = new List<int>();
 
         public ClientMagic NextMagic;
         public Point NextMagicLocation;
@@ -83,6 +86,8 @@ namespace Client.MirObjects
 
             Inventory = info.Inventory;
             Equipment = info.Equipment;
+            QuestInventory = info.QuestInventory;
+
             Magics = info.Magics;
 
             BindAllItems();
@@ -626,6 +631,12 @@ namespace Client.MirObjects
                 if (Equipment[i] == null) continue;
                 GameScene.Bind(Equipment[i]);
             }
+
+            for (int i = 0; i < QuestInventory.Length; i++)
+            {
+                if (QuestInventory[i] == null) continue;
+                GameScene.Bind(QuestInventory[i]);
+            }
         }
 
 
@@ -770,7 +781,7 @@ namespace Client.MirObjects
             NextMagicDirection = 0;
             NextMagicLocation = Point.Empty;
             NextMagicObject = null;
-        }
+        } 
     }
 }
 

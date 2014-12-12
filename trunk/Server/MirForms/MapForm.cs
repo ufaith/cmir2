@@ -45,7 +45,7 @@ namespace Server.MirForms
                     newMapInfo.MapFile = b[0].TrimStart('['); // Assign MapFile from variable and trim leading '[' char
                     newMapInfo.MapName = b[1]; // Assign MapName from variable
 
-                    List<string> mapAttributes = new List<string>(); // List of all attributes associated with that map
+                    List<string> mapAttributes = new List<string>(); // Group of all attributes associated with that map
                     mapAttributes.AddRange(a[1].Split(' '));
 
                     int nri = mapAttributes.FindIndex(x => x.StartsWith("NORECONNECT(".ToUpper())); // NORECONNECT() placement in list of parameters
@@ -378,6 +378,7 @@ namespace Server.MirForms
             Title = string.Empty;
 
         public int
+            Index = 0,
             X = 0,
             Y = 0,
             Image = 0,

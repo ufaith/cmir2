@@ -443,7 +443,7 @@ namespace ServerPackets
         public ushort HP, MP;
         public long Experience, MaxExperience;
 
-        public UserItem[] Inventory, Equipment;
+        public UserItem[] Inventory, Equipment, QuestInventory;
         public uint Gold;
 
         public List<ClientMagic> Magics = new List<ClientMagic>();
@@ -487,6 +487,17 @@ namespace ServerPackets
                     Equipment[i] = new UserItem(reader);
                 }
             }
+
+            if (reader.ReadBoolean())
+            {
+                QuestInventory = new UserItem[reader.ReadInt32()];
+                for (int i = 0; i < QuestInventory.Length; i++)
+                {
+                    if (!reader.ReadBoolean()) continue;
+                    QuestInventory[i] = new UserItem(reader);
+                }
+            }
+
             Gold = reader.ReadUInt32();
 
             int count = reader.ReadInt32();
@@ -542,6 +553,20 @@ namespace ServerPackets
                     Equipment[i].Save(writer);
                 }
             }
+
+            writer.Write(QuestInventory != null);
+            if (QuestInventory != null)
+            {
+                writer.Write(QuestInventory.Length);
+                for (int i = 0; i < QuestInventory.Length; i++)
+                {
+                    writer.Write(QuestInventory[i] != null);
+                    if (QuestInventory[i] == null) continue;
+
+                    QuestInventory[i].Save(writer);
+                }
+            }
+
             writer.Write(Gold);
 
             writer.Write(Magics.Count);
@@ -1957,6 +1982,7 @@ namespace ServerPackets
         public byte Image;
         public Point Location;
         public MirDirection Direction;
+        public List<int> QuestIDs = new List<int>();
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -1966,6 +1992,11 @@ namespace ServerPackets
             Image = reader.ReadByte();
             Location = new Point(reader.ReadInt32(), reader.ReadInt32());
             Direction = (MirDirection)reader.ReadByte();
+
+            int count = reader.ReadInt32();
+
+            for (var i = 0; i < count; i++)
+                QuestIDs.Add(reader.ReadInt32());
         }
         protected override void WritePacket(BinaryWriter writer)
         {
@@ -1976,6 +2007,11 @@ namespace ServerPackets
             writer.Write(Location.X);
             writer.Write(Location.Y);
             writer.Write((byte)Direction);
+
+            writer.Write(QuestIDs.Count);
+
+            for (int i = 0; i < QuestIDs.Count; i++)
+                writer.Write(QuestIDs[i]);
         }
     }
     public sealed class NPCResponse : Packet
@@ -2301,7 +2337,6 @@ namespace ServerPackets
         {
             Magic.Save(writer);
         }
-
     }
     public sealed class RemoveMagic : Packet
     {
@@ -3525,6 +3560,101 @@ namespace ServerPackets
             writer.Write(FishingPoint.X);
             writer.Write(FishingPoint.Y);
             writer.Write(FoundFish);
+        }
+    }
+
+    public sealed class UpdateQuests : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.UpdateQuests; }
+        }
+
+        public List<ClientQuestProgress> CurrentQuests = new List<ClientQuestProgress>();
+        public List<int> CompletedQuests = new List<int>();
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            int count = reader.ReadInt32();
+            for (var i = 0; i < count; i++)
+                CurrentQuests.Add(new ClientQuestProgress(reader));
+
+            count = reader.ReadInt32();
+            for (var i = 0; i < count; i++)
+                CompletedQuests.Add(reader.ReadInt32());
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(CurrentQuests.Count);
+            foreach (var q in CurrentQuests)
+                q.Save(writer);
+
+            writer.Write(CompletedQuests.Count);
+            foreach (int q in CompletedQuests)
+                writer.Write(q);
+        }
+    }
+
+    public sealed class NewQuestInfo : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.NewQuestInfo; }
+        }
+
+        public ClientQuestInfo Info;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Info = new ClientQuestInfo(reader);
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            Info.Save(writer);
+        }
+    }
+
+    public sealed class GainedQuestItem : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.GainedQuestItem; }
+        }
+
+        public UserItem Item;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Item = new UserItem(reader);
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            Item.Save(writer);
+        }
+    }
+
+    public sealed class DeleteQuestItem : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.DeleteQuestItem; }
+        }
+
+        public ulong UniqueID;
+        public uint Count;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            UniqueID = reader.ReadUInt64();
+            Count = reader.ReadUInt32();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(UniqueID);
+            writer.Write(Count);
         }
     }
 

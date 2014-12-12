@@ -248,6 +248,13 @@ namespace Server.MirObjects
         public bool TradeLocked = false;
         public uint TradeGoldAmount = 0;
 
+        public List<int> CompletedQuests = new List<int>();
+
+        public List<QuestProgressInfo> CurrentQuests
+        {
+            get { return Info.CurrentQuests; }
+        }
+
         public PlayerObject(CharacterInfo info, MirConnection connection)
         {
             if (info.Player != null)
@@ -969,10 +976,12 @@ namespace Server.MirObjects
             }
             else
                 GainExp(amount);
-
         }
+
         public void GainExp(uint amount)
         {
+            if (amount == 0) return;
+
             Experience += amount;
 
             Enqueue(new S.GainExperience { Amount = amount });
@@ -1032,6 +1041,34 @@ namespace Server.MirObjects
 
             return count;
         }
+
+        private void AddQuestItem(UserItem item)
+        {
+            if (item.Info.StackSize > 1) //Stackable
+            {
+                for (int i = 0; i < Info.QuestInventory.Length; i++)
+                {
+                    UserItem temp = Info.QuestInventory[i];
+                    if (temp == null || item.Info != temp.Info || temp.Count >= temp.Info.StackSize) continue;
+
+                    if (item.Count + temp.Count <= temp.Info.StackSize)
+                    {
+                        temp.Count += item.Count;
+                        return;
+                    }
+                    item.Count -= temp.Info.StackSize - temp.Count;
+                    temp.Count = temp.Info.StackSize;
+                }
+            }
+
+            for (int i = 0; i < Info.QuestInventory.Length; i++)
+            {
+                if (Info.QuestInventory[i] != null) continue;
+                Info.QuestInventory[i] = item;
+                return;
+            }
+        }
+
         private void AddItem(UserItem item)
         {
             if (item.Info.StackSize > 1) //Stackable
@@ -1105,9 +1142,9 @@ namespace Server.MirObjects
 
             return true;
         }
-        public void CheckItemInfo(ItemInfo info, bool DontLoop = false)
+        public void CheckItemInfo(ItemInfo info, bool dontLoop = false)
         {
-            if ((DontLoop == false) && (info.ClassBased | info.LevelBased)) //send all potential data so client can display it
+            if ((dontLoop == false) && (info.ClassBased | info.LevelBased)) //send all potential data so client can display it
             {
                 for (int i = 0; i < Envir.ItemInfoList.Count; i++)
                 {
@@ -1133,6 +1170,12 @@ namespace Server.MirObjects
             }
         }
 
+        public void CheckQuestInfo(QuestInfo info)
+        {
+            if (Connection.SentQuestInfo.Contains(info)) return;
+            Enqueue(new S.NewQuestInfo { Info = info.CreateClientQuestInfo() });
+            Connection.SentQuestInfo.Add(info);
+        }
 
         private void SetBind()
         {
@@ -1210,6 +1253,8 @@ namespace Server.MirObjects
             GetItemInfo();
             GetMapInfo();
             GetUserInfo();
+            GetQuestInfo();
+            SendQuestUpdate();
 
             Enqueue(new S.BaseStatsInfo { Stats = Settings.ClassBaseStats[(byte)Class] });
             GetObjectsPassive();
@@ -1314,6 +1359,14 @@ namespace Server.MirObjects
                 //CheckItemInfo(item.Info);
                 CheckItem(item);
             }
+
+            for (int i = 0; i < Info.QuestInventory.Length; i++)
+            {
+                item = Info.QuestInventory[i];
+
+                if (item == null) continue;
+                CheckItem(item);
+            }
         }
         private void GetUserInfo()
         {
@@ -1340,6 +1393,7 @@ namespace Server.MirObjects
                 MaxExperience = MaxExperience,
                 Inventory = new UserItem[Info.Inventory.Length],
                 Equipment = new UserItem[Info.Equipment.Length],
+                QuestInventory = new UserItem[Info.QuestInventory.Length],
                 Gold = Account.Gold,
             };
 
@@ -1349,7 +1403,7 @@ namespace Server.MirObjects
 
             Info.Inventory.CopyTo(packet.Inventory, 0);
             Info.Equipment.CopyTo(packet.Equipment, 0);
-
+            Info.QuestInventory.CopyTo(packet.QuestInventory, 0);
 
             Enqueue(packet);
         }
@@ -1366,6 +1420,14 @@ namespace Server.MirObjects
                 Fire = CurrentMap.Info.Fire,
                 MapDarkLight = CurrentMap.Info.MapDarkLight
             });
+        }
+
+        private void GetQuestInfo()
+        {
+            for (int i = 0; i < Envir.QuestInfoList.Count; i++)
+            {
+                CheckQuestInfo(Envir.QuestInfoList[i]);
+            }
         }
         private void GetObjects()
         {
@@ -2180,6 +2242,185 @@ namespace Server.MirObjects
                 FoundFish = FishFound
             };
         }
+
+
+        public void AcceptQuest(uint npcIndex, int questIndex)
+        {
+            NPCObject target = (NPCObject)FindObject(npcIndex, 10);
+
+            if (target == null)
+            {
+                ReceiveChat("Must be closer to the target to accept quest.", ChatType.System);
+                return;
+            }
+
+            if (CurrentQuests.Exists(e => e.Info.NpcIndex == npcIndex && e.Info.Index == questIndex)) return;
+
+            QuestInfo questInfo = target.Quests.FirstOrDefault(d => d.Index == questIndex);
+
+            if (questInfo == null)
+            {
+                return;
+            }
+
+            if (!questInfo.CanAccept(this))
+            {
+                //couldn't accept quest
+                return;
+            }
+
+            if (CurrentQuests.Count >= Globals.MaxConcurrentQuests)
+            {
+                ReceiveChat("Maximum amount of quests already taken.", ChatType.System);
+                return;
+            }
+
+            if (questInfo.CarryItems.Count > 0)
+            {
+                bool gainedAllitems = true;
+
+                foreach (QuestItemTask carryItem in questInfo.CarryItems)
+                {
+                    uint count = carryItem.Count;
+
+                    while (count > 1)
+                    {
+                        UserItem item = SMain.Envir.CreateFreshItem(carryItem.Item);
+
+                        if (item.Info.StackSize > count)
+                        {
+                            item.Count = count;
+                            count = 0;
+                        }
+                        else
+                        {
+                            count -= item.Info.StackSize;
+                            item.Count = item.Info.StackSize;
+                        }
+
+                        if (!CanGainQuestItem(item))
+                        {
+                            gainedAllitems = false;
+                            break;
+                        }
+
+                        GainQuestItem(item);
+                    }
+                }
+
+                if (!gainedAllitems)
+                {
+                    ReceiveChat("Quest bag cannot accept any more items.", ChatType.System);
+                    //can't start quest as no room for item, send error msg
+                    //recalculate quest bag to remove unneeded ones
+                    return;
+                }
+            }
+
+            CurrentQuests.Add(new QuestProgressInfo(questIndex) { StartDateTime = DateTime.Now });
+
+            SendQuestUpdate();
+
+            CallDefaultNPC(DefaultNPCType.OnAcceptQuest, questIndex);
+        }
+        public void FinishQuest(int questIndex, int selectedItemIndex)
+        {
+            QuestProgressInfo quest = CurrentQuests.FirstOrDefault(e => e.Info.Index == questIndex);
+
+            if (quest == null) return;
+            if (!quest.CheckCompleted()) return;
+            if (!quest.Completed) return;
+
+            if (quest.Info.Type != QuestType.Repeatable)
+                Info.Flags[1000 + quest.Index] = true;
+
+            CurrentQuests.Remove(quest);
+
+            SendQuestUpdate();
+                
+            UserItem item;
+
+            if (quest.Info.CarryItems.Count > 0)
+            {
+                foreach (QuestItemTask carryItem in quest.Info.CarryItems)
+                {
+                    TakeQuestItem(carryItem.Item, carryItem.Count);
+                }
+            }
+
+            foreach (QuestItemTask iTask in quest.Info.ItemTasks)
+            {
+                TakeQuestItem(iTask.Item, Convert.ToUInt32(iTask.Count));
+            }
+
+            foreach (ItemInfo iInfo in quest.Info.FixedRewards)
+            {
+                item = Envir.CreateDropItem(iInfo);
+
+                if (CanGainItem(item, false)) GainItem(item);
+            }
+
+            if (selectedItemIndex >= 0)
+            {
+                for (int i = 0; i < quest.Info.SelectRewards.Count; i++)
+                {
+                    if (selectedItemIndex != i) continue;
+
+                    item = Envir.CreateDropItem(quest.Info.SelectRewards[i]);
+
+                    if (CanGainItem(item, false)) GainItem(item);
+                }
+            }
+
+            GainGold(quest.Info.GoldReward);
+            GainExp(quest.Info.ExpReward);
+
+            CallDefaultNPC(DefaultNPCType.OnFinishQuest, questIndex);
+        }
+        public override void CheckGroupQuestKill(MonsterInfo mInfo)
+        {
+            if (GroupMembers != null)
+            {
+                foreach (PlayerObject player in GroupMembers.
+                    Where(player => player.CurrentMap == CurrentMap && 
+                        Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) && 
+                        !player.Dead))
+                {
+                    player.CheckQuestKill(mInfo);
+                }
+            }
+            else
+                CheckQuestKill(mInfo);
+        }
+        public void CheckQuestKill(MonsterInfo mInfo)
+        {
+            foreach (QuestProgressInfo quest in CurrentQuests.
+                    Where(e => e.KillTaskCount.Count > 0).
+                    Where(quest => quest.NeedKill(mInfo)))
+            {
+                quest.ProcessKill(mInfo.Index);
+                SendQuestUpdate();
+            } 
+        }
+        public void SendQuestUpdate()
+        {
+            CompletedQuests.Clear();
+            for (int i = 1000; i < Globals.FlagIndexCount; i++)
+                if (Info.Flags[i]) CompletedQuests.Add(i - 1000);
+
+            foreach (QuestProgressInfo quest in CurrentQuests)
+            {
+                quest.CheckCompleted();
+            }
+
+            Enqueue(new S.UpdateQuests
+            {
+                CurrentQuests = (from q in CurrentQuests
+                                select q.CreateClientQuestProgress()).ToList(),
+                CompletedQuests = CompletedQuests
+            });
+        }
+
 
         private void AddTempSkills(IEnumerable<string> skillsToAdd)
         {
@@ -3027,6 +3268,25 @@ namespace Server.MirObjects
 
                         break;
 
+                    case "CLEARFLAGS":
+                        if (!IsGM) return;
+
+                        player = parts.Length > 1 ? Envir.GetPlayer(parts[1]) : this;
+
+                        if (player == null)
+                        {
+                            ReceiveChat(parts[1] + " is not online", ChatType.System);
+                            return;
+                        }
+
+                        for (int i = 0; i < player.Info.Flags.Length; i++)
+                        {
+                            player.Info.Flags[i] = false;
+                        }
+
+                        player.SendQuestUpdate();
+                        break;
+
                     default:
                         foreach (string command in Envir.CustomCommands)
                         {
@@ -3038,27 +3298,6 @@ namespace Server.MirObjects
             }
             else
             {
-                //FAR - NPC Listener code
-                //if (NPCListener != null && NPCListener.Active)
-                //{
-                //    if (NPCID == NPCListener.NPCID)
-                //    {
-                //        NPCPage.AddVariable(this, NPCListener.NPCVariable, message);
-                //        NPCListener.Active = false;
-
-                //        NPCJumpPage = new NPCJumpPage
-                //        {
-                //            NPCID = NPCListener.NPCID,
-                //            TimePeriod = 0,
-                //            NPCGotoPage = "[" + NPCListener.NPCGotoPage + "]"
-                //        };
-                //    }
-                //    else
-                //    {
-                //        NPCListener.Active = false;
-                //    }
-                //}
-
                 message = String.Format("{0}:{1}", CurrentMap.Info.NoNames ? "?????" : Name, message);
 
                 p = new S.ObjectChat { ObjectID = ObjectID, Text = message, Type = ChatType.Normal };
@@ -3726,21 +3965,9 @@ namespace Server.MirObjects
                         break;
                 }
 
-                if (ob.Attacked(this, damage, defence) <= 0) break;
-
-
-                //Level Fencing / SpiritSword
-                for (int m = 0; m < Info.Magics.Count; m++)
-                {
-                    magic = Info.Magics[m];
-                    switch (magic.Spell)
-                    {
-                        case Spell.Fencing:
-                        case Spell.SpiritSword:
-                            LevelMagic(magic);
-                            break;
-                    }
-                }
+                //if (ob.Attacked(this, damage, defence) <= 0) break;
+                action = new DelayedAction(DelayedType.Damage, Envir.Time + 300, ob, damage, defence, true);
+                ActionList.Add(action);
                 break;
             }
 
@@ -5109,9 +5336,20 @@ namespace Server.MirObjects
 
             if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null) return;
 
-            target.Attacked(this, damage, defence, damageWeapon);
-        }
+            if (target.Attacked(this, damage, defence, damageWeapon) <= 0) return;
 
+            //Level Fencing / SpiritSword
+            foreach (UserMagic magic in Info.Magics)
+            {
+                switch (magic.Spell)
+                {
+                    case Spell.Fencing:
+                    case Spell.SpiritSword:
+                        LevelMagic(magic);
+                        break;
+                }
+            }
+        }
         private void CompleteNPC(IList<object> data)
         {
             uint npcid = (uint)data[0];
@@ -5267,8 +5505,6 @@ namespace Server.MirObjects
 
                 if (temp == null || !temp.ValidPoint(info.Destination)) continue;
 
-                if (RidingMount) RefreshMount();
-
                 CurrentMap.RemoveObject(this);
                 Broadcast(new S.ObjectRemove { ObjectID = ObjectID });
 
@@ -5305,6 +5541,8 @@ namespace Server.MirObjects
                 Direction = Direction,
                 MapDarkLight = CurrentMap.Info.MapDarkLight
             });
+
+            if (RidingMount) RefreshMount();
 
             GetObjects();
 
@@ -6743,13 +6981,36 @@ namespace Server.MirObjects
 
                 if (item.Item != null)
                 {
-                    if (!CanGainItem(item.Item)) continue;
-                    if (item.Item.Info.ShowGroupPickup)
-                        for (int j = 0; j < GroupMembers.Count; j++)
-                            GroupMembers[j].ReceiveChat(Name + " Picked up: {" + item.Item.Name + "}", ChatType.System);
-                    GainItem(item.Item);
+                    bool addedToQuestBag = false;
+
+                    foreach (QuestProgressInfo quest in CurrentQuests.
+                        Where(e => e.ItemTaskCount.Count > 0).
+                        Where(quest => quest.NeedItem(item.Item)).
+                        Where(quest => CanGainQuestItem(item.Item)))
+                    {
+                        GainQuestItem(item.Item);
+                        quest.ProcessItem(Info.QuestInventory);
+                        SendQuestUpdate();
+                        addedToQuestBag = true;
+                        break;
+                    }
+
+
+                    if (!addedToQuestBag)
+                    {
+                        if (!CanGainItem(item.Item)) continue;
+
+                        if (item.Item.Info.ShowGroupPickup)
+                            for (int j = 0; j < GroupMembers.Count; j++)
+                                GroupMembers[j].ReceiveChat(Name + " Picked up: {" + item.Item.Name + "}",
+                                    ChatType.System);
+
+                        GainItem(item.Item);
+                    }
+
                     CurrentMap.RemoveObject(ob);
-                    ob.Despawn();
+                    ob.Despawn();                  
+
                     return;
                 }
 
@@ -6809,6 +7070,8 @@ namespace Server.MirObjects
         }
         public void GainGold(uint gold)
         {
+            if (gold == 0) return;
+
             if (((UInt64)Account.Gold + gold) > uint.MaxValue)
                 gold = uint.MaxValue - Account.Gold;
 
@@ -6828,7 +7091,11 @@ namespace Server.MirObjects
 
             AddItem(item);
             RefreshBagWeight();
+
         }
+
+
+
         public bool CanGainItem(UserItem item, bool useWeight = true)
         {
             if (item.Info.Type == ItemType.Amulet)
@@ -6876,7 +7143,7 @@ namespace Server.MirObjects
 
         public bool CanGainItems(UserItem[] items)
         {
-            int itemCount = items.Where(e => e != null).Count();
+            int itemCount = items.Count(e => e != null);
             uint itemWeight = 0;
             uint stackOffset = 0;
 
@@ -6908,7 +7175,6 @@ namespace Server.MirObjects
 
             return true;
         }
-
         private bool DropItem(UserItem item, int range = 1)
         {
             ItemObject ob = new ItemObject(this, item);
@@ -7239,6 +7505,83 @@ namespace Server.MirObjects
 
             return FreeSpace(array) > 0;
         }
+
+        public bool CheckQuestItem(UserItem uItem, uint count)
+        {
+            foreach (var item in Info.QuestInventory.Where(item => item != null && item.Info == uItem.Info))
+            {
+                if (count > item.Count)
+                {
+                    count -= item.Count;
+                    continue;
+                }
+
+                if (count > item.Count) continue;
+                count = 0;
+                break;
+            }
+
+            return count <= 0;
+        }
+        public bool CanGainQuestItem(UserItem item)
+        {
+            if (FreeSpace(Info.QuestInventory) > 0) return true;
+
+            if (item.Info.StackSize > 1)
+            {
+                uint count = item.Count;
+
+                for (int i = 0; i < Info.QuestInventory.Length; i++)
+                {
+                    UserItem bagItem = Info.QuestInventory[i];
+
+                    if (bagItem.Info != item.Info) continue;
+
+                    if (bagItem.Count + count <= bagItem.Info.StackSize) return true;
+
+                    count -= bagItem.Info.StackSize - bagItem.Count;
+                }
+            }
+
+            return false;
+        }
+        public void GainQuestItem(UserItem item)
+        {
+            CheckItem(item);
+
+            UserItem clonedItem = item.Clone();
+
+            Enqueue(new S.GainedQuestItem { Item = clonedItem });
+
+            AddQuestItem(item);
+        }
+        public void TakeQuestItem(ItemInfo uItem, uint count)
+        {
+            for (int o = 0; o < Info.QuestInventory.Length; o++)
+            {
+                UserItem item = Info.QuestInventory[o];
+                if (item == null) continue;
+                if (item.Info != uItem) continue;
+
+                if (count > item.Count)
+                {
+                    Enqueue(new S.DeleteQuestItem { UniqueID = item.UniqueID, Count = item.Count });
+                    Info.QuestInventory[o] = null;
+
+                    count -= item.Count;
+                    continue;
+                }
+
+                Enqueue(new S.DeleteQuestItem { UniqueID = item.UniqueID, Count = count });
+
+                if (count == item.Count)
+                    Info.QuestInventory[o] = null;
+                else
+                    item.Count -= count;
+                break;
+            }
+        }
+
         private void DamageDura()
         {
             if (!NoDuraLoss)
@@ -7352,13 +7695,25 @@ namespace Server.MirObjects
                     key = "LevelUp";
                     break;
                 case DefaultNPCType.CustomCommand:
+                    if (value.Length < 1) return;
                     key = string.Format("CustomCommand({0})", value[0]);
+                    break;
+                case DefaultNPCType.OnAcceptQuest:
+                    if (value.Length < 1) return;
+                    key = string.Format("OnAcceptQuest({0})", value[0]);
+                    break;
+                case DefaultNPCType.OnFinishQuest:
+                    if (value.Length < 1) return;
+                    key = string.Format("OnFinishQuest({0})", value[0]);
                     break;
             }
 
             key = string.Format("[@_{0}]", key);
 
-            NPCJumpList.AddPage(new NPCJumpPage { NPCID = DefaultNPC.ObjectID, Page = key, TimePeriod = 0 });
+            DelayedAction action = new DelayedAction(DelayedType.NPC, SMain.Envir.Time + 0, DefaultNPC.ObjectID, key);
+            ActionList.Add(action);
+
+            //NPCJumpList.AddPage(new NPCJumpPage { NPCID = DefaultNPC.ObjectID, Page = key, TimePeriod = 0 });
             Enqueue(new S.NPCUpdate { NPCID = DefaultNPC.ObjectID });
         }
         public void CallNPC(uint objectID, string key)
@@ -7665,7 +8020,7 @@ namespace Server.MirObjects
             MatchType = type;
             PageSent = 0;
 
-            long start = Envir._stopwatch.ElapsedMilliseconds;
+            long start = Envir.Stopwatch.ElapsedMilliseconds;
 
             LinkedListNode<AuctionInfo> current = UserMatch ? Account.Auctions.First : Envir.Auctions.First;
 
@@ -7691,7 +8046,7 @@ namespace Server.MirObjects
 
             Enqueue(new S.NPCMarket { Listings = listings, Pages = (Search.Count - 1) / 10 + 1, UserMode = UserMatch });
 
-            SMain.EnqueueDebugging(string.Format("{0}ms to match {1} items", Envir._stopwatch.ElapsedMilliseconds - start, UserMatch ? Account.Auctions.Count : Envir.Auctions.Count));
+            SMain.EnqueueDebugging(string.Format("{0}ms to match {1} items", Envir.Stopwatch.ElapsedMilliseconds - start, UserMatch ? Account.Auctions.Count : Envir.Auctions.Count));
         }
         public void MarketSearch(string match)
         {

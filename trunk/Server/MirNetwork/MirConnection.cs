@@ -44,6 +44,7 @@ namespace Server.MirNetwork
         public AccountInfo Account;
         public PlayerObject Player;
         public List<ItemInfo> SentItemInfo = new List<ItemInfo>();
+        public List<QuestInfo> SentQuestInfo = new List<QuestInfo>();
         public bool StorageSent;
 
 
@@ -404,6 +405,12 @@ namespace Server.MirNetwork
                     break;
                 case (short)ClientPacketIds.FishingChangeAutocast:
                     FishingChangeAutocast((C.FishingChangeAutocast)p);
+                    break;
+                case (short)ClientPacketIds.AcceptQuest:
+                    AcceptQuest((C.AcceptQuest)p);
+                    break;
+                case (short)ClientPacketIds.FinishQuest:
+                    FinishQuest((C.FinishQuest)p);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -1039,6 +1046,20 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.FishingChangeAutocast(p.AutoCast);
+        }
+
+        private void AcceptQuest(C.AcceptQuest p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.AcceptQuest(p.NPCIndex, p.QuestIndex);
+        }
+
+        private void FinishQuest(C.FinishQuest p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.FinishQuest(p.QuestIndex, p.SelectedItemIndex);
         }
     }
 }

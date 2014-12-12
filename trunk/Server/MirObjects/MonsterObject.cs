@@ -448,7 +448,12 @@ namespace Server.MirObjects
 
             Broadcast(new S.ObjectDied { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
 
-            if (EXPOwner != null && Master == null && EXPOwner.Race == ObjectType.Player) EXPOwner.WinExp(Info.Experience);
+            if (EXPOwner != null && Master == null && EXPOwner.Race == ObjectType.Player)
+            {
+                EXPOwner.WinExp(Info.Experience);
+
+                EXPOwner.CheckGroupQuestKill(Info);
+            }
 
             if (Respawn != null)
                 Respawn.Count--;

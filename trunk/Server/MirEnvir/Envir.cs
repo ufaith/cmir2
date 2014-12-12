@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 33;
+        public const int Version = 34;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -29,7 +29,7 @@ namespace Server.MirEnvir
         public static int LoadVersion;
 
         private readonly DateTime _startTime = DateTime.Now;
-        public readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+        public readonly Stopwatch Stopwatch = Stopwatch.StartNew();
 
         public long Time { get; private set; }
 
@@ -62,11 +62,13 @@ namespace Server.MirEnvir
 
 
         //Server DB
-        public int MapIndex, ItemIndex,  MonsterIndex;
+        public int MapIndex, ItemIndex, MonsterIndex, NPCIndex, QuestIndex;
         public List<MapInfo> MapInfoList = new List<MapInfo>();
         public List<ItemInfo> ItemInfoList = new List<ItemInfo>();
         public List<MonsterInfo> MonsterInfoList = new List<MonsterInfo>();
+        public List<NPCInfo> NPCInfoList = new List<NPCInfo>();
         public DragonInfo DragonInfo = new DragonInfo();
+        public List<QuestInfo> QuestInfoList = new List<QuestInfo>();
 
         //User DB
         public int NextAccountID, NextCharacterID;
@@ -108,11 +110,12 @@ namespace Server.MirEnvir
 
         private void WorkLoop()
         {
-            Time = _stopwatch.ElapsedMilliseconds;
+            Time = Stopwatch.ElapsedMilliseconds;
             long conTime = Time;
             long saveTime = Time + Settings.SaveDelay * Settings.Minute;
             long userTime = Time + Settings.Minute * 5;
-            long proceesTime = Time + 1000;
+            long dayTime = Time;
+            long processTime = Time + 1000;
             int processCount = 0;
             int processRealCount = 0;
 
@@ -126,86 +129,90 @@ namespace Server.MirEnvir
 
                 while (Running)
                 {
+                    Time = Stopwatch.ElapsedMilliseconds;
+
+                    if (Time >= processTime)
+                    {
+                        LastCount = processCount;
+                        LastRealCount = processRealCount;
+                        processCount = 0;
+                        processRealCount = 0;
+                        processTime = Time + 1000;
+                    }
 
                     
-                        Time = _stopwatch.ElapsedMilliseconds;
+                    if (conTime != Time)
+                    {
+                        conTime = Time;
 
-                        if (Time >= proceesTime)
+                        AdjustLights();
+
+
+                        lock (Connections)
                         {
-                            LastCount = processCount;
-                            LastRealCount = processRealCount;
-                            processCount = 0;
-                            processRealCount = 0;
-                            proceesTime = Time + 1000;
-                        }
-
-                    
-                        if (conTime != Time)
-                        {
-                            conTime = Time;
-
-                            AdjustLights();
-
-
-                            lock (Connections)
+                            for (int i = Connections.Count - 1; i >= 0; i--)
                             {
-                                for (int i = Connections.Count - 1; i >= 0; i--)
-                                {
-                                    Connections[i].Process();
-                                }
+                                Connections[i].Process();
                             }
-
                         }
+
+                    }
                     
 
-                        if (current == null)
-                            current = Objects.First;
+                    if (current == null)
+                        current = Objects.First;
 
 
-                        for (int i = 0; i < 100; i++)
+                    for (int i = 0; i < 100; i++)
+                    {
+                        if (current == null) break;
+
+                        LinkedListNode<MapObject> next = current.Next;
+
+
+                        if (Time > current.Value.OperateTime)
                         {
-                            if (current == null) break;
 
-                            LinkedListNode<MapObject> next = current.Next;
+                            processRealCount++;
+                            current.Value.Process();
+                            current.Value.SetOperateTime();
+
+                        }
+                        processCount++;
+                        current = next;
+                    }
 
 
-                            if (Time > current.Value.OperateTime)
+                    for (int i = 0; i < MapList.Count; i++)
+                        MapList[i].Process();
+
+                    if (DragonSystem != null) DragonSystem.Process();
+
+                    if (Time >= saveTime)
+                    {
+                        saveTime = Time + Settings.SaveDelay * Settings.Minute;
+                        BeginSaveAccounts();
+                        SaveGuilds();
+                    }
+
+                    if (Time >= userTime)
+                    {
+                        userTime = Time + Settings.Minute * 5;
+                        Broadcast(new S.Chat
                             {
+                                Message = string.Format("Online Players: {0}", Players.Count),
+                                Type = ChatType.Hint
+                            });
+                    }
 
-                                processRealCount++;
-                                current.Value.Process();
-                                current.Value.SetOperateTime();
+                    if (Time >= dayTime)
+                    {
+                        dayTime = Time + Settings.Day;
+                        ProcessNewDay();
+                    }
 
-                            }
-                            processCount++;
-                            current = next;
-                        }
-
-
-                        for (int i = 0; i < MapList.Count; i++)
-                            MapList[i].Process();
-
-                        if (DragonSystem != null) DragonSystem.Process();
-
-                        if (Time >= saveTime)
-                        {
-                            saveTime = Time + Settings.SaveDelay * Settings.Minute;
-                            BeginSaveAccounts();
-                            SaveGuilds();
-                        }
-
-                        if (Time >= userTime)
-                        {
-                            userTime = Time + Settings.Minute * 5;
-                            Broadcast(new S.Chat
-                                {
-                                    Message = string.Format("Online Players: {0}", Players.Count),
-                                    Type = ChatType.Hint
-                                });
-                        }
-
-                        //   if (Players.Count == 0) Thread.Sleep(1);
-                        //   GC.Collect();
+                    //   if (Players.Count == 0) Thread.Sleep(1);
+                    //   GC.Collect();
 
                     
                 }
@@ -268,6 +275,8 @@ namespace Server.MirEnvir
                 writer.Write(MapIndex);
                 writer.Write(ItemIndex);
                 writer.Write(MonsterIndex);
+                writer.Write(NPCIndex);
+                writer.Write(QuestIndex);
 
                 writer.Write(MapInfoList.Count);
                 for (int i = 0; i < MapInfoList.Count; i++)
@@ -280,6 +289,14 @@ namespace Server.MirEnvir
                 writer.Write(MonsterInfoList.Count);
                 for (int i = 0; i < MonsterInfoList.Count; i++)
                     MonsterInfoList[i].Save(writer);
+
+                writer.Write(NPCInfoList.Count);
+                for (int i = 0; i < NPCInfoList.Count; i++)
+                    NPCInfoList[i].Save(writer);
+
+                writer.Write(QuestInfoList.Count);
+                for (int i = 0; i < QuestInfoList.Count; i++)
+                    QuestInfoList[i].Save(writer);
 
                 DragonInfo.Save(writer);
             }
@@ -400,6 +417,11 @@ namespace Server.MirEnvir
                     MapIndex = reader.ReadInt32();
                     ItemIndex = reader.ReadInt32();
                     MonsterIndex = reader.ReadInt32();
+                    if (LoadVersion > 33)
+                    {
+                        NPCIndex = reader.ReadInt32();
+                        QuestIndex = reader.ReadInt32();
+                    }
 
                     int count = reader.ReadInt32();
                     MapInfoList.Clear();
@@ -420,6 +442,19 @@ namespace Server.MirEnvir
                     MonsterInfoList.Clear();
                     for (int i = 0; i < count; i++)
                         MonsterInfoList.Add(new MonsterInfo(reader));
+
+                    if (LoadVersion > 33)
+                    {
+                        count = reader.ReadInt32();
+                        NPCInfoList.Clear();
+                        for (int i = 0; i < count; i++)
+                            NPCInfoList.Add(new NPCInfo(reader));
+
+                        count = reader.ReadInt32();
+                        QuestInfoList.Clear();
+                        for (int i = 0; i < count; i++)
+                            QuestInfoList.Add(new QuestInfo(reader));
+                    }
 
                     if (LoadVersion >= 11) DragonInfo = new DragonInfo(reader);
                     else DragonInfo = new DragonInfo();
@@ -590,7 +625,6 @@ namespace Server.MirEnvir
 
             LoadDB();
 
-
             for (int i = 0; i < MapInfoList.Count; i++)
                 MapInfoList[i].CreateMap();
 
@@ -653,9 +687,9 @@ namespace Server.MirEnvir
 
             long expire = Time + 5000;
 
-            while (Connections.Count != 0 && _stopwatch.ElapsedMilliseconds < expire)
+            while (Connections.Count != 0 && Stopwatch.ElapsedMilliseconds < expire)
             {
-                Time = _stopwatch.ElapsedMilliseconds;
+                Time = Stopwatch.ElapsedMilliseconds;
 
                 for (int i = Connections.Count - 1; i >= 0; i--)
                     Connections[i].Process();
@@ -987,6 +1021,16 @@ namespace Server.MirEnvir
             MonsterInfoList.Add(new MonsterInfo {Index = ++MonsterIndex});
         }
 
+        public void CreateNPCInfo()
+        {
+            NPCInfoList.Add(new NPCInfo { Index = ++NPCIndex });
+        }
+
+        public void CreateQuestInfo()
+        {
+            QuestInfoList.Add(new QuestInfo { Index = ++QuestIndex });
+        }
+
         public void Remove(MapInfo info)
         {
             MapInfoList.Remove(info);
@@ -1002,6 +1046,16 @@ namespace Server.MirEnvir
             //Desync all objects\
         }
 
+        public void Remove(NPCInfo info)
+        {
+            NPCInfoList.Remove(info);
+            //Desync all objects\
+        }
+        public void Remove(QuestInfo info)
+        {
+            QuestInfoList.Remove(info);
+            //Desync all objects\
+        }
 
         public UserItem CreateFreshItem(ItemInfo info)
         {
@@ -1102,10 +1156,7 @@ namespace Server.MirEnvir
 
         public Map GetMap(int index)
         {
-            for (int i = 0; i < MapList.Count; i++)
-                if (MapList[i].Info.Index == index) return MapList[i];
-
-            return null;
+            return MapList.FirstOrDefault(t => t.Info.Index == index);
         }
 
         //public Map GetMapByName(string name)
@@ -1129,6 +1180,12 @@ namespace Server.MirEnvir
 
             return null;
         }
+
+        public NPCObject GetNPC(string name)
+        {
+            return MapList.SelectMany(t1 => t1.NPCs.Where(t => t.Info.Name == name)).FirstOrDefault();
+        }
+
         public MonsterInfo GetMonsterInfo(string name)
         {
             for (int i = 0; i < MonsterInfoList.Count; i++)
@@ -1164,10 +1221,10 @@ namespace Server.MirEnvir
             return null;
         }
 
-        public CharacterInfo GetCharacterInfo(int Index)
+        public CharacterInfo GetCharacterInfo(int index)
         {
             for (int i = 0; i < CharacterList.Count; i++)
-                if (CharacterList[i].Index == Index)
+                if (CharacterList[i].Index == index)
                     return CharacterList[i];
 
             return null;
@@ -1194,6 +1251,11 @@ namespace Server.MirEnvir
             return null;
         }
 
+        public QuestInfo GetQuestInfo(int index)
+        {
+            return QuestInfoList.FirstOrDefault(info => info.Index == index);
+        }
+
         public void MessageAccount(AccountInfo account, string message, ChatType type)
         {
             if (account == null) return;
@@ -1206,11 +1268,11 @@ namespace Server.MirEnvir
                 return;
             }
         }
-        public GuildObject GetGuild(string Name)
+        public GuildObject GetGuild(string name)
         {
             for (int i = 0; i < GuildList.Count; i++)
             {
-                if (String.Compare(GuildList[i].Name.Replace(" ", ""), Name, StringComparison.OrdinalIgnoreCase) != 0) continue;
+                if (String.Compare(GuildList[i].Name.Replace(" ", ""), name, StringComparison.OrdinalIgnoreCase) != 0) continue;
                 return GuildList[i];
             }
             return null;
@@ -1221,6 +1283,33 @@ namespace Server.MirEnvir
                 if (GuildList[i].Guildindex == index)
                     return GuildList[i];
             return null;
+        }
+
+        public void ProcessNewDay()
+        {
+            ClearDailyQuests();
+        }
+
+
+        private void ClearDailyQuests()
+        {
+            foreach (CharacterInfo c in CharacterList)
+            {
+                CharacterInfo c1 = c;
+                foreach (int flagId in 
+                    from q in QuestInfoList 
+                    let flagId = 1000 + q.Index 
+                    where c1.Flags[flagId] && q.Type == QuestType.Daily 
+                    select flagId)
+                {
+                    c.Flags[flagId] = false;
+                }
+            }
+
+            foreach (PlayerObject p in Players)
+            {
+                p.SendQuestUpdate();
+            }
         }
     }
 }
