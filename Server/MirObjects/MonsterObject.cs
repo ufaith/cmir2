@@ -127,6 +127,8 @@ namespace Server.MirObjects
                     return new HumanWizard(info);
                 case 56:
                     return new Trainer(info);
+                case 57:
+                    return new TownArcher(info);
                 default:
                     return new MonsterObject(info);
             }
@@ -563,6 +565,14 @@ namespace Server.MirObjects
                     UserItem item = Envir.CreateDropItem(drop.Item);
                     if (item == null) continue;
 
+                    if (EXPOwner != null && EXPOwner.Race == ObjectType.Player)
+                    {
+                        PlayerObject ob = (PlayerObject) EXPOwner;
+
+                        if (ob.CheckNeedQuestItem(item)) return;
+                    }
+
+                    if (drop.QuestRequired) continue;
                     if (!DropItem(item)) return;
                 }
             }

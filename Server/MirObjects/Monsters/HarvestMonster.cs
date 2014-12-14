@@ -27,24 +27,11 @@ namespace Server.MirObjects.Monsters
             {
                 for (int i = _drops.Count - 1; i >= 0; i--)
                 {
-                    bool addedToQuestBag = false;
-
-                    int i1 = i;
-                    foreach (QuestProgressInfo quest in player.CurrentQuests.
-                        Where(e => e.ItemTaskCount.Count > 0).
-                        Where(quest => quest.NeedItem(_drops[i1])).
-                        Where(quest => player.CanGainQuestItem(_drops[i1])))
+                    if (player.CheckNeedQuestItem(_drops[i]))
                     {
-                        player.GainQuestItem(_drops[i]);
-                        _drops.RemoveAt(i);
-
-                        quest.ProcessItem(player.Info.QuestInventory);
-                        player.SendQuestUpdate();
-                        addedToQuestBag = true;
-                        break;
+                        _drops.RemoveAt(i); 
                     }
-
-                    if (!addedToQuestBag)
+                    else
                     {
                         if (player.CanGainItem(_drops[i]))
                         {

@@ -112,9 +112,9 @@ namespace Server.MirDatabase
         }
 
 
-        public bool NeedItem(UserItem item)
+        public bool NeedItem(ItemInfo iInfo)
         {
-            return Info.ItemTasks.Where((task, i) => ItemTaskCount[i] < task.Count && task.Item == item.Info).Any();
+            return Info.ItemTasks.Where((task, i) => ItemTaskCount[i] < task.Count && task.Item == iInfo).Any();
         }
 
         public bool NeedKill(MonsterInfo mInfo)

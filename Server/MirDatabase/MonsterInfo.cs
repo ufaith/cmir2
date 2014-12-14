@@ -242,6 +242,8 @@ namespace Server.MirDatabase
         public ItemInfo Item;
         public uint Gold;
 
+        public bool QuestRequired;
+
         public static DropInfo FromLine(string s)
         {
             string[] parts = s.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
@@ -258,7 +260,14 @@ namespace Server.MirDatabase
             {
                 info.Item = SMain.Envir.GetItemInfo(parts[1]);
                 if (info.Item == null) return null;
+
+                if (parts.Length > 2)
+                {
+                    string dropRequirement = parts[2];
+                    if (dropRequirement.ToUpper() == "Q") info.QuestRequired = true;
+                }
             }
+
             return info;
         }
     }

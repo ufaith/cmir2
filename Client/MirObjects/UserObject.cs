@@ -296,7 +296,7 @@ namespace Client.MirObjects
 
 
                 if (RealItem.Light > Light) Light = RealItem.Light;
-                if (RealItem.Unique != SpecialItemMode.none)
+                if (RealItem.Unique != SpecialItemMode.None)
                 {
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Paralize)) HasParalysisRing = true;
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Teleport)) HasTeleportRing = true;

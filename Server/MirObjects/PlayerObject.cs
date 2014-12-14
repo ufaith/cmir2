@@ -102,6 +102,12 @@ namespace Server.MirObjects
         public byte HpDrainRate;
         public float HpDrain = 0;
 
+        public override int PKPoints
+        {
+            get { return Info.PKPoints; }
+            set { Info.PKPoints = value; }
+        }
+
         public byte Hair
         {
             get { return Info.Hair; }
@@ -1690,7 +1696,7 @@ namespace Server.MirObjects
                 HpDrainRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, HpDrainRate + RealItem.HpDrainRate)));
 
                 if (RealItem.Light > Light) Light = RealItem.Light;
-                if (RealItem.Unique != SpecialItemMode.none)
+                if (RealItem.Unique != SpecialItemMode.None)
                 {
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Paralize)) HasParalysisRing = true;
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Teleport)) HasTeleportRing = true;
@@ -2402,6 +2408,23 @@ namespace Server.MirObjects
                 SendQuestUpdate();
             } 
         }
+
+        public bool CheckNeedQuestItem(UserItem item)
+        {
+            foreach (QuestProgressInfo quest in CurrentQuests.
+                Where(e => e.ItemTaskCount.Count > 0).
+                Where(e => e.NeedItem(item.Info)).
+                Where(e => CanGainQuestItem(item)))
+            {
+                GainQuestItem(item);
+                quest.ProcessItem(Info.QuestInventory);
+                SendQuestUpdate();
+                return true;
+            }
+
+            return false;
+        }
+
         public void SendQuestUpdate()
         {
             CompletedQuests.Clear();
@@ -3719,9 +3742,9 @@ namespace Server.MirObjects
                 int damage = GetAttackPower(MinDC * ((distance + 1) / 2) * (Focus ? 2 : 1), MaxDC * ((distance + 1) / 2) * (Focus ? 2 : 1));
 
                 int chanceToHit = 30 + Accuracy - (distance * 2); //Base chance chance = 30%, then add accuracy.
-                int HitChance = SMain.Envir.Random.Next(100); // Randomise a number between minimum chance and 100       
+                int hitChance = SMain.Envir.Random.Next(100); // Randomise a number between minimum chance and 100       
 
-                if (HitChance < chanceToHit)
+                if (hitChance < chanceToHit)
                 {
                     if (target.CurrentLocation != location)
                         location = target.CurrentLocation;
@@ -6981,32 +7004,14 @@ namespace Server.MirObjects
 
                 if (item.Item != null)
                 {
-                    bool addedToQuestBag = false;
+                    if (!CanGainItem(item.Item)) continue;
 
-                    foreach (QuestProgressInfo quest in CurrentQuests.
-                        Where(e => e.ItemTaskCount.Count > 0).
-                        Where(quest => quest.NeedItem(item.Item)).
-                        Where(quest => CanGainQuestItem(item.Item)))
-                    {
-                        GainQuestItem(item.Item);
-                        quest.ProcessItem(Info.QuestInventory);
-                        SendQuestUpdate();
-                        addedToQuestBag = true;
-                        break;
-                    }
+                    if (item.Item.Info.ShowGroupPickup)
+                        for (int j = 0; j < GroupMembers.Count; j++)
+                            GroupMembers[j].ReceiveChat(Name + " Picked up: {" + item.Item.Name + "}",
+                                ChatType.System);
 
-
-                    if (!addedToQuestBag)
-                    {
-                        if (!CanGainItem(item.Item)) continue;
-
-                        if (item.Item.Info.ShowGroupPickup)
-                            for (int j = 0; j < GroupMembers.Count; j++)
-                                GroupMembers[j].ReceiveChat(Name + " Picked up: {" + item.Item.Name + "}",
-                                    ChatType.System);
-
-                        GainItem(item.Item);
-                    }
+                    GainItem(item.Item);
 
                     CurrentMap.RemoveObject(ob);
                     ob.Despawn();                  
@@ -7542,6 +7547,8 @@ namespace Server.MirObjects
                     count -= bagItem.Info.StackSize - bagItem.Count;
                 }
             }
+
+            ReceiveChat("You cannot carry anymore quest items.", ChatType.System);
 
             return false;
         }
