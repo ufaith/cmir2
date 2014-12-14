@@ -175,11 +175,16 @@ public enum Monster : ushort
     GreatFoxSpirit = 134,
     HedgeKekTal = 135,
     BigHedgeKekTal = 136,
-    EvilMir = 137,
-    EvilMirBody = 138,
-    DragonStatue = 139,
-    RedFrogSpider = 140,
-    BrownFrogSpider = 141
+    RedFrogSpider = 137,
+    BrownFrogSpider = 138,
+    ArcherGuard = 139,
+    KatanaGuard = 140,
+    BLANK01 = 141,
+
+
+    EvilMir = 900,
+    EvilMirBody = 901,
+    DragonStatue = 902,
 }
 
 public enum MirAction : byte
@@ -428,7 +433,7 @@ public enum BindMode : byte
 [Obfuscation(Feature = "renaming", Exclude = true)]
 public enum SpecialItemMode : short
 {
-    none = 0,
+    None = 0,
     Paralize = 0x0001,
     Teleport = 0x0002,
     Clearring = 0x0004,
@@ -1667,7 +1672,7 @@ public class ItemInfo
     
     public BindMode Bind = BindMode.none;//due to lack of space in bindmodes > bindonequip and srepair are seperate bools for now, if anyone adds 2/3 more bindmodes then it'd be more suitable to upgrade bindmode to short!
     public byte Reflect;
-    public SpecialItemMode Unique = SpecialItemMode.none;
+    public SpecialItemMode Unique = SpecialItemMode.None;
     public byte RandomStatsId;
     public RandomItemStat RandomStats;
 
@@ -2417,7 +2422,8 @@ public class ClientQuestInfo
 
         switch (Type)
         {
-            case QuestType.General:           
+            case QuestType.General:
+            case QuestType.Repeatable:
                 if (completed)
                     icon = QuestIcon.QuestionYellow;
                 else if (taken)

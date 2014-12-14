@@ -48,6 +48,8 @@ namespace Server.MirDatabase
         public bool AllowGroup;
         public bool AllowTrade;
 
+        public int PKPoints;
+
         public bool Thrusting, HalfMoon, CrossHalfMoon;
         public bool DoubleSlash;
 
@@ -88,7 +90,6 @@ namespace Server.MirDatabase
             Gender = (MirGender) reader.ReadByte();
             Hair = reader.ReadByte();
 
-
             CreationIP = reader.ReadString();
             CreationDate = DateTime.FromBinary(reader.ReadInt64());
 
@@ -114,6 +115,11 @@ namespace Server.MirDatabase
             
             AMode = (AttackMode) reader.ReadByte();
             PMode = (PetMode) reader.ReadByte();
+
+            if (Envir.LoadVersion > 34)
+            {
+                PKPoints = reader.ReadInt32();
+            }
 
             int count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
@@ -175,6 +181,7 @@ namespace Server.MirDatabase
 
             for (int i = 0; i < Globals.FlagIndexCount; i++)
                 Flags[i] = reader.ReadBoolean();
+
             if (Envir.LoadVersion > 27)
                 GuildIndex = reader.ReadInt32();
 
@@ -227,6 +234,8 @@ namespace Server.MirDatabase
 
             writer.Write((byte) AMode);
             writer.Write((byte) PMode);
+
+            writer.Write(PKPoints);
 
             writer.Write(Inventory.Length);
             for (int i = 0; i < Inventory.Length; i++)

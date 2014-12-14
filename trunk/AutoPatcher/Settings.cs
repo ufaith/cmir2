@@ -7,7 +7,7 @@ namespace AutoPatcher
     {
         private static readonly InIReader Reader = new InIReader(@".\Mir2Config.ini");
 
-        public static string Host = @"ftp://212.67.209.184";
+        public static string Host = @""; //ftp://212.67.209.184
         public static string PatchFileName = @"PList.gz";
 
         public static bool NeedLogin  =false;

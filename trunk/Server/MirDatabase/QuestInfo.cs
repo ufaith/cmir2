@@ -9,12 +9,7 @@ using System.Text;
 namespace Server.MirDatabase
 {
     #region Notes
-    //can show/hide quests on screen
     //kill, item shown as yellow notification top left if quest not on screen
-    //ignore quest button if accepted to finish without reward
-    //share quests??
-    //custom quest log messages -> Take / Kill / Item
-    //Finished quests stored in flags?? 0-999 NPC. 1000-1999 Quest. Send list of completed quests on client load??
     #endregion
 
     public class QuestInfo

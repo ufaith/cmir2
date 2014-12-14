@@ -179,6 +179,7 @@
     <Compile Include="MirObjects\Monsters\GreatFoxSpirit.cs" />
     <Compile Include="MirObjects\Monsters\ThunderElement.cs" />
     <Compile Include="MirObjects\Monsters\GuardianRock.cs" />
+    <Compile Include="MirObjects\Monsters\TownArcher.cs" />
     <Compile Include="MirObjects\Monsters\Trainer.cs" />
     <Compile Include="MirObjects\Monsters\TrapRock.cs" />
     <Compile Include="MirObjects\Monsters\WhiteFoxman.cs" />

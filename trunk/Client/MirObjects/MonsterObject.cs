@@ -196,6 +196,7 @@ namespace Client.MirObjects
                 case Monster.WingedOma:
                 case Monster.FlailOma:
                 case Monster.OmaGuard:
+                case Monster.KatanaGuard:
                     Frames = FrameSet.Monsters[2];
                     break;
                 case Monster.CannibalPlant:
@@ -325,6 +326,9 @@ namespace Client.MirObjects
                     break;
                 case Monster.DragonStatue:
                     Frames = FrameSet.Monsters[41 + (byte)Direction];
+                    break;
+                case Monster.ArcherGuard:
+                    Frames = FrameSet.Monsters[47];
                     break;
                 default:
                     Frames = FrameSet.Monsters[0];
@@ -1198,6 +1202,10 @@ namespace Client.MirObjects
                                                         missile.Target.Effects.Add(new Effect(Libraries.Dragon, 200, 20, 600, missile.Target));
                                                     };
                                                 }
+                                                break;
+                                            case Monster.ArcherGuard:
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(38, Libraries.Monsters[(ushort)Monster.ArcherGuard], false, 3, 30, 6);
                                                 break;
                                             }
                                         break;

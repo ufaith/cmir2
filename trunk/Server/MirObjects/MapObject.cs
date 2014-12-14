@@ -68,7 +68,8 @@ namespace Server.MirObjects
         public Color NameColour = Color.White;
         
         public bool Dead, Undead, Harvested, AutoRev;
-        public int PKPoints;
+
+        public virtual int PKPoints { get; set; }
 
         public ushort PotHealthAmount, PotManaAmount, HealAmount, VampAmount;
         //public bool HealthChanged;

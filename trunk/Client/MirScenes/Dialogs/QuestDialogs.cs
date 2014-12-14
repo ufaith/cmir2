@@ -1271,7 +1271,9 @@ namespace Client.MirScenes.Dialogs
             {
                 List<ClientQuestProgress> singleGroup = @group.ToList();
 
-                QuestGroupQuestItem groupQuest = new QuestGroupQuestItem(group.Key, singleGroup, ExpandedGroups.Contains(@group.Key))
+                bool expanded = ExpandedGroups.Count <= 0 || ExpandedGroups.Contains(@group.Key);
+
+                QuestGroupQuestItem groupQuest = new QuestGroupQuestItem(group.Key, singleGroup, expanded)
                 {
                     Parent = this,
                     Visible = true,
@@ -1599,9 +1601,10 @@ namespace Client.MirScenes.Dialogs
 
         public QuestTrackingDialog()
         {
-            Movable = false;
-            Location = new Point(0, 50);
+            Movable = true;
+            Location = new Point(0, 100);
             Sort = false;
+            Size = new Size(150, 150);
         }
 
         public void DisplayQuests()
@@ -1621,7 +1624,7 @@ namespace Client.MirScenes.Dialogs
                 return;
             }
 
-            int y = 20;
+            int y = 0;
 
             for (int i = 0; i < questsToTrack.Count; i++)
             {

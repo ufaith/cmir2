@@ -23,6 +23,11 @@ namespace Client.MirObjects
 
             Players = new FrameSet();
 
+            /*
+             * PLAYERS
+             */
+
+            #region Player Frames
             //Common
             Players.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500, 0, 8, 0, 250));
             Players.Frames.Add(MirAction.Walking, new Frame(32, 6, 0, 100, 64, 6, 0, 100));
@@ -61,10 +66,13 @@ namespace Client.MirObjects
             Players.Frames.Add(MirAction.FishingWait, new Frame(696, 6, 0, 120));
             Players.Frames.Add(MirAction.FishingReel, new Frame(744, 8, 0, 100));
 
+            #endregion
+
             /*
              * NPCS
              */
 
+            #region NPC Frames
             //Default
             NPCs.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 450));
@@ -136,10 +144,13 @@ namespace Client.MirObjects
             NPCs.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(0, 6, 0, 450, 6, 12, 0, 250));
 
+            #endregion
+
             /*
              * MONSTERS             
              */
 
+            #region Monster Frames
             //0
             Monsters.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
@@ -593,6 +604,18 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Standing, new Frame(322, 1, -1, 1000));
             frame.Frames.Add(MirAction.AttackRange1, new Frame(322, 1, -1, 120));
             frame.Frames.Add(MirAction.Struck, new Frame(322, 1, -1, 200));
+
+            //47 - Archer Guard
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
+            frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 3, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(104, 6, 3, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(176, 2, 0 , 100));
+            frame.Frames.Add(MirAction.Die, new Frame(192, 10, 0, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(201, 1, 9, 1000));
+
+            #endregion
+
         }
     }
 
