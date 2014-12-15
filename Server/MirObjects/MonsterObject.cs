@@ -201,9 +201,11 @@ namespace Server.MirObjects
         public uint PetExperience;
         public byte MaxPetLevel;
 
+        public int RoutePoint;
+        public bool Waiting;
 
         public List<MonsterObject> SlaveList = new List<MonsterObject>();
-        
+        public List<RouteInfo> Route = new List<RouteInfo>();
 
         public override bool Blocking
         {
@@ -285,6 +287,9 @@ namespace Server.MirObjects
                 respawn.Map.AddObject(this);
 
                 CurrentMap = respawn.Map;
+
+                if (Respawn.Route.Count > 0)
+                    Route.AddRange(Respawn.Route);
 
                 RefreshAll();
                 SetHP(MaxHP);
@@ -569,7 +574,7 @@ namespace Server.MirObjects
                     {
                         PlayerObject ob = (PlayerObject) EXPOwner;
 
-                        if (ob.CheckNeedQuestItem(item)) return;
+                        if (ob.CheckNeedQuestItem(item)) continue;
                     }
 
                     if (drop.QuestRequired) continue;
@@ -951,6 +956,8 @@ namespace Server.MirObjects
         {
             if (Target != null || Envir.Time < RoamTime) return;
 
+            if (ProcessRoute()) return;
+
             if (Master != null)
             {
                 MoveTo(Master.Back);
@@ -1038,6 +1045,34 @@ namespace Server.MirObjects
                     }
                 }
             }
+        }
+
+        protected virtual bool ProcessRoute()
+        {
+            if (Route.Count < 1) return false;
+
+            RoamTime = Envir.Time + 600;
+
+            if (CurrentLocation == Route[RoutePoint].Location)
+            {
+                if (Route[RoutePoint].Delay > 0 && !Waiting)
+                {
+                    Waiting = true;
+                    RoamTime = Envir.Time + RoamDelay + Route[RoutePoint].Delay;
+                    return true;
+                }
+
+                Waiting = false;
+                RoutePoint++;
+            }
+
+            if (RoutePoint > Route.Count - 1) RoutePoint = 0;
+
+            if (!CurrentMap.ValidPoint(Route[RoutePoint].Location)) return true;
+
+            MoveTo(Route[RoutePoint].Location);
+
+            return true;
         }
 
         protected virtual void MoveTo(Point location)

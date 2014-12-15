@@ -256,6 +256,7 @@ namespace Server
                 SpreadTextBox.Text = string.Empty;
                 DelayTextBox.Text = string.Empty;
                 DirectionTextBox.Text = string.Empty;
+                RoutePathTextBox.Text = string.Empty;
                 return;
             }
 
@@ -283,6 +284,7 @@ namespace Server
                 SpreadTextBox.Text = string.Empty;
                 DelayTextBox.Text = string.Empty;
                 DirectionTextBox.Text = string.Empty;
+                RoutePathTextBox.Text = string.Empty;
                 return;
             }
 
@@ -296,7 +298,7 @@ namespace Server
             SpreadTextBox.Text = info.Spread.ToString();
             DelayTextBox.Text = info.Delay.ToString();
             DirectionTextBox.Text = info.Direction.ToString();
-
+            RoutePathTextBox.Text = info.RoutePath;
 
             for (int i = 1; i < _selectedRespawnInfos.Count; i++)
             {
@@ -309,6 +311,7 @@ namespace Server
                 if (SpreadTextBox.Text != info.Spread.ToString()) SpreadTextBox.Text = string.Empty;
                 if (DelayTextBox.Text != info.Delay.ToString()) DelayTextBox.Text = string.Empty;
                 if (DirectionTextBox.Text != info.Direction.ToString()) DirectionTextBox.Text = string.Empty;
+                if (RoutePathTextBox.Text != info.RoutePath) RoutePathTextBox.Text = string.Empty;
             }
         }
         private void UpdateNPCInterface()
@@ -907,6 +910,17 @@ namespace Server
 
             RefreshRespawnList();
         }
+
+        private void RoutePathTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedRespawnInfos.Count; i++)
+                _selectedRespawnInfos[i].RoutePath = ActiveControl.Text;
+
+            RefreshRespawnList();
+        }
+
         private void RPasteButton_Click(object sender, EventArgs e)
         {
             if (_info == null) return;
@@ -1862,5 +1876,6 @@ namespace Server
             for (int i = 0; i < _selectedMapInfos.Count; i++)
                 _selectedMapInfos[i].NeedBridle = NeedBridleCheckbox.Checked;
         }
+
     }
 }

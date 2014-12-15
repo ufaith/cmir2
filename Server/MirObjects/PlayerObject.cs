@@ -195,8 +195,8 @@ namespace Server.MirObjects
         public NPCPage NPCPage;
         public bool NPCSuccess;
         public bool NPCDelayed;
-        public NPCJumpList NPCJumpList = new NPCJumpList();
-        public NPCListener NPCListener;
+        //public NPCJumpList NPCJumpList = new NPCJumpList();
+        //public NPCListener NPCListener;
 
         public List<KeyValuePair<string, string>> NPCVar = new List<KeyValuePair<string, string>>();
 
@@ -405,7 +405,6 @@ namespace Server.MirObjects
                     Pets.Remove(Pets[i]);
             }
 
-            ProcessNPCPages();
             ProcessBuffs();
             ProcessRegen();
             ProcessPoison();
@@ -458,20 +457,6 @@ namespace Server.MirObjects
         public override void SetOperateTime()
         {
             OperateTime = Envir.Time;
-        }
-
-        private void ProcessNPCPages()
-        {
-            if (NPCJumpList.NextPage == null || Envir.Time < NPCJumpList.NextPage.TimePeriod) return;
-
-            if (NPCJumpList.NextPage.PlayerMap != null)
-                Teleport(NPCJumpList.NextPage.PlayerMap, NPCJumpList.NextPage.PlayerCoords);
-
-            NPCJumpList.NextPage.Active = true;
-
-            CallNPC(NPCJumpList.NextPage.NPCID, NPCJumpList.NextPage.Page);
-
-            NPCJumpList.RemovePage();
         }
 
         private void ProcessBuffs()
@@ -5378,7 +5363,7 @@ namespace Server.MirObjects
             uint npcid = (uint)data[0];
             string page = (string)data[1];
 
-            if (data.Count > 2)
+            if (data.Count > 3)
             {
                 Map map = (Map)data[2];
                 Point coords = (Point)data[3];
@@ -5388,7 +5373,8 @@ namespace Server.MirObjects
 
             NPCDelayed = true;
 
-            CallNPC(npcid, page);
+            if (page.Length > 0)
+                CallNPC(npcid, page);
         }
 
 
