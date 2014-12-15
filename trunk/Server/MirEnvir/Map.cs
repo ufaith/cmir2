@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using Server.MirDatabase;
 using Server.MirObjects;
 using S = ServerPackets;
@@ -1354,10 +1355,14 @@ namespace Server.MirEnvir
         public int Count;
         public long RespawnTime;
 
+        public List<RouteInfo> Route;
+
         public MapRespawn(RespawnInfo info)
         {
             Info = info;
             Monster = SMain.Envir.GetMonsterInfo(info.MonsterIndex);
+
+            LoadRoutes();
         }
         public void Spawn()
         {
@@ -1365,6 +1370,30 @@ namespace Server.MirEnvir
             if (ob == null) return;
             ob.Spawn(this);
         }
+
+
+        public void LoadRoutes()
+        {
+            Route = new List<RouteInfo>();
+
+            if (string.IsNullOrEmpty(Info.RoutePath)) return;
+
+            string fileName = Path.Combine(Settings.RoutePath, Info.RoutePath + ".txt");
+
+            if (!File.Exists(fileName)) return;
+
+            List<string> lines = File.ReadAllLines(fileName).ToList();
+
+            foreach (string line in lines)
+            {
+                RouteInfo info = RouteInfo.FromText(line, Info.RouteLoop);
+
+                if (info == null) continue;
+
+                Route.Add(info);
+            }
+        }
+
 
     }
 }

@@ -14,7 +14,7 @@ namespace Server.MirObjects.Monsters
 
         protected override bool CanMove
         {
-            get { return false; }
+            get { return Route.Count > 0; }
         }
 
         protected override bool CanRegen
@@ -45,7 +45,11 @@ namespace Server.MirObjects.Monsters
         }
 
         protected override void ProcessRegen() { }
-        protected override void ProcessRoam() { }
+        protected override void ProcessRoam()
+        {
+            if (CanMove)
+                base.ProcessRoam();
+        }
 
         public override bool IsAttackTarget(PlayerObject attacker) { return false; }
         public override bool IsAttackTarget(MonsterObject attacker) { return false; }

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using Server.MirEnvir;
 
 namespace Server.MirDatabase
 {
@@ -10,6 +13,10 @@ namespace Server.MirDatabase
         public Point Location;
         public ushort Count, Spread, Delay;
         public byte Direction;
+
+        public string RoutePath = string.Empty;
+        public bool RouteLoop;
+
 
         public RespawnInfo()
         {
@@ -26,6 +33,11 @@ namespace Server.MirDatabase
 
             Delay = reader.ReadUInt16();
             Direction = reader.ReadByte();
+
+            if (Envir.LoadVersion >= 36)
+            {
+                RoutePath = reader.ReadString();
+            }
         }
 
         public static RespawnInfo FromText(string text)
@@ -63,11 +75,39 @@ namespace Server.MirDatabase
 
             writer.Write(Delay);
             writer.Write(Direction);
+
+            writer.Write(RoutePath);
         }
 
         public override string ToString()
         {
             return string.Format("Monster: {0} - {1} - {2} - {3}", MonsterIndex, Functions.PointToString(Location), Count, Delay);
+        }
+    }
+
+    public class RouteInfo
+    {
+        public Point Location;
+        public int Delay;
+
+        public static RouteInfo FromText(string text, bool loop)
+        {
+            string[] data = text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (data.Length < 2) return null;
+
+            RouteInfo info = new RouteInfo();
+
+            int x, y;
+
+            if (!int.TryParse(data[0], out x)) return null;
+            if (!int.TryParse(data[1], out y)) return null;
+
+            info.Location = new Point(x, y);
+
+            if (data.Length <= 2) return info;
+
+            return !int.TryParse(data[2], out info.Delay) ? info : info;
         }
     }
 }

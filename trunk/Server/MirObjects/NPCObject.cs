@@ -270,11 +270,13 @@ namespace Server.MirObjects
                             case "GOTO":
                                 gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
                                 break;
-                            case "TIMERECALLPAGE":
-                                gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
+                            case "TIMERECALL":
+                                if (parts.Length > 2)
+                                gotoButtons.Add(string.Format("[{0}]", parts[2].ToUpper()));
                                 break;
-                            case "TIMERECALLGROUPPAGE":
-                                gotoButtons.Add(string.Format("[{0}]", parts[1].ToUpper()));
+                            case "TIMERECALLGROUP":
+                                if (parts.Length > 2)
+                                gotoButtons.Add(string.Format("[{0}]", parts[2].ToUpper()));
                                 break;
                             case "DELAYGOTO":
                                 gotoButtons.Add(string.Format("[{0}]", parts[2].ToUpper()));
@@ -1179,25 +1181,17 @@ namespace Server.MirObjects
                 case "TIMERECALL":
                     if (parts.Length < 2) return;
 
-                    acts.Add(new NPCActions(ActionType.TimeRecall, parts[1]));
+                    string page = parts.Length > 2 ? parts[2] : "";
+
+                    acts.Add(new NPCActions(ActionType.TimeRecall, parts[1], page));
                     break;
 
                 case "TIMERECALLGROUP":
                     if (parts.Length < 2) return;
 
-                    acts.Add(new NPCActions(ActionType.TimeRecallGroup, parts[1]));
-                    break;
+                    page = parts.Length > 2 ? parts[2] : "";
 
-                case "TIMERECALLPAGE":
-                    if (parts.Length < 2) return;
-                    string page = "[" + parts[1] + "]";
-                    acts.Add(new NPCActions(ActionType.TimeRecallPage, page));
-                    break;
-
-                case "TIMERECALLGROUPPAGE":
-                    if (parts.Length < 2) return;
-                    page = "[" + parts[1] + "]";
-                    acts.Add(new NPCActions(ActionType.TimeRecallGroupPage, page));
+                    acts.Add(new NPCActions(ActionType.TimeRecallGroup, parts[1], page));
                     break;
 
                 case "BREAKTIMERECALL":
@@ -1270,16 +1264,6 @@ namespace Server.MirObjects
 
                     if (match.Success)
                         acts.Add(new NPCActions(ActionType.Calc, "%" + parts[1], parts[2], valueToStore, parts[1].Insert(1, "-")));
-
-                    break;
-
-                case "LISTEN":
-                    if (parts.Length < 3) return;
-
-                    match = Regex.Match(parts[1], @"[A-Z][0-9]", RegexOptions.IgnoreCase);
-
-                    if (match.Success)
-                        acts.Add(new NPCActions(ActionType.Listen, parts[1], parts[2]));
 
                     break;
             }
@@ -1735,7 +1719,7 @@ namespace Server.MirObjects
             {
                 uint gold;
                 uint count;
-                string path;
+                string tempString = string.Empty;
                 int x, y;
                 int tempInt;
                 byte tempByte;
@@ -1911,10 +1895,10 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.AddNameList:
-                        path = param[0];
-                        if (File.ReadAllLines(path).All(t => player.Name != t))
+                        tempString = param[0];
+                        if (File.ReadAllLines(tempString).All(t => player.Name != t))
                             {
-                                using (var line = File.AppendText(path))
+                                using (var line = File.AppendText(tempString))
                                 {
                                     line.WriteLine(player.Name);
                                 }
@@ -1922,13 +1906,13 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.DelNameList:
-                        path = param[0];
-                        File.WriteAllLines(path, File.ReadLines(path).Where(l => l != player.Name).ToList());
+                        tempString = param[0];
+                        File.WriteAllLines(tempString, File.ReadLines(tempString).Where(l => l != player.Name).ToList());
                         break;
 
                     case ActionType.ClearNameList:
-                        path = param[0];
-                        File.WriteAllLines(path, new string[] { });
+                        tempString = param[0];
+                        File.WriteAllLines(tempString, new string[] { });
                         break;
 
                     case ActionType.GiveHP:
@@ -2012,8 +1996,6 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.Goto:
-                        //player.NPCJumpList.AddPage(new NPCJumpPage { NPCID = player.NPCID, Page = "[" + param[0] + "]", TimePeriod = 0 });
-
                         DelayedAction action = new DelayedAction(DelayedType.NPC, SMain.Envir.Time + 0, player.NPCID, "[" + param[0] + "]");
                         player.ActionList.Add(action);
                         break;
@@ -2072,65 +2054,43 @@ namespace Server.MirObjects
                     case ActionType.TimeRecall:
                         if (!long.TryParse(param[0], out tempLong)) return;
 
-                        player.NPCJumpList.AddPage(new NPCJumpPage
-                        {
-                            NPCID = player.NPCID,
-                            Page = "[" + param[0] + "]",
-                            TimePeriod = tempLong,
-                            PlayerMap = player.CurrentMap,
-                            PlayerCoords = player.CurrentLocation
-                        });
+                        if (param[1].Length > 0) tempString = "[" + param[1] + "]";
+
+                        Map tempMap = player.CurrentMap;
+                        Point tempPoint = player.CurrentLocation;
+
+                        action = new DelayedAction(DelayedType.NPC, SMain.Envir.Time + (tempLong * 1000), player.NPCID, tempString, tempMap, tempPoint);
+                        player.ActionList.Add(action);
 
                         break;
 
                     case ActionType.TimeRecallGroup:
                         if (player.GroupMembers == null) return;
                         if (!long.TryParse(param[0], out tempLong)) return;
+                        if (param[1].Length > 0) tempString = "[" + param[1] + "]";
+
+                        tempMap = player.CurrentMap;
+                        tempPoint = player.CurrentLocation;
 
                         for (i = 0; i < player.GroupMembers.Count(); i++)
                         {
-                            player.GroupMembers[i].NPCJumpList.AddPage(new NPCJumpPage
-                            {
-                                NPCID = player.NPCID,
-                                TimePeriod = tempLong,
-                                PlayerMap = player.CurrentMap,
-                                PlayerCoords = player.CurrentLocation
-                            });
-                        }
-                        break;
+                            var groupMember = player.GroupMembers[i];
 
-                    case ActionType.TimeRecallPage:
-                        if (player.NPCJumpList.NextPage == null) return;
-
-                        player.NPCJumpList.JumpPages.Last().NPCID = player.NPCID;
-                        player.NPCJumpList.JumpPages.Last().Page = param[0];
-                        break;
-
-                    case ActionType.TimeRecallGroupPage:
-                        if (player.NPCJumpList.NextPage == null) return;
-                        if (player.GroupMembers == null) return;
-                        for (i = 0; i < player.GroupMembers.Count(); i++)
-                        {
-                            if (player.GroupMembers[i].NPCJumpList.NextPage == null) continue;
-
-                            player.GroupMembers[i].NPCJumpList.JumpPages.Last().NPCID = player.NPCID;
-                            player.GroupMembers[i].NPCJumpList.JumpPages.Last().Page = param[0];
+                            action = new DelayedAction(DelayedType.NPC, SMain.Envir.Time + (tempLong * 1000), player.NPCID, tempString, tempMap, tempPoint);
+                            groupMember.ActionList.Add(action);
                         }
                         break;
 
                     case ActionType.BreakTimeRecall:
-                        player.NPCJumpList.JumpPages.Clear();
+                        foreach (var ac in player.ActionList.Where(d => d.Type == DelayedType.NPC))
+                            player.ActionList.Remove(ac);
                         break;
 
                     case ActionType.DelayGoto:
                         if (!long.TryParse(param[0], out tempLong)) return;
 
-                        player.NPCJumpList.AddPage(new NPCJumpPage
-                        {
-                            NPCID = player.NPCID,
-                            TimePeriod = tempLong,
-                            Page = "[" + param[1] + "]"
-                        });
+                        action = new DelayedAction(DelayedType.NPC, SMain.Envir.Time + (tempLong * 1000), player.NPCID, "[" + param[1] + "]");
+                        player.ActionList.Add(action);
                         break;
 
                     case ActionType.MonClear:
@@ -2212,16 +2172,6 @@ namespace Server.MirObjects
                         {
                             AddVariable(player, param[3].Replace("-", ""), param[0] + param[2]);
                         }
-                        break;
-
-                    case ActionType.Listen:
-                        player.NPCListener = new NPCListener
-                        {
-                            Active = true,
-                            NPCGotoPage = param[1],
-                            NPCVariable = param[0],
-                            NPCID = player.NPCID
-                        };
                         break;
                 }
             }
@@ -2329,8 +2279,6 @@ namespace Server.MirObjects
         Mongen,
         TimeRecall,
         TimeRecallGroup,
-        TimeRecallPage,
-        TimeRecallGroupPage,
         BreakTimeRecall,
         MonClear,
         GroupRecall,
@@ -2338,7 +2286,6 @@ namespace Server.MirObjects
         DelayGoto,
         Mov,
         Calc,
-        Listen,
     }
     public enum CheckType
     {

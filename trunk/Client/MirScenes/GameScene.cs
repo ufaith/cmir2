@@ -79,6 +79,8 @@ namespace Client.MirScenes
         public QuestLogDialog QuestLogDialog;
         public QuestTrackingDialog QuestTrackingDialog;
 
+        public MagicKeyDialog MagicKeyDialog;
+
         public static List<ItemInfo> ItemInfoList = new List<ItemInfo>();
         public static List<UserId> UserIdList = new List<UserId>();
         public static List<ChatItem> ChatItemList = new List<ChatItem>();
@@ -174,6 +176,8 @@ namespace Client.MirScenes
             QuestDetailDialog = new QuestDetailDialog {Parent = this, Visible = false};
             QuestTrackingDialog = new QuestTrackingDialog { Parent = this, Visible = false };
             QuestLogDialog = new QuestLogDialog {Parent = this, Visible = false};
+
+            MagicKeyDialog = new MagicKeyDialog {Parent = this, Visible = false };
 
             for (int i = 0; i < OutputLines.Length; i++)
                 OutputLines[i] = new MirLabel
@@ -308,6 +312,15 @@ namespace Client.MirScenes
                     else GuildDialog.Hide();
                     break;
 
+                case Keys.K:
+                    if (!MagicKeyDialog.Visible) MagicKeyDialog.Show();
+                    else MagicKeyDialog.Hide();
+                    break;
+
+                case Keys.U:
+                    if (!QuestLogDialog.Visible) QuestLogDialog.Show();
+                    else QuestLogDialog.Hide();
+                    break;
 
                 case Keys.Escape:
                     InventoryDialog.Hide();
@@ -7493,6 +7506,125 @@ namespace Client.MirScenes
             return null;
         }
     }
+
+    public sealed class MagicKeyDialog : MirImageControl
+    {
+        private readonly MirButton _switchBindsButton;
+
+        public bool TopBind = true;
+        public MirImageControl[] Cells = new MirImageControl[8];
+        public MirLabel[] KeyNameLabels = new MirLabel[8];
+
+        public MagicKeyDialog()
+        {
+            Index = 2190;
+            Library = Libraries.Prguse;
+            Movable = true;
+            Sort = true;
+            Location = new Point(Settings.ScreenWidth / 2 - 200, 0);
+            Visible = true;
+
+            BeforeDraw += MagicKeyDialog_BeforeDraw;
+
+            _switchBindsButton = new MirButton
+            {
+                Index = 2247,
+                Library = Libraries.Prguse,
+                Parent = this,
+                Sound = SoundList.ButtonA,
+                Size = new Size(16, 28),
+                Location = new Point(0, 0)
+            };
+            _switchBindsButton.Click += _switchBindsButton_Click;
+
+            for (var i = 0; i < Cells.Length; i++)
+            {
+                Cells[i] = new MirImageControl
+                {
+                    Index = -1,
+                    Library = Libraries.MagIcon,
+                    Parent = this,
+                    Location = new Point(i * 25 + 15, 3),
+                };
+            }
+
+            for (var i = 0; i < KeyNameLabels.Length; i++)
+            {
+                KeyNameLabels[i] = new MirLabel
+                {
+                    Text = "F" + (i + 1),
+                    Font = new Font(Settings.FontName, 8F),
+                    DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
+                    ForeColour = Color.White,
+                    Parent = this,
+                    Location = new Point(i * 25 + 15, 0),
+                    Size = new Size(15,15),
+                    NotControl = true
+                };
+            }
+        }
+
+        void MagicKeyDialog_BeforeDraw(object sender, EventArgs e)
+        {
+            Libraries.Prguse.Draw(2193, new Point(DisplayLocation.X + 12, DisplayLocation.Y), Color.White, true, 0.5F);
+        }
+
+        void _switchBindsButton_Click(object sender, EventArgs e)
+        {
+            TopBind = !TopBind;
+
+            if (TopBind)
+            {
+                Index = 2190;
+                _switchBindsButton.Index = 2247;
+            }
+            else
+            {
+                Index = 2191;
+                _switchBindsButton.Index = 2248;
+            }
+
+            SetTab();
+        }
+
+        public void SetTab()
+        {
+            for (var i = 1; i <= 8; i++)
+            {
+                Cells[i - 1].Index = -1;
+
+                int offset = TopBind ? 0 : 8;
+
+                foreach (var m in GameScene.User.Magics)
+                {
+                    if (m.Key != i + offset) continue;
+
+                    ClientMagic magic = MapObject.User.GetMagic(m.Spell);
+                    if (magic == null) continue;
+
+                    string key = m.Key > 8 ? string.Format("CTRL F{0}", m.Key % 8) : string.Format("F{0}", m.Key);
+
+                    Cells[i - 1].Index = magic.Icon*2;
+                    Cells[i - 1].Hint = string.Format("{0}\nMP: {1}\nKey: {2}", magic.Spell,
+                        (magic.BaseCost + (magic.LevelCost * magic.Level)), key);
+                }
+            }
+        }
+
+        public void Show()
+        {
+            if (Visible) return;
+            Visible = true;
+            SetTab();
+        }
+
+        public void Hide()
+        {
+            if (!Visible) return;
+            Visible = false;
+        }
+    }
+
     public sealed class CharacterDialog : MirImageControl
     {
         public MirButton CloseButton, CharacterButton, StatusButton, StateButton, SkillButton;
@@ -10335,6 +10467,9 @@ namespace Client.MirScenes
 
                 Network.Enqueue(new C.MagicKey { Spell = Magic.Spell, Key = Key });
                 Magic.Key = Key;
+
+                GameScene.Scene.MagicKeyDialog.SetTab();
+
                 Dispose();
             };
 

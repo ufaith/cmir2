@@ -50,6 +50,8 @@ namespace Server
             this.FileNameTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.NeedBridleCheckbox = new System.Windows.Forms.CheckBox();
+            this.NoMountCheckbox = new System.Windows.Forms.CheckBox();
             this.label19 = new System.Windows.Forms.Label();
             this.MapDarkLighttextBox = new System.Windows.Forms.TextBox();
             this.NoNamesCheckbox = new System.Windows.Forms.CheckBox();
@@ -88,6 +90,8 @@ namespace Server
             this.AddRButton = new System.Windows.Forms.Button();
             this.RespawnInfoListBox = new System.Windows.Forms.ListBox();
             this.RespawnInfoPanel = new System.Windows.Forms.Panel();
+            this.label34 = new System.Windows.Forms.Label();
+            this.RoutePathTextBox = new System.Windows.Forms.TextBox();
             this.label24 = new System.Windows.Forms.Label();
             this.DirectionTextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -162,8 +166,6 @@ namespace Server
             this.ImportNPCInfoButton = new System.Windows.Forms.Button();
             this.ExportNPCInfoButton = new System.Windows.Forms.Button();
             this.VisualizerButton = new System.Windows.Forms.Button();
-            this.NoMountCheckbox = new System.Windows.Forms.CheckBox();
-            this.NeedBridleCheckbox = new System.Windows.Forms.CheckBox();
             this.MapTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage6.SuspendLayout();
@@ -376,6 +378,28 @@ namespace Server
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "Attributes";
             this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // NeedBridleCheckbox
+            // 
+            this.NeedBridleCheckbox.AutoSize = true;
+            this.NeedBridleCheckbox.Location = new System.Drawing.Point(174, 137);
+            this.NeedBridleCheckbox.Name = "NeedBridleCheckbox";
+            this.NeedBridleCheckbox.Size = new System.Drawing.Size(81, 17);
+            this.NeedBridleCheckbox.TabIndex = 42;
+            this.NeedBridleCheckbox.Text = "Need Bridle";
+            this.NeedBridleCheckbox.UseVisualStyleBackColor = true;
+            this.NeedBridleCheckbox.CheckedChanged += new System.EventHandler(this.NeedBridleCheckbox_CheckedChanged);
+            // 
+            // NoMountCheckbox
+            // 
+            this.NoMountCheckbox.AutoSize = true;
+            this.NoMountCheckbox.Location = new System.Drawing.Point(174, 113);
+            this.NoMountCheckbox.Name = "NoMountCheckbox";
+            this.NoMountCheckbox.Size = new System.Drawing.Size(73, 17);
+            this.NoMountCheckbox.TabIndex = 41;
+            this.NoMountCheckbox.Text = "No Mount";
+            this.NoMountCheckbox.UseVisualStyleBackColor = true;
+            this.NoMountCheckbox.CheckedChanged += new System.EventHandler(this.NoMountCheckbox_CheckedChanged);
             // 
             // label19
             // 
@@ -772,6 +796,8 @@ namespace Server
             this.RespawnInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.RespawnInfoPanel.Controls.Add(this.label34);
+            this.RespawnInfoPanel.Controls.Add(this.RoutePathTextBox);
             this.RespawnInfoPanel.Controls.Add(this.label24);
             this.RespawnInfoPanel.Controls.Add(this.DirectionTextBox);
             this.RespawnInfoPanel.Controls.Add(this.label8);
@@ -789,8 +815,25 @@ namespace Server
             this.RespawnInfoPanel.Enabled = false;
             this.RespawnInfoPanel.Location = new System.Drawing.Point(272, 35);
             this.RespawnInfoPanel.Name = "RespawnInfoPanel";
-            this.RespawnInfoPanel.Size = new System.Drawing.Size(205, 139);
+            this.RespawnInfoPanel.Size = new System.Drawing.Size(205, 175);
             this.RespawnInfoPanel.TabIndex = 11;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(20, 123);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(39, 13);
+            this.label34.TabIndex = 21;
+            this.label34.Text = "Route:";
+            // 
+            // RoutePathTextBox
+            // 
+            this.RoutePathTextBox.Location = new System.Drawing.Point(65, 120);
+            this.RoutePathTextBox.Name = "RoutePathTextBox";
+            this.RoutePathTextBox.Size = new System.Drawing.Size(130, 20);
+            this.RoutePathTextBox.TabIndex = 20;
+            this.RoutePathTextBox.TextChanged += new System.EventHandler(this.RoutePathTextBox_TextChanged);
             // 
             // label24
             // 
@@ -1550,28 +1593,6 @@ namespace Server
             this.VisualizerButton.UseVisualStyleBackColor = true;
             this.VisualizerButton.Click += new System.EventHandler(this.VisualizerButton_Click);
             // 
-            // NoMountCheckbox
-            // 
-            this.NoMountCheckbox.AutoSize = true;
-            this.NoMountCheckbox.Location = new System.Drawing.Point(174, 113);
-            this.NoMountCheckbox.Name = "NoMountCheckbox";
-            this.NoMountCheckbox.Size = new System.Drawing.Size(73, 17);
-            this.NoMountCheckbox.TabIndex = 41;
-            this.NoMountCheckbox.Text = "No Mount";
-            this.NoMountCheckbox.UseVisualStyleBackColor = true;
-            this.NoMountCheckbox.CheckedChanged += new System.EventHandler(this.NoMountCheckbox_CheckedChanged);
-            // 
-            // NeedBridleCheckbox
-            // 
-            this.NeedBridleCheckbox.AutoSize = true;
-            this.NeedBridleCheckbox.Location = new System.Drawing.Point(174, 137);
-            this.NeedBridleCheckbox.Name = "NeedBridleCheckbox";
-            this.NeedBridleCheckbox.Size = new System.Drawing.Size(81, 17);
-            this.NeedBridleCheckbox.TabIndex = 42;
-            this.NeedBridleCheckbox.Text = "Need Bridle";
-            this.NeedBridleCheckbox.UseVisualStyleBackColor = true;
-            this.NeedBridleCheckbox.CheckedChanged += new System.EventHandler(this.NeedBridleCheckbox_CheckedChanged);
-            // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1750,6 +1771,8 @@ namespace Server
         private Button VisualizerButton;
         private CheckBox NeedBridleCheckbox;
         private CheckBox NoMountCheckbox;
+        private Label label34;
+        private TextBox RoutePathTextBox;
 
     }
 }

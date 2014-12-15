@@ -13,10 +13,11 @@ namespace Server
         public const string EnvirPath = @".\Envir\",
                             MapPath = @".\Maps\",
                             ExportPath = @".\Exports\",
+                            GuildPath = @".\Guilds\",
                             NPCPath = EnvirPath + @".\NPCs\",
                             QuestPath = EnvirPath + @".\Quests\",
-                            GuildPath = @".\Guilds\",
                             DropPath = EnvirPath + @".\Drops\",
+                            RoutePath = EnvirPath + @".\Routes\",
                             NameListPath = EnvirPath + @".\NameLists\";
 
 
@@ -228,14 +229,6 @@ namespace Server
             if (!Directory.Exists(EnvirPath))
                 Directory.CreateDirectory(EnvirPath);
 
-            //Temp code to move old revision folders
-            if (Directory.Exists(@".\NPCs\") && !Directory.Exists(NPCPath))
-                Directory.Move(@".\NPCs\", NPCPath);
-            if (Directory.Exists(@".\Drops\") && !Directory.Exists(DropPath))
-                Directory.Move(@".\Drops\", DropPath);
-            if (Directory.Exists(@".\Quests\") && !Directory.Exists(QuestPath))
-                Directory.Move(@".\Quests\", QuestPath);
-
             if (!Directory.Exists(MapPath))
                 Directory.CreateDirectory(MapPath);
             if (!Directory.Exists(NPCPath))
@@ -246,6 +239,8 @@ namespace Server
                 Directory.CreateDirectory(DropPath);
             if (!Directory.Exists(ExportPath))
                 Directory.CreateDirectory(ExportPath);
+            if (!Directory.Exists(RoutePath))
+                Directory.CreateDirectory(RoutePath);
             
             if (!Directory.Exists(NameListPath))
                 Directory.CreateDirectory(NameListPath);
