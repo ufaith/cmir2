@@ -175,7 +175,7 @@ namespace Server.MirObjects
         }
 
         public const long TurnDelay = 350, MoveDelay = 600, HarvestDelay = 350, RegenDelay = 10000, PotDelay = 200, HealDelay = 600, DuraDelay = 10000, VampDelay = 500, LoyaltyDelay = 1000, FishingCastDelay = 750, FishingDelay = 200;
-        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, LoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, PoisonFieldTime, MountTime, FishingTime;
+        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, DecreaseLoyaltyTime, IncreaseLoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, PoisonFieldTime, FishingTime;
 
         public bool MagicShield;
         public byte MagicShieldLv;
@@ -387,6 +387,12 @@ namespace Server.MirObjects
             {
                 RunTime = Envir.Time + 1500;
                 _runCounter--;
+            }
+
+            if (Envir.Time > IncreaseLoyaltyTime && Mount.HasMount)
+            {
+                IncreaseLoyaltyTime = Envir.Time + (LoyaltyDelay * 60);
+                IncreaseMountLoyalty(1);
             }
 
             if (Envir.Time > FishingTime && Fishing)
@@ -2050,11 +2056,22 @@ namespace Server.MirObjects
             Enqueue(GetMountInfo());
         }
 
-        public void DecreaseLoyalty(int amount)
+        public void IncreaseMountLoyalty(int amount)
         {
-            if (Envir.Time > LoyaltyTime)
+            UserItem item = Info.Equipment[(int)EquipmentSlot.Mount];
+            if (item != null && item.CurrentDura < item.MaxDura)
             {
-                LoyaltyTime = Envir.Time + (Mount.SlowLoyalty ? 2000 : 1000);
+                item.CurrentDura = (ushort)Math.Min(item.MaxDura, item.CurrentDura + amount);
+                item.DuraChanged = false;
+                Enqueue(new S.ItemRepaired { UniqueID = item.UniqueID, MaxDura = item.MaxDura, CurrentDura = item.CurrentDura });
+            }
+        }
+
+        public void DecreaseMountLoyalty(int amount)
+        {
+            if (Envir.Time > DecreaseLoyaltyTime)
+            {
+                DecreaseLoyaltyTime = Envir.Time + (Mount.SlowLoyalty ? (LoyaltyDelay * 2) : LoyaltyDelay);
                 UserItem item = Info.Equipment[(int)EquipmentSlot.Mount];
                 if (item != null && item.CurrentDura > 0)
                 {
@@ -2070,40 +2087,39 @@ namespace Server.MirObjects
 
         public void FishingCast(bool cast, bool cancel = false)
         {
-            UserItem Rod = Info.Equipment[(int)EquipmentSlot.Weapon];
+            UserItem rod = Info.Equipment[(int)EquipmentSlot.Weapon];
 
-            byte FlexibilityStat = 0;
-            sbyte SuccessStat = 0;
+            byte flexibilityStat = 0;
+            sbyte successStat = 0;
 
             FishingProgressMax = 30;
 
-            if (Rod == null || (Rod.Info.Shape != 49 && Rod.Info.Shape != 50))
+            if (rod == null || (rod.Info.Shape != 49 && rod.Info.Shape != 50))
             {
                 Fishing = false;
                 return;
             }
 
-            UserItem Hook = Rod.Slots[(int)FishingSlot.Hook];
+            UserItem hook = rod.Slots[(int)FishingSlot.Hook];
 
-            if (Hook == null)
+            if (hook == null)
             {
                 ReceiveChat("You need a hook.", ChatType.System);
                 return;
             }
 
-            for (int i = 0; i < Rod.Slots.Length; i++) 
+            foreach (UserItem temp in rod.Slots)
             {
-                UserItem temp = Rod.Slots[i];
                 if (temp == null) continue;
 
-                ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+                ItemInfo realItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
 
-                FlexibilityStat = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, FlexibilityStat + temp.CriticalRate + RealItem.CriticalRate)));
-                SuccessStat = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, SuccessStat + temp.Luck + RealItem.Luck)));
+                flexibilityStat = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, flexibilityStat + temp.CriticalRate + realItem.CriticalRate)));
+                successStat = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, successStat + temp.Luck + realItem.Luck)));
             }
 
-            FishingProgressMax += FlexibilityStat;
-            FishingChance = Envir.Random.Next(0,10) + (int)SuccessStat + FishingChanceCounter * 10;
+            FishingProgressMax += flexibilityStat;
+            FishingChance = Envir.Random.Next(0,10) + (int)successStat + FishingChanceCounter * 10;
 
             if (FishingChance > 100)
             {
@@ -2147,10 +2163,8 @@ namespace Server.MirObjects
                     {
                         FishingChanceCounter = 0;
 
-                        for (int i = 0; i < Envir.FishingDrops.Count; i++)
+                        foreach (DropInfo drop in Envir.FishingDrops)
                         {
-                            DropInfo drop = Envir.FishingDrops[i];
-
                             int rate = (int)(drop.Chance / Settings.DropRate); if (rate < 1) rate = 1;
                             if (Envir.Random.Next(rate) != 0) continue;
 
@@ -2187,13 +2201,13 @@ namespace Server.MirObjects
 
         public void FishingChangeAutocast(bool autoCast)
         {
-            UserItem Rod = Info.Equipment[(int)EquipmentSlot.Weapon];
+            UserItem rod = Info.Equipment[(int)EquipmentSlot.Weapon];
 
-            if (Rod.Info.Shape != 49 && Rod.Info.Shape != 50) return;
+            if (rod.Info.Shape != 49 && rod.Info.Shape != 50) return;
 
-            UserItem Reel = Rod.Slots[(int)FishingSlot.Reel];
+            UserItem reel = rod.Slots[(int)FishingSlot.Reel];
 
-            if (Reel == null)
+            if (reel == null)
             {
                 FishingAutocast = false;
                 return;
@@ -2368,21 +2382,6 @@ namespace Server.MirObjects
 
             CallDefaultNPC(DefaultNPCType.OnFinishQuest, questIndex);
         }
-        public override void CheckGroupQuestKill(MonsterInfo mInfo)
-        {
-            if (GroupMembers != null)
-            {
-                foreach (PlayerObject player in GroupMembers.
-                    Where(player => player.CurrentMap == CurrentMap && 
-                        Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) && 
-                        !player.Dead))
-                {
-                    player.CheckQuestKill(mInfo);
-                }
-            }
-            else
-                CheckQuestKill(mInfo);
-        }
         public void CheckQuestKill(MonsterInfo mInfo)
         {
             foreach (QuestProgressInfo quest in CurrentQuests.
@@ -2392,6 +2391,21 @@ namespace Server.MirObjects
                 quest.ProcessKill(mInfo.Index);
                 SendQuestUpdate();
             } 
+        }
+        public override void CheckGroupQuestKill(MonsterInfo mInfo)
+        {
+            if (GroupMembers != null)
+            {
+                foreach (PlayerObject player in GroupMembers.
+                    Where(player => player.CurrentMap == CurrentMap &&
+                        Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) &&
+                        !player.Dead))
+                {
+                    player.CheckQuestKill(mInfo);
+                }
+            }
+            else
+                CheckQuestKill(mInfo);
         }
 
         public bool CheckNeedQuestItem(UserItem item)
@@ -3478,7 +3492,7 @@ namespace Server.MirObjects
 
             if (TradePartner != null) TradeCancel();
 
-            if (RidingMount) DecreaseLoyalty(1);
+            if (RidingMount) DecreaseMountLoyalty(1);
 
             Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
             Broadcast(new S.ObjectWalk { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
@@ -3568,7 +3582,7 @@ namespace Server.MirObjects
                         return;
                     }
 
-                DecreaseLoyalty(2);
+                DecreaseMountLoyalty(2);
             }
 
             if (Hidden && !HasClearRing)
@@ -3840,7 +3854,7 @@ namespace Server.MirObjects
 
             Direction = dir;
 
-            if (RidingMount) DecreaseLoyalty(3);
+            if (RidingMount) DecreaseMountLoyalty(3);
 
             Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
             Broadcast(new S.ObjectAttack { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation, Spell = spell, Level = level });
@@ -6666,7 +6680,7 @@ namespace Server.MirObjects
                             break;
                     }
 
-                    temp.CurrentDura = (ushort)Math.Min(temp.MaxDura, temp.CurrentDura + 5000);
+                    temp.CurrentDura = (ushort)Math.Min(temp.MaxDura, temp.CurrentDura + item.CurrentDura);
                     temp.DuraChanged = false;
 
                     ReceiveChat("Your mount has been fed.", ChatType.Hint);
