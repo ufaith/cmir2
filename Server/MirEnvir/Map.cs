@@ -1371,7 +1371,6 @@ namespace Server.MirEnvir
             ob.Spawn(this);
         }
 
-
         public void LoadRoutes()
         {
             Route = new List<RouteInfo>();

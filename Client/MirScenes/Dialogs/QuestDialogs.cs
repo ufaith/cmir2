@@ -1085,6 +1085,8 @@ namespace Client.MirScenes.Dialogs
 
             if (quest.RewardsFixedItem.Count > 0)
             {
+                //var fixedRewards = FilterRewards(quest.RewardsFixedItem);
+
                 for (int i = 0; i < FixedItems.Length; i++)
                 {
                     if (i >= quest.RewardsFixedItem.Count) break;
@@ -1101,13 +1103,15 @@ namespace Client.MirScenes.Dialogs
 
             if (quest.RewardsSelectItem.Count > 0)
             {
+                var selRewards = FilterRewards(quest.RewardsSelectItem);
+
                 for (int i = 0; i < SelectItems.Length; i++)
                 {
-                    if (i >= quest.RewardsSelectItem.Count) break;
+                    if (i >= selRewards.Count) break;
 
                     SelectItems[i] = new QuestCell
                     {
-                        Item = quest.RewardsSelectItem[i],
+                        Item = selRewards[i],
                         Parent = this,
                         Location = new Point(i * 45 + 15, 89),
                     };
@@ -1131,6 +1135,29 @@ namespace Client.MirScenes.Dialogs
                     };
                 }
             }
+        }
+
+        public List<ItemInfo> FilterRewards(List<ItemInfo> rewardItems)
+        {
+            List<ItemInfo> filteredRewards =  new List<ItemInfo>();
+
+            //Only display same sex items
+            foreach (var item in rewardItems)
+            {
+                switch (MapObject.User.Gender)
+                {
+                    case MirGender.Male:
+                        if (!item.RequiredGender.HasFlag(RequiredGender.Male)) continue;
+                        break;
+                    case MirGender.Female:
+                        if (!item.RequiredGender.HasFlag(RequiredGender.Female)) continue;
+                        break;
+                }
+
+                filteredRewards.Add(item);
+            }
+
+            return filteredRewards;
         }
 
         public int FindSelectedItemIndex()

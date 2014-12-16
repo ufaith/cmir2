@@ -52,7 +52,6 @@ C:\mirserver\Server\Server.exe
 C:\mirserver\Server\Server.pdb
 C:\Mir 2\Mir 2 Server\Server.exe
 C:\Mir 2\Mir 2 Server\Server.pdb
-C:\Mir 2 Source\trunk SVN\Server\obj\Debug\Server.csprojResolveAssemblyReference.cache
 C:\Mir 2 Source\trunk SVN\Server\obj\Debug\Server.AccountInfoForm.resources
 C:\Mir 2 Source\trunk SVN\Server\obj\Debug\Server.BalanceConfigForm.resources
 C:\Mir 2 Source\trunk SVN\Server\obj\Debug\Server.ConfigForm.resources

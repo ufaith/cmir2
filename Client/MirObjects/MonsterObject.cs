@@ -113,6 +113,8 @@ namespace Client.MirObjects
                 case Monster.Deer: 
                 case Monster.Sheep:
                 case Monster.Wolf:
+                case Monster.Pig:
+                case Monster.Bull:
                     Frames = FrameSet.Monsters[1];
                     break;
                 case Monster.Scarecrow:

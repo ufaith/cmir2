@@ -27,6 +27,11 @@ namespace Client.MirScenes
         Consign
     }
 
+    public enum OutputType
+    {
+        Normal, Quest
+    }
+
     public sealed class GameScene : MirScene
     {
         public static GameScene Scene;
@@ -192,9 +197,9 @@ namespace Client.MirScenes
 
         }
 
-        public void OutputMessage(string message)
+        public void OutputMessage(string message, OutputType type = OutputType.Normal)
         {
-            OutputMessages.Add(new OutPutMessage { Message = message, ExpireTime = CMain.Time + 5000 });
+            OutputMessages.Add(new OutPutMessage { Message = message, ExpireTime = CMain.Time + 5000, Type = type });
             if (OutputMessages.Count > 10)
                 OutputMessages.RemoveAt(0);
         }
@@ -211,7 +216,19 @@ namespace Client.MirScenes
             {
                 if (OutputMessages.Count > i)
                 {
+                    Color color;
+                    switch (OutputMessages[i].Type)
+                    {
+                        case OutputType.Quest:
+                            color = Color.Gold;
+                            break;
+                        default:
+                            color = Color.LimeGreen;
+                            break;
+                    }
+
                     OutputLines[i].Text = OutputMessages[i].Message;
+                    OutputLines[i].ForeColour = color;
                     OutputLines[i].Visible = true;
                 }
                 else
@@ -1841,7 +1858,7 @@ namespace Client.MirScenes
             Bind(p.Item);
             AddQuestItem(p.Item);
 
-            OutputMessage(string.Format("You found {0}.", p.Item.Name));
+            OutputMessage(string.Format("You found {0}.", p.Item.Name), OutputType.Quest);
         }
 
         private void GainedGold(S.GainedGold p)
@@ -3936,16 +3953,19 @@ namespace Client.MirScenes
                         break;
                     case ItemType.Meat:
                         text = string.Format("Quality: {0}", Math.Round(HoverItem.CurrentDura / 1000M));
-                        break;
+                        break;       
                     case ItemType.Mount:
                         text = string.Format("Loyalty: {0} / {1}", HoverItem.CurrentDura, HoverItem.MaxDura);
+                        break;
+                    case ItemType.Food:
+                        text = string.Format("Nutrition: {0}", HoverItem.CurrentDura);
                         break;
                     default:
                         text = string.Format("Durability: {0}/{1}", Math.Round(HoverItem.CurrentDura / 1000M),
                                                    Math.Round(HoverItem.MaxDura / 1000M));
                         break;
-
                 }
+
                 MirLabel label = new MirLabel
                 {
                     AutoSize = true,
@@ -4559,6 +4579,7 @@ namespace Client.MirScenes
         {
             public string Message;
             public long ExpireTime;
+            public OutputType Type;
         }
 
         #region Disposable
@@ -7514,6 +7535,7 @@ namespace Client.MirScenes
         public bool TopBind = true;
         public MirImageControl[] Cells = new MirImageControl[8];
         public MirLabel[] KeyNameLabels = new MirLabel[8];
+        public MirLabel BindNumberLabel = new MirLabel();
 
         public MagicKeyDialog()
         {
@@ -7521,7 +7543,7 @@ namespace Client.MirScenes
             Library = Libraries.Prguse;
             Movable = true;
             Sort = true;
-            Location = new Point(Settings.ScreenWidth / 2 - 200, 0);
+            Location = new Point(0, 0);
             Visible = true;
 
             BeforeDraw += MagicKeyDialog_BeforeDraw;
@@ -7548,17 +7570,27 @@ namespace Client.MirScenes
                 };
             }
 
+            BindNumberLabel = new MirLabel
+            {
+                Text = "1",
+                Font = new Font(Settings.FontName, 8F),
+                ForeColour = Color.White,
+                Parent = this,
+                Location = new Point(0, 1),
+                Size = new Size(10, 25),
+                NotControl = true
+            };
+
             for (var i = 0; i < KeyNameLabels.Length; i++)
             {
                 KeyNameLabels[i] = new MirLabel
                 {
                     Text = "F" + (i + 1),
                     Font = new Font(Settings.FontName, 8F),
-                    DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
                     ForeColour = Color.White,
                     Parent = this,
-                    Location = new Point(i * 25 + 15, 0),
-                    Size = new Size(15,15),
+                    Location = new Point(i * 25 + 13, 0),
+                    Size = new Size(25,25),
                     NotControl = true
                 };
             }
@@ -7577,11 +7609,15 @@ namespace Client.MirScenes
             {
                 Index = 2190;
                 _switchBindsButton.Index = 2247;
+                BindNumberLabel.Text = "1";
+                BindNumberLabel.Location = new Point(0, 1);
             }
             else
             {
                 Index = 2191;
                 _switchBindsButton.Index = 2248;
+                BindNumberLabel.Text = "2";
+                BindNumberLabel.Location = new Point(0, 10);
             }
 
             SetTab();
@@ -7595,6 +7631,9 @@ namespace Client.MirScenes
 
                 int offset = TopBind ? 0 : 8;
 
+
+                KeyNameLabels[i - 1].Text = (TopBind ? "" : "Ctrl\n") + "F" + i;
+
                 foreach (var m in GameScene.User.Magics)
                 {
                     if (m.Key != i + offset) continue;
@@ -7607,6 +7646,8 @@ namespace Client.MirScenes
                     Cells[i - 1].Index = magic.Icon*2;
                     Cells[i - 1].Hint = string.Format("{0}\nMP: {1}\nKey: {2}", magic.Spell,
                         (magic.BaseCost + (magic.LevelCost * magic.Level)), key);
+
+                    KeyNameLabels[i - 1].Text = "";
                 }
             }
         }
@@ -10469,6 +10510,7 @@ namespace Client.MirScenes
                 Magic.Key = Key;
 
                 GameScene.Scene.MagicKeyDialog.SetTab();
+                GameScene.Scene.MagicKeyDialog.Show();
 
                 Dispose();
             };

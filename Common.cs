@@ -179,19 +179,17 @@ public enum Monster : ushort
     BrownFrogSpider = 138,
     ArcherGuard = 139,
     KatanaGuard = 140,
-
     //BLANK01 = 141,
-
     Pig = 142,
-    Cow = 143,
-    Bush = 144,
-    ChristmasTree = 145,
-    //_blackSamuraiMan = 146,
-    //_dirtMound = 147,
-    //_darkWolf = 148,
-    Football = 149,
-    GingerBreadman = 150,
-    //_pumpkinhead = 151,
+    Bull = 143,
+    //Bush = 144,
+    //ChristmasTree = 145,
+    //HighAssassin = 146,
+    //DarkDustPile = 147,
+    //DarkBrownWolf = 148,
+    //Football = 149,
+    //GingerBreadman = 150,
+    //HalloweenScythe = 151,
 
 
     EvilMir = 900,
