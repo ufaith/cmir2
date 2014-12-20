@@ -342,7 +342,8 @@ public enum ItemType : byte
     Bait = 30,
     Finder = 31,
     Reel = 32,
-    Fish = 33
+    Fish = 33,
+    Quest = 34
 }
 public enum MirGridType : byte
 {
@@ -2465,6 +2466,7 @@ public class ClientQuestProgress
 
     public bool Taken;
     public bool Completed;
+    public bool New;
 
     public QuestIcon Icon
     {
@@ -2489,6 +2491,7 @@ public class ClientQuestProgress
 
         Taken = reader.ReadBoolean();
         Completed = reader.ReadBoolean();
+        New = reader.ReadBoolean();
     }
 
     public void Save(BinaryWriter writer)
@@ -2502,6 +2505,7 @@ public class ClientQuestProgress
 
         writer.Write(Taken);
         writer.Write(Completed);
+        writer.Write(New);
     }
 }
 

@@ -112,6 +112,7 @@ namespace Server
                     MaxManaRegen = 8,
                     ManaRegenWeight = 10,
                     MaxPoisonRecovery = 6;
+
         public static Boolean PvpCanResistMagic = false,
                               PvpCanResistPoison = false,
                               PvpCanFreeze = false;
@@ -244,6 +245,11 @@ namespace Server
             
             if (!Directory.Exists(NameListPath))
                 Directory.CreateDirectory(NameListPath);
+
+            string fileName = Path.Combine(Settings.NPCPath, DefaultNPCFilename + ".txt");
+
+            if (!File.Exists(fileName))
+                File.Create(fileName);
 
             LoadVersion();
             LoadEXP();

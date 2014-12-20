@@ -80,6 +80,7 @@ namespace Server
                 QGotoTextBox.Text = string.Empty;
                 QKillTextBox.Text = string.Empty;
                 QItemTextBox.Text = string.Empty;
+                QFlagTextBox.Text = string.Empty;
 
                 RequiredLevelTextBox.Text = string.Empty;
                 RequiredQuestComboBox.SelectedItem = null;
@@ -100,6 +101,7 @@ namespace Server
             QGotoTextBox.Text = info.GotoMessage;
             QKillTextBox.Text = info.KillMessage;
             QItemTextBox.Text = info.ItemMessage;
+            QFlagTextBox.Text = info.FlagMessage;
 
             RequiredLevelTextBox.Text = info.RequiredLevel.ToString();
 
@@ -125,6 +127,7 @@ namespace Server
                 if (QGotoTextBox.Text != info.GotoMessage) QGotoTextBox.Text = string.Empty;
                 if (QKillTextBox.Text != info.KillMessage) QKillTextBox.Text = string.Empty;
                 if (QItemTextBox.Text != info.ItemMessage) QItemTextBox.Text = string.Empty;
+                if (QFlagTextBox.Text != info.ItemMessage) QFlagTextBox.Text = string.Empty;
 
                 RequiredLevelTextBox.Text = string.Empty;
                 RequiredQuestComboBox.SelectedItem = null;
@@ -299,7 +302,14 @@ namespace Server
 
             for (int i = 0; i < _selectedQuestInfos.Count; i++)
                 _selectedQuestInfos[i].ItemMessage = ActiveControl.Text;
+        }
 
+        private void QFlagTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedQuestInfos.Count; i++)
+                _selectedQuestInfos[i].FlagMessage = ActiveControl.Text;
         }
 
         private void RequiredLevelTextBox_TextChanged(object sender, EventArgs e)
@@ -355,8 +365,8 @@ namespace Server
                 File.Create(scriptPath).Close();
 
                 File.WriteAllText(scriptPath,
-                    string.Format("{0}\r\n\r\n{1}\r\n\r\n{2}\r\n\r\n{3}\r\n\r\n{4}\r\n\r\n{5}\r\n\r\n{6}\r\n\r\n{7}\r\n\r\n{8}\r\n\r\n{9}",
-                    "[@Description]", "[@TaskDescription]","[@Completion]", "[@KillTasks]", "[@ItemTasks]", "[@CarryItems]", "[@FixedRewards]", "[@SelectRewards]", "[@ExpReward]", "[@GoldReward]"));
+                    string.Format("{0}\r\n\r\n{1}\r\n\r\n{2}\r\n\r\n{3}\r\n\r\n{4}\r\n\r\n{5}\r\n\r\n{6}\r\n\r\n{7}\r\n\r\n{8}\r\n\r\n{9}\r\n\r\n{10}",
+                    "[@Description]", "[@TaskDescription]", "[@Completion]", "[@KillTasks]", "[@ItemTasks]", "[@FlagTasks]", "[@CarryItems]", "[@FixedRewards]", "[@SelectRewards]", "[@ExpReward]", "[@GoldReward]"));
 
                 Process.Start(scriptPath);
             }

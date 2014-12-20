@@ -62,6 +62,8 @@
             this.ExportButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
+            this.QFlagTextBox = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.QuestInfoPanel.SuspendLayout();
@@ -76,7 +78,7 @@
             this.tabControl1.Location = new System.Drawing.Point(174, 41);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(602, 258);
+            this.tabControl1.Size = new System.Drawing.Size(602, 302);
             this.tabControl1.TabIndex = 16;
             // 
             // tabPage1
@@ -85,7 +87,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(594, 232);
+            this.tabPage1.Size = new System.Drawing.Size(594, 276);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Info";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -95,6 +97,8 @@
             this.QuestInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.QuestInfoPanel.Controls.Add(this.label3);
+            this.QuestInfoPanel.Controls.Add(this.QFlagTextBox);
             this.QuestInfoPanel.Controls.Add(this.label14);
             this.QuestInfoPanel.Controls.Add(this.label12);
             this.QuestInfoPanel.Controls.Add(this.label10);
@@ -121,7 +125,7 @@
             this.QuestInfoPanel.Enabled = false;
             this.QuestInfoPanel.Location = new System.Drawing.Point(3, 6);
             this.QuestInfoPanel.Name = "QuestInfoPanel";
-            this.QuestInfoPanel.Size = new System.Drawing.Size(585, 220);
+            this.QuestInfoPanel.Size = new System.Drawing.Size(585, 264);
             this.QuestInfoPanel.TabIndex = 11;
             // 
             // label14
@@ -358,7 +362,7 @@
             this.QuestInfoListBox.Location = new System.Drawing.Point(12, 41);
             this.QuestInfoListBox.Name = "QuestInfoListBox";
             this.QuestInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.QuestInfoListBox.Size = new System.Drawing.Size(156, 238);
+            this.QuestInfoListBox.Size = new System.Drawing.Size(156, 277);
             this.QuestInfoListBox.TabIndex = 15;
             this.QuestInfoListBox.SelectedIndexChanged += new System.EventHandler(this.QuestInfoListBox_SelectedIndexChanged);
             // 
@@ -411,11 +415,28 @@
             this.ExportSelectedButton.UseVisualStyleBackColor = true;
             this.ExportSelectedButton.Click += new System.EventHandler(this.ExportSelected_Click);
             // 
+            // QFlagTextBox
+            // 
+            this.QFlagTextBox.Location = new System.Drawing.Point(87, 217);
+            this.QFlagTextBox.Name = "QFlagTextBox";
+            this.QFlagTextBox.Size = new System.Drawing.Size(180, 20);
+            this.QFlagTextBox.TabIndex = 54;
+            this.QFlagTextBox.TextChanged += new System.EventHandler(this.QFlagTextBox_TextChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(27, 220);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(54, 13);
+            this.label3.TabIndex = 55;
+            this.label3.Text = "Flag Text:";
+            // 
             // QuestInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(788, 311);
+            this.ClientSize = new System.Drawing.Size(788, 355);
             this.Controls.Add(this.ExportSelectedButton);
             this.Controls.Add(this.ImportButton);
             this.Controls.Add(this.ExportButton);
@@ -472,5 +493,7 @@
         private System.Windows.Forms.TextBox QItemTextBox;
         private System.Windows.Forms.TextBox QKillTextBox;
         private System.Windows.Forms.TextBox QGotoTextBox;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox QFlagTextBox;
     }
 }

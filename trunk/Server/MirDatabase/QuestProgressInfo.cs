@@ -3,9 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Server.MirObjects;
+using System.Text.RegularExpressions;
+using Server.MirEnvir;
 
 namespace Server.MirDatabase
 {
+    #region Notes
+    //kill, item shown as yellow notification top left if quest not on screen
+    //quest bag needs recalculating after each accept/hand in to ensure only required items are in there
+    //better way to store quest progress?
+    //clean up new flag methods
+    //only send add/update/delete quests to client, instead of all
+    #endregion
+
     public class QuestProgressInfo
     {
         public int Index
@@ -20,6 +30,7 @@ namespace Server.MirDatabase
 
         public List<int> KillTaskCount = new List<int>();
         public List<long> ItemTaskCount = new List<long>();
+        public List<bool> FlagTaskSet = new List<bool>();
 
         public List<string> TaskList = new List<string>();
 
@@ -33,6 +44,10 @@ namespace Server.MirDatabase
             get { return EndDateTime < DateTime.MaxValue; }
         }
 
+        public bool New
+        {
+            get { return StartDateTime > DateTime.Now.AddDays(-1); }
+        }
 
         public QuestProgressInfo(int index)
         {
@@ -45,6 +60,9 @@ namespace Server.MirDatabase
 
             foreach (var item in Info.ItemTasks)
                 ItemTaskCount.Add(0);
+
+            foreach (var flag in Info.FlagTasks)
+                FlagTaskSet.Add(false);
 
             CheckCompleted();
         }
@@ -65,6 +83,13 @@ namespace Server.MirDatabase
             count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
                 ItemTaskCount.Add(reader.ReadInt64());
+
+            if (Envir.LoadVersion >= 37)
+            {
+                count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                    FlagTaskSet.Add(reader.ReadBoolean());
+            }
         }
 
         public void Save(BinaryWriter writer)
@@ -81,6 +106,10 @@ namespace Server.MirDatabase
             writer.Write(ItemTaskCount.Count);
             for (int i = 0; i < ItemTaskCount.Count; i++)
                 writer.Write(ItemTaskCount[i]);
+
+            writer.Write(FlagTaskSet.Count);
+            for (int i = 0; i < FlagTaskSet.Count; i++)
+                writer.Write(FlagTaskSet[i]);
         }
 
         public bool CheckCompleted()
@@ -103,6 +132,13 @@ namespace Server.MirDatabase
                 canComplete = false;
             }
 
+            for (int i = 0; i < Info.FlagTasks.Count; i++)
+            {
+                if (FlagTaskSet[i]) continue;
+
+                canComplete = false;
+            }
+
             if (!canComplete) return false;
 
             if (!Completed)
@@ -111,6 +147,7 @@ namespace Server.MirDatabase
             return true;
         }
 
+        #region Need Requirement
 
         public bool NeedItem(ItemInfo iInfo)
         {
@@ -121,6 +158,15 @@ namespace Server.MirDatabase
         {
             return Info.KillTasks.Where((task, i) => KillTaskCount[i] < task.Count && task.Monster == mInfo).Any();
         }
+
+        public bool NeedFlag(int flagNumber)
+        {
+            return Info.FlagTasks.Where((task, i) => FlagTaskSet[i] == false && task.Number == flagNumber).Any();
+        }
+
+        #endregion
+
+        #region Process Quest Task
 
         public void ProcessKill(int mobIndex)
         {
@@ -147,36 +193,110 @@ namespace Server.MirDatabase
             }
         }
 
+        public void ProcessFlag(bool[] Flags)
+        {
+            for (int i = 0; i < Info.FlagTasks.Count; i++)
+            {
+                for (int j = 0; j < Flags.Length - 1000; j++)
+                {
+                    if (Info.FlagTasks[i].Number != j || !Flags[j]) continue;
+
+                    FlagTaskSet[i] = Flags[j];
+                    break;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Update Task Messages
+
         public void UpdateTasks()
         {
             TaskList = new List<string>();
 
             UpdateKillTasks();
             UpdateItemTasks();
+            UpdateFlagTasks();
             UpdateGotoTask();
         }
 
         public void UpdateKillTasks()
         {
+            if(Info.KillMessage.Length > 0) 
+            {
+                bool allComplete = true;
+                for (int i = 0; i < Info.KillTasks.Count; i++)
+                {
+                    if (KillTaskCount[i] >= Info.KillTasks[i].Count) continue;
+
+                    allComplete = false;
+                }
+
+                TaskList.Add(string.Format("{0} {1}", Info.KillMessage, allComplete ? "(Completed)" : ""));
+                return;
+            }
+
             for (int i = 0; i < Info.KillTasks.Count; i++)
             {
-                if (Info.KillMessage.Length <= 0)
+                if (string.IsNullOrEmpty(Info.KillTasks[i].Message))
                     TaskList.Add(string.Format("Kill {0}: {1}/{2} {3}", Info.KillTasks[i].Monster.Name, KillTaskCount[i],
                         Info.KillTasks[i].Count, KillTaskCount[i] >= Info.KillTasks[i].Count ? "(Completed)" : ""));
                 else
-                    TaskList.Add(Info.KillMessage);
+                    TaskList.Add(string.Format("{0} {1}", Info.KillTasks[i].Message, KillTaskCount[i] >= Info.KillTasks[i].Count ? "(Completed)" : ""));
+                    
             }
         }
 
         public void UpdateItemTasks()
         {
+            if (Info.ItemMessage.Length > 0)
+            {
+                bool allComplete = true;
+                for (int i = 0; i < Info.ItemTasks.Count; i++)
+                {
+                    if (ItemTaskCount[i] >= Info.ItemTasks[i].Count) continue;
+
+                    allComplete = false;
+                }
+
+                TaskList.Add(string.Format("{0} {1}", Info.ItemMessage, allComplete ? "(Completed)" : ""));
+                return;
+            }
+
             for (int i = 0; i < Info.ItemTasks.Count; i++)
             {
-                if (Info.ItemMessage.Length <= 0)
+                if (string.IsNullOrEmpty(Info.ItemTasks[i].Message))
                     TaskList.Add(string.Format("Collect {0}: {1}/{2} {3}", Info.ItemTasks[i].Item.Name, ItemTaskCount[i],
                         Info.ItemTasks[i].Count, ItemTaskCount[i] >= Info.ItemTasks[i].Count ? "(Completed)" : ""));
                 else
-                    TaskList.Add(Info.ItemMessage);
+                    TaskList.Add(string.Format("{0} {1}", Info.ItemTasks[i].Message, ItemTaskCount[i] >= Info.ItemTasks[i].Count ? "(Completed)" : ""));
+            }
+        }
+
+        public void UpdateFlagTasks()
+        {
+            if (Info.FlagMessage.Length > 0)
+            {
+                bool allComplete = true;
+                for (int i = 0; i < Info.FlagTasks.Count; i++)
+                {
+                    if (FlagTaskSet[i]) continue;
+
+                    allComplete = false;
+                }
+
+                TaskList.Add(string.Format("{0} {1}", Info.FlagMessage, allComplete ? "(Completed)" : ""));
+                return;
+            }
+
+            for (int i = 0; i < Info.FlagTasks.Count; i++)
+            {
+                if (string.IsNullOrEmpty(Info.FlagTasks[i].Message))
+                    TaskList.Add(string.Format("Activate Flag {0} {1}", Info.FlagTasks[i].Number, FlagTaskSet[i] ? "(Completed)" : ""));
+                else
+                    TaskList.Add(string.Format("{0} {1}", Info.FlagTasks[i].Message, FlagTaskSet[i] ? "(Completed)" : ""));
+
             }
         }
 
@@ -187,6 +307,8 @@ namespace Server.MirDatabase
             TaskList.Add(Info.GotoMessage);
         }
 
+        #endregion
+
         public ClientQuestProgress CreateClientQuestProgress()
         {
             return new ClientQuestProgress
@@ -194,7 +316,8 @@ namespace Server.MirDatabase
                 Id = Index,
                 TaskList = TaskList,
                 Taken = Taken,
-                Completed = Completed
+                Completed = Completed,
+                New = New
             };
         }
     }

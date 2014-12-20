@@ -36,8 +36,6 @@ namespace Server.MirObjects
             TypeKey = "[TYPES]",
             GuildCreateKey = "[@CREATEGUILD]",
             QuestKey = "[QUESTS]";
-            //CollectQuestKey = "[COLLECTQUESTS]",
-            //FinishQuestKey = "[FINISHQUESTS]";
 
 
         //public static Regex Regex = new Regex(@"[^\{\}]<.*?/(.*?)>");
@@ -2001,15 +1999,18 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.Set:
-                        uint flagIndex;
+                        int flagIndex;
                         uint onCheck;
-                        if (!uint.TryParse(param[0], out flagIndex)) return;
+                        if (!int.TryParse(param[0], out flagIndex)) return;
                         if (!uint.TryParse(param[1], out onCheck)) return;
 
-                        if (flagIndex > Globals.FlagIndexCount) return;
+                        if (flagIndex < 0 || flagIndex > Globals.FlagIndexCount) return;
                         var flagIsOn = Convert.ToBoolean(onCheck);
 
                         player.Info.Flags[flagIndex] = flagIsOn;
+
+                        if (flagIsOn) player.CheckNeedQuestFlag(flagIndex);
+
                         break;
 
                     case ActionType.Param1:
