@@ -2423,6 +2423,19 @@ namespace Server.MirObjects
 
             return false;
         }
+        public bool CheckNeedQuestFlag(int flagNumber)
+        {
+            foreach (QuestProgressInfo quest in CurrentQuests.
+                Where(e => e.FlagTaskSet.Count > 0).
+                Where(e => e.NeedFlag(flagNumber)))
+            {
+                quest.ProcessFlag(Info.Flags);
+                SendQuestUpdate();
+                return true;
+            }
+
+            return false;
+        }
 
         public void SendQuestUpdate()
         {

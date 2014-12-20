@@ -116,7 +116,13 @@ namespace Client
         {
             Shift = e.Shift;
             Alt = e.Alt;
-            Ctrl = e.Control;
+
+            if(Settings.SkillMode)
+            {
+                Ctrl = e.KeyCode == Keys.Tab;
+            }
+            else
+                Ctrl = e.Control;
             
             try
             {

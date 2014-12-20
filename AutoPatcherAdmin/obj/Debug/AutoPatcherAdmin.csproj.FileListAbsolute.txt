@@ -24,3 +24,12 @@ C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.Properties
 C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.csproj.GenerateResource.Cache
 C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.exe
 C:\Mir 2 Source\trunk SVN\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.pdb
+C:\Mir 2\AutoPatcher\AutoPatcherAdmin\AutoPatcherAdmin.exe.config
+C:\Mir 2\AutoPatcher\AutoPatcherAdmin\AutoPatcherAdmin.exe
+C:\Mir 2\AutoPatcher\AutoPatcherAdmin\AutoPatcherAdmin.pdb
+C:\Mir 2 Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.csprojResolveAssemblyReference.cache
+C:\Mir 2 Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.AMain.resources
+C:\Mir 2 Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.Properties.Resources.resources
+C:\Mir 2 Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.csproj.GenerateResource.Cache
+C:\Mir 2 Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.exe
+C:\Mir 2 Source\AutoPatcherAdmin\obj\Debug\AutoPatcherAdmin.pdb

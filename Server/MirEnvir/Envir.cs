@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 36;
+        public const int Version = 37;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -555,8 +555,7 @@ namespace Server.MirEnvir
 
             if (!File.Exists(path))
             {
-                SMain.Enqueue(string.Format("Fishing File Not Found: {0}", path));
-                return;
+                File.Create(path);
             }
 
             string[] lines = File.ReadAllLines(path);

@@ -84,7 +84,7 @@ namespace Client.MirScenes
         public QuestLogDialog QuestLogDialog;
         public QuestTrackingDialog QuestTrackingDialog;
 
-        public MagicKeyDialog MagicKeyDialog;
+        public SkillBarDialog SkillBarDialog;
 
         public static List<ItemInfo> ItemInfoList = new List<ItemInfo>();
         public static List<UserId> UserIdList = new List<UserId>();
@@ -182,7 +182,7 @@ namespace Client.MirScenes
             QuestTrackingDialog = new QuestTrackingDialog { Parent = this, Visible = false };
             QuestLogDialog = new QuestLogDialog {Parent = this, Visible = false};
 
-            MagicKeyDialog = new MagicKeyDialog {Parent = this, Visible = false };
+            SkillBarDialog = new SkillBarDialog {Parent = this, Visible = false };
 
             for (int i = 0; i < OutputLines.Length; i++)
                 OutputLines[i] = new MirLabel
@@ -191,7 +191,7 @@ namespace Client.MirScenes
                     BackColour = Color.Transparent,
                     Font = new Font(Settings.FontName, 10F),
                     ForeColour = Color.LimeGreen,
-                    Location = new Point(20, 20 + i * 13),
+                    Location = new Point(20, 25 + i * 13),
                     OutLine = true,
                 };
 
@@ -327,11 +327,6 @@ namespace Client.MirScenes
                 case Keys.G:
                     if (!GuildDialog.Visible) GuildDialog.Show();
                     else GuildDialog.Hide();
-                    break;
-
-                case Keys.K:
-                    if (!MagicKeyDialog.Visible) MagicKeyDialog.Show();
-                    else MagicKeyDialog.Hide();
                     break;
 
                 case Keys.U:
@@ -682,8 +677,21 @@ namespace Client.MirScenes
             MainDialog.Process();
             InventoryDialog.Process();
             MiniMapDialog.Process();
+            SkillBarDialog.Process();
+
+            ProcessDialogs();
+
             ProcessOuput();
         }
+
+        public void ProcessDialogs()
+        {
+            if (Settings.SkillBar)
+                SkillBarDialog.Show();
+            else
+                SkillBarDialog.Hide();
+        }
+
         public override void ProcessPacket(Packet p)
         {
             switch (p.Index)
@@ -6101,7 +6109,7 @@ namespace Client.MirScenes
         public MirImageControl ExperienceBar, WeightBar;
         public MirButton GameShopButton, MenuButton, InventoryButton, CharacterButton, SkillButton, QuestButton, OptionButton;
         public MirControl HealthOrb;
-        public MirLabel HealthLabel, ManaLabel, LevelLabel, CharacterName, ExperienceLabel, GoldLabel, WeightLabel, AModeLabel, PModeLabel;
+        public MirLabel HealthLabel, ManaLabel, LevelLabel, CharacterName, ExperienceLabel, GoldLabel, WeightLabel, AModeLabel, PModeLabel, SModeLabel;
 
         public MainDialog()
         {
@@ -6335,7 +6343,7 @@ namespace Client.MirScenes
                 ForeColour = Color.Yellow,
                 OutLineColour = Color.Black,
                 Parent = this,
-                Location = new Point(115, 125)
+                Location = new Point(Settings.HighResolution ? 899 : 675, Settings.HighResolution ? -448 : -280),
             };
 
             PModeLabel = new MirLabel
@@ -6346,6 +6354,15 @@ namespace Client.MirScenes
                 Parent = this,
                 Location = new Point(230, 125),
                 Visible = false
+            };
+
+            SModeLabel = new MirLabel
+            {
+                AutoSize = true,
+                ForeColour = Color.LimeGreen,
+                OutLineColour = Color.Black,
+                Parent = this,
+                Location = new Point(Settings.HighResolution ? 899 : 675, Settings.HighResolution ? -463 : -295),
             };
         }
 
@@ -6396,6 +6413,15 @@ namespace Client.MirScenes
                     break;
             }
 
+            switch(Settings.SkillMode)
+            {
+                case true:
+                    SModeLabel.Text = "[Skill Mode: `]";
+                    break;
+                case false:
+                    SModeLabel.Text = "[Skill Mode: Ctrl]";
+                    break;
+            }
 
             HealthLabel.Text = string.Format("HP {0}/{1}", User.HP, User.MaxHP);
             ManaLabel.Text = string.Format("MP {0}/{1} ", User.MP, User.MaxMP);
@@ -7528,7 +7554,7 @@ namespace Client.MirScenes
         }
     }
 
-    public sealed class MagicKeyDialog : MirImageControl
+    public sealed class SkillBarDialog : MirImageControl
     {
         private readonly MirButton _switchBindsButton;
 
@@ -7537,7 +7563,7 @@ namespace Client.MirScenes
         public MirLabel[] KeyNameLabels = new MirLabel[8];
         public MirLabel BindNumberLabel = new MirLabel();
 
-        public MagicKeyDialog()
+        public SkillBarDialog()
         {
             Index = 2190;
             Library = Libraries.Prguse;
@@ -7557,7 +7583,6 @@ namespace Client.MirScenes
                 Size = new Size(16, 28),
                 Location = new Point(0, 0)
             };
-            _switchBindsButton.Click += _switchBindsButton_Click;
 
             for (var i = 0; i < Cells.Length; i++)
             {
@@ -7601,36 +7626,50 @@ namespace Client.MirScenes
             Libraries.Prguse.Draw(2193, new Point(DisplayLocation.X + 12, DisplayLocation.Y), Color.White, true, 0.5F);
         }
 
-        void _switchBindsButton_Click(object sender, EventArgs e)
+        public void Update()
         {
             TopBind = !TopBind;
+        }
 
-            if (TopBind)
+        public void Process()
+        {
+            if (!Visible) return;
+
+            if(CMain.Ctrl)
             {
-                Index = 2190;
-                _switchBindsButton.Index = 2247;
-                BindNumberLabel.Text = "1";
-                BindNumberLabel.Location = new Point(0, 1);
-            }
-            else
-            {
+                if (TopBind) return;
+
+                SetTab();
+
                 Index = 2191;
                 _switchBindsButton.Index = 2248;
                 BindNumberLabel.Text = "2";
                 BindNumberLabel.Location = new Point(0, 10);
-            }
 
-            SetTab();
+                TopBind = true;
+            }
+            else
+            {
+                if (!TopBind) return;
+
+                SetTab();
+
+                Index = 2190;
+                _switchBindsButton.Index = 2247;
+                BindNumberLabel.Text = "1";
+                BindNumberLabel.Location = new Point(0, 1);
+
+                TopBind = false;
+            }
         }
 
-        public void SetTab()
+        private void SetTab()
         {
             for (var i = 1; i <= 8; i++)
             {
                 Cells[i - 1].Index = -1;
 
                 int offset = TopBind ? 0 : 8;
-
 
                 KeyNameLabels[i - 1].Text = (TopBind ? "" : "Ctrl\n") + "F" + i;
 
@@ -8552,6 +8591,12 @@ namespace Client.MirScenes
             LocationLabel.Location = new Point(46, y);
             LightSetting.Location = new Point(102, y);
 
+            GameScene.Scene.MainDialog.SModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
+                Settings.HighResolution ? -463 - 108 : -295 - 108);
+
+            GameScene.Scene.MainDialog.AModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
+                Settings.HighResolution ? -448 - 108 : -280 - 108);
+
             GameScene.Scene.DuraStatusPanel.Location = new Point((GameScene.Scene.MiniMapDialog.Location.X + 86),
             GameScene.Scene.MiniMapDialog.Size.Height);
         }
@@ -8564,6 +8609,12 @@ namespace Client.MirScenes
             BigMapButton.Location = new Point(25, y);
             LocationLabel.Location = new Point(46, y);
             LightSetting.Location = new Point(102, y);
+
+            GameScene.Scene.MainDialog.SModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
+                Settings.HighResolution ? -463: -295);
+
+            GameScene.Scene.MainDialog.AModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
+                Settings.HighResolution ? -448 : -280);
 
             GameScene.Scene.DuraStatusPanel.Location = new Point((GameScene.Scene.MiniMapDialog.Location.X + 86),
             GameScene.Scene.MiniMapDialog.Size.Height);
@@ -10427,7 +10478,11 @@ namespace Client.MirScenes
             }
 
             if (Magic.Key > 8)
-                KeyLabel.Text = string.Format("CTRL" + Environment.NewLine + "F{0}", Magic.Key % 8);
+            {
+                int key = Magic.Key % 8;
+
+                KeyLabel.Text = string.Format("CTRL" + Environment.NewLine + "F{0}", key != 0 ? key : 8);
+            }
             else if (Magic.Key > 0)
                 KeyLabel.Text = string.Format("F{0}", Magic.Key);
             else
@@ -10509,8 +10564,7 @@ namespace Client.MirScenes
                 Network.Enqueue(new C.MagicKey { Spell = Magic.Spell, Key = Key });
                 Magic.Key = Key;
 
-                GameScene.Scene.MagicKeyDialog.SetTab();
-                GameScene.Scene.MagicKeyDialog.Show();
+                GameScene.Scene.SkillBarDialog.Update();
 
                 Dispose();
             };

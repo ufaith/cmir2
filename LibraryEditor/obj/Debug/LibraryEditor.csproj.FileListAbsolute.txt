@@ -49,3 +49,12 @@ C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.Properties.Resou
 C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.csproj.GenerateResource.Cache
 C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.exe
 C:\Mir 2 Source\trunk SVN\LibraryEditor\obj\Debug\LibraryEditor.pdb
+C:\Mir 2\Library\LibraryEditor.exe.config
+C:\Mir 2\Library\LibraryEditor.exe
+C:\Mir 2\Library\LibraryEditor.pdb
+C:\Mir 2 Source\LibraryEditor\obj\Debug\LibraryEditor.csprojResolveAssemblyReference.cache
+C:\Mir 2 Source\LibraryEditor\obj\Debug\LibraryEditor.LMain.resources
+C:\Mir 2 Source\LibraryEditor\obj\Debug\LibraryEditor.Properties.Resources.resources
+C:\Mir 2 Source\LibraryEditor\obj\Debug\LibraryEditor.csproj.GenerateResource.Cache
+C:\Mir 2 Source\LibraryEditor\obj\Debug\LibraryEditor.exe
+C:\Mir 2 Source\LibraryEditor\obj\Debug\LibraryEditor.pdb

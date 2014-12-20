@@ -20,6 +20,7 @@ namespace Client.MirScenes.Dialogs
     public sealed class QuestListDialog : MirImageControl
     {
         private readonly MirButton _acceptButton, _finishButton;
+        private MirLabel _availableQuestLabel;
 
         public List<ClientQuestProgress> Quests = new List<ClientQuestProgress>();
 
@@ -221,6 +222,14 @@ namespace Client.MirScenes.Dialogs
 
             #endregion
 
+            _availableQuestLabel = new MirLabel
+            {
+                Font = new Font(Settings.FontName, 8F),
+                Parent = this,
+                AutoSize = true,
+                Location = new Point(230, 8)
+            };
+
             MirButton closeButton = new MirButton
             {
                 Index = 360,
@@ -228,7 +237,7 @@ namespace Client.MirScenes.Dialogs
                 PressedIndex = 362,
                 Library = Libraries.Prguse2,
                 Parent = this,
-                Location = new Point(289, 3),
+                Location = new Point(289, 8),
                 Sound = SoundList.ButtonA,
             };
             closeButton.Click += (o, e) => Hide();
@@ -304,6 +313,8 @@ namespace Client.MirScenes.Dialogs
 
         public void RefreshInterface()
         {
+            _availableQuestLabel.Text = string.Format("List: {0}", Quests.Count);
+
             int maxIndex = Quests.Count - Rows.Length;
 
             if (StartIndex > maxIndex) StartIndex = maxIndex;
@@ -901,8 +912,12 @@ namespace Client.MirScenes.Dialogs
                 if (i == 0 || lines[i] == TaskTitle || lines[i] == ProgressTitle)
                 {
                     font = new Font(Settings.FontName, 10F, FontStyle.Bold);
-                    fontColor = Color.Yellow;
                     title = true;
+
+                    if (i == 0)
+                    {
+                        fontColor = Color.Yellow;
+                    }
                 }
 
                 _textLabel[i - TopLine] = new MirLabel
@@ -1261,8 +1276,9 @@ namespace Client.MirScenes.Dialogs
         public List<ClientQuestProgress> Quests = new List<ClientQuestProgress>();
         public List<QuestGroupQuestItem> TaskGroups = new List<QuestGroupQuestItem>();
 
-        public List<string> ExpandedGroups = new List<string>(); 
+        public List<string> ExpandedGroups = new List<string>();
 
+        private MirLabel _takenQuestsLabel;
         public QuestLogDialog()
         {
             Index = 961;
@@ -1270,6 +1286,14 @@ namespace Client.MirScenes.Dialogs
             Movable = true;
             Sort = true;
             Location = new Point(Settings.ScreenWidth / 2 - 300 - 20, 60);
+
+            _takenQuestsLabel = new MirLabel
+            {
+                Font = new Font(Settings.FontName, 8F),
+                Parent = this,
+                AutoSize = true,
+                Location = new Point(220, 7)
+            };
 
             MirButton closeButton = new MirButton
             {
@@ -1289,6 +1313,8 @@ namespace Client.MirScenes.Dialogs
             ClearLog();
 
             Quests = GameScene.User.CurrentQuests;
+
+            _takenQuestsLabel.Text = string.Format("List: {0}/{1}", Quests.Count, Globals.MaxConcurrentQuests);
 
             var groupedQuests = Quests.GroupBy(d => d.QuestInfo.Group).ToList();
 
@@ -1429,7 +1455,7 @@ namespace Client.MirScenes.Dialogs
                 AutoSize = true,
                 Parent = this,
                 Font = new Font(Settings.FontName, 8F),
-                ForeColour = Color.DodgerBlue,
+                ForeColour = Color.LimeGreen,
                 Location = new Point(18, 0),
                 Visible = true,
             };
@@ -1511,7 +1537,7 @@ namespace Client.MirScenes.Dialogs
     }
     public sealed class QuestSingleQuestItem : MirControl
     {
-        private MirLabel _questLabel;
+        private MirLabel _questLabel, _stateLabel;
         private readonly MirImageControl _selectedImage;
 
         public ClientQuestProgress Quest;
@@ -1533,8 +1559,8 @@ namespace Client.MirScenes.Dialogs
             TrackQuest = GameScene.Scene.QuestTrackingDialog.TrackedQuestsIds.Contains(quest.Id);
 
             string name = Quest.QuestInfo.Name;
-            string level = string.Format("Lv {0}", Quest.QuestInfo.LevelNeeded);
-            string state = quest.Completed ? "(Complete)" : "(Waiting)"; //not in use
+            string level = string.Format("Lv{0}", Quest.QuestInfo.LevelNeeded);
+            string state = quest.Completed ? "(Complete)" : "(Waiting)";
 
             BeforeDraw += QuestTaskSingleItem_BeforeDraw;
             AfterDraw += QuestTaskSingleItem_AfterDraw;
@@ -1553,7 +1579,7 @@ namespace Client.MirScenes.Dialogs
                 Text = string.Format("{0,-4} {1}", level, name),
                 AutoSize = true,
                 Font = new Font(Settings.FontName, 8F),
-                ForeColour = Color.White,
+                ForeColour = quest.New ? Color.Yellow : Color.White,
                 Parent = this,
                 Location = new Point(0, 0),
                 Sound = SoundList.ButtonA
@@ -1590,6 +1616,17 @@ namespace Client.MirScenes.Dialogs
                 {
                     GameScene.Scene.QuestTrackingDialog.RemoveQuest(Quest);
                 }
+            };
+
+            _questLabel = new MirLabel
+            {
+                Text = string.Format("{0}", state),
+                AutoSize = true,
+                Font = new Font(Settings.FontName, 8F),
+                ForeColour = quest.New ? Color.Yellow : Color.White,
+                Parent = this,
+                Location = new Point(190, 0),
+                Sound = SoundList.ButtonA
             };
         }
 
@@ -1661,7 +1698,7 @@ namespace Client.MirScenes.Dialogs
                     AutoSize = true,
                     BackColour = Color.Transparent,
                     Font = QuestFont,
-                    ForeColour = Color.DodgerBlue,
+                    ForeColour = Color.LimeGreen,
                     Location = new Point(20, 20 + y),
                     OutLine = true,
                     Parent = this,
