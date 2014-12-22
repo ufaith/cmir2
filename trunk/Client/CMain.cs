@@ -37,7 +37,7 @@ namespace Client
         private static int _fps;
         public static int FPS;
 
-        public static bool Shift, Alt, Ctrl;
+        public static bool Shift, Alt, Ctrl, Tilde;
 
 
         public CMain()
@@ -110,20 +110,18 @@ namespace Client
             Shift = false;
             Alt = false;
             Ctrl = false;
+            Tilde = false;
         }
 
         public static void CMain_KeyDown(object sender, KeyEventArgs e)
         {
             Shift = e.Shift;
             Alt = e.Alt;
+            Ctrl = e.Control;
 
-            if(Settings.SkillMode)
-            {
-                Ctrl = e.KeyCode == Keys.Tab;
-            }
-            else
-                Ctrl = e.Control;
-            
+            if (e.KeyCode == Keys.Oem8)
+                CMain.Tilde = true;
+
             try
             {
                 if (e.Alt && e.KeyCode == Keys.Enter)
@@ -163,6 +161,9 @@ namespace Client
             Shift = e.Shift;
             Alt = e.Alt;
             Ctrl = e.Control;
+
+            if (e.KeyCode == Keys.Oem8)
+                CMain.Tilde = false;
 
             if (e.KeyCode == Keys.PrintScreen)
                 Program.Form.CreateScreenShot();
@@ -336,6 +337,8 @@ namespace Client
 
         private static void CreateDebugLabel()
         {
+            if (!Settings.DebugMode) return;
+
             if (DebugBaseLabel == null || DebugBaseLabel.IsDisposed)
             {
                 DebugBaseLabel = new MirControl
@@ -466,11 +469,11 @@ namespace Client
             using (Bitmap image = GetImage(Handle, new Rectangle(location, ClientSize)))
             using (Graphics graphics = Graphics.FromImage(image))
             {
-                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.Black, 3, 30);
-                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.Black, 4, 29);
-                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.Black, 5, 30);
-                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.Black, 4, 31);
-                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.White, 4, 30);
+                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.Black, 3, 50);
+                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.Black, 4, 49);
+                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.Black, 5, 50);
+                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.Black, 4, 51);
+                graphics.DrawString(text, new Font(Settings.FontName, 10F), Brushes.White, 4, 50);
 
                 string path = Path.Combine(Application.StartupPath, @"Screenshots\");
                 if (!Directory.Exists(path))

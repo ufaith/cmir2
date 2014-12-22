@@ -237,7 +237,7 @@ namespace Client.MirScenes.Dialogs
                 PressedIndex = 362,
                 Library = Libraries.Prguse2,
                 Parent = this,
-                Location = new Point(289, 8),
+                Location = new Point(289, 3),
                 Sound = SoundList.ButtonA,
             };
             closeButton.Click += (o, e) => Hide();
@@ -601,6 +601,7 @@ namespace Client.MirScenes.Dialogs
             Visible = false;
         }
     }
+
     public sealed class QuestRow : MirControl
     {
         public ClientQuestProgress Quest;
@@ -1562,6 +1563,8 @@ namespace Client.MirScenes.Dialogs
             string level = string.Format("Lv{0}", Quest.QuestInfo.LevelNeeded);
             string state = quest.Completed ? "(Complete)" : "(Waiting)";
 
+            bool lowLevelQuest = (MapObject.User.Level - quest.QuestInfo.LevelNeeded) > 10;
+
             BeforeDraw += QuestTaskSingleItem_BeforeDraw;
             AfterDraw += QuestTaskSingleItem_AfterDraw;
 
@@ -1579,7 +1582,7 @@ namespace Client.MirScenes.Dialogs
                 Text = string.Format("{0,-4} {1}", level, name),
                 AutoSize = true,
                 Font = new Font(Settings.FontName, 8F),
-                ForeColour = quest.New ? Color.Yellow : Color.White,
+                ForeColour = lowLevelQuest ? Color.Gray : quest.New ? Color.Yellow : Color.White,
                 Parent = this,
                 Location = new Point(0, 0),
                 Sound = SoundList.ButtonA
@@ -1618,12 +1621,12 @@ namespace Client.MirScenes.Dialogs
                 }
             };
 
-            _questLabel = new MirLabel
+            _stateLabel = new MirLabel
             {
                 Text = string.Format("{0}", state),
                 AutoSize = true,
                 Font = new Font(Settings.FontName, 8F),
-                ForeColour = quest.New ? Color.Yellow : Color.White,
+                ForeColour = lowLevelQuest ? Color.Gray : quest.New ? Color.Yellow : Color.White,
                 Parent = this,
                 Location = new Point(190, 0),
                 Sound = SoundList.ButtonA

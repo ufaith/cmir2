@@ -273,6 +273,7 @@ namespace Client.MirControls
             CMain.Ctrl = false;
             CMain.Shift = false;
             CMain.Alt = false;
+            CMain.Tilde = false;
         }
 
         public void SetFocus()
