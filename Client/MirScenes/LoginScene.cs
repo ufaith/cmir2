@@ -11,6 +11,8 @@ using Client.MirNetwork;
 using Client.MirSounds;
 using S = ServerPackets;
 using C = ClientPackets;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Client.MirScenes
 {
@@ -25,9 +27,13 @@ namespace Client.MirScenes
 
         private MirMessageBox _connectBox;
 
+        private InputKeyDialog _ViewKey;
+
+        public MirImageControl ViolenceLabel, MinorLabel, YouthLabel; 
 
         public LoginScene()
         {
+
             SoundManager.PlaySound(SoundList.IntroMusic, true);
             Disposing += (o, e) => SoundManager.StopSound(SoundList.IntroMusic);
 
@@ -46,15 +52,24 @@ namespace Client.MirScenes
             _login.AccountButton.Click += (o, e) =>
                 {
                     _login.Hide();
+                    if(_ViewKey != null && !_ViewKey.IsDisposed) _ViewKey.Dispose();
                     _account = new NewAccountDialog { Parent = _background };
                     _account.Disposing += (o1, e1) => _login.Show();
                 };
             _login.PassButton.Click += (o, e) =>
                 {
                     _login.Hide();
+                    if (_ViewKey != null && !_ViewKey.IsDisposed) _ViewKey.Dispose();
                     _password = new ChangePasswordDialog { Parent = _background };
                     _password.Disposing += (o1, e1) => _login.Show();
                 };
+
+            _login.ViewKeyButton.Click += (o, e) =>     //ADD
+            {
+                if (_ViewKey != null && !_ViewKey.IsDisposed) return;
+
+                _ViewKey = new InputKeyDialog(_login) { Parent = _background };
+            };
 
             Version = new MirLabel
                 {
@@ -66,8 +81,32 @@ namespace Client.MirScenes
                     Parent = _background,
                     Text = string.Format("Version: {0}", Application.ProductVersion),
                 };
-            
-            
+
+
+            //ViolenceLabel = new MirImageControl
+            //{
+            //    Index = 89,
+            //    Library = Libraries.Prguse,
+            //    Parent = this,
+            //    Location = new Point(471, 10)
+            //};
+
+            //MinorLabel = new MirImageControl
+            //{
+            //    Index = 87,
+            //    Library = Libraries.Prguse,
+            //    Parent = this,
+            //    Location = new Point(578, 10)
+            //};
+
+            //YouthLabel = new MirImageControl
+            //{
+            //    Index = 88,
+            //    Library = Libraries.Prguse,
+            //    Parent = this,
+            //    Location = new Point(684, 10)
+            //};
+
             _connectBox = new MirMessageBox("Attempting to connect to the server.", MirMessageBoxButtons.Cancel);
             _connectBox.CancelButton.Click += (o, e) => Program.Form.Close();
             Shown += (sender, args) =>
@@ -116,8 +155,6 @@ namespace Client.MirScenes
                     break;
             }
         }
-
-        
 
         private  void SendVersion()
         {
@@ -283,6 +320,8 @@ namespace Client.MirScenes
         {
             Enabled = false;
             _login.Dispose();
+            if(_ViewKey != null && !_ViewKey.IsDisposed) _ViewKey.Dispose();
+
             SoundManager.PlaySound(SoundList.LoginEffect);
             _background.Animated = true;
             _background.AfterAnimation += (o, e) =>
@@ -295,7 +334,7 @@ namespace Client.MirScenes
         public sealed class LoginDialog : MirImageControl
         {
             public MirImageControl TitleLabel, AccountIDLabel, PassLabel;
-            public MirButton AccountButton, CloseButton, OKButton, PassButton;
+            public MirButton AccountButton, CloseButton, OKButton, PassButton, ViewKeyButton;
             public MirTextBox AccountIDTextBox, PasswordTextBox;
             private bool _accountIDValid, _passwordValid;
 
@@ -360,6 +399,16 @@ namespace Client.MirScenes
                         Parent = this,
                         PressedIndex = 328,
                     };
+
+                ViewKeyButton = new MirButton
+                {
+                    HoverIndex = 333,
+                    Index = 332,
+                    Library = Libraries.Title,
+                    Location = new Point(60, 189),
+                    Parent = this,
+                    PressedIndex = 334,
+                };
 
                 CloseButton = new MirButton
                     {
@@ -440,7 +489,7 @@ namespace Client.MirScenes
 
                 RefreshLoginButton();
             }
-            private void TextBox_KeyPress(object sender, KeyPressEventArgs e)
+            public void TextBox_KeyPress(object sender, KeyPressEventArgs e)
             {
                 if (sender == null || e.KeyChar != (char) Keys.Enter) return;
 
@@ -512,6 +561,186 @@ namespace Client.MirScenes
             #endregion
         }
 
+        public sealed class InputKeyDialog : MirImageControl
+        {
+            public readonly MirButton KeyEscButton, KeyDelButton, KeyRandButton, KeyEnterButton;
+
+            private LoginDialog _loginDialog;
+
+            private List<MirButton> _buttons = new List<MirButton>();
+
+            private char[] _letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+            private char[] _numbers = "0123456789".ToCharArray();
+
+            public InputKeyDialog(LoginDialog loginDialog)
+            {
+                _loginDialog = loginDialog;
+
+                Index = 1080;
+                Library = Libraries.Prguse;
+                Location = new Point((Client.Settings.ScreenWidth - Size.Width) / 2 + 285, (Client.Settings.ScreenHeight - Size.Height) / 2 + 150);
+                Visible = true;
+
+                KeyEscButton = new MirButton
+                {
+                    HoverIndex = 301,
+                    Index = 300,
+                    Library = Libraries.Title,
+                    Location = new Point(12, 12),
+                    Parent = this,
+                    PressedIndex = 302
+                };
+                KeyEscButton.Click += (o, e) => Dispose();
+
+                KeyDelButton = new MirButton
+                {
+                    HoverIndex = 304,
+                    Index = 303,
+                    Library = Libraries.Title,
+                    Location = new Point(140, 76),
+                    Parent = this,
+                    PressedIndex = 305
+                };
+                KeyDelButton.Click += (o, e) => SecureKeyDelete();
+
+                KeyEnterButton = new MirButton
+                {
+                    HoverIndex = 310,
+                    Index = 309,
+                    Library = Libraries.Title,
+                    Location = new Point(76, 236),
+                    Parent = this,
+                    PressedIndex = 311
+                };
+                KeyEnterButton.Click += (o, e) =>
+                {
+                    KeyPressEventArgs arg = new KeyPressEventArgs((char)Keys.Enter);
+
+                    _loginDialog.TextBox_KeyPress(o, arg);
+                };
+
+                KeyRandButton = new MirButton
+                {
+                    HoverIndex = 307,
+                    Index = 306,
+                    Library = Libraries.Title,
+                    Location = new Point(140, 236),
+                    Parent = this,
+                    PressedIndex = 308
+                };
+                KeyRandButton.Click += (o, e) =>
+                {
+                    _letters = new string(_letters.OrderBy(s => Guid.NewGuid()).ToArray()).ToCharArray();
+                    _numbers = new string(_numbers.OrderBy(s => Guid.NewGuid()).ToArray()).ToCharArray();
+
+                    UpdateKeys();
+                };
+
+                UpdateKeys();
+            }
+
+            private void DisposeKeys()
+            {
+                foreach(MirButton button in _buttons)
+                {
+                    if (button != null && !button.IsDisposed) button.Dispose();
+                }
+            }
+
+            private void UpdateKeys()
+            {
+                DisposeKeys();
+
+                for (int i = 0; i < _numbers.Length; i++)
+                {
+                    MirButton numButton = new MirButton
+                    {
+                        HoverIndex = 1082,
+                        Index = 1081,
+                        Size = new Size(32, 30),
+                        Library = Libraries.Prguse,
+                        Location = new Point(12 + (i % 6 * 32), 44 + (i / 6 * 32)),
+                        Parent = this,
+                        PressedIndex = 1083,
+                        Text = _numbers[i].ToString(),
+                        CenterText = true
+                    };
+                    numButton.Click += (o, e) => SecureKeyPress(Convert.ToChar(numButton.Text));
+
+                    _buttons.Add(numButton);
+                }
+
+                for (int i = 0; i < _letters.Length; i++)
+                {
+                    MirButton alphButton = new MirButton
+                    {
+                        HoverIndex = 1082,
+                        Index = 1081,
+                        Size = new Size(32, 30),
+                        Library = Libraries.Prguse,
+                        Location = new Point(12 + (i % 6 * 32), 108 + (i / 6 * 32)),
+                        Parent = this,
+                        PressedIndex = 1083,
+                        Text = _letters[i].ToString(),
+                        CenterText = true
+                    };
+
+                    alphButton.Click += (o, e) => SecureKeyPress(Convert.ToChar(alphButton.Text));
+
+                    _buttons.Add(alphButton);
+                }
+            }
+
+            private void SecureKeyPress(char chr)
+            {
+                MirTextBox currentTextBox = GetFocussedTextBox();
+
+                string keyToAdd = chr.ToString();
+
+                if (CMain.IsKeyLocked(Keys.CapsLock)) 
+                    keyToAdd = keyToAdd.ToUpper(); 
+                else 
+                    keyToAdd = keyToAdd.ToLower();
+
+                currentTextBox.Text += keyToAdd;
+                currentTextBox.TextBox.SelectionLength = 0;
+                currentTextBox.TextBox.SelectionStart = currentTextBox.Text.Length;
+            }
+
+            private void SecureKeyDelete()
+            {
+                MirTextBox currentTextBox = GetFocussedTextBox();
+
+                if (currentTextBox.TextBox.SelectionLength > 0)
+                {
+                    currentTextBox.Text = currentTextBox.Text.Remove(currentTextBox.TextBox.SelectionStart, currentTextBox.TextBox.SelectionLength);
+                }
+                else if (currentTextBox.Text.Length > 0)
+                {
+                    currentTextBox.Text = currentTextBox.Text.Remove(currentTextBox.Text.Length - 1);
+                }
+
+                currentTextBox.TextBox.SelectionStart = currentTextBox.Text.Length;
+            }
+
+            private MirTextBox GetFocussedTextBox()
+            {
+                if (_loginDialog.AccountIDTextBox.TextBox.Focused)
+                    return _loginDialog.AccountIDTextBox;
+                else
+                    return _loginDialog.PasswordTextBox;
+            }
+
+            #region Disposable
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+
+                DisposeKeys();
+            }
+            #endregion
+        }
+
         public sealed class NewAccountDialog : MirImageControl
         {
             public MirButton OKButton, CancelButton;
@@ -541,6 +770,7 @@ namespace Client.MirScenes
             {
                 Index = 63;
                 Library = Libraries.Prguse;
+                Size = new Size();
                 Location = new Point((Settings.ScreenWidth - Size.Width) / 2, (Settings.ScreenHeight - Size.Height) / 2);
 
                 CancelButton = new MirButton

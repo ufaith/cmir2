@@ -392,6 +392,7 @@ namespace Client.MirControls
                 case ItemType.Scroll:
                 case ItemType.Book:
                 case ItemType.Food:
+                case ItemType.Script:
                     if (CanUseItem() && GridType == MirGridType.Inventory)
                     {
                         if (CMain.Time < GameScene.UseItemTime) return;

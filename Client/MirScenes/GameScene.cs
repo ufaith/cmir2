@@ -240,31 +240,34 @@ namespace Client.MirScenes
         }
         private void GameScene_KeyDown(object sender, KeyEventArgs e)
         {
+            bool skillMode = Settings.SkillMode ? CMain.Tilde : CMain.Ctrl;
+            bool altBind = !Scene.SkillBarDialog.TopBind;
+
             switch (e.KeyCode)
             {
                 case Keys.F1:
-                    UseSpell(CMain.Ctrl ? 9 : 1);
+                    UseSpell(altBind || skillMode ? 9 : 1);
                     break;
                 case Keys.F2:
-                    UseSpell(CMain.Ctrl ? 10 : 2);
+                    UseSpell(altBind || skillMode ? 10 : 2);
                     break;
                 case Keys.F3:
-                    UseSpell(CMain.Ctrl ? 11 : 3);
+                    UseSpell(altBind || skillMode ? 11 : 3);
                     break;
                 case Keys.F4:
-                    UseSpell(CMain.Ctrl ? 12 : 4);
+                    UseSpell(altBind || skillMode ? 12 : 4);
                     break;
                 case Keys.F5:
-                    UseSpell(CMain.Ctrl ? 13 : 5);
+                    UseSpell(altBind || skillMode ? 13 : 5);
                     break;
                 case Keys.F6:
-                    UseSpell(CMain.Ctrl ? 14 : 6);
+                    UseSpell(altBind || skillMode ? 14 : 6);
                     break;
                 case Keys.F7:
-                    UseSpell(CMain.Ctrl ? 15 : 7);
+                    UseSpell(altBind || skillMode ? 15 : 7);
                     break;
                 case Keys.F8:
-                    UseSpell(CMain.Ctrl ? 16 : 8);
+                    UseSpell(altBind || skillMode ? 16 : 8);
                     break;
                 case Keys.I:
                 case Keys.F9:
@@ -677,7 +680,6 @@ namespace Client.MirScenes
             MainDialog.Process();
             InventoryDialog.Process();
             MiniMapDialog.Process();
-            SkillBarDialog.Process();
 
             ProcessDialogs();
 
@@ -6515,6 +6517,8 @@ namespace Client.MirScenes
         public int StartIndex, LineCount = 4, WindowSize;
         public string ChatPrefix = "";
 
+        public bool Transparent;
+
         public ChatDialog()
         {
             Index = Settings.HighResolution ? 2221 : 2201;
@@ -6698,25 +6702,6 @@ namespace Client.MirScenes
 
         public void ReceiveChat(string text, ChatType type)
         {
-            //switch (type)
-            //{
-            //    case ChatType.Normal:
-            //        if (!Settings.ShowNormalChat) return;
-            //        break;
-            //    case ChatType.Shout:
-            //        if (!Settings.ShowYellChat) return;
-            //        break;
-            //    case ChatType.WhisperIn:
-            //        if (!Settings.ShowWhisperChat) return;
-            //        break;
-            //    case ChatType.Group:
-            //        if (!Settings.ShowGroupChat) return;
-            //        break;
-            //    case ChatType.Guild:
-            //        if (!Settings.ShowGuildChat) return;
-            //        break;
-            //}
-
             int chatWidth = Settings.HighResolution ? 614 : 390;
             List<string> chat = new List<string>();
 
@@ -6779,7 +6764,6 @@ namespace Client.MirScenes
 
             Update();
         }
-
 
         public void Update()
         {
@@ -6998,8 +6982,31 @@ namespace Client.MirScenes
                     break;
             }
             Location = new Point(Location.X, y - Size.Height);
+
+            UpdateBackground();
+
             Update();
         }
+
+        public void UpdateBackground()
+        {
+            int offset = Transparent ? 1 : 0;
+
+            switch (WindowSize)
+            {
+                case 0:
+                    Index = Settings.HighResolution ? 2221 : 2201;
+                    break;
+                case 1:
+                    Index = Settings.HighResolution ? 2224 : 2204;
+                    break;
+                case 2:
+                    Index = Settings.HighResolution ? 2227 : 2207;
+                    break;
+            }
+
+            Index -= offset;
+        } 
 
         public class ChatHistory
         {
@@ -7048,6 +7055,11 @@ namespace Client.MirScenes
                 Location = new Point(Settings.HighResolution ? 596 : 372, 1),
                 Sound = SoundList.ButtonA
             };
+            SettingsButton.Click += (o, e) =>
+                {
+                    GameScene.Scene.ChatDialog.Transparent = !GameScene.Scene.ChatDialog.Transparent;
+                    GameScene.Scene.ChatDialog.UpdateBackground();
+                };
 
             NormalButton = new MirButton
             {
@@ -7553,7 +7565,6 @@ namespace Client.MirScenes
             return null;
         }
     }
-
     public sealed class SkillBarDialog : MirImageControl
     {
         private readonly MirButton _switchBindsButton;
@@ -7583,6 +7594,7 @@ namespace Client.MirScenes
                 Size = new Size(16, 28),
                 Location = new Point(0, 0)
             };
+            _switchBindsButton.Click += _switchBindsButton_Click;
 
             for (var i = 0; i < Cells.Length; i++)
             {
@@ -7621,49 +7633,41 @@ namespace Client.MirScenes
             }
         }
 
+        void _switchBindsButton_Click(object sender, EventArgs e)
+        {
+            SwitchTab();
+        }
+
         void MagicKeyDialog_BeforeDraw(object sender, EventArgs e)
         {
             Libraries.Prguse.Draw(2193, new Point(DisplayLocation.X + 12, DisplayLocation.Y), Color.White, true, 0.5F);
         }
 
-        public void Update()
+        public void SwitchTab()
         {
             TopBind = !TopBind;
-        }
 
-        public void Process()
-        {
-            if (!Visible) return;
-
-            if(CMain.Ctrl)
+            if (TopBind)
             {
-                if (TopBind) return;
-
-                SetTab();
-
-                Index = 2191;
-                _switchBindsButton.Index = 2248;
-                BindNumberLabel.Text = "2";
-                BindNumberLabel.Location = new Point(0, 10);
-
-                TopBind = true;
-            }
-            else
-            {
-                if (!TopBind) return;
-
-                SetTab();
+                Update();
 
                 Index = 2190;
                 _switchBindsButton.Index = 2247;
                 BindNumberLabel.Text = "1";
                 BindNumberLabel.Location = new Point(0, 1);
+            }
+            else
+            {
+                Update();
 
-                TopBind = false;
+                Index = 2191;
+                _switchBindsButton.Index = 2248;
+                BindNumberLabel.Text = "2";
+                BindNumberLabel.Location = new Point(0, 10);
             }
         }
 
-        private void SetTab()
+        public void Update()
         {
             for (var i = 1; i <= 8; i++)
             {
@@ -7695,7 +7699,7 @@ namespace Client.MirScenes
         {
             if (Visible) return;
             Visible = true;
-            SetTab();
+            Update();
         }
 
         public void Hide()
@@ -8998,7 +9002,11 @@ namespace Client.MirScenes
                 Size = new Size(36, 17),
                 PressedIndex = 451,
             };
-            SkillModeOn.Click += (o, e) => Settings.SkillMode = true;
+            SkillModeOn.Click += (o, e) => 
+                {
+                    Settings.SkillMode = true;
+                    GameScene.Scene.ChatDialog.ReceiveChat("<SkillMode 2>", ChatType.Hint);
+                };
 
             SkillModeOff = new MirButton
             {
@@ -9009,7 +9017,11 @@ namespace Client.MirScenes
                 Size = new Size(36, 17),
                 PressedIndex = 454
             };
-            SkillModeOff.Click += (o, e) => Settings.SkillMode = false;
+            SkillModeOff.Click += (o, e) =>
+                {
+                    Settings.SkillMode = false;
+                    GameScene.Scene.ChatDialog.ReceiveChat("<SkillMode 1>", ChatType.Hint);
+                };
 
             SkillBarOn = new MirButton
             {
@@ -9517,6 +9529,10 @@ namespace Client.MirScenes
         public MirLabel[] TextLabel;
         public List<MirLabel> TextButtons;
 
+        public MirLabel NameLabel;
+
+        Font font = new Font(Settings.FontName, 9F);
+
         public List<string> CurrentLines = new List<string>();
         private int _index = 0;
         public int MaximumLines = 8;
@@ -9532,6 +9548,16 @@ namespace Client.MirScenes
             MouseWheel += NPCDialog_MouseWheel;
 
             Sort = true;
+
+            NameLabel = new MirLabel
+            {
+                Text = "",
+                Parent = this,
+                Font = new Font(Settings.FontName, 10F, FontStyle.Bold),              
+                ForeColour = Color.BurlyWood,
+                Location = new Point(30, 6),
+                AutoSize = true
+            };
 
             UpButton = new MirButton
             {
@@ -9712,6 +9738,7 @@ namespace Client.MirScenes
             {
                 TextLabel[i] = new MirLabel
                 {
+                    Font = font,
                     DrawFormat = TextFormatFlags.WordBreak,
                     Visible = true,
                     Parent = this,
@@ -9769,7 +9796,7 @@ namespace Client.MirScenes
                 Text = text,
                 ForeColour = Color.Yellow,
                 Sound = SoundList.ButtonC,
-                Font = new Font(Settings.FontName, 8F)
+                Font = font
             };
             //Fontstyle.Underline;
 
@@ -9808,7 +9835,7 @@ namespace Client.MirScenes
                 Location = p,
                 Text = text,
                 ForeColour = textColour,
-                Font = new Font(Settings.FontName, 8F)
+                Font = font
             };
             temp.MouseWheel += NPCDialog_MouseWheel;
 
@@ -9822,6 +9849,9 @@ namespace Client.MirScenes
             NPCObject npc = (NPCObject)MapControl.GetObject(GameScene.NPCID);
             if (npc != null)
             {
+                string[] nameSplit = npc.Name.Split('_');
+                NameLabel.Text = nameSplit[0];
+
                 if (npc.GetAvailableQuests().Any())
                     QuestButton.Visible = true;
             }
@@ -10563,8 +10593,6 @@ namespace Client.MirScenes
 
                 Network.Enqueue(new C.MagicKey { Spell = Magic.Spell, Key = Key });
                 Magic.Key = Key;
-
-                GameScene.Scene.SkillBarDialog.Update();
 
                 Dispose();
             };

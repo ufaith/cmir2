@@ -1487,6 +1487,7 @@ namespace Server.MirObjects
             }
         }
 
+        #region Refresh Stats
 
         public void RefreshStats()
         {
@@ -1515,6 +1516,7 @@ namespace Server.MirObjects
 
             if (AttackSpeed < 600) AttackSpeed = 600;
         }
+
         private void RefreshLevelStats()
         {
             MaxExperience = Level < Settings.ExperienceList.Count ? Settings.ExperienceList[Level - 1] : 0;
@@ -1587,6 +1589,7 @@ namespace Server.MirObjects
             }
 
         }
+
         private void RefreshBagWeight()
         {
             CurrentBagWeight = 0;
@@ -2021,441 +2024,7 @@ namespace Server.MirObjects
             }
         }
 
-        public void RefreshMount()
-        {
-            if (RidingMount)
-            {
-                if (MountType < 0)
-                {
-                    RidingMount = false;
-                }
-                else if (!Mount.CanRide)
-                {
-                    RidingMount = false;
-                    ReceiveChat("You must have a saddle to ride your mount", ChatType.System);
-                }
-                else if (!Mount.CanMapRide)
-                {
-                    RidingMount = false;
-                    ReceiveChat("You cannot ride on this map", ChatType.System);
-                }
-                else if (!Mount.CanDungeonRide)
-                {
-                    RidingMount = false;
-                    ReceiveChat("You cannot ride here without a bridle", ChatType.System);
-                }
-            }
-            else
-            {
-                RidingMount = false;
-            }
-
-            RefreshStats();
-
-            Broadcast(GetMountInfo());
-            Enqueue(GetMountInfo());
-        }
-
-        public void IncreaseMountLoyalty(int amount)
-        {
-            UserItem item = Info.Equipment[(int)EquipmentSlot.Mount];
-            if (item != null && item.CurrentDura < item.MaxDura)
-            {
-                item.CurrentDura = (ushort)Math.Min(item.MaxDura, item.CurrentDura + amount);
-                item.DuraChanged = false;
-                Enqueue(new S.ItemRepaired { UniqueID = item.UniqueID, MaxDura = item.MaxDura, CurrentDura = item.CurrentDura });
-            }
-        }
-
-        public void DecreaseMountLoyalty(int amount)
-        {
-            if (Envir.Time > DecreaseLoyaltyTime)
-            {
-                DecreaseLoyaltyTime = Envir.Time + (Mount.SlowLoyalty ? (LoyaltyDelay * 2) : LoyaltyDelay);
-                UserItem item = Info.Equipment[(int)EquipmentSlot.Mount];
-                if (item != null && item.CurrentDura > 0)
-                {
-                    DamageItem(item, amount);
-
-                    if (item.CurrentDura == 0)
-                    {
-                        RefreshMount();
-                    }
-                }
-            }
-        }
-
-        public void FishingCast(bool cast, bool cancel = false)
-        {
-            UserItem rod = Info.Equipment[(int)EquipmentSlot.Weapon];
-
-            byte flexibilityStat = 0;
-            sbyte successStat = 0;
-
-            FishingProgressMax = 30;
-
-            if (rod == null || (rod.Info.Shape != 49 && rod.Info.Shape != 50))
-            {
-                Fishing = false;
-                return;
-            }
-
-            UserItem hook = rod.Slots[(int)FishingSlot.Hook];
-
-            if (hook == null)
-            {
-                ReceiveChat("You need a hook.", ChatType.System);
-                return;
-            }
-
-            foreach (UserItem temp in rod.Slots)
-            {
-                if (temp == null) continue;
-
-                ItemInfo realItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
-
-                flexibilityStat = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, flexibilityStat + temp.CriticalRate + realItem.CriticalRate)));
-                successStat = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, successStat + temp.Luck + realItem.Luck)));
-            }
-
-            FishingProgressMax += flexibilityStat;
-            FishingChance = Envir.Random.Next(0,10) + (int)successStat + FishingChanceCounter * 10;
-
-            if (FishingChance > 100)
-            {
-                FishingChance = 100;
-            }
-            else if (FishingChance < 0)
-            {
-                FishingChance = 0;
-            }
-
-            FishingTime = Envir.Time + FishingCastDelay;
-
-            if (cast)
-            {
-                _fishCounter = 0;
-                FishFound = false;
-
-                UserItem item = GetBait(1);
-                if (item == null)
-                {
-                    ReceiveChat("You need bait.", ChatType.System);
-                    return;
-                }
-
-                ConsumeItem(item, 1);
-
-                Fishing = true;
-            }
-            else
-            {
-                Fishing = false;
-
-                if (FishingProgress > 99)
-                {
-                    FishingChanceCounter++;
-                }
-
-                if (FishFound)
-                {
-                    if (FishingProgress < 100)
-                    {
-                        FishingChanceCounter = 0;
-
-                        foreach (DropInfo drop in Envir.FishingDrops)
-                        {
-                            int rate = (int)(drop.Chance / Settings.DropRate); if (rate < 1) rate = 1;
-                            if (Envir.Random.Next(rate) != 0) continue;
-
-                            UserItem item = Envir.CreateDropItem(drop.Item);
-                            if (item == null) continue;
-
-                            GainItem(item);
-
-                            break;
-                        }
-
-                        if (Envir.Random.Next(20) == 0)
-                        {
-                            MonsterObject mob = MonsterObject.GetMonster(Envir.GetMonsterInfo(Settings.FishMonster));
-
-                            if (mob == null) return;
-
-                            mob.Spawn(CurrentMap, Back);
-                        }
-                    }
-                    FishFound = false;
-                }
-            }
-
-            Enqueue(GetFishInfo());
-            Broadcast(GetFishInfo());
-
-            if (FishingAutocast && !cast && !cancel)
-            {
-                FishingCast(true);
-                FishingTime = Envir.Time + (FishingCastDelay * 2);
-            }
-        }
-
-        public void FishingChangeAutocast(bool autoCast)
-        {
-            UserItem rod = Info.Equipment[(int)EquipmentSlot.Weapon];
-
-            if (rod.Info.Shape != 49 && rod.Info.Shape != 50) return;
-
-            UserItem reel = rod.Slots[(int)FishingSlot.Reel];
-
-            if (reel == null)
-            {
-                FishingAutocast = false;
-                return;
-            }
-
-            FishingAutocast = autoCast;
-        }
-
-        public void UpdateFish()
-        {
-            if (!FishFound)
-            {
-                FishFound = SMain.Envir.Random.Next(0, 100 - FishingChance) == 0;
-            }
-
-            FishingTime = Envir.Time + FishingDelay;
-
-            Enqueue(GetFishInfo());
-
-            if (FishingProgress > 100)
-            {
-                FishingCast(false);
-            }
-        }
-
-        Packet GetFishInfo()
-        {
-            FishingProgress = _fishCounter > 0 ? (int)(((decimal)_fishCounter / FishingProgressMax) * 100) : 0;
-
-            return new S.FishingUpdate
-            {
-                ObjectID = ObjectID,
-                Fishing = Fishing,
-                ProgressPercent = FishingProgress,
-                FishingPoint = Functions.PointMove(CurrentLocation, Direction, 3),
-                ChancePercent = FishingChance,
-                FoundFish = FishFound
-            };
-        }
-
-
-        public void AcceptQuest(uint npcIndex, int questIndex)
-        {
-            NPCObject target = (NPCObject)FindObject(npcIndex, 10);
-
-            if (target == null)
-            {
-                ReceiveChat("Must be closer to the target to accept quest.", ChatType.System);
-                return;
-            }
-
-            if (CurrentQuests.Exists(e => e.Info.NpcIndex == npcIndex && e.Info.Index == questIndex)) return;
-
-            QuestInfo questInfo = target.Quests.FirstOrDefault(d => d.Index == questIndex);
-
-            if (questInfo == null)
-            {
-                return;
-            }
-
-            if (!questInfo.CanAccept(this))
-            {
-                //couldn't accept quest
-                return;
-            }
-
-            if (CurrentQuests.Count >= Globals.MaxConcurrentQuests)
-            {
-                ReceiveChat("Maximum amount of quests already taken.", ChatType.System);
-                return;
-            }
-
-            if (questInfo.CarryItems.Count > 0)
-            {
-                bool gainedAllitems = true;
-
-                foreach (QuestItemTask carryItem in questInfo.CarryItems)
-                {
-                    uint count = carryItem.Count;
-
-                    while (count > 1)
-                    {
-                        UserItem item = SMain.Envir.CreateFreshItem(carryItem.Item);
-
-                        if (item.Info.StackSize > count)
-                        {
-                            item.Count = count;
-                            count = 0;
-                        }
-                        else
-                        {
-                            count -= item.Info.StackSize;
-                            item.Count = item.Info.StackSize;
-                        }
-
-                        if (!CanGainQuestItem(item))
-                        {
-                            gainedAllitems = false;
-                            break;
-                        }
-
-                        GainQuestItem(item);
-                    }
-                }
-
-                if (!gainedAllitems)
-                {
-                    ReceiveChat("Quest bag cannot accept any more items.", ChatType.System);
-                    //can't start quest as no room for item, send error msg
-                    //recalculate quest bag to remove unneeded ones
-                    return;
-                }
-            }
-
-            CurrentQuests.Add(new QuestProgressInfo(questIndex) { StartDateTime = DateTime.Now });
-
-            SendQuestUpdate();
-
-            CallDefaultNPC(DefaultNPCType.OnAcceptQuest, questIndex);
-        }
-        public void FinishQuest(int questIndex, int selectedItemIndex)
-        {
-            QuestProgressInfo quest = CurrentQuests.FirstOrDefault(e => e.Info.Index == questIndex);
-
-            if (quest == null) return;
-            if (!quest.CheckCompleted()) return;
-            if (!quest.Completed) return;
-
-            if (quest.Info.Type != QuestType.Repeatable)
-                Info.Flags[1000 + quest.Index] = true;
-
-            CurrentQuests.Remove(quest);
-
-            SendQuestUpdate();
-                
-            UserItem item;
-
-            if (quest.Info.CarryItems.Count > 0)
-            {
-                foreach (QuestItemTask carryItem in quest.Info.CarryItems)
-                {
-                    TakeQuestItem(carryItem.Item, carryItem.Count);
-                }
-            }
-
-            foreach (QuestItemTask iTask in quest.Info.ItemTasks)
-            {
-                TakeQuestItem(iTask.Item, Convert.ToUInt32(iTask.Count));
-            }
-
-            foreach (ItemInfo iInfo in quest.Info.FixedRewards)
-            {
-                item = Envir.CreateDropItem(iInfo);
-
-                if (CanGainItem(item, false)) GainItem(item);
-            }
-
-            if (selectedItemIndex >= 0)
-            {
-                for (int i = 0; i < quest.Info.SelectRewards.Count; i++)
-                {
-                    if (selectedItemIndex != i) continue;
-
-                    item = Envir.CreateDropItem(quest.Info.SelectRewards[i]);
-
-                    if (CanGainItem(item, false)) GainItem(item);
-                }
-            }
-
-            GainGold(quest.Info.GoldReward);
-            GainExp(quest.Info.ExpReward);
-
-            CallDefaultNPC(DefaultNPCType.OnFinishQuest, questIndex);
-        }
-        public void CheckQuestKill(MonsterInfo mInfo)
-        {
-            foreach (QuestProgressInfo quest in CurrentQuests.
-                    Where(e => e.KillTaskCount.Count > 0).
-                    Where(quest => quest.NeedKill(mInfo)))
-            {
-                quest.ProcessKill(mInfo.Index);
-                SendQuestUpdate();
-            } 
-        }
-        public override void CheckGroupQuestKill(MonsterInfo mInfo)
-        {
-            if (GroupMembers != null)
-            {
-                foreach (PlayerObject player in GroupMembers.
-                    Where(player => player.CurrentMap == CurrentMap &&
-                        Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) &&
-                        !player.Dead))
-                {
-                    player.CheckQuestKill(mInfo);
-                }
-            }
-            else
-                CheckQuestKill(mInfo);
-        }
-
-        public bool CheckNeedQuestItem(UserItem item)
-        {
-            foreach (QuestProgressInfo quest in CurrentQuests.
-                Where(e => e.ItemTaskCount.Count > 0).
-                Where(e => e.NeedItem(item.Info)).
-                Where(e => CanGainQuestItem(item)))
-            {
-                GainQuestItem(item);
-                quest.ProcessItem(Info.QuestInventory);
-                SendQuestUpdate();
-                return true;
-            }
-
-            return false;
-        }
-        public bool CheckNeedQuestFlag(int flagNumber)
-        {
-            foreach (QuestProgressInfo quest in CurrentQuests.
-                Where(e => e.FlagTaskSet.Count > 0).
-                Where(e => e.NeedFlag(flagNumber)))
-            {
-                quest.ProcessFlag(Info.Flags);
-                SendQuestUpdate();
-                return true;
-            }
-
-            return false;
-        }
-
-        public void SendQuestUpdate()
-        {
-            CompletedQuests.Clear();
-            for (int i = 1000; i < Globals.FlagIndexCount; i++)
-                if (Info.Flags[i]) CompletedQuests.Add(i - 1000);
-
-            foreach (QuestProgressInfo quest in CurrentQuests)
-            {
-                quest.CheckCompleted();
-            }
-
-            Enqueue(new S.UpdateQuests
-            {
-                CurrentQuests = (from q in CurrentQuests
-                                select q.CreateClientQuestProgress()).ToList(),
-                CompletedQuests = CompletedQuests
-            });
-        }
-
+        #endregion
 
         private void AddTempSkills(IEnumerable<string> skillsToAdd)
         {
@@ -4813,7 +4382,6 @@ namespace Server.MirObjects
 
             ActionList.Add(action);
         }
-
         private void SummonShinsu(UserMagic magic)
         {
             MonsterObject monster;
@@ -7098,22 +6666,6 @@ namespace Server.MirObjects
             Enqueue(new S.GainedGold { Gold = gold });
         }
 
-        public void GainItem(UserItem item)
-        {
-            //CheckItemInfo(item.Info);
-            CheckItem(item);
-
-            UserItem clonedItem = item.Clone();
-
-            Enqueue(new S.GainedItem { Item = clonedItem }); //Cloned because we are probably going to change the amount.
-
-            AddItem(item);
-            RefreshBagWeight();
-
-        }
-
-
-
         public bool CanGainItem(UserItem item, bool useWeight = true)
         {
             if (item.Info.Type == ItemType.Amulet)
@@ -7158,7 +6710,6 @@ namespace Server.MirObjects
 
             return false;
         }
-
         public bool CanGainItems(UserItem[] items)
         {
             int itemCount = items.Count(e => e != null);
@@ -7192,6 +6743,20 @@ namespace Server.MirObjects
             if (FreeSpace(Info.Inventory) < itemCount + stackOffset) return false;
 
             return true;
+        }
+
+        public void GainItem(UserItem item)
+        {
+            //CheckItemInfo(item.Info);
+            CheckItem(item);
+
+            UserItem clonedItem = item.Clone();
+
+            Enqueue(new S.GainedItem { Item = clonedItem }); //Cloned because we are probably going to change the amount.
+
+            AddItem(item);
+            RefreshBagWeight();
+
         }
         private bool DropItem(UserItem item, int range = 1)
         {
@@ -8967,6 +8532,7 @@ namespace Server.MirObjects
 
 
         #region Groups
+
         public void SwitchGroup(bool allow)
         {
             Enqueue(new S.SwitchGroup { AllowGroup = allow });
@@ -9158,9 +8724,11 @@ namespace Server.MirObjects
 
             Enqueue(p);
         }
+
         #endregion
 
         #region Guilds
+
         public bool CreateGuild(string GuildName)
         {
             if ((MyGuild != null) || (Info.GuildIndex != -1)) return false;
@@ -9633,9 +9201,11 @@ namespace Server.MirObjects
             }
 
         }
+
         #endregion
 
         #region Trading
+
         public void TradeRequest()
         {
             if (TradePartner != null)
@@ -9926,6 +9496,445 @@ namespace Server.MirObjects
         }
 
         #endregion
+
+        #region Mounts
+
+        public void RefreshMount()
+        {
+            if (RidingMount)
+            {
+                if (MountType < 0)
+                {
+                    RidingMount = false;
+                }
+                else if (!Mount.CanRide)
+                {
+                    RidingMount = false;
+                    ReceiveChat("You must have a saddle to ride your mount", ChatType.System);
+                }
+                else if (!Mount.CanMapRide)
+                {
+                    RidingMount = false;
+                    ReceiveChat("You cannot ride on this map", ChatType.System);
+                }
+                else if (!Mount.CanDungeonRide)
+                {
+                    RidingMount = false;
+                    ReceiveChat("You cannot ride here without a bridle", ChatType.System);
+                }
+            }
+            else
+            {
+                RidingMount = false;
+            }
+
+            RefreshStats();
+
+            Broadcast(GetMountInfo());
+            Enqueue(GetMountInfo());
+        }
+        public void IncreaseMountLoyalty(int amount)
+        {
+            UserItem item = Info.Equipment[(int)EquipmentSlot.Mount];
+            if (item != null && item.CurrentDura < item.MaxDura)
+            {
+                item.CurrentDura = (ushort)Math.Min(item.MaxDura, item.CurrentDura + amount);
+                item.DuraChanged = false;
+                Enqueue(new S.ItemRepaired { UniqueID = item.UniqueID, MaxDura = item.MaxDura, CurrentDura = item.CurrentDura });
+            }
+        }
+        public void DecreaseMountLoyalty(int amount)
+        {
+            if (Envir.Time > DecreaseLoyaltyTime)
+            {
+                DecreaseLoyaltyTime = Envir.Time + (Mount.SlowLoyalty ? (LoyaltyDelay * 2) : LoyaltyDelay);
+                UserItem item = Info.Equipment[(int)EquipmentSlot.Mount];
+                if (item != null && item.CurrentDura > 0)
+                {
+                    DamageItem(item, amount);
+
+                    if (item.CurrentDura == 0)
+                    {
+                        RefreshMount();
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Fishing
+
+        public void FishingCast(bool cast, bool cancel = false)
+        {
+            UserItem rod = Info.Equipment[(int)EquipmentSlot.Weapon];
+
+            byte flexibilityStat = 0;
+            sbyte successStat = 0;
+
+            FishingProgressMax = 30;
+
+            if (rod == null || (rod.Info.Shape != 49 && rod.Info.Shape != 50))
+            {
+                Fishing = false;
+                return;
+            }
+
+            UserItem hook = rod.Slots[(int)FishingSlot.Hook];
+
+            if (hook == null)
+            {
+                ReceiveChat("You need a hook.", ChatType.System);
+                return;
+            }
+
+            foreach (UserItem temp in rod.Slots)
+            {
+                if (temp == null) continue;
+
+                ItemInfo realItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+
+                flexibilityStat = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, flexibilityStat + temp.CriticalRate + realItem.CriticalRate)));
+                successStat = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, successStat + temp.Luck + realItem.Luck)));
+            }
+
+            FishingProgressMax += flexibilityStat;
+            FishingChance = Envir.Random.Next(0, 10) + (int)successStat + FishingChanceCounter * 10;
+
+            if (FishingChance > 100)
+            {
+                FishingChance = 100;
+            }
+            else if (FishingChance < 0)
+            {
+                FishingChance = 0;
+            }
+
+            FishingTime = Envir.Time + FishingCastDelay;
+
+            if (cast)
+            {
+                _fishCounter = 0;
+                FishFound = false;
+
+                UserItem item = GetBait(1);
+                if (item == null)
+                {
+                    ReceiveChat("You need bait.", ChatType.System);
+                    return;
+                }
+
+                ConsumeItem(item, 1);
+
+                Fishing = true;
+            }
+            else
+            {
+                Fishing = false;
+
+                if (FishingProgress > 99)
+                {
+                    FishingChanceCounter++;
+                }
+
+                if (FishFound)
+                {
+                    if (FishingProgress < 100)
+                    {
+                        FishingChanceCounter = 0;
+
+                        foreach (DropInfo drop in Envir.FishingDrops)
+                        {
+                            int rate = (int)(drop.Chance / Settings.DropRate); if (rate < 1) rate = 1;
+                            if (Envir.Random.Next(rate) != 0) continue;
+
+                            UserItem item = Envir.CreateDropItem(drop.Item);
+                            if (item == null) continue;
+
+                            GainItem(item);
+
+                            break;
+                        }
+
+                        if (Envir.Random.Next(20) == 0)
+                        {
+                            MonsterObject mob = MonsterObject.GetMonster(Envir.GetMonsterInfo(Settings.FishMonster));
+
+                            if (mob == null) return;
+
+                            mob.Spawn(CurrentMap, Back);
+                        }
+                    }
+                    FishFound = false;
+                }
+            }
+
+            Enqueue(GetFishInfo());
+            Broadcast(GetFishInfo());
+
+            if (FishingAutocast && !cast && !cancel)
+            {
+                FishingCast(true);
+                FishingTime = Envir.Time + (FishingCastDelay * 2);
+            }
+        }
+        public void FishingChangeAutocast(bool autoCast)
+        {
+            UserItem rod = Info.Equipment[(int)EquipmentSlot.Weapon];
+
+            if (rod.Info.Shape != 49 && rod.Info.Shape != 50) return;
+
+            UserItem reel = rod.Slots[(int)FishingSlot.Reel];
+
+            if (reel == null)
+            {
+                FishingAutocast = false;
+                return;
+            }
+
+            FishingAutocast = autoCast;
+        }
+        public void UpdateFish()
+        {
+            if (!FishFound)
+            {
+                FishFound = SMain.Envir.Random.Next(0, 100 - FishingChance) == 0;
+            }
+
+            FishingTime = Envir.Time + FishingDelay;
+
+            Enqueue(GetFishInfo());
+
+            if (FishingProgress > 100)
+            {
+                FishingCast(false);
+            }
+        }
+        Packet GetFishInfo()
+        {
+            FishingProgress = _fishCounter > 0 ? (int)(((decimal)_fishCounter / FishingProgressMax) * 100) : 0;
+
+            return new S.FishingUpdate
+            {
+                ObjectID = ObjectID,
+                Fishing = Fishing,
+                ProgressPercent = FishingProgress,
+                FishingPoint = Functions.PointMove(CurrentLocation, Direction, 3),
+                ChancePercent = FishingChance,
+                FoundFish = FishFound
+            };
+        }
+
+        #endregion
+
+        #region Quests
+
+        public void AcceptQuest(uint npcIndex, int questIndex)
+        {
+            NPCObject target = (NPCObject)FindObject(npcIndex, 10);
+
+            if (target == null)
+            {
+                ReceiveChat("Must be closer to the target to accept quest.", ChatType.System);
+                return;
+            }
+
+            if (CurrentQuests.Exists(e => e.Info.NpcIndex == npcIndex && e.Info.Index == questIndex)) return;
+
+            QuestInfo questInfo = target.Quests.FirstOrDefault(d => d.Index == questIndex);
+
+            if (questInfo == null)
+            {
+                return;
+            }
+
+            if (!questInfo.CanAccept(this))
+            {
+                //couldn't accept quest
+                return;
+            }
+
+            if (CurrentQuests.Count >= Globals.MaxConcurrentQuests)
+            {
+                ReceiveChat("Maximum amount of quests already taken.", ChatType.System);
+                return;
+            }
+
+            if (questInfo.CarryItems.Count > 0)
+            {
+                bool gainedAllitems = true;
+
+                foreach (QuestItemTask carryItem in questInfo.CarryItems)
+                {
+                    uint count = carryItem.Count;
+
+                    while (count > 1)
+                    {
+                        UserItem item = SMain.Envir.CreateFreshItem(carryItem.Item);
+
+                        if (item.Info.StackSize > count)
+                        {
+                            item.Count = count;
+                            count = 0;
+                        }
+                        else
+                        {
+                            count -= item.Info.StackSize;
+                            item.Count = item.Info.StackSize;
+                        }
+
+                        if (!CanGainQuestItem(item))
+                        {
+                            gainedAllitems = false;
+                            break;
+                        }
+
+                        GainQuestItem(item);
+                    }
+                }
+
+                if (!gainedAllitems)
+                {
+                    ReceiveChat("Quest bag cannot accept any more items.", ChatType.System);
+                    //can't start quest as no room for item, send error msg
+                    //recalculate quest bag to remove unneeded ones
+                    return;
+                }
+            }
+
+            CurrentQuests.Add(new QuestProgressInfo(questIndex) { StartDateTime = DateTime.Now });
+
+            SendQuestUpdate();
+
+            CallDefaultNPC(DefaultNPCType.OnAcceptQuest, questIndex);
+        }
+        public void FinishQuest(int questIndex, int selectedItemIndex)
+        {
+            QuestProgressInfo quest = CurrentQuests.FirstOrDefault(e => e.Info.Index == questIndex);
+
+            if (quest == null) return;
+            if (!quest.CheckCompleted()) return;
+            if (!quest.Completed) return;
+
+            if (quest.Info.Type != QuestType.Repeatable) Info.Flags[1000 + quest.Index] = true;
+
+            CurrentQuests.Remove(quest);
+
+            SendQuestUpdate();
+
+            UserItem item;
+
+            if (quest.Info.CarryItems.Count > 0)
+            {
+                foreach (QuestItemTask carryItem in quest.Info.CarryItems)
+                {
+                    TakeQuestItem(carryItem.Item, carryItem.Count);
+                }
+            }
+
+            foreach (QuestItemTask iTask in quest.Info.ItemTasks)
+            {
+                TakeQuestItem(iTask.Item, Convert.ToUInt32(iTask.Count));
+            }
+
+            foreach (ItemInfo iInfo in quest.Info.FixedRewards)
+            {
+                item = Envir.CreateDropItem(iInfo);
+
+                if (CanGainItem(item, false)) GainItem(item);
+            }
+
+            if (selectedItemIndex >= 0)
+            {
+                for (int i = 0; i < quest.Info.SelectRewards.Count; i++)
+                {
+                    if (selectedItemIndex != i) continue;
+
+                    item = Envir.CreateDropItem(quest.Info.SelectRewards[i]);
+
+                    if (CanGainItem(item, false)) GainItem(item);
+                }
+            }
+
+            GainGold(quest.Info.GoldReward);
+            GainExp(quest.Info.ExpReward);
+
+            CallDefaultNPC(DefaultNPCType.OnFinishQuest, questIndex);
+        }
+        public void CheckNeedQuestKill(MonsterInfo mInfo)
+        {
+            if (GroupMembers != null)
+            {
+                foreach (PlayerObject player in GroupMembers.
+                    Where(player => player.CurrentMap == CurrentMap &&
+                        Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) &&
+                        !player.Dead))
+                {
+                    player.CheckQuestKill(mInfo);
+                }
+            }
+            else
+                CheckQuestKill(mInfo);
+        }
+        public bool CheckNeedQuestItem(UserItem item)
+        {
+            foreach (QuestProgressInfo quest in CurrentQuests.
+                Where(e => e.ItemTaskCount.Count > 0).
+                Where(e => e.NeedItem(item.Info)).
+                Where(e => CanGainQuestItem(item)))
+            {
+                GainQuestItem(item);
+                quest.ProcessItem(Info.QuestInventory);
+                SendQuestUpdate();
+                return true;
+            }
+
+            return false;
+        }
+        public bool CheckNeedQuestFlag(int flagNumber)
+        {
+            foreach (QuestProgressInfo quest in CurrentQuests.
+                Where(e => e.FlagTaskSet.Count > 0).
+                Where(e => e.NeedFlag(flagNumber)))
+            {
+                quest.ProcessFlag(Info.Flags);
+                SendQuestUpdate();
+                return true;
+            }
+
+            return false;
+        }
+        public void CheckQuestKill(MonsterInfo mInfo)
+        {
+            foreach (QuestProgressInfo quest in CurrentQuests.
+                    Where(e => e.KillTaskCount.Count > 0).
+                    Where(quest => quest.NeedKill(mInfo)))
+            {
+                quest.ProcessKill(mInfo.Index);
+                SendQuestUpdate();
+            }
+        }
+        public void SendQuestUpdate()
+        {
+            CompletedQuests.Clear();
+            for (int i = 1000; i < Globals.FlagIndexCount; i++)
+                if (Info.Flags[i]) CompletedQuests.Add(i - 1000);
+
+            foreach (QuestProgressInfo quest in CurrentQuests)
+            {
+                quest.CheckCompleted();
+            }
+
+            Enqueue(new S.UpdateQuests
+            {
+                CurrentQuests = (from q in CurrentQuests
+                                 select q.CreateClientQuestProgress()).ToList(),
+                CompletedQuests = CompletedQuests
+            });
+        }
+
+        #endregion
+
     }
 }
 

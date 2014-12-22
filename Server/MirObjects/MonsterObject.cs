@@ -459,7 +459,8 @@ namespace Server.MirObjects
             {
                 EXPOwner.WinExp(Info.Experience);
 
-                EXPOwner.CheckGroupQuestKill(Info);
+                PlayerObject playerObj = (PlayerObject)EXPOwner;
+                playerObj.CheckNeedQuestKill(Info);
             }
 
             if (Respawn != null)

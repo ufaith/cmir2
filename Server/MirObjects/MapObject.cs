@@ -331,11 +331,6 @@ namespace Server.MirObjects
 
         }
 
-        public virtual void CheckGroupQuestKill(MonsterInfo mInfo)
-        {
-            
-        }
-
         public virtual bool CanGainGold(uint gold)
         {
             return false;
