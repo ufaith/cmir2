@@ -5821,6 +5821,7 @@ namespace Client.MirScenes
                 case Spell.FireBang:
                 case Spell.MassHiding:
                 case Spell.FireWall:
+                case Spell.TrapHexagon:
                     if (User.NextMagicObject != null)
                     {
                         if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)

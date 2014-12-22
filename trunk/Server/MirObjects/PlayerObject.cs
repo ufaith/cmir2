@@ -2820,12 +2820,6 @@ namespace Server.MirObjects
                         player.CanCreateGuild = false;
                         break;
 
-                    //case "TRADE":
-                    //    if (parts.Length < 2) return;
-
-                    //    TradeRequest(parts[1]);
-                    //    break;
-
                     case "ALLOWTRADE":
                         AllowTrade = !AllowTrade;
 
@@ -2889,6 +2883,26 @@ namespace Server.MirObjects
                         }
 
                         player.SendQuestUpdate();
+                        break;
+
+                    case "CHANGECLASS": //@changeclass [Player] [Class]
+                        if (!IsGM) return;
+
+                        data = parts.Length <= 2 ? Info : Envir.GetCharacterInfo(parts[1]);
+
+                        if (data == null) return;
+
+                        MirClass mirClass;
+
+                        if (!Enum.TryParse(parts[parts.Length - 1], true, out mirClass) || data.Class == mirClass) return;
+
+                        data.Class = mirClass;
+
+                        ReceiveChat(string.Format("Player {0} has been changed to {1}", data.Name, data.Class), ChatType.System);
+                        SMain.Enqueue(string.Format("Player {0} has been changed to {1} by {2}", data.Name, data.Class, Name));
+
+                        if (data.Player != null)
+                            data.Player.Connection.LogOut();
                         break;
 
                     default:
@@ -3934,6 +3948,9 @@ namespace Server.MirObjects
                 case Spell.MeteorStrike:
                     MeteorStrike(magic, target == null ? location : target.CurrentLocation, out cast);
                     break;
+                case Spell.TrapHexagon:
+                    TrapHexagon(magic, target);
+                    break;
                 default:
                     cast = false;
                     break;
@@ -4646,6 +4663,51 @@ namespace Server.MirObjects
             ActiveBlizzard = true;
             CurrentMap.ActionList.Add(action);
             cast = true;
+        }
+        private void TrapHexagon(UserMagic magic, MapObject target)
+        {
+            if (target == null || !target.IsAttackTarget(this) || !(target is MonsterObject)) return;
+            if (target.Level > Level + 2) return;
+
+            UserItem item = GetAmulet(1);
+            Point location = target.CurrentLocation;
+
+            if (item == null) return;
+
+            LevelMagic(magic);
+            uint duration = (uint)((magic.Level * 5 + 10) * 1000);
+            int value = (int)duration;
+
+            for (byte i = 0; i < 8; i += 2)
+            {
+                Point startpoint = Functions.PointMove(location, (MirDirection)i, 2);
+                for (byte j = 0; j <= 4; j += 4)
+                {
+                    MirDirection spawndirection = i == 0 || i == 4 ? MirDirection.Right : MirDirection.Up;
+                    Point spawnpoint = Functions.PointMove(startpoint, spawndirection + j, 1);
+                    if (spawnpoint.X <= 0 || spawnpoint.X > target.CurrentMap.Width) continue;
+                    if (spawnpoint.Y <= 0 || spawnpoint.Y > target.CurrentMap.Height) continue;
+                    SpellObject ob = new SpellObject
+                    {
+                        Spell = Spell.TrapHexagon,
+                        ExpireTime = Envir.Time + value,
+                        TickSpeed = 100,
+                        Caster = this,
+                        CurrentLocation = spawnpoint,
+                        CastLocation = location,
+                        CurrentMap = target.CurrentMap,
+                        Target = target,
+                    };
+
+                    target.CurrentMap.AddObject(ob);
+                    ob.Spawned();
+                }
+            }
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, value, location);
+            CurrentMap.ActionList.Add(action);
+
+            ConsumeItem(item, 1);
         }
 
         private void CompleteMagic(IList<object> data)
