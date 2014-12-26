@@ -605,12 +605,13 @@ namespace Client.MirScenes
 
                 KeyEnterButton = new MirButton
                 {
-                    HoverIndex = 310,
-                    Index = 309,
+                    HoverIndex = 307,
+                    Index = 306,
                     Library = Libraries.Title,
-                    Location = new Point(76, 236),
+                    Location = new Point(140, 236),
                     Parent = this,
-                    PressedIndex = 311
+                    PressedIndex = 308
+                   
                 };
                 KeyEnterButton.Click += (o, e) =>
                 {
@@ -621,12 +622,12 @@ namespace Client.MirScenes
 
                 KeyRandButton = new MirButton
                 {
-                    HoverIndex = 307,
-                    Index = 306,
+                    HoverIndex = 310,
+                    Index = 309,
                     Library = Libraries.Title,
-                    Location = new Point(140, 236),
+                    Location = new Point(76, 236),
                     Parent = this,
-                    PressedIndex = 308
+                    PressedIndex = 311
                 };
                 KeyRandButton.Click += (o, e) =>
                 {
@@ -653,6 +654,8 @@ namespace Client.MirScenes
 
                 for (int i = 0; i < _numbers.Length; i++)
                 {
+                    char key = _numbers[i];
+
                     MirButton numButton = new MirButton
                     {
                         HoverIndex = 1082,
@@ -665,13 +668,15 @@ namespace Client.MirScenes
                         Text = _numbers[i].ToString(),
                         CenterText = true
                     };
-                    numButton.Click += (o, e) => SecureKeyPress(Convert.ToChar(numButton.Text));
+                    numButton.Click += (o, e) => SecureKeyPress(key);
 
                     _buttons.Add(numButton);
                 }
 
                 for (int i = 0; i < _letters.Length; i++)
                 {
+                    char key = _letters[i];
+
                     MirButton alphButton = new MirButton
                     {
                         HoverIndex = 1082,
@@ -685,7 +690,7 @@ namespace Client.MirScenes
                         CenterText = true
                     };
 
-                    alphButton.Click += (o, e) => SecureKeyPress(Convert.ToChar(alphButton.Text));
+                    alphButton.Click += (o, e) => SecureKeyPress(key);
 
                     _buttons.Add(alphButton);
                 }

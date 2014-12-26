@@ -1251,7 +1251,12 @@ namespace Server.MirObjects
             GetMapInfo();
             GetUserInfo();
             GetQuestInfo();
-            SendQuestUpdate();
+            //SendQuestUpdate();
+
+            GetCompletedQuests();
+
+            foreach (var quest in CurrentQuests)
+                SendUpdateQuest(quest, QuestState.Add);
 
             Enqueue(new S.BaseStatsInfo { Stats = Settings.ClassBaseStats[(byte)Class] });
             GetObjectsPassive();
@@ -2882,7 +2887,8 @@ namespace Server.MirObjects
                             player.Info.Flags[i] = false;
                         }
 
-                        player.SendQuestUpdate();
+                        player.GetCompletedQuests();
+                        //player.SendQuestUpdate();
                         break;
 
                     case "CHANGECLASS": //@changeclass [Player] [Class]
@@ -4704,7 +4710,7 @@ namespace Server.MirObjects
                 }
             }
 
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, value, location);
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 100, this, magic, value, location);
             CurrentMap.ActionList.Add(action);
 
             ConsumeItem(item, 1);
@@ -9864,9 +9870,11 @@ namespace Server.MirObjects
                 }
             }
 
-            CurrentQuests.Add(new QuestProgressInfo(questIndex) { StartDateTime = DateTime.Now });
+            QuestProgressInfo quest = new QuestProgressInfo(questIndex) { StartDateTime = DateTime.Now };
 
-            SendQuestUpdate();
+            CurrentQuests.Add(quest);
+            SendUpdateQuest(quest, QuestState.Add, true);
+            //SendQuestUpdate();
 
             CallDefaultNPC(DefaultNPCType.OnAcceptQuest, questIndex);
         }
@@ -9878,11 +9886,17 @@ namespace Server.MirObjects
             if (!quest.CheckCompleted()) return;
             if (!quest.Completed) return;
 
-            if (quest.Info.Type != QuestType.Repeatable) Info.Flags[1000 + quest.Index] = true;
+            if (quest.Info.Type != QuestType.Repeatable)
+            {
+                Info.Flags[1000 + quest.Index] = true;
+
+                GetCompletedQuests();
+            }
 
             CurrentQuests.Remove(quest);
+            SendUpdateQuest(quest, QuestState.Remove);
 
-            SendQuestUpdate();
+            //SendQuestUpdate();
 
             UserItem item;
 
@@ -9947,7 +9961,8 @@ namespace Server.MirObjects
             {
                 GainQuestItem(item);
                 quest.ProcessItem(Info.QuestInventory);
-                SendQuestUpdate();
+                //SendQuestUpdate();
+                SendUpdateQuest(quest, QuestState.Update);
                 return true;
             }
 
@@ -9960,7 +9975,8 @@ namespace Server.MirObjects
                 Where(e => e.NeedFlag(flagNumber)))
             {
                 quest.ProcessFlag(Info.Flags);
-                SendQuestUpdate();
+                //SendQuestUpdate();
+                SendUpdateQuest(quest, QuestState.Update);
                 return true;
             }
 
@@ -9973,27 +9989,53 @@ namespace Server.MirObjects
                     Where(quest => quest.NeedKill(mInfo)))
             {
                 quest.ProcessKill(mInfo.Index);
-                SendQuestUpdate();
+                //SendQuestUpdate();
+                SendUpdateQuest(quest, QuestState.Update);
             }
         }
-        public void SendQuestUpdate()
+
+        public void SendUpdateQuest(QuestProgressInfo quest, QuestState state, bool trackQuest = false)
+        {
+            quest.CheckCompleted();
+ 
+            Enqueue(new S.ChangeQuest 
+            { 
+                Quest = quest.CreateClientQuestProgress(), 
+                QuestState = state,
+                TrackQuest = trackQuest
+            });
+        }
+
+        public void GetCompletedQuests()
         {
             CompletedQuests.Clear();
             for (int i = 1000; i < Globals.FlagIndexCount; i++)
                 if (Info.Flags[i]) CompletedQuests.Add(i - 1000);
 
-            foreach (QuestProgressInfo quest in CurrentQuests)
+            Enqueue(new S.CompleteQuest
             {
-                quest.CheckCompleted();
-            }
-
-            Enqueue(new S.UpdateQuests
-            {
-                CurrentQuests = (from q in CurrentQuests
-                                 select q.CreateClientQuestProgress()).ToList(),
                 CompletedQuests = CompletedQuests
             });
         }
+
+        //public void SendQuestUpdate()
+        //{
+        //    CompletedQuests.Clear();
+        //    for (int i = 1000; i < Globals.FlagIndexCount; i++)
+        //        if (Info.Flags[i]) CompletedQuests.Add(i - 1000);
+
+        //    foreach (QuestProgressInfo quest in CurrentQuests)
+        //    {
+        //        quest.CheckCompleted();
+        //    }
+
+        //    Enqueue(new S.UpdateQuests
+        //    {
+        //        CurrentQuests = (from q in CurrentQuests
+        //                         select q.CreateClientQuestProgress()).ToList(),
+        //        CompletedQuests = CompletedQuests
+        //    });
+        //}
 
         #endregion
 

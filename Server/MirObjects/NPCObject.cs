@@ -2004,7 +2004,7 @@ namespace Server.MirObjects
                         if (!int.TryParse(param[0], out flagIndex)) return;
                         if (!uint.TryParse(param[1], out onCheck)) return;
 
-                        if (flagIndex < 0 || flagIndex > Globals.FlagIndexCount) return;
+                        if (flagIndex < 0 || flagIndex >= Globals.FlagIndexCount) return;
                         var flagIsOn = Convert.ToBoolean(onCheck);
 
                         player.Info.Flags[flagIndex] = flagIsOn;

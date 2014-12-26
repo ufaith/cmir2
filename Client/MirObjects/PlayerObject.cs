@@ -311,14 +311,19 @@ namespace Client.MirObjects
                 case MirClass.Assassin:
 
                     #region WeaponType
-                    if (HasClassWeapon)
+                    if (HasClassWeapon || Weapon < 0)
                     {
                         switch (CurrentAction)
                         {
                             case MirAction.Standing:
+                            case MirAction.Stance:
                             case MirAction.Walking:
                             case MirAction.Running:
+                            case MirAction.Die:
                             case MirAction.Attack1:
+                            case MirAction.Attack2:
+                            case MirAction.Attack3:
+                            case MirAction.Attack4:
                                 AltAnim = true;
                                 break;
                         }

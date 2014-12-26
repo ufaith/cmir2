@@ -1307,7 +1307,7 @@ namespace Server.MirEnvir
 
             foreach (PlayerObject p in Players)
             {
-                p.SendQuestUpdate();
+                p.GetCompletedQuests();
             }
         }
     }

@@ -3563,37 +3563,87 @@ namespace ServerPackets
         }
     }
 
-    public sealed class UpdateQuests : Packet
+    //public sealed class UpdateQuests : Packet
+    //{
+    //    public override short Index
+    //    {
+    //        get { return (short)ServerPacketIds.UpdateQuests; }
+    //    }
+
+    //    public List<ClientQuestProgress> CurrentQuests = new List<ClientQuestProgress>();
+    //    public List<int> CompletedQuests = new List<int>();
+
+    //    protected override void ReadPacket(BinaryReader reader)
+    //    {
+    //        int count = reader.ReadInt32();
+    //        for (var i = 0; i < count; i++)
+    //            CurrentQuests.Add(new ClientQuestProgress(reader));
+
+    //        count = reader.ReadInt32();
+    //        for (var i = 0; i < count; i++)
+    //            CompletedQuests.Add(reader.ReadInt32());
+    //    }
+    //    protected override void WritePacket(BinaryWriter writer)
+    //    {
+    //        writer.Write(CurrentQuests.Count);
+    //        foreach (var q in CurrentQuests)
+    //            q.Save(writer);
+
+    //        writer.Write(CompletedQuests.Count);
+    //        foreach (int q in CompletedQuests)
+    //            writer.Write(q);
+    //    }
+    //}
+
+
+    public sealed class ChangeQuest : Packet
     {
         public override short Index
         {
-            get { return (short)ServerPacketIds.UpdateQuests; }
+            get { return (short)ServerPacketIds.ChangeQuest; }
         }
 
-        public List<ClientQuestProgress> CurrentQuests = new List<ClientQuestProgress>();
+        public ClientQuestProgress Quest = new ClientQuestProgress();
+        public QuestState QuestState;
+        public bool TrackQuest;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Quest = new ClientQuestProgress(reader);
+            QuestState = (QuestState)reader.ReadByte();
+            TrackQuest = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            Quest.Save(writer);
+            writer.Write((byte)QuestState);
+            writer.Write(TrackQuest);
+        }
+    }
+
+    public sealed class CompleteQuest : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.CompleteQuest; }
+        }
+
         public List<int> CompletedQuests = new List<int>();
 
         protected override void ReadPacket(BinaryReader reader)
         {
             int count = reader.ReadInt32();
             for (var i = 0; i < count; i++)
-                CurrentQuests.Add(new ClientQuestProgress(reader));
-
-            count = reader.ReadInt32();
-            for (var i = 0; i < count; i++)
                 CompletedQuests.Add(reader.ReadInt32());
         }
         protected override void WritePacket(BinaryWriter writer)
         {
-            writer.Write(CurrentQuests.Count);
-            foreach (var q in CurrentQuests)
-                q.Save(writer);
-
             writer.Write(CompletedQuests.Count);
             foreach (int q in CompletedQuests)
                 writer.Write(q);
         }
     }
+
 
     public sealed class NewQuestInfo : Packet
     {
