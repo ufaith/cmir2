@@ -7,6 +7,7 @@ using Client.MirGraphics;
 using Client.MirScenes;
 using Client.MirSounds;
 using S = ServerPackets;
+using Client.MirControls;
 
 namespace Client.MirObjects
 {
@@ -49,6 +50,9 @@ namespace Client.MirObjects
         public byte Stage;
         public int BaseSound;
 
+        public MirLabel TempLabel;
+        public Color OldNameColor;
+
         public MonsterObject(uint objectID) : base(objectID)
         {
         }
@@ -57,6 +61,8 @@ namespace Client.MirObjects
             Name = info.Name;
             NameColour = info.NameColour;
             BaseImage = info.Image;
+
+            OldNameColor = NameColour;
 
             CurrentLocation = info.Location;
             MapLocation = info.Location;
@@ -1829,6 +1835,55 @@ namespace Client.MirObjects
             }
             
 
+        }
+
+        public override void DrawName()
+        {
+            if (!Name.Contains("_"))
+            {
+                base.DrawName();
+                return;
+            }
+
+            string[] splitName = Name.Split('_');
+
+            for (int s = 0; s < splitName.Count(); s++)
+            {
+                CreateMonsterLabel(splitName[s], s);
+
+                TempLabel.Text = splitName[s];
+                TempLabel.Location = new Point(DisplayRectangle.X + (48 - TempLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - TempLabel.Size.Height / 2) + (Dead ? 35 : 8) - (((splitName.Count() - 1) * 10) / 2) + (s * 12));
+                TempLabel.Draw();
+            }
+        }
+
+        public void CreateMonsterLabel(string word, int wordOrder)
+        {
+            TempLabel = null;
+
+            for (int i = 0; i < LabelList.Count; i++)
+            {
+                if (LabelList[i].Text != word) continue;
+                TempLabel = LabelList[i];
+                break;
+            }
+
+            if (TempLabel != null && !TempLabel.IsDisposed && NameColour == OldNameColor) return;
+
+            OldNameColor = NameColour;
+
+            TempLabel = new MirLabel
+            {
+                AutoSize = true,
+                BackColour = Color.Transparent,
+                ForeColour = NameColour,
+                OutLine = true,
+                OutLineColour = Color.Black,
+                Text = word,
+            };
+
+            TempLabel.Disposing += (o, e) => LabelList.Remove(TempLabel);
+            LabelList.Add(TempLabel);
         }
     }
 }

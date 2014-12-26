@@ -37,7 +37,7 @@ namespace Client
         //Graphics
         public static bool FullScreen = true, TopMost = true;
         public static string FontName = "Tahoma"; //"MS Sans Serif"
-        public static bool FPSCap = false;
+        public static bool FPSCap = true;
         public static int MaxFPS = 100;
         public static bool HighResolution = false;
         public static bool DebugMode = false;
@@ -73,6 +73,7 @@ namespace Client
         public static bool
             SkillMode,
             SkillBar,
+            SkillSet,
             Effect = true,
             DropView = true,
             NameView = true,
@@ -124,6 +125,7 @@ namespace Client
 
             SkillMode = Reader.ReadBoolean("Game", "SkillMode", SkillMode);
             SkillBar = Reader.ReadBoolean("Game", "SkillBar", SkillBar);
+            SkillSet = Reader.ReadBoolean("Game", "SkillSet", SkillSet);
             Effect = Reader.ReadBoolean("Game", "Effect", Effect);
             DropView = Reader.ReadBoolean("Game", "DropView", DropView);
             NameView = Reader.ReadBoolean("Game", "NameView", NameView);
@@ -155,6 +157,7 @@ namespace Client
             //Game
             Reader.Write("Game", "SkillMode", SkillMode);
             Reader.Write("Game", "SkillBar", SkillBar);
+            Reader.Write("Game", "SkillSet", SkillSet);
             Reader.Write("Game", "Effect", Effect);
             Reader.Write("Game", "DropView", DropView);
             Reader.Write("Game", "NameView", NameView);

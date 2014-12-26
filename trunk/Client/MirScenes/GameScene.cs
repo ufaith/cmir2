@@ -182,7 +182,7 @@ namespace Client.MirScenes
             QuestTrackingDialog = new QuestTrackingDialog { Parent = this, Visible = false };
             QuestLogDialog = new QuestLogDialog {Parent = this, Visible = false};
 
-            SkillBarDialog = new SkillBarDialog {Parent = this, Visible = false };
+            SkillBarDialog = new SkillBarDialog { Parent = this, Visible = false };
 
             for (int i = 0; i < OutputLines.Length; i++)
                 OutputLines[i] = new MirLabel
@@ -241,33 +241,33 @@ namespace Client.MirScenes
         private void GameScene_KeyDown(object sender, KeyEventArgs e)
         {
             bool skillMode = Settings.SkillMode ? CMain.Tilde : CMain.Ctrl;
-            bool altBind = !Scene.SkillBarDialog.TopBind;
+            bool altBind = skillMode ? Settings.SkillSet : !Settings.SkillSet;
 
             switch (e.KeyCode)
             {
                 case Keys.F1:
-                    UseSpell(altBind || skillMode ? 9 : 1);
+                    UseSpell(altBind ? 9 : 1);
                     break;
                 case Keys.F2:
-                    UseSpell(altBind || skillMode ? 10 : 2);
+                    UseSpell(altBind ? 10 : 2);
                     break;
                 case Keys.F3:
-                    UseSpell(altBind || skillMode ? 11 : 3);
+                    UseSpell(altBind ? 11 : 3);
                     break;
                 case Keys.F4:
-                    UseSpell(altBind || skillMode ? 12 : 4);
+                    UseSpell(altBind ? 12 : 4);
                     break;
                 case Keys.F5:
-                    UseSpell(altBind || skillMode ? 13 : 5);
+                    UseSpell(altBind ? 13 : 5);
                     break;
                 case Keys.F6:
-                    UseSpell(altBind || skillMode ? 14 : 6);
+                    UseSpell(altBind ? 14 : 6);
                     break;
                 case Keys.F7:
-                    UseSpell(altBind || skillMode ? 15 : 7);
+                    UseSpell(altBind ? 15 : 7);
                     break;
                 case Keys.F8:
-                    UseSpell(altBind || skillMode ? 16 : 8);
+                    UseSpell(altBind ? 16 : 8);
                     break;
                 case Keys.I:
                 case Keys.F9:
@@ -359,6 +359,8 @@ namespace Client.MirScenes
                     TrustMerchantDialog.Hide();
                     CharacterDuraPanel.Hide();
                     QuestListDialog.Hide();
+                    QuestDetailDialog.Hide();
+                    QuestLogDialog.Hide();
                     BigMapDialog.Visible = false;
                     break;
                 case Keys.O:
@@ -497,6 +499,12 @@ namespace Client.MirScenes
         private void UseSpell(int key)
         {
             if (User.RidingMount) return;
+
+            if(!User.HasClassWeapon && User.Weapon >= 0)
+            {
+                ChatDialog.ReceiveChat("You must be wearing a suitable weapon to perform this skill", ChatType.System);
+                return;
+            }
 
             ClientMagic magic = null;
 
@@ -681,17 +689,21 @@ namespace Client.MirScenes
             InventoryDialog.Process();
             MiniMapDialog.Process();
 
-            ProcessDialogs();
+            DialogProcess();
 
             ProcessOuput();
         }
 
-        public void ProcessDialogs()
+        public void DialogProcess()
         {
-            if (Settings.SkillBar)
-                SkillBarDialog.Show();
+            if(Settings.SkillBar)
+            {
+                Scene.SkillBarDialog.Show();
+            }
             else
-                SkillBarDialog.Hide();
+            {
+                Scene.SkillBarDialog.Hide();
+            }
         }
 
         public override void ProcessPacket(Packet p)
@@ -1086,8 +1098,14 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.FishingUpdate:
                     FishingUpdate((S.FishingUpdate)p);
                     break;
-                case (short)ServerPacketIds.UpdateQuests:
-                    UpdateQuests((S.UpdateQuests)p);
+                //case (short)ServerPacketIds.UpdateQuests:
+                //    UpdateQuests((S.UpdateQuests)p);
+                //    break;
+                case (short)ServerPacketIds.ChangeQuest:
+                    ChangeQuest((S.ChangeQuest)p);
+                    break;
+                case (short)ServerPacketIds.CompleteQuest:
+                    CompleteQuest((S.CompleteQuest)p);
                     break;
                 case (short)ServerPacketIds.GainedQuestItem:
                     GainedQuestItem((S.GainedQuestItem)p);
@@ -1724,15 +1742,54 @@ namespace Client.MirScenes
             GameScene.Scene.FishingStatusDialog.UpdateFishing(p);
         }
 
-        private void UpdateQuests(S.UpdateQuests p)
+        private void CompleteQuest(S.CompleteQuest p)
         {
-            User.CurrentQuests = p.CurrentQuests;
             User.CompletedQuests = p.CompletedQuests;
+        }
 
-            foreach (ClientQuestProgress quest in User.CurrentQuests)
-                BindQuest(quest);
+        private void ChangeQuest(S.ChangeQuest p)
+        {
+            switch(p.QuestState)
+            {
+                case QuestState.Add:
+                    User.CurrentQuests.Add(p.Quest);
 
-            QuestTrackingDialog.DisplayQuests();
+                    foreach (ClientQuestProgress quest in User.CurrentQuests)
+                        BindQuest(quest);
+
+                    if (p.TrackQuest)
+                    {
+                        GameScene.Scene.QuestTrackingDialog.AddQuest(p.Quest);
+                    }
+
+                    break;
+                case QuestState.Update:
+                    for (int i = 0; i < User.CurrentQuests.Count; i++)
+                    {
+                        if (User.CurrentQuests[i].Id != p.Quest.Id) continue;
+
+                        User.CurrentQuests[i] = p.Quest;
+                    }
+
+                    foreach (ClientQuestProgress quest in User.CurrentQuests)
+                        BindQuest(quest);
+
+                    break;
+                case QuestState.Remove:
+
+                    for (int i = User.CurrentQuests.Count - 1; i >= 0; i--)
+                    {
+                        if (User.CurrentQuests[i].Id != p.Quest.Id) continue;
+
+                        User.CurrentQuests.RemoveAt(i);
+                    }
+
+                    GameScene.Scene.QuestTrackingDialog.RemoveQuest(p.Quest);
+
+                    break;
+            }
+
+            GameScene.Scene.QuestTrackingDialog.DisplayQuests();
 
             if (Scene.QuestListDialog.Visible)
             {
@@ -1744,6 +1801,27 @@ namespace Client.MirScenes
                 Scene.QuestLogDialog.DisplayQuests();
             }
         }
+
+        //private void UpdateQuests(S.UpdateQuests p)
+        //{
+        //    User.CurrentQuests = p.CurrentQuests;
+        //    User.CompletedQuests = p.CompletedQuests;
+
+        //    foreach (ClientQuestProgress quest in User.CurrentQuests)
+        //        BindQuest(quest);
+
+        //    QuestTrackingDialog.DisplayQuests();
+
+        //    if (Scene.QuestListDialog.Visible)
+        //    {
+        //        Scene.QuestListDialog.DisplayInfo();
+        //    }
+
+        //    if (Scene.QuestLogDialog.Visible)
+        //    {
+        //        Scene.QuestLogDialog.DisplayQuests();
+        //    }
+        //}
 
         private void PlayerUpdate(S.PlayerUpdate p)
         {
@@ -6112,7 +6190,7 @@ namespace Client.MirScenes
         public MirImageControl ExperienceBar, WeightBar;
         public MirButton GameShopButton, MenuButton, InventoryButton, CharacterButton, SkillButton, QuestButton, OptionButton;
         public MirControl HealthOrb;
-        public MirLabel HealthLabel, ManaLabel, LevelLabel, CharacterName, ExperienceLabel, GoldLabel, WeightLabel, AModeLabel, PModeLabel, SModeLabel;
+        public MirLabel HealthLabel, ManaLabel, TopLabel, BottomLabel, LevelLabel, CharacterName, ExperienceLabel, GoldLabel, WeightLabel, AModeLabel, PModeLabel, SModeLabel;
 
         public MainDialog()
         {
@@ -6258,18 +6336,34 @@ namespace Client.MirScenes
             HealthLabel = new MirLabel
             {
                 AutoSize = true,
-                Location = new Point(0, 32),
-                Parent = HealthOrb,
+                Location = new Point(0, 27),
+                Parent = HealthOrb
             };
             HealthLabel.SizeChanged += Label_SizeChanged;
 
             ManaLabel = new MirLabel
             {
                 AutoSize = true,
-                Location = new Point(0, 50),
-                Parent = HealthOrb,
+                Location = new Point(0, 42),
+                Parent = HealthOrb
             };
             ManaLabel.SizeChanged += Label_SizeChanged;
+
+            TopLabel = new MirLabel
+            {
+                Size = new Size(85, 30),
+                DrawFormat = TextFormatFlags.HorizontalCenter,
+                Location = new Point(9, 20),
+                Parent = HealthOrb,
+            };
+
+            BottomLabel = new MirLabel
+            {
+                Size = new Size(85, 30),
+                DrawFormat = TextFormatFlags.HorizontalCenter,
+                Location = new Point(9, 50),
+                Parent = HealthOrb,
+            };
 
             LevelLabel = new MirLabel
             {
@@ -6426,8 +6520,21 @@ namespace Client.MirScenes
                     break;
             }
 
-            HealthLabel.Text = string.Format("HP {0}/{1}", User.HP, User.MaxHP);
-            ManaLabel.Text = string.Format("MP {0}/{1} ", User.MP, User.MaxMP);
+            if (Settings.HPView)
+            {
+                HealthLabel.Text = string.Format("HP {0}/{1}", User.HP, User.MaxHP);
+                ManaLabel.Text = string.Format("MP {0}/{1} ", User.MP, User.MaxMP);
+                TopLabel.Text = string.Empty;
+                BottomLabel.Text = string.Empty;
+            }
+            else
+            {
+                TopLabel.Text = string.Format(" {0}    {1} \n" + "---------------", User.HP, User.MP);
+                BottomLabel.Text = string.Format(" {0}    {1} ", User.MaxHP, User.MaxMP);
+                HealthLabel.Text = string.Empty;
+                ManaLabel.Text = string.Empty;
+            }
+
             LevelLabel.Text = User.Level.ToString();
             ExperienceLabel.Text = string.Format("{0:#0.##%}", User.Experience / (double)User.MaxExperience);
             ExperienceLabel.Location = new Point((ExperienceBar.Size.Width / 2) - 20, -10);
@@ -7570,7 +7677,9 @@ namespace Client.MirScenes
     {
         private readonly MirButton _switchBindsButton;
 
-        public bool TopBind = true;
+        public bool AltBind;
+
+        //public bool TopBind = !Settings.SkillMode;
         public MirImageControl[] Cells = new MirImageControl[8];
         public MirLabel[] KeyNameLabels = new MirLabel[8];
         public MirLabel BindNumberLabel = new MirLabel();
@@ -7595,7 +7704,12 @@ namespace Client.MirScenes
                 Size = new Size(16, 28),
                 Location = new Point(0, 0)
             };
-            _switchBindsButton.Click += _switchBindsButton_Click;
+            _switchBindsButton.Click += (o, e) =>
+            {
+                Settings.SkillSet = !Settings.SkillSet;
+
+                Update();
+            };
 
             for (var i = 0; i < Cells.Length; i++)
             {
@@ -7634,24 +7748,15 @@ namespace Client.MirScenes
             }
         }
 
-        void _switchBindsButton_Click(object sender, EventArgs e)
-        {
-            SwitchTab();
-        }
-
         void MagicKeyDialog_BeforeDraw(object sender, EventArgs e)
         {
             Libraries.Prguse.Draw(2193, new Point(DisplayLocation.X + 12, DisplayLocation.Y), Color.White, true, 0.5F);
         }
 
-        public void SwitchTab()
+        public void Update()
         {
-            TopBind = !TopBind;
-
-            if (TopBind)
+            if (Settings.SkillSet)
             {
-                Update();
-
                 Index = 2190;
                 _switchBindsButton.Index = 2247;
                 BindNumberLabel.Text = "1";
@@ -7659,24 +7764,19 @@ namespace Client.MirScenes
             }
             else
             {
-                Update();
-
                 Index = 2191;
                 _switchBindsButton.Index = 2248;
                 BindNumberLabel.Text = "2";
                 BindNumberLabel.Location = new Point(0, 10);
             }
-        }
 
-        public void Update()
-        {
             for (var i = 1; i <= 8; i++)
             {
                 Cells[i - 1].Index = -1;
 
-                int offset = TopBind ? 0 : 8;
+                int offset = Settings.SkillSet ? 0 : 8;
 
-                KeyNameLabels[i - 1].Text = (TopBind ? "" : "Ctrl\n") + "F" + i;
+                KeyNameLabels[i - 1].Text = (Settings.SkillSet ? "" : "Ctrl\n") + "F" + i;
 
                 foreach (var m in GameScene.User.Magics)
                 {
@@ -9121,7 +9221,11 @@ namespace Client.MirScenes
                 Size = new Size(36, 17),
                 PressedIndex = 463,
             };
-            HPViewOn.Click += (o, e) => Settings.HPView = true;
+            HPViewOn.Click += (o, e) =>
+            {
+                Settings.HPView = true;
+                GameScene.Scene.ChatDialog.ReceiveChat("<HP/MP Mode 1>", ChatType.Hint);
+            };
 
             HPViewOff = new MirButton
             {
@@ -9132,7 +9236,11 @@ namespace Client.MirScenes
                 Size = new Size(36, 17),
                 PressedIndex = 466
             };
-            HPViewOff.Click += (o, e) => Settings.HPView = false;
+            HPViewOff.Click += (o, e) => 
+            {
+                Settings.HPView = false; 
+                GameScene.Scene.ChatDialog.ReceiveChat("<HP/MP Mode 2>", ChatType.Hint);
+            };
 
             SoundBar = new MirImageControl
             {
@@ -10594,6 +10702,8 @@ namespace Client.MirScenes
 
                 Network.Enqueue(new C.MagicKey { Spell = Magic.Spell, Key = Key });
                 Magic.Key = Key;
+
+                GameScene.Scene.SkillBarDialog.Update();
 
                 Dispose();
             };

@@ -144,6 +144,19 @@ namespace Client.MirObjects
             NPCs.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(0, 6, 0, 450, 6, 12, 0, 250));
 
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 9, 0, 650));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 5, 0, 400));
+
+            //
+            NPCs.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 7, 0, 550));
+            frame.Frames.Add(MirAction.Harvest, new Frame(21, 10, 0, 200));
+
             #endregion
 
             /*

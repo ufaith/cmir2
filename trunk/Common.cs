@@ -6,6 +6,7 @@ using System.Reflection;
 using C = ClientPackets;
 using S = ServerPackets;
 
+
 public enum QuestType : byte
 {
     General = 0,
@@ -21,6 +22,13 @@ public enum QuestIcon : byte
     QuestionYellow = 3,
     ExclamationBlue = 5,
     QuestionBlue = 6
+}
+
+public enum QuestState : byte
+{
+    Add,
+    Update,
+    Remove
 }
 
 public enum DefaultNPCType : byte
@@ -809,7 +817,9 @@ public enum ServerPacketIds : short
     MountUpdate,
     EquipSlotItem,
     FishingUpdate,
-    UpdateQuests,
+    //UpdateQuests,
+    ChangeQuest,
+    CompleteQuest,
     NewQuestInfo,
     GainedQuestItem,
     DeleteQuestItem
@@ -3024,8 +3034,12 @@ public abstract class Packet
                 return new S.EquipSlotItem();
             case (short)ServerPacketIds.FishingUpdate:
                 return new S.FishingUpdate();
-            case (short)ServerPacketIds.UpdateQuests:
-                return new S.UpdateQuests();
+            //case (short)ServerPacketIds.UpdateQuests:
+            //    return new S.UpdateQuests();
+            case (short)ServerPacketIds.ChangeQuest:
+                return new S.ChangeQuest();
+            case (short)ServerPacketIds.CompleteQuest:
+                return new S.CompleteQuest();
             case (short)ServerPacketIds.NewQuestInfo:
                 return new S.NewQuestInfo();
             case (short)ServerPacketIds.GainedQuestItem:

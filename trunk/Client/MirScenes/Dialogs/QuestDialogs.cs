@@ -1702,7 +1702,7 @@ namespace Client.MirScenes.Dialogs
                     BackColour = Color.Transparent,
                     Font = QuestFont,
                     ForeColour = Color.LimeGreen,
-                    Location = new Point(20, 20 + y),
+                    Location = new Point(5, 20 + y),
                     OutLine = true,
                     Parent = this,
                     Visible = true,
@@ -1723,7 +1723,7 @@ namespace Client.MirScenes.Dialogs
                         BackColour = Color.Transparent,
                         Font = QuestFont,
                         ForeColour = Color.White, //trackedQuest.Contains("(Completed)") ? Color.LimeGreen : 
-                        Location = new Point(40, 20 + y),
+                        Location = new Point(25, 20 + y),
                         OutLine = true,
                         Parent = this,
                         Visible = true,
@@ -1742,7 +1742,7 @@ namespace Client.MirScenes.Dialogs
 
         public void AddQuest(ClientQuestProgress quest)
         {
-            if (TrackedQuestsIds.Any(d => d == quest.Id)) return;
+            if (TrackedQuestsIds.Any(d => d == quest.Id) || TrackedQuestsIds.Count >= 5) return;
 
             TrackedQuestsIds.Add(quest.Id);
 

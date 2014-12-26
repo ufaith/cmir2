@@ -94,6 +94,8 @@ namespace Client.MirObjects
                 #endregion
 
                 #region 4 frames + direction
+                case 25:
+                case 27:
                 case 52:
                 case 61:
                 case 68:
@@ -120,6 +122,7 @@ namespace Client.MirObjects
                 case 151:
                 case 152:
                 case 163:
+                case 178:
                     Frames = FrameSet.NPCs[2];
                     break;
                 #endregion
@@ -221,6 +224,8 @@ namespace Client.MirObjects
                 case 161:
                 case 162:
                 case 123:
+                case 175:
+                case 176:
                     Frames = FrameSet.NPCs[7];
                     CanChangeDir = false;
                     break;
@@ -248,6 +253,8 @@ namespace Client.MirObjects
                 case 119:
                 case 122:
                 case 143:
+                case 174:
+                case 185:
                     Frames = FrameSet.NPCs[10];
                     break;
                 #endregion
@@ -291,6 +298,7 @@ namespace Client.MirObjects
 
                 #region 4 frames + harvest(6 frames)
                 case 60:
+                case 183:
                     Frames = FrameSet.NPCs[15];
                     break;
                 #endregion
@@ -299,6 +307,27 @@ namespace Client.MirObjects
                 case 48:
                     Frames = FrameSet.NPCs[16];
                     CanChangeDir = false;
+                    break;
+                #endregion
+
+                #region 9 frames + direction
+                case 177:
+                    Frames = FrameSet.NPCs[17];
+                    break;
+                #endregion
+
+                #region 5 frames + direction
+                case 179:
+                case 180:
+                case 181:
+                case 184:
+                    Frames = FrameSet.NPCs[18];
+                    break;
+                #endregion
+
+                #region 7 frames + direction + harvest(10 frames)
+                case 182:
+                    Frames = FrameSet.NPCs[0];
                     break;
                 #endregion
             }
