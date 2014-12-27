@@ -449,7 +449,7 @@ namespace Server.MirObjects
                 for (int i = 0; i < Info.Equipment.Length; i++)
                 {
                     item = Info.Equipment[i];
-                    if (item == null || !item.DuraChanged) continue;
+                    if (item == null || !item.DuraChanged) continue; // || item.Info.Type == ItemType.Mount
                     item.DuraChanged = false;
                     Enqueue(new S.DuraChanged { UniqueID = item.UniqueID, CurrentDura = item.CurrentDura });
                 }

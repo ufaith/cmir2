@@ -936,10 +936,17 @@ namespace Server.MirObjects
                     break;
 
                 case "CHECKMON":
-                    if (parts.Length < 3) return;
+                    if (parts.Length < 4) return;
 
-                    tempString = parts.Length < 4 ? "1" : parts[3];
-                    CheckList.Add(new NPCChecks(CheckType.CheckMon, parts[1], parts[2], tempString));
+                    tempString = parts.Length < 5 ? "1" : parts[4];
+                    CheckList.Add(new NPCChecks(CheckType.CheckMon, parts[1], parts[2], parts[3], tempString));
+                    break;
+
+                case "CHECKEXACTMON":
+                    if (parts.Length < 5) return;
+
+                    tempString = parts.Length < 6 ? "1" : parts[5];
+                    CheckList.Add(new NPCChecks(CheckType.CheckExactMon, parts[1], parts[2], parts[3], parts[4], tempString));
                     break;
 
                 case "RANDOM":
@@ -1406,10 +1413,12 @@ namespace Server.MirObjects
                 NPCChecks check = CheckList[i];
                 List<string> param = check.Params.Select(t => FindVariable(player, t)).ToList();
 
+                MonsterInfo monInfo;
                 byte tempByte;
                 uint tempUint;
                 int tempInt;
                 int tempInt2;
+
                 switch (check.Type)
                 {
                     case CheckType.Level:
@@ -1615,20 +1624,46 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.CheckMon:
-                        if (!int.TryParse(param[0], out tempInt) || !int.TryParse(param[2], out tempInt2))
+                        if (!int.TryParse(param[1], out tempInt) || !int.TryParse(param[3], out tempInt2))
                         {
                             failed = true;
                             break;
                         }
 
-                        map = SMain.Envir.GetMapByNameAndInstance(param[1], tempInt2);
+                        map = SMain.Envir.GetMapByNameAndInstance(param[2], tempInt2);
                         if (map == null)
                         {
                             failed = true;
                             break;
                         }
 
-                        failed = map.MonsterCount < tempInt;
+                        failed = !Compare(param[0], map.MonsterCount, tempInt);
+
+                        break;
+
+                    case CheckType.CheckExactMon:
+                        monInfo = SMain.Envir.GetMonsterInfo(param[0]);
+                        if (monInfo == null)
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        if (!int.TryParse(param[2], out tempInt) || !int.TryParse(param[4], out tempInt2))
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        map = SMain.Envir.GetMapByNameAndInstance(param[3], tempInt2);
+                        if (map == null)
+                        {
+                            failed = true;
+                            break;
+                        }
+
+                        failed = (!Compare(param[1], SMain.Envir.Objects.Count((d => d.CurrentMap == map && d.Race == ObjectType.Monster && !d.Dead)), tempInt));
+
                         break;
 
                     case CheckType.Random:
@@ -1949,10 +1984,11 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.ChangeClass:
-                        if (!Enum.IsDefined(typeof(MirClass), param[0])) return;
-                        var data = (MirClass)((byte)Enum.Parse(typeof(MirClass), param[0]));
 
-                        switch (data)
+                        MirClass mirClass;
+                        if (!Enum.TryParse(param[0], true, out mirClass)) return;
+
+                        switch (mirClass)
                         {
                             case MirClass.Warrior:
                                 player.Info.Class = MirClass.Warrior;
@@ -1973,21 +2009,21 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.LineMessage:
-	                    if (!Enum.IsDefined(typeof(ChatType), param[1])) return;
-
-                        ChatType chatType = (ChatType)((byte)Enum.Parse(typeof(ChatType), param[1]));
-
+                        ChatType chatType;
+                        if (!Enum.TryParse(param[1], true, out chatType)) return;
                         player.ReceiveChat(param[0], chatType);
                         break;
 
                     case ActionType.GiveSkill:
                         byte spellLevel = 0;
-                        if (!Enum.IsDefined(typeof(Spell), param[0])) return;
+
+                        Spell skill;
+                        if (!Enum.TryParse(param[0], true, out skill)) return;
 
                         if (param.Count > 1)
                             spellLevel = byte.TryParse(param[1], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
 
-                        var magic = new UserMagic((Spell)(byte)Enum.Parse(typeof(Spell), param[0])) { Level = spellLevel };
+                        var magic = new UserMagic(skill) { Level = spellLevel };
 
                         player.Info.Magics.Add(magic);
                         player.Enqueue(magic.GetInfo());
@@ -2305,6 +2341,7 @@ namespace Server.MirObjects
         Check,
         CheckHum,
         CheckMon,
+        CheckExactMon,
         Random,
         Groupleader,
         GroupCount,
