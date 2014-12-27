@@ -1642,8 +1642,7 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.CheckExactMon:
-                        monInfo = SMain.Envir.GetMonsterInfo(param[0]);
-                        if (monInfo == null)
+                        if (SMain.Envir.GetMonsterInfo(param[0]) == null)
                         {
                             failed = true;
                             break;
@@ -1662,7 +1661,11 @@ namespace Server.MirObjects
                             break;
                         }
 
-                        failed = (!Compare(param[1], SMain.Envir.Objects.Count((d => d.CurrentMap == map && d.Race == ObjectType.Monster && !d.Dead)), tempInt));
+                        failed = (!Compare(param[1], SMain.Envir.Objects.Count((
+                            d => d.CurrentMap == map && 
+                                d.Race == ObjectType.Monster && 
+                                string.Equals(d.Name, param[0], StringComparison.OrdinalIgnoreCase) && 
+                                !d.Dead)), tempInt));
 
                         break;
 

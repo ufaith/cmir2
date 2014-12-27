@@ -1428,7 +1428,7 @@ namespace Server.MirEnvir
 
             foreach (string line in lines)
             {
-                RouteInfo info = RouteInfo.FromText(line, Info.RouteLoop);
+                RouteInfo info = RouteInfo.FromText(line);
 
                 if (info == null) continue;
 
