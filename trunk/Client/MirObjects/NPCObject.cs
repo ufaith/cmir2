@@ -94,6 +94,7 @@ namespace Client.MirObjects
                 #endregion
 
                 #region 4 frames + direction
+                case 24:
                 case 25:
                 case 27:
                 case 52:
@@ -132,6 +133,7 @@ namespace Client.MirObjects
                 case 34:
                     Frames = FrameSet.NPCs[3];
                     CanChangeDir = false;
+                    Blend = false;
                     break;
                 #endregion
 
@@ -140,6 +142,7 @@ namespace Client.MirObjects
                 case 80:
                     Frames = FrameSet.NPCs[4];
                     CanChangeDir = false;
+                    Blend = false;
                     break;
                 #endregion
 

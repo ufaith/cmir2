@@ -240,7 +240,7 @@ namespace Server.MirDatabase
             for (int i = 0; i < Info.KillTasks.Count; i++)
             {
                 if (string.IsNullOrEmpty(Info.KillTasks[i].Message))
-                    TaskList.Add(string.Format("Kill {0}: {1}/{2} {3}", Info.KillTasks[i].Monster.Name, KillTaskCount[i],
+                    TaskList.Add(string.Format("Kill {0}: {1}/{2} {3}", Info.KillTasks[i].Monster.GameName, KillTaskCount[i],
                         Info.KillTasks[i].Count, KillTaskCount[i] >= Info.KillTasks[i].Count ? "(Completed)" : ""));
                 else
                     TaskList.Add(string.Format("{0} {1}", Info.KillTasks[i].Message, KillTaskCount[i] >= Info.KillTasks[i].Count ? "(Completed)" : ""));

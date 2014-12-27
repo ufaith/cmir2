@@ -64,9 +64,15 @@ namespace Server.MirObjects.Monsters
                 int rate = (int)(drop.Chance / Settings.DropRate); if (rate < 1) rate = 1;
                 if (drop.Gold > 0 || Envir.Random.Next(rate) != 0) continue;
 
-
                 UserItem item = Envir.CreateDropItem(drop.Item);
                 if (item == null) continue;
+
+                if (drop.QuestRequired)
+                {
+                    player.CheckNeedQuestItem(_drops[i]);
+                    continue;
+                }
+
                 if (item.Info.Type == ItemType.Meat)
                     item.CurrentDura = (ushort)Math.Max(0, item.CurrentDura + Quality);
 

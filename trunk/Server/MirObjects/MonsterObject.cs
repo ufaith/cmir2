@@ -1052,7 +1052,7 @@ namespace Server.MirObjects
         {
             if (Route.Count < 1) return false;
 
-            RoamTime = Envir.Time + 600;
+            RoamTime = Envir.Time + 500;
 
             if (CurrentLocation == Route[RoutePoint].Location)
             {

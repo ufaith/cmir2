@@ -5253,8 +5253,10 @@ namespace Client.MirScenes
 
             DXManager.SetOpacity(oldOpacity);
 
+            //if (MapObject.MouseObject != null && !MapObject.MouseObject.Dead && MapObject.MouseObject != MapObject.TargetObject && !(MapObject.MouseObject is NPCObject))
+            //    MapObject.MouseObject.DrawBlend();
 
-            if (MapObject.MouseObject != null && !MapObject.MouseObject.Dead && MapObject.MouseObject != MapObject.TargetObject)
+            if (MapObject.MouseObject != null && !MapObject.MouseObject.Dead && MapObject.MouseObject != MapObject.TargetObject && MapObject.MouseObject.Blend) //Far
                 MapObject.MouseObject.DrawBlend();
 
             if (MapObject.TargetObject != null)

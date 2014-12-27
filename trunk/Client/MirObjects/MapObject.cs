@@ -30,6 +30,8 @@ namespace Client.MirObjects
         public byte AI;
         public bool InTrapRock;
 
+        public bool Blend = true;
+
         public uint TradeGoldAmount;
 
         public byte PercentHealth;

@@ -1600,25 +1600,24 @@ namespace Client.MirScenes.Dialogs
                         GameScene.Scene.QuestDetailDialog.DisplayQuestDetails(Quest);
                         break;
                     case MouseButtons.Right:
-                        TrackQuest = !TrackQuest;
+                        {
+                            if (TrackQuest)
+                            {
+                                GameScene.Scene.QuestTrackingDialog.RemoveQuest(Quest);
+                            }
+                            else
+                            {
+                                if (GameScene.Scene.QuestTrackingDialog.TrackedQuestsIds.Count >= 5) return;
+
+                                GameScene.Scene.QuestTrackingDialog.AddQuest(Quest);
+                            }
+
+                            TrackQuest = !TrackQuest;
+                        }
                         break;
                 }
 
                 OnSelectedQuestChanged();
-
-                if (TrackQuest)
-                {
-                    GameScene.Scene.QuestTrackingDialog.AddQuest(Quest);
-
-                    if (GameScene.Scene.QuestTrackingDialog.TrackedQuestsIds.Count <= 5) return;
-
-                    TrackQuest = false;
-                    GameScene.Scene.QuestTrackingDialog.RemoveQuest(Quest);
-                }
-                else
-                {
-                    GameScene.Scene.QuestTrackingDialog.RemoveQuest(Quest);
-                }
             };
 
             _stateLabel = new MirLabel
