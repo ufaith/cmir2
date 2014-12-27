@@ -15,7 +15,6 @@ namespace Server.MirDatabase
         public byte Direction;
 
         public string RoutePath = string.Empty;
-        public bool RouteLoop;
 
 
         public RespawnInfo()
@@ -90,7 +89,7 @@ namespace Server.MirDatabase
         public Point Location;
         public int Delay;
 
-        public static RouteInfo FromText(string text, bool loop)
+        public static RouteInfo FromText(string text)
         {
             string[] data = text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
