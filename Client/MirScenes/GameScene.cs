@@ -506,6 +506,8 @@ namespace Client.MirScenes
                 return;
             }
 
+            if (CMain.Time < User.ReincarnationStopTime) return;
+
             ClientMagic magic = null;
 
             for (int i = 0; i < User.Magics.Count; i++)
@@ -1113,6 +1115,13 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.DeleteQuestItem:
                     DeleteQuestItem((S.DeleteQuestItem)p);
                     break;
+                case (short)ServerPacketIds.CancelReincarnation:
+                    User.ReincarnationStopTime = 0;
+                    break;
+                case (short)ServerPacketIds.RequestReincarnation:
+                    if (!User.Dead) return;
+                    RequestReincarnation();
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1476,6 +1485,9 @@ namespace Client.MirScenes
                     break;
                 case MirGridType.Trade:
                     toCell = TradeDialog.GetCell(p.IDTo);
+                    break;
+                case MirGridType.Fishing:
+                    toCell = FishingDialog.GetCell(p.IDTo);
                     break;
                 default:
                     return;
@@ -3419,6 +3431,18 @@ namespace Client.MirScenes
             }
         }
 
+        private void RequestReincarnation()
+        {
+            if (CMain.Time > User.DeadTime && User.CurrentAction == MirAction.Dead)
+            {
+                MirMessageBox messageBox = new MirMessageBox("Would you like to be revived?", MirMessageBoxButtons.YesNo);
+
+                messageBox.YesButton.Click += (o, e) => Network.Enqueue(new C.AcceptReincarnation());
+
+                messageBox.Show();
+            }
+        }
+
         public void AddItem(UserItem item)
         {
             Redraw();
@@ -4919,7 +4943,7 @@ namespace Client.MirScenes
                             if (ob.Dead)
                             {
                                 bestmouseobject = ob;
-                                continue;
+                                //continue;
                             }
                             MapObject.MouseObject = ob;
                             Redraw();
@@ -5601,6 +5625,8 @@ namespace Client.MirScenes
                 return;
             }
 
+            if (CMain.Time < User.ReincarnationStopTime) return; 
+
             if (MapObject.TargetObject != null && !MapObject.TargetObject.Dead)
             {
                 if (((MapObject.TargetObject.Name.EndsWith(")") || MapObject.TargetObject is PlayerObject) && CMain.Shift) ||
@@ -5928,6 +5954,13 @@ namespace Client.MirScenes
                     if (User.NextMagicObject != null)
                     {
                         if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
+                            target = User.NextMagicObject;
+                    }
+                    break;
+                case Spell.Reincarnation:
+                    if (User.NextMagicObject != null)
+                    {
+                        if (User.NextMagicObject.Dead && User.NextMagicObject.Race == ObjectType.Player)
                             target = User.NextMagicObject;
                     }
                     break;
@@ -11590,6 +11623,16 @@ namespace Client.MirScenes
             }
 
             Visible = true;
+        }
+
+        public MirItemCell GetCell(ulong id)
+        {
+            for (int i = 0; i < Grid.Length; i++)
+            {
+                if (Grid[i].Item == null || Grid[i].Item.UniqueID != id) continue;
+                return Grid[i];
+            }
+            return null;
         }
     }
     public sealed class FishingStatusDialog : MirImageControl

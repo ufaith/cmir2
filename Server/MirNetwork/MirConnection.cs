@@ -415,6 +415,9 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.AbandonQuest:
                     AbandonQuest((C.AbandonQuest)p);
                     break;
+                case (short)ClientPacketIds.AcceptReincarnation:
+                    Revive();
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1070,6 +1073,13 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.AbandonQuest(p.QuestIndex);
+        }
+
+        private void Revive()
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.Revive((uint)Player.MaxHP / 2, true);
         }
     }
 }

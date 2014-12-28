@@ -31,7 +31,7 @@ namespace Server.MirObjects.Monsters
                 RevivalCount++;
 
                 uint newhp = MaxHP * (100 - (25 * RevivalCount)) / 100;
-                Revive(newhp);
+                Revive(newhp, false);
             }
 
             base.ProcessAI();

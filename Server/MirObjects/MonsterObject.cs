@@ -474,7 +474,7 @@ namespace Server.MirObjects
             CurrentMap.MonsterCount--;
         }
 
-        public void Revive(uint hp)
+        public void Revive(uint hp, bool effect)
         {
             if (!Dead) return;
 
@@ -483,7 +483,7 @@ namespace Server.MirObjects
             Dead = false;
             ActionTime = Envir.Time + RevivalDelay;
 
-            Broadcast(new S.ObjectRevived { ObjectID = ObjectID, Effect = false });
+            Broadcast(new S.ObjectRevived { ObjectID = ObjectID, Effect = effect });
 
             if (Respawn != null)
                 Respawn.Count++;

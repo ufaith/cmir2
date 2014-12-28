@@ -511,6 +511,20 @@ namespace Client.MirControls
                     break;
                 case ItemType.Bait:
                     fishingDialog = GameScene.Scene.FishingDialog;
+
+                    if (fishingDialog.Grid[(int)FishingSlot.Bait].Item != null && Item.Info.Type == ItemType.Bait)
+                    {
+                        if (fishingDialog.Grid[(int)FishingSlot.Bait].Item.Info == Item.Info && fishingDialog.Grid[(int)FishingSlot.Bait].Item.Count < fishingDialog.Grid[(int)FishingSlot.Bait].Item.Info.StackSize)
+                        {
+                            Network.Enqueue(new C.MergeItem { GridFrom = GridType, GridTo = MirGridType.Fishing, IDFrom = Item.UniqueID, IDTo = fishingDialog.Grid[(int)FishingSlot.Bait].Item.UniqueID });
+
+                            Locked = true;
+                            GameScene.SelectedCell.Locked = true;
+                            GameScene.SelectedCell = null;
+                            return;
+                        }
+                    }
+
                     if (fishingDialog.Grid[(int)FishingSlot.Bait].CanWearItem(Item))
                     {
                         Network.Enqueue(new C.EquipSlotItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)FishingSlot.Bait, GridTo = MirGridType.Fishing });

@@ -10,10 +10,8 @@ namespace Server.MirDatabase
 {
     #region Notes
     //kill, item shown as yellow notification top left if quest not on screen
-    //quest bag needs recalculating after each accept/hand in to ensure only required items are in there
     //better way to store quest progress?
     //clean up new flag methods
-    //only send add/update/delete quests to client, instead of all
     #endregion
 
     public class QuestProgressInfo
