@@ -695,5 +695,12 @@ namespace Server
 
             UpdateInterface();
         }
+
+        private void DropBuilderButton_Click(object sender, EventArgs e)
+        {
+            MirForms.DropBuilder.DropGenForm GenForm = new MirForms.DropBuilder.DropGenForm();
+
+            GenForm.ShowDialog();
+        }
     }
 }
