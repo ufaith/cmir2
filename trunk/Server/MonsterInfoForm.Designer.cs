@@ -31,6 +31,8 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.MonsterInfoPanel = new System.Windows.Forms.Panel();
+            this.UndeadCheckBox = new System.Windows.Forms.CheckBox();
+            this.AutoRevCheckBox = new System.Windows.Forms.CheckBox();
             this.ImageComboBox = new System.Windows.Forms.ComboBox();
             this.label10 = new System.Windows.Forms.Label();
             this.CoolEyeTextBox = new System.Windows.Forms.TextBox();
@@ -91,8 +93,7 @@
             this.ExportButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
-            this.AutoRevCheckBox = new System.Windows.Forms.CheckBox();
-            this.UndeadCheckBox = new System.Windows.Forms.CheckBox();
+            this.DropBuilderButton = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.MonsterInfoPanel.SuspendLayout();
@@ -185,6 +186,28 @@
             this.MonsterInfoPanel.Name = "MonsterInfoPanel";
             this.MonsterInfoPanel.Size = new System.Drawing.Size(585, 217);
             this.MonsterInfoPanel.TabIndex = 11;
+            // 
+            // UndeadCheckBox
+            // 
+            this.UndeadCheckBox.AutoSize = true;
+            this.UndeadCheckBox.Location = new System.Drawing.Point(353, 188);
+            this.UndeadCheckBox.Name = "UndeadCheckBox";
+            this.UndeadCheckBox.Size = new System.Drawing.Size(64, 17);
+            this.UndeadCheckBox.TabIndex = 88;
+            this.UndeadCheckBox.Text = "Undead";
+            this.UndeadCheckBox.UseVisualStyleBackColor = true;
+            this.UndeadCheckBox.CheckedChanged += new System.EventHandler(this.UndeadCheckBox_CheckedChanged);
+            // 
+            // AutoRevCheckBox
+            // 
+            this.AutoRevCheckBox.AutoSize = true;
+            this.AutoRevCheckBox.Location = new System.Drawing.Point(353, 165);
+            this.AutoRevCheckBox.Name = "AutoRevCheckBox";
+            this.AutoRevCheckBox.Size = new System.Drawing.Size(71, 17);
+            this.AutoRevCheckBox.TabIndex = 87;
+            this.AutoRevCheckBox.Text = "Auto Rev";
+            this.AutoRevCheckBox.UseVisualStyleBackColor = true;
+            this.AutoRevCheckBox.CheckedChanged += new System.EventHandler(this.AutoRevCheckBox_CheckedChanged);
             // 
             // ImageComboBox
             // 
@@ -738,33 +761,22 @@
             this.ExportSelectedButton.UseVisualStyleBackColor = true;
             this.ExportSelectedButton.Click += new System.EventHandler(this.ExportSelected_Click);
             // 
-            // AutoRevCheckBox
+            // DropBuilderButton
             // 
-            this.AutoRevCheckBox.AutoSize = true;
-            this.AutoRevCheckBox.Location = new System.Drawing.Point(353, 165);
-            this.AutoRevCheckBox.Name = "AutoRevCheckBox";
-            this.AutoRevCheckBox.Size = new System.Drawing.Size(71, 17);
-            this.AutoRevCheckBox.TabIndex = 87;
-            this.AutoRevCheckBox.Text = "Auto Rev";
-            this.AutoRevCheckBox.UseVisualStyleBackColor = true;
-            this.AutoRevCheckBox.CheckedChanged += new System.EventHandler(this.AutoRevCheckBox_CheckedChanged);
-            // 
-            // UndeadCheckBox
-            // 
-            this.UndeadCheckBox.AutoSize = true;
-            this.UndeadCheckBox.Location = new System.Drawing.Point(353, 188);
-            this.UndeadCheckBox.Name = "UndeadCheckBox";
-            this.UndeadCheckBox.Size = new System.Drawing.Size(64, 17);
-            this.UndeadCheckBox.TabIndex = 88;
-            this.UndeadCheckBox.Text = "Undead";
-            this.UndeadCheckBox.UseVisualStyleBackColor = true;
-            this.UndeadCheckBox.CheckedChanged += new System.EventHandler(this.UndeadCheckBox_CheckedChanged);
+            this.DropBuilderButton.Location = new System.Drawing.Point(415, 12);
+            this.DropBuilderButton.Name = "DropBuilderButton";
+            this.DropBuilderButton.Size = new System.Drawing.Size(75, 23);
+            this.DropBuilderButton.TabIndex = 26;
+            this.DropBuilderButton.Text = "Drop Builder";
+            this.DropBuilderButton.UseVisualStyleBackColor = true;
+            this.DropBuilderButton.Click += new System.EventHandler(this.DropBuilderButton_Click);
             // 
             // MonsterInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(788, 308);
+            this.Controls.Add(this.DropBuilderButton);
             this.Controls.Add(this.ExportSelectedButton);
             this.Controls.Add(this.ImportButton);
             this.Controls.Add(this.ExportButton);
@@ -852,5 +864,6 @@
         private System.Windows.Forms.Button ExportSelectedButton;
         private System.Windows.Forms.CheckBox UndeadCheckBox;
         private System.Windows.Forms.CheckBox AutoRevCheckBox;
+        private System.Windows.Forms.Button DropBuilderButton;
     }
 }

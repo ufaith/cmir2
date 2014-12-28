@@ -119,6 +119,12 @@
     <Compile Include="MapInfoForm.Designer.cs">
       <DependentUpon>MapInfoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MirForms\DropBuilder\DropBuilderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MirForms\DropBuilder\DropBuilderForm.designer.cs">
+      <DependentUpon>DropBuilderForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MirForms\MapForm.cs" />
     <Compile Include="MirForms\VisualMapInfo\Class\LockBitmap.cs" />
     <Compile Include="MirForms\VisualMapInfo\Class\ReadMap.cs" />
@@ -264,6 +270,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MapInfoForm.resx">
       <DependentUpon>MapInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirForms\DropBuilder\DropBuilderForm.resx">
+      <DependentUpon>DropBuilderForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MirForms\VisualMapInfo\Control\Forms\MiningDetailForm.resx">
       <DependentUpon>MiningDetailForm.cs</DependentUpon>
