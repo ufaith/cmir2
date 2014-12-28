@@ -412,6 +412,9 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.FinishQuest:
                     FinishQuest((C.FinishQuest)p);
                     break;
+                case (short)ClientPacketIds.AbandonQuest:
+                    AbandonQuest((C.AbandonQuest)p);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1060,6 +1063,13 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.FinishQuest(p.QuestIndex, p.SelectedItemIndex);
+        }
+
+        private void AbandonQuest(C.AbandonQuest p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.AbandonQuest(p.QuestIndex);
         }
     }
 }

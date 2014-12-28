@@ -349,56 +349,60 @@ namespace Server.MirEnvir
 
         private void CreateSafeZone(SafeZoneInfo info)
         {
-
-            for (int y = info.Location.Y - info.Size; y <= info.Location.Y + info.Size; y++)
+            if (Settings.SafeZoneBorder)
             {
-                if (y < 0) continue;
-                if (y >= Height) break;
-                for (int x = info.Location.X - info.Size; x <= info.Location.X + info.Size  ; x += Math.Abs(y - info.Location.Y) == info.Size ? 1 : info.Size * 2)
+                for (int y = info.Location.Y - info.Size; y <= info.Location.Y + info.Size; y++)
                 {
-                    if (x < 0) continue;
-                    if (x >= Width) break;
-                    if (!Cells[x, y].Valid) continue;
-
-                    SpellObject spell = new SpellObject
+                    if (y < 0) continue;
+                    if (y >= Height) break;
+                    for (int x = info.Location.X - info.Size; x <= info.Location.X + info.Size; x += Math.Abs(y - info.Location.Y) == info.Size ? 1 : info.Size * 2)
                     {
-                        ExpireTime = long.MaxValue,
-                        Spell = Spell.TrapHexagon,
-                        TickSpeed = int.MaxValue,
-                        CurrentLocation = new Point(x, y),
-                        CurrentMap = this
-                    };
+                        if (x < 0) continue;
+                        if (x >= Width) break;
+                        if (!Cells[x, y].Valid) continue;
 
-                    Cells[x, y].Add(spell);
-
-                    spell.Spawned();
-                }
-            }
-
-
-            for (int y = info.Location.Y - info.Size; y <= info.Location.Y + info.Size; y++)
-            {
-                if (y < 0) continue;
-                if (y >= Height) break;
-                for (int x = info.Location.X - info.Size; x <= info.Location.X + info.Size; x++)
-                {
-                    if (x < 0) continue;
-                    if (x >= Width) break;
-                    if (!Cells[x,y].Valid) continue;
-
-                    SpellObject spell = new SpellObject
+                        SpellObject spell = new SpellObject
                         {
                             ExpireTime = long.MaxValue,
-                            Value = 25,
-                            TickSpeed = 2000,
-                            Spell = Spell.Healing,
+                            Spell = Spell.TrapHexagon,
+                            TickSpeed = int.MaxValue,
                             CurrentLocation = new Point(x, y),
                             CurrentMap = this
                         };
 
-                    Cells[x, y].Add(spell);
+                        Cells[x, y].Add(spell);
 
-                    spell.Spawned();
+                        spell.Spawned();
+                    }
+                }
+            }
+
+            if (Settings.SafeZoneHealing)
+            {
+                for (int y = info.Location.Y - info.Size; y <= info.Location.Y + info.Size; y++)
+                {
+                    if (y < 0) continue;
+                    if (y >= Height) break;
+                    for (int x = info.Location.X - info.Size; x <= info.Location.X + info.Size; x++)
+                    {
+                        if (x < 0) continue;
+                        if (x >= Width) break;
+                        if (!Cells[x, y].Valid) continue;
+
+                        SpellObject spell = new SpellObject
+                            {
+                                ExpireTime = long.MaxValue,
+                                Value = 25,
+                                TickSpeed = 2000,
+                                Spell = Spell.Healing,
+                                CurrentLocation = new Point(x, y),
+                                CurrentMap = this
+                            };
+
+                        Cells[x, y].Add(spell);
+
+                        spell.Spawned();
+                    }
                 }
             }
 

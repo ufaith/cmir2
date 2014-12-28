@@ -5253,9 +5253,6 @@ namespace Client.MirScenes
 
             DXManager.SetOpacity(oldOpacity);
 
-            //if (MapObject.MouseObject != null && !MapObject.MouseObject.Dead && MapObject.MouseObject != MapObject.TargetObject && !(MapObject.MouseObject is NPCObject))
-            //    MapObject.MouseObject.DrawBlend();
-
             if (MapObject.MouseObject != null && !MapObject.MouseObject.Dead && MapObject.MouseObject != MapObject.TargetObject && MapObject.MouseObject.Blend) //Far
                 MapObject.MouseObject.DrawBlend();
 
@@ -5363,12 +5360,12 @@ namespace Client.MirScenes
 
                     //NPCs use wider light width, but low source
                     if (ob.Race == ObjectType.Merchant)
-                        lightIntensity = Color.FromArgb(255, 60, 60, 60);
+                        lightIntensity = Color.FromArgb(255, 120, 120, 120);
 
                     if (DXManager.Lights[LightRange] != null && !DXManager.Lights[LightRange].Disposed)
                     {
                         p.Offset(-(DXManager.LightSizes[LightRange].X / 2) - (CellWidth / 2) + 10, -(DXManager.LightSizes[LightRange].Y / 2) - (CellHeight / 2) - 5);
-                        DXManager.Sprite.Draw2D(DXManager.Lights[LightRange], PointF.Empty, 0, p, ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : lightIntensity);
+                        DXManager.Sprite.Draw2D(DXManager.Lights[LightRange], PointF.Empty, 0, p, lightIntensity); // ob is MonsterObject && ob.AI != 6 ? Color.PaleVioletRed : 
                     }
 
                 }

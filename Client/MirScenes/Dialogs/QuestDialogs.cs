@@ -553,14 +553,24 @@ namespace Client.MirScenes.Dialogs
 
             _cancelButton = new MirButton
             {
-                Index = 270,
-                HoverIndex = 271,
-                PressedIndex = 272,
+                Index = 203,
+                HoverIndex = 204,
+                PressedIndex = 205,
                 Library = Libraries.Title,
                 Parent = this,
                 Location = new Point(200, 437),
                 Sound = SoundList.ButtonA,
-                Visible = false
+            };
+            _cancelButton.Click += (o, e) =>
+            {
+                MirMessageBox messageBox = new MirMessageBox("Are you sure you want to cancel this quest?", MirMessageBoxButtons.YesNo);
+
+                messageBox.YesButton.Click += (o1, a) =>
+                {
+                    Network.Enqueue(new C.AbandonQuest { QuestIndex = Quest.Id });
+                    Hide();
+                };
+                messageBox.Show();
             };
 
             #endregion
@@ -1279,7 +1289,9 @@ namespace Client.MirScenes.Dialogs
 
         public List<string> ExpandedGroups = new List<string>();
 
+        private MirButton _closeButton;
         private MirLabel _takenQuestsLabel;
+
         public QuestLogDialog()
         {
             Index = 961;
@@ -1295,6 +1307,18 @@ namespace Client.MirScenes.Dialogs
                 AutoSize = true,
                 Location = new Point(220, 7)
             };
+
+            _closeButton = new MirButton
+            {
+                Index = 193,
+                HoverIndex = 194,
+                PressedIndex = 195,
+                Library = Libraries.Title,
+                Parent = this,
+                Location = new Point(200, 437),
+                Sound = SoundList.ButtonA,
+            };
+            _closeButton.Click += (o, e) => Hide();
 
             MirButton closeButton = new MirButton
             {

@@ -57,11 +57,15 @@
             this.SaveDelayTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.VPathDialog = new System.Windows.Forms.OpenFileDialog();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.SafeZoneBorderCheckBox = new System.Windows.Forms.CheckBox();
+            this.SafeZoneHealingCheckBox = new System.Windows.Forms.CheckBox();
             this.configTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.tabPage5.SuspendLayout();
             this.SuspendLayout();
             // 
             // SaveButton
@@ -81,6 +85,7 @@
             this.configTabs.Controls.Add(this.tabPage2);
             this.configTabs.Controls.Add(this.tabPage3);
             this.configTabs.Controls.Add(this.tabPage4);
+            this.configTabs.Controls.Add(this.tabPage5);
             this.configTabs.Location = new System.Drawing.Point(12, 12);
             this.configTabs.Name = "configTabs";
             this.configTabs.SelectedIndex = 0;
@@ -359,6 +364,38 @@
             this.VPathDialog.FileName = "Mir2.Exe";
             this.VPathDialog.Filter = "Executable Files (*.exe)|*.exe";
             // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.SafeZoneHealingCheckBox);
+            this.tabPage5.Controls.Add(this.SafeZoneBorderCheckBox);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage5.Size = new System.Drawing.Size(407, 300);
+            this.tabPage5.TabIndex = 4;
+            this.tabPage5.Text = "Optional";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // SafeZoneBorderCheckBox
+            // 
+            this.SafeZoneBorderCheckBox.AutoSize = true;
+            this.SafeZoneBorderCheckBox.Location = new System.Drawing.Point(24, 20);
+            this.SafeZoneBorderCheckBox.Name = "SafeZoneBorderCheckBox";
+            this.SafeZoneBorderCheckBox.Size = new System.Drawing.Size(107, 17);
+            this.SafeZoneBorderCheckBox.TabIndex = 0;
+            this.SafeZoneBorderCheckBox.Text = "SafeZone Border";
+            this.SafeZoneBorderCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // SafeZoneHealingCheckBox
+            // 
+            this.SafeZoneHealingCheckBox.AutoSize = true;
+            this.SafeZoneHealingCheckBox.Location = new System.Drawing.Point(24, 43);
+            this.SafeZoneHealingCheckBox.Name = "SafeZoneHealingCheckBox";
+            this.SafeZoneHealingCheckBox.Size = new System.Drawing.Size(112, 17);
+            this.SafeZoneHealingCheckBox.TabIndex = 1;
+            this.SafeZoneHealingCheckBox.Text = "SafeZone Healing";
+            this.SafeZoneHealingCheckBox.UseVisualStyleBackColor = true;
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -378,6 +415,8 @@
             this.tabPage3.PerformLayout();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
+            this.tabPage5.ResumeLayout(false);
+            this.tabPage5.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -413,5 +452,8 @@
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.TextBox SaveDelayTextBox;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.CheckBox SafeZoneBorderCheckBox;
+        private System.Windows.Forms.CheckBox SafeZoneHealingCheckBox;
     }
 }

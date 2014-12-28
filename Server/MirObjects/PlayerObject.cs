@@ -9830,8 +9830,6 @@ namespace Server.MirObjects
 
             if (questInfo.CarryItems.Count > 0)
             {
-                bool gainedAllitems = true;
-
                 foreach (QuestItemTask carryItem in questInfo.CarryItems)
                 {
                     uint count = carryItem.Count;
@@ -9853,20 +9851,12 @@ namespace Server.MirObjects
 
                         if (!CanGainQuestItem(item))
                         {
-                            gainedAllitems = false;
-                            break;
+                            RecalculateQuestBag();
+                            return;
                         }
 
                         GainQuestItem(item);
                     }
-                }
-
-                if (!gainedAllitems)
-                {
-                    ReceiveChat("Quest bag cannot accept any more items.", ChatType.System);
-                    //can't start quest as no room for item, send error msg
-                    //recalculate quest bag to remove unneeded ones
-                    return;
                 }
             }
 
@@ -9937,6 +9927,18 @@ namespace Server.MirObjects
 
             CallDefaultNPC(DefaultNPCType.OnFinishQuest, questIndex);
         }
+        public void AbandonQuest(int questIndex)
+        {
+            QuestProgressInfo quest = CurrentQuests.FirstOrDefault(e => e.Info.Index == questIndex);
+
+            if (quest == null) return;
+
+            CurrentQuests.Remove(quest);
+            SendUpdateQuest(quest, QuestState.Remove);
+
+            RecalculateQuestBag();
+        }
+
         public void CheckNeedQuestKill(MonsterInfo mInfo)
         {
             if (GroupMembers != null)
@@ -9952,17 +9954,20 @@ namespace Server.MirObjects
             else
                 CheckQuestKill(mInfo);
         }
-        public bool CheckNeedQuestItem(UserItem item)
+        public bool CheckNeedQuestItem(UserItem item, bool gainItem = true)
         {
             foreach (QuestProgressInfo quest in CurrentQuests.
                 Where(e => e.ItemTaskCount.Count > 0).
                 Where(e => e.NeedItem(item.Info)).
                 Where(e => CanGainQuestItem(item)))
             {
-                GainQuestItem(item);
-                quest.ProcessItem(Info.QuestInventory);
-                //SendQuestUpdate();
-                SendUpdateQuest(quest, QuestState.Update);
+                if (gainItem)
+                {
+                    GainQuestItem(item);
+                    quest.ProcessItem(Info.QuestInventory);
+                    //SendQuestUpdate();
+                    SendUpdateQuest(quest, QuestState.Update);
+                }
                 return true;
             }
 
@@ -9994,6 +9999,36 @@ namespace Server.MirObjects
             }
         }
 
+        public void RecalculateQuestBag()
+        {
+            for (int i = 0; i < Info.QuestInventory.Length; i++)
+            {
+                UserItem itm = Info.QuestInventory[i];
+
+                if (itm == null) continue;
+
+                bool itemRequired = false;
+
+                foreach (QuestProgressInfo quest in CurrentQuests)
+                {
+                    foreach (QuestItemTask task in quest.Info.ItemTasks)
+                    {
+                        if (task.Item == itm.Info)
+                        {
+                            itemRequired = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!itemRequired)
+                {
+                    Info.QuestInventory[i] = null;
+                    Enqueue(new S.DeleteQuestItem { UniqueID = itm.UniqueID, Count = itm.Count });
+                }
+            }
+        }
+
         public void SendUpdateQuest(QuestProgressInfo quest, QuestState state, bool trackQuest = false)
         {
             quest.CheckCompleted();
@@ -10017,25 +10052,6 @@ namespace Server.MirObjects
                 CompletedQuests = CompletedQuests
             });
         }
-
-        //public void SendQuestUpdate()
-        //{
-        //    CompletedQuests.Clear();
-        //    for (int i = 1000; i < Globals.FlagIndexCount; i++)
-        //        if (Info.Flags[i]) CompletedQuests.Add(i - 1000);
-
-        //    foreach (QuestProgressInfo quest in CurrentQuests)
-        //    {
-        //        quest.CheckCompleted();
-        //    }
-
-        //    Enqueue(new S.UpdateQuests
-        //    {
-        //        CurrentQuests = (from q in CurrentQuests
-        //                         select q.CreateClientQuestProgress()).ToList(),
-        //        CompletedQuests = CompletedQuests
-        //    });
-        //}
 
         #endregion
 

@@ -69,8 +69,7 @@ namespace Server.MirObjects.Monsters
 
                 if (drop.QuestRequired)
                 {
-                    player.CheckNeedQuestItem(_drops[i]);
-                    continue;
+                    if(!player.CheckNeedQuestItem(item, false)) continue;
                 }
 
                 if (item.Info.Type == ItemType.Meat)
