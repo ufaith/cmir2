@@ -73,7 +73,7 @@ namespace Client.MirObjects
         public byte WingEffect;
         private short StanceDelay = 2500;
 
-        public long StanceTime, BlizzardFreezeTime;
+        public long StanceTime, BlizzardFreezeTime, ReincarnationStopTime;
 
         public string GuildName;
         public string GuildRankName;
@@ -1554,7 +1554,13 @@ namespace Client.MirObjects
 
                             #endregion
 
+                            #region Reincarnation
 
+                            case Spell.Reincarnation:
+                                ReincarnationStopTime = CMain.Time + 6000;
+                                break;
+
+                            #endregion
                         }
 
 
@@ -2378,6 +2384,14 @@ namespace Client.MirObjects
                                         SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 1);
                                         SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 2);
                                         BlizzardFreezeTime = CMain.Time + 3000;
+                                        break;
+
+                                    #endregion
+
+                                    #region Reincarnation
+
+                                    case Spell.Reincarnation:
+                                        ReincarnationStopTime = 0;
                                         break;
 
                                     #endregion

@@ -102,6 +102,15 @@ namespace Client.MirObjects
                         FrameInterval = 10000;
                     }
                     break;
+                case Spell.Reincarnation:
+                    BodyLibrary = Libraries.Magic2;
+                    DrawFrame = 1680;
+                    FrameInterval = 100;
+                    FrameCount = 10;
+                    Light = 1;
+                    Blend = true;
+                    Repeat = true;
+                    break;
             }
 
 

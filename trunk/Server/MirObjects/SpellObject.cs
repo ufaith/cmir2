@@ -51,6 +51,19 @@ namespace Server.MirObjects
 
             if (Envir.Time > ExpireTime || (Spell == Spell.FireWall && Caster == null))
             {
+                if (Spell == Spell.Reincarnation)
+                {
+                    Caster.ReincarnationReady = true;
+                    Caster.ReincarnationExpireTime = Envir.Time + 6000;
+                }
+
+                CurrentMap.RemoveObject(this);
+                Despawn();
+                return;
+            }
+
+            if (Spell == Spell.Reincarnation && !Caster.ActiveReincarnation)
+            {
                 CurrentMap.RemoveObject(this);
                 Despawn();
                 return;
@@ -251,6 +264,16 @@ namespace Server.MirObjects
         public override void SendHealth(PlayerObject player)
         {
             throw new NotSupportedException();
+        }
+        public override void Despawn()
+        {
+            base.Despawn();
+
+            if (Spell == Spell.Reincarnation && Caster != null && Caster.Node != null)
+            {
+                Caster.ActiveReincarnation = false;
+                Caster.Enqueue(new S.CancelReincarnation { });
+            }
         }
     }
 }

@@ -1250,4 +1250,16 @@ namespace ClientPackets
             writer.Write(QuestIndex);
         }
     }
+
+    public sealed class AcceptReincarnation : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.AcceptReincarnation; } }
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+        }
+    }
 }

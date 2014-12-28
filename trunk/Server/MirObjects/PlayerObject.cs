@@ -210,7 +210,9 @@ namespace Server.MirObjects
 
         public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
         public long FlamingSwordTime;
-        public bool ActiveBlizzard;
+        public bool ActiveBlizzard, ActiveReincarnation, ReincarnationReady;
+        public PlayerObject ReincarnationTarget;
+        public long ReincarnationExpireTime;
         public byte Reflect;
         public bool UnlockCurse = false;
 
@@ -381,6 +383,17 @@ namespace Server.MirObjects
             {
                 FlamingSword = false;
                 Enqueue(new S.SpellToggle { Spell = Spell.FlamingSword, CanUse = false });
+            }
+
+            if (ReincarnationReady && Envir.Time >= ReincarnationExpireTime)
+            {
+                ReincarnationReady = false;
+                ReceiveChat("Reincarnation failed.", ChatType.System);
+            }
+            if ((ReincarnationReady || ActiveReincarnation) && !ReincarnationTarget.Dead)
+            {
+                ReincarnationReady = false;
+                ActiveReincarnation = false;
             }
 
             if (Envir.Time > RunTime && _runCounter > 0)
@@ -1301,6 +1314,26 @@ namespace Server.MirObjects
             Enqueue(new S.StartGame { Result = 3 });
             CleanUp();
         }
+
+        public void Revive(uint hp, bool effect)
+        {
+            if (!Dead) return;
+
+            Dead = false;
+            SetHP((ushort)hp);
+
+            CurrentMap.RemoveObject(this);
+            Broadcast(new S.ObjectRemove { ObjectID = ObjectID });
+
+            CurrentMap = this.CurrentMap;
+            CurrentLocation = this.CurrentLocation;
+
+            CurrentMap.AddObject(this);
+
+            GetObjects();
+            Enqueue(new S.Revived());
+            Broadcast(new S.ObjectRevived { ObjectID = ObjectID, Effect = effect });
+        }
         public void TownRevive()
         {
             if (!Dead) return;
@@ -1981,6 +2014,8 @@ namespace Server.MirObjects
 
                 ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
 
+                CurrentWearWeight = (byte)Math.Min(byte.MaxValue, CurrentWearWeight + temp.Weight);
+
                 if (temp.CurrentDura == 0 && temp.Info.Durability > 0) continue;
 
                 MinAC = (byte)Math.Min(byte.MaxValue, MinAC + RealItem.MinAC);
@@ -2020,6 +2055,10 @@ namespace Server.MirObjects
                 if (temp == null) continue;
 
                 ItemInfo RealItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+
+                CurrentWearWeight = (byte)Math.Min(byte.MaxValue, CurrentWearWeight + temp.Weight);
+
+                if (temp.CurrentDura == 0 && temp.Info.Durability > 0) continue;
 
                 //flexibility
                 CriticalRate = (byte)Math.Max(byte.MinValue, (Math.Min(byte.MaxValue, CriticalRate + temp.CriticalRate + RealItem.CriticalRate)));
@@ -3957,6 +3996,9 @@ namespace Server.MirObjects
                 case Spell.TrapHexagon:
                     TrapHexagon(magic, target);
                     break;
+                case Spell.Reincarnation:
+                    Reincarnation(magic, target == null ? null : target as PlayerObject, out cast);
+                    break;
                 default:
                     cast = false;
                     break;
@@ -4714,6 +4756,67 @@ namespace Server.MirObjects
             CurrentMap.ActionList.Add(action);
 
             ConsumeItem(item, 1);
+        }
+        private void Reincarnation(UserMagic magic, PlayerObject target, out bool cast)
+        {
+            cast = true;
+
+            if (target == null || !target.Dead) return;
+            // if (ReincarnationTarget == null || !ReincarnationTarget.Dead) return;
+
+            UserItem item = GetAmulet(1);
+            if (item == null) return;
+
+            if (!ActiveReincarnation && !ReincarnationReady)
+            {
+                cast = false;
+                ActiveReincarnation = true;
+                ReincarnationTarget = target;
+
+                SpellObject ob = new SpellObject
+                {
+                    Spell = Spell.Reincarnation,
+                    ExpireTime = Envir.Time + 3000,
+                    TickSpeed = 1000,
+                    Caster = this,
+                    CurrentLocation = CurrentLocation,
+                    CastLocation = CurrentLocation,
+                    Show = true,
+                    CurrentMap = CurrentMap,
+                };
+                CurrentMap.AddObject(ob);
+                ob.Spawned();
+
+                Packet p = new S.Chat { Message = string.Format("{0} is attempting to revive {1}", Name, target.Name), Type = ChatType.Shout };
+
+                ReincarnationReady = false;
+
+                if (Envir.Random.Next(30) > (magic.Level) * 10)
+                {
+                    ReceiveChat("Reviving failed.", ChatType.System);
+                    return;
+                }
+
+                ConsumeItem(item, 1);
+                Envir.Broadcast(p);
+                ReincarnationTarget.Enqueue(new S.RequestReincarnation { });
+                return;
+            }
+            //else
+            //{
+            //    if (ReincarnationTarget == null || ReincarnationTarget.Node == null || !ReincarnationTarget.Dead) return;
+
+            //    ReincarnationReady = false;
+            //    //if (Envir.Random.Next(50) > (magic.Level + 2) * 10)
+            //    //{
+            //    //    ReceiveChat("Reviving failed.", ChatType.System);
+            //    //    return;
+            //    //}
+            //    ReincarnationTarget.Enqueue(new S.RequestReincarnation { });
+            //    ConsumeItem(item, 1);
+
+            //    return;
+            //}
         }
 
         private void CompleteMagic(IList<object> data)
@@ -5514,6 +5617,7 @@ namespace Server.MirObjects
 
             DamageDura();
             ActiveBlizzard = false;
+            ActiveReincarnation = false;
 
             Enqueue(new S.Struck { AttackerID = attacker.ObjectID });
             Broadcast(new S.ObjectStruck { ObjectID = ObjectID, AttackerID = attacker.ObjectID, Direction = Direction, Location = CurrentLocation });
@@ -6497,6 +6601,14 @@ namespace Server.MirObjects
                     break;
                 case MirGridType.Equipment:
                     arrayTo = Info.Equipment;
+                    break;
+                case MirGridType.Fishing:
+                    if (Info.Equipment[(int)EquipmentSlot.Weapon] == null || (Info.Equipment[(int)EquipmentSlot.Weapon].Info.Shape != 49 && Info.Equipment[(int)EquipmentSlot.Weapon].Info.Shape != 50))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+                    arrayTo = Info.Equipment[(int)EquipmentSlot.Weapon].Slots;
                     break;
                 default:
                     Enqueue(p);

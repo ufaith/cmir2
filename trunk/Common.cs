@@ -817,12 +817,15 @@ public enum ServerPacketIds : short
     MountUpdate,
     EquipSlotItem,
     FishingUpdate,
-    //UpdateQuests,
+
     ChangeQuest,
     CompleteQuest,
     NewQuestInfo,
     GainedQuestItem,
-    DeleteQuestItem
+    DeleteQuestItem,
+
+    CancelReincarnation,
+    RequestReincarnation,
 }
 
 public enum ClientPacketIds : short
@@ -900,7 +903,9 @@ public enum ClientPacketIds : short
     FishingChangeAutocast,
     AcceptQuest,
     FinishQuest,
-    AbandonQuest
+    AbandonQuest,
+
+    AcceptReincarnation,
 }
 
 public class InIReader
@@ -2736,6 +2741,8 @@ public abstract class Packet
                 return new C.FinishQuest();
             case (short)ClientPacketIds.AbandonQuest:
                 return new C.AbandonQuest();
+            case (short)ClientPacketIds.AcceptReincarnation:
+                return new C.AcceptReincarnation();
             default:
                 throw new NotImplementedException();
         }
@@ -3049,6 +3056,10 @@ public abstract class Packet
                 return new S.GainedQuestItem();
             case (short)ServerPacketIds.DeleteQuestItem:
                 return new S.DeleteQuestItem();
+            case (short)ServerPacketIds.CancelReincarnation:
+                return new S.CancelReincarnation();
+            case (short)ServerPacketIds.RequestReincarnation:
+                return new S.RequestReincarnation();
             default:
                 throw new NotImplementedException();
         }
