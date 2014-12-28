@@ -899,7 +899,8 @@ public enum ClientPacketIds : short
     FishingCast,
     FishingChangeAutocast,
     AcceptQuest,
-    FinishQuest
+    FinishQuest,
+    AbandonQuest
 }
 
 public class InIReader
@@ -2733,6 +2734,8 @@ public abstract class Packet
                 return new C.AcceptQuest();
             case (short)ClientPacketIds.FinishQuest:
                 return new C.FinishQuest();
+            case (short)ClientPacketIds.AbandonQuest:
+                return new C.AbandonQuest();
             default:
                 throw new NotImplementedException();
         }

@@ -27,6 +27,9 @@ namespace Server
             DCharacterCheckBox.Checked = Settings.AllowDeleteCharacter;
             StartGameCheckBox.Checked = Settings.AllowStartGame;
 
+            SafeZoneBorderCheckBox.Checked = Settings.SafeZoneBorder;
+            SafeZoneHealingCheckBox.Checked = Settings.SafeZoneHealing;
+
             SaveDelayTextBox.Text = Settings.SaveDelay.ToString();
         }
 
@@ -74,6 +77,8 @@ namespace Server
             Settings.AllowDeleteCharacter = DCharacterCheckBox.Checked;
             Settings.AllowStartGame = StartGameCheckBox.Checked;
 
+            Settings.SafeZoneBorder = SafeZoneBorderCheckBox.Checked;
+            Settings.SafeZoneHealing = SafeZoneHealingCheckBox.Checked;
         }
 
         private void IPAddressCheck(object sender, EventArgs e)

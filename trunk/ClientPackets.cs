@@ -1234,4 +1234,20 @@ namespace ClientPackets
             writer.Write(SelectedItemIndex);
         }
     }
+
+    public sealed class AbandonQuest : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.AbandonQuest; } }
+
+        public int QuestIndex;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            QuestIndex = reader.ReadInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(QuestIndex);
+        }
+    }
 }
