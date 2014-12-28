@@ -1561,6 +1561,15 @@ namespace Client.MirObjects
                                 break;
 
                             #endregion
+
+                            #region Plague
+
+                            case Spell.Plague:
+                                Effects.Add(new Effect(Libraries.Magic3, 110, 10, 800, this));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
+
+                            #endregion
                         }
 
 
@@ -2303,6 +2312,8 @@ namespace Client.MirObjects
                                     case Spell.Purification:
                                         if (ob == null)
                                             MapControl.Effects.Add(new Effect(Libraries.Magic2, 620, 10, 800, TargetPoint));
+                                        else
+                                            ob.Effects.Add(new Effect(Libraries.Magic2, 620, 10, 800, ob));
                                         break;
 
                                     #endregion
@@ -2310,12 +2321,12 @@ namespace Client.MirObjects
                                     #region Curse
 
                                     case Spell.Curse:
-                                        missile = CreateProjectile(1160, Libraries.Magic2, true, 3, 30, 7);
+                                        missile = CreateProjectile(1160, Libraries.Magic, true, 3, 30, 7);
                                         missile.Explode = true;
 
                                         missile.Complete += (o, e) =>
                                         {
-                                            MapControl.Effects.Add(new Effect(Libraries.Magic2, 1320, 24, 2000, TargetPoint));
+                                            MapControl.Effects.Add(new Effect(Libraries.Magic2, 950, 24, 2000, TargetPoint));
                                             SoundManager.PlaySound(20000 + (ushort)Spell.Curse * 10);
                                         };
                                         break;
@@ -2325,11 +2336,28 @@ namespace Client.MirObjects
                                     #region Hallucination
 
                                     case Spell.Hallucination:
-                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10);
-                                        if (ob != null)
-                                            ob.Effects.Add(new Effect(Libraries.Magic2, 1110, 10, 1000, ob));
+                                        missile = CreateProjectile(1160, Libraries.Magic, true, 3, 48, 7);
+
+                                        if (missile.Target != null)
+                                        {
+                                            missile.Complete += (o, e) =>
+                                            {
+                                                if (missile.Target.CurrentAction == MirAction.Dead) return;
+                                                missile.Target.Effects.Add(new Effect(Libraries.Magic2, 1110, 10, 1000, missile.Target));
+                                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                            };
+                                        }
                                         break;
+
                                     #endregion
+
+                                    //#region TrapHexagon
+
+                                    //case Spell.TrapHexagon:
+                                    //    missile = CreateProjectile(1160, Libraries.Magic, true, 3, 48, 7);
+                                    //    break;
+
+                                    //#endregion
 
                                     #region Lightning
 
@@ -2392,6 +2420,33 @@ namespace Client.MirObjects
 
                                     case Spell.Reincarnation:
                                         ReincarnationStopTime = 0;
+                                        break;
+
+                                    #endregion
+
+                                    #region SummonHolyDeva
+
+                                    case Spell.SummonHolyDeva:
+                                        Effects.Add(new Effect(Libraries.Magic, 1500, 10, Frame.Count * FrameInterval, this));
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                        break;
+
+                                    #endregion
+
+                                    #region UltimateEnhancer
+
+                                    case Spell.UltimateEnhancer:
+                                        if (ob != null && ob != User)
+                                            ob.Effects.Add(new Effect(Libraries.Magic2, 160, 15, 1000, ob));
+                                        break;
+
+                                    #endregion
+
+                                    #region Plague
+
+                                    case Spell.Plague:
+                                        if (ob != null && ob != User)
+                                            ob.Effects.Add(new Effect(Libraries.Magic3, 110, 10, 800, ob));
                                         break;
 
                                     #endregion

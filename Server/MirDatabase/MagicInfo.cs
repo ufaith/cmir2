@@ -338,6 +338,9 @@ namespace Server.MirDatabase
                 case Spell.StraightShot:
                     return 7;
 
+                case Spell.Plague:
+                    return 10;
+
                 default:
                     return 0;
             }
@@ -383,6 +386,9 @@ namespace Server.MirDatabase
 
                 case Spell.StraightShot:
                     return 3;
+
+                case Spell.Plague:
+                    return 8;
 
                 default:
                     return 0;

@@ -3999,6 +3999,20 @@ namespace Server.MirObjects
                 case Spell.Reincarnation:
                     Reincarnation(magic, target == null ? null : target as PlayerObject, out cast);
                     break;
+                case Spell.Curse:
+                    break;
+                case Spell.SummonHolyDeva:
+                    SummonHolyDeva(magic);
+                    break;
+                case Spell.Hallucination:
+                    Hallucination(target, magic);
+                    break;
+                case Spell.UltimateEnhancer:
+                    UltimateEnhancer(target, magic, out cast);
+                    break;
+                case Spell.Plague:
+                    Plague(magic);
+                    break;
                 default:
                     cast = false;
                     break;
@@ -4599,7 +4613,7 @@ namespace Server.MirObjects
 
             int damage = GetAttackPower(MinSC, MaxSC) + magic.GetPower();
 
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, Envir.Random.Next(PoisonAttack));
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, (byte)Envir.Random.Next(PoisonAttack));
 
             ConsumeItem(amuelt, 5);
             ConsumeItem(poison, 5);
@@ -4817,6 +4831,87 @@ namespace Server.MirObjects
 
             //    return;
             //}
+        }
+        private void SummonHolyDeva(UserMagic magic)
+        {
+            MonsterObject monster;
+            for (int i = 0; i < Pets.Count; i++)
+            {
+                monster = Pets[i];
+                if ((monster.Info.Name != Settings.SkeletonName &&
+                    monster.Info.Name != Settings.AngelName) || monster.Dead) continue;
+                if (monster.Node == null) continue;
+                monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500));
+                return;
+            }
+
+            UserItem item = GetAmulet(2);
+            if (item == null) return;
+
+
+            MonsterInfo info = Envir.GetMonsterInfo(Settings.AngelName);
+            if (info == null) return;
+
+            LevelMagic(magic);
+            ConsumeItem(item, 2);
+
+            monster = MonsterObject.GetMonster(info);
+            monster.PetLevel = magic.Level;
+            monster.Master = this;
+            monster.MaxPetLevel = (byte)(1 + magic.Level * 2);
+            monster.Direction = Direction;
+            monster.ActionTime = Envir.Time + 1000;
+
+            Pets.Add(monster);
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, monster, Front);
+            CurrentMap.ActionList.Add(action);
+        }
+        private void Hallucination(MapObject target, UserMagic magic)
+        {
+            if (target == null || !target.IsAttackTarget(this)) return;
+
+            int damage = 0;
+            int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, delay, magic, damage, target);
+
+            ActionList.Add(action);
+        }
+        private void UltimateEnhancer(MapObject target, UserMagic magic, out bool cast)
+        {
+            cast = false;
+            int count = Buffs.Where(x => x.Type == BuffType.UltimateEnhancer).ToList().Count();
+            if (count > 0) return;
+
+            UserItem item = GetAmulet(1);
+            if (item == null) return;
+
+            long expiretime = GetAttackPower(MinSC, MaxSC) * 2 + (magic.Level + 1) * 10;
+            int value = MaxSC >= 5 ? Math.Min(8, MaxSC / 5) : 1;
+
+            switch (target.Race)
+            {
+                case ObjectType.Monster:
+                case ObjectType.Player:
+                    //Only targets
+                    if (target.IsFriendlyTarget(this))
+                    {
+                        target.AddBuff(new Buff { Type = BuffType.UltimateEnhancer, Caster = this, ExpireTime = Envir.Time + expiretime * 1000, Value = value });
+                        target.OperateTime = 0;
+                        LevelMagic(magic);
+                        ConsumeItem(item, 1);
+                        if (target != this) cast = true;
+                    }
+                    break;
+            }
+        }
+        private void Plague(UserMagic magic)
+        {
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation);
+            CurrentMap.ActionList.Add(action);
         }
 
         private void CompleteMagic(IList<object> data)
@@ -5084,6 +5179,25 @@ namespace Server.MirObjects
                     if (duration > 0) target.ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = duration, TickSpeed = 1000 }, this);
                     CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = target.ObjectID, Effect = SpellEffect.Entrapment }, target.CurrentLocation);
                     if (target.Pushed(this, pulldirection, pulldistance) > 0) LevelMagic(magic);
+                    break;
+
+                #endregion
+
+                #region Hallucination
+
+                case Spell.Hallucination:
+                    value = (int)data[1];
+                    target = (MapObject)data[2];
+
+                    if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null ||
+                        Functions.MaxDistance(CurrentLocation, target.CurrentLocation) > 7 || Envir.Random.Next(Level + 20 + magic.Level * 5) <= target.Level + 10) return;
+                    item = GetAmulet(1);
+                    if (item == null) return;
+
+                    ((MonsterObject)target).RageTime = Envir.Time + (Envir.Random.Next(20) + 10) * 1000;
+                    target.Target = null;
+
+                    ConsumeItem(item, 1);
                     break;
 
                 #endregion

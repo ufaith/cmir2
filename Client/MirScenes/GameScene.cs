@@ -1130,6 +1130,7 @@ namespace Client.MirScenes
 
         public void CreateBuff(Buff buff)
         {
+            string text = "";
             MirImageControl image = new MirImageControl
             {
                 Library = Libraries.Prguse,
@@ -1173,8 +1174,13 @@ namespace Client.MirScenes
                 case BuffType.Rage:
                     image.Index = 860;
                     break;
+                case BuffType.UltimateEnhancer:
+                    image.Index = 862;
+                    text = string.Format("DC increased by 0-{0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
+                    break;
             }
 
+            if (text != "") GameScene.Scene.ChatDialog.ReceiveChat(text, ChatType.Hint);
             BuffList.Insert(0, image);
         }
         public void UpdateBuffs()
@@ -5901,6 +5907,7 @@ namespace Client.MirScenes
                 case Spell.Revelation:
                 case Spell.Entrapment:
                 case Spell.StraightShot:
+                case Spell.Hallucination:
                     if (User.NextMagicObject != null)
                     {
                         if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
@@ -5913,6 +5920,7 @@ namespace Client.MirScenes
                     break;
                 case Spell.Purification:
                 case Spell.Healing:
+                case Spell.UltimateEnhancer:
                     if (User.NextMagicObject != null)
                     {
                         if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
@@ -14866,6 +14874,9 @@ namespace Client.MirScenes
                     break;
                 case BuffType.Rage:
                     text = string.Format("Rage\nIncreases DC by: 0-{0}.\n", Value);
+                    break;
+                case BuffType.UltimateEnhancer:
+                    text = string.Format("UltimateEnhancer\nIncreases DC by: 0-{0}.\n", Value);
                     break;
             }
 

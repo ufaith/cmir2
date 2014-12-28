@@ -1318,6 +1318,22 @@ namespace Server.MirEnvir
                     break;
 
                 #endregion
+
+                #region SummonHolyDeva
+
+                case Spell.SummonHolyDeva:
+                    monster = (MonsterObject)data[2];
+                    front = (Point)data[3];
+
+
+                    if (ValidPoint(front))
+                        monster.Spawn(this, front);
+                    else
+                        monster.Spawn(player.CurrentMap, player.CurrentLocation);
+                    break;
+
+                #endregion
+
             }
 
             if (train)

@@ -221,7 +221,7 @@ namespace Server.MirDatabase
 
         public void UpdateKillTasks()
         {
-            if(Info.KillMessage.Length > 0) 
+            if(Info.KillMessage.Length > 0 && Info.KillTasks.Count > 0) 
             {
                 bool allComplete = true;
                 for (int i = 0; i < Info.KillTasks.Count; i++)
@@ -248,7 +248,7 @@ namespace Server.MirDatabase
 
         public void UpdateItemTasks()
         {
-            if (Info.ItemMessage.Length > 0)
+            if (Info.ItemMessage.Length > 0 && Info.ItemTasks.Count > 0)
             {
                 bool allComplete = true;
                 for (int i = 0; i < Info.ItemTasks.Count; i++)
@@ -300,7 +300,7 @@ namespace Server.MirDatabase
 
         public void UpdateGotoTask()
         {
-            if (Info.GotoMessage.Length <= 0) return;
+            if (Info.GotoMessage.Length <= 0 || TaskList.Count > 0) return;
 
             TaskList.Add(Info.GotoMessage);
         }
