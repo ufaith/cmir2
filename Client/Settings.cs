@@ -71,9 +71,9 @@ namespace Client
         public static string AccountID = "",
                              Password = "";
         public static bool
-            SkillMode,
-            SkillBar,
-            SkillSet,
+            SkillMode = false,
+            SkillBar = false,
+            SkillSet = true,
             Effect = true,
             DropView = true,
             NameView = true,

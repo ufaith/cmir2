@@ -617,6 +617,12 @@ public enum Spell : byte
     //Archer
     Focus = 121,
     StraightShot = 122,
+    DoubleShot = 123,
+    ExplosiveTrap = 124,
+    DelayedExplosion = 125,
+    Meditation = 126,
+    BackStep = 127,
+
 
     //Map Events
     DigOutZombie = 200,
@@ -656,6 +662,7 @@ public enum BuffType : byte
     UltimateEnhancer,
     ProtectionField,
     Rage,
+    Curse
 }
 
 public enum DefenceType : byte

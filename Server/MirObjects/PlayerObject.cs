@@ -2157,6 +2157,18 @@ namespace Server.MirObjects
                     case BuffType.Rage:
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
                         break;
+                    case BuffType.Curse:
+
+                        byte rMaxDC = (byte)(((int)MaxDC / 100) * buff.Value);
+                        byte rMaxMC = (byte)(((int)MaxMC / 100) * buff.Value);
+                        byte rMaxSC = (byte)(((int)MaxSC / 100) * buff.Value);
+                        byte rASpeed = (byte)(((int)ASpeed / 100) * buff.Value);
+
+                        MaxDC = (byte)Math.Max(byte.MinValue, MaxDC - rMaxDC);
+                        MaxMC = (byte)Math.Max(byte.MinValue, MaxMC - rMaxMC);
+                        MaxSC = (byte)Math.Max(byte.MinValue, MaxSC - rMaxSC);
+                        ASpeed = (sbyte)Math.Min(sbyte.MaxValue, (Math.Max(sbyte.MinValue, ASpeed - rASpeed)));
+                        break;
                 }
 
             }
@@ -2948,6 +2960,10 @@ namespace Server.MirObjects
 
                         if (data.Player != null)
                             data.Player.Connection.LogOut();
+                        break;
+
+                    case "DIE":
+                        Die();
                         break;
 
                     default:
@@ -4000,6 +4016,7 @@ namespace Server.MirObjects
                     Reincarnation(magic, target == null ? null : target as PlayerObject, out cast);
                     break;
                 case Spell.Curse:
+                    Curse(magic, target == null ? location : target.CurrentLocation, out cast);
                     break;
                 case Spell.SummonHolyDeva:
                     SummonHolyDeva(magic);
@@ -4013,6 +4030,9 @@ namespace Server.MirObjects
                 case Spell.Plague:
                     Plague(magic);
                     break;
+                case Spell.DoubleShot:
+                    if (!DoubleShot(target, magic)) targetID = 0;
+                    break;
                 default:
                     cast = false;
                     break;
@@ -4025,6 +4045,8 @@ namespace Server.MirObjects
 
         private void ShoulderDash(UserMagic magic)
         {
+            ActionTime = Envir.Time; //allow an immediate next action
+
             if (InTrapRock) return;
             if (!CanWalk) return;
 
@@ -4778,7 +4800,7 @@ namespace Server.MirObjects
             if (target == null || !target.Dead) return;
             // if (ReincarnationTarget == null || !ReincarnationTarget.Dead) return;
 
-            UserItem item = GetAmulet(1);
+            UserItem item = GetAmulet(1, 3);
             if (item == null) return;
 
             if (!ActiveReincarnation && !ReincarnationReady)
@@ -4913,6 +4935,37 @@ namespace Server.MirObjects
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation);
             CurrentMap.ActionList.Add(action);
         }
+        private void Curse(UserMagic magic, Point location, out bool cast)
+        {
+            cast = false;
+            UserItem item = GetAmulet(1);
+            if (item == null) return;
+            cast = true;
+
+            int delay = Functions.MaxDistance(CurrentLocation, location) * 50 + 500; //50 MS per Step
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, this, magic, GetAttackPower(MinSC, MaxSC) * 2 + (magic.Level + 1) * 10, location, 8 + ((magic.Level + 1) * 2));
+            CurrentMap.ActionList.Add(action);
+        }
+
+        private bool DoubleShot(MapObject target, UserMagic magic)
+        {
+            if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return false;
+
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, magic, damage, target);
+
+            ActionList.Add(action);
+
+            action = new DelayedAction(DelayedType.Magic, Envir.Time + delay + 50, magic, damage, target);
+
+            ActionList.Add(action);
+
+            return true;
+        }
 
         private void CompleteMagic(IList<object> data)
         {
@@ -4931,6 +4984,7 @@ namespace Server.MirObjects
                 case Spell.SoulFireBall:
                 case Spell.FlameDisruptor:
                 case Spell.StraightShot:
+                case Spell.DoubleShot:
                     value = (int)data[1];
                     target = (MapObject)data[2];
 
@@ -5258,12 +5312,12 @@ namespace Server.MirObjects
         }
 
 
-        private UserItem GetAmulet(int count)
+        private UserItem GetAmulet(int count, int shape = 0)
         {
             for (int i = 0; i < Info.Inventory.Length; i++)
             {
                 UserItem item = Info.Inventory[i];
-                if (item != null && item.Info.Type == ItemType.Amulet && item.Info.Shape == 0 && item.Count >= count)
+                if (item != null && item.Info.Type == ItemType.Amulet && item.Info.Shape == shape && item.Count >= count)
                     return item;
             }
 
