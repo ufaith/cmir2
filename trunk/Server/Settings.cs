@@ -60,7 +60,7 @@ namespace Server
         //Game
         public static List<long> ExperienceList = new List<long>();
 
-        public static float DropRate = 2F, ExpRate = 3F;
+        public static float DropRate = 1F, ExpRate = 1F;
 
         public static int ItemTimeOut = 30,
                           DropRange = 4,

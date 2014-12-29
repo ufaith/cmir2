@@ -373,6 +373,18 @@ namespace Server.MirObjects
                     case BuffType.UltimateEnhancer:
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
                         break;
+                    case BuffType.Curse:
+
+                        byte rMaxDC = (byte)(((int)MaxDC / 100) * buff.Value);
+                        byte rMaxMC = (byte)(((int)MaxMC / 100) * buff.Value);
+                        byte rMaxSC = (byte)(((int)MaxSC / 100) * buff.Value);
+                        byte rASpeed = (byte)(((int)ASpeed / 100) * buff.Value);
+
+                        MaxDC = (byte)Math.Max(byte.MinValue, MaxDC - rMaxDC);
+                        MaxMC = (byte)Math.Max(byte.MinValue, MaxMC - rMaxMC);
+                        MaxSC = (byte)Math.Max(byte.MinValue, MaxSC - rMaxSC);
+                        ASpeed = (sbyte)Math.Min(sbyte.MaxValue, (Math.Max(sbyte.MinValue, ASpeed - rASpeed)));
+                        break;
                 }
 
             }

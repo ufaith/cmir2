@@ -533,7 +533,7 @@ namespace Server.MirEnvir
             PlayerObject player = (PlayerObject)data[0];
             UserMagic magic = (UserMagic)data[1];
 
-            int value;
+            int value, value2;
             Point location;
             Cell cell;
             MirDirection dir;
@@ -541,13 +541,14 @@ namespace Server.MirEnvir
             Point front;
             switch (magic.Spell)
             {
-                    #region HellFire
+
+                #region HellFire
 
                 case Spell.HellFire:
-                    value = (int) data[2];
-                    dir = (MirDirection) data[4];
-                    location = Functions.PointMove((Point) data[3], dir, 1);
-                    int count = (int) data[5] - 1;
+                    value = (int)data[2];
+                    dir = (MirDirection)data[4];
+                    location = Functions.PointMove((Point)data[3], dir, 1);
+                    int count = (int)data[5] - 1;
 
                     if (!ValidPoint(location)) return;
 
@@ -581,14 +582,14 @@ namespace Server.MirEnvir
                     }
                     break;
 
-                    #endregion
+                #endregion
 
-                    #region SummonSkeleton
+                #region SummonSkeleton
 
                 case Spell.SummonSkeleton:
                     monster = (MonsterObject)data[2];
                     front = (Point)data[3];
-                    
+
                     if (ValidPoint(front))
                         monster.Spawn(this, front);
                     else
@@ -597,12 +598,12 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                    #region FireBang, IceStorm
+                #region FireBang, IceStorm
 
                 case Spell.IceStorm:
                 case Spell.FireBang:
-                    value = (int) data[2];
-                    location = (Point) data[3];
+                    value = (int)data[2];
+                    location = (Point)data[3];
 
                     for (int y = location.Y - 1; y <= location.Y + 1; y++)
                     {
@@ -641,13 +642,13 @@ namespace Server.MirEnvir
 
                     break;
 
-                    #endregion
+                #endregion
 
-                    #region MassHiding
+                #region MassHiding
 
                 case Spell.MassHiding:
-                    value = (int) data[2];
-                    location = (Point) data[3];
+                    value = (int)data[2];
+                    location = (Point)data[3];
 
                     for (int y = location.Y - 1; y <= location.Y + 1; y++)
                     {
@@ -690,14 +691,14 @@ namespace Server.MirEnvir
 
                     break;
 
-                    #endregion
+                #endregion
 
-                    #region SoulShield, BlessedArmour
+                #region SoulShield, BlessedArmour
 
                 case Spell.SoulShield:
                 case Spell.BlessedArmour:
-                    value = (int) data[2];
-                    location = (Point) data[3];
+                    value = (int)data[2];
+                    location = (Point)data[3];
                     BuffType type = magic.Spell == Spell.SoulShield ? BuffType.SoulShield : BuffType.BlessedArmour;
 
                     for (int y = location.Y - 3; y <= location.Y + 3; y++)
@@ -738,9 +739,9 @@ namespace Server.MirEnvir
 
                     break;
 
-                    #endregion
+                #endregion
 
-                    #region FireWall
+                #region FireWall
 
                 case Spell.FireWall:
                     value = (int)data[2];
@@ -751,13 +752,13 @@ namespace Server.MirEnvir
                     if (ValidPoint(location))
                     {
                         cell = GetCell(location);
-                        
+
                         bool cast = true;
                         if (cell.Objects != null)
                             for (int o = 0; o < cell.Objects.Count; o++)
                             {
                                 MapObject target = cell.Objects[o];
-                                if (target.Race != ObjectType.Spell || ((SpellObject) target).Spell != Spell.FireWall) continue;
+                                if (target.Race != ObjectType.Spell || ((SpellObject)target).Spell != Spell.FireWall) continue;
 
                                 cast = false;
                                 break;
@@ -769,7 +770,7 @@ namespace Server.MirEnvir
                                 {
                                     Spell = Spell.FireWall,
                                     Value = value,
-                                    ExpireTime = Envir.Time + (10 + value/2)*1000,
+                                    ExpireTime = Envir.Time + (10 + value / 2) * 1000,
                                     TickSpeed = 2000,
                                     Caster = player,
                                     CurrentLocation = location,
@@ -783,7 +784,7 @@ namespace Server.MirEnvir
                     dir = MirDirection.Up;
                     for (int i = 0; i < 4; i++)
                     {
-                        location = Functions.PointMove((Point) data[3], dir, 1);
+                        location = Functions.PointMove((Point)data[3], dir, 1);
                         dir += 2;
 
                         if (!ValidPoint(location)) continue;
@@ -795,7 +796,7 @@ namespace Server.MirEnvir
                             for (int o = 0; o < cell.Objects.Count; o++)
                             {
                                 MapObject target = cell.Objects[o];
-                                if (target.Race != ObjectType.Spell || ((SpellObject) target).Spell != Spell.FireWall) continue;
+                                if (target.Race != ObjectType.Spell || ((SpellObject)target).Spell != Spell.FireWall) continue;
 
                                 cast = false;
                                 break;
@@ -821,7 +822,7 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                    #region Lightning
+                #region Lightning
 
                 case Spell.Lightning:
                     value = (int)data[2];
@@ -854,7 +855,7 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                    #region HeavenlySword
+                #region HeavenlySword
 
                 case Spell.HeavenlySword:
                     value = (int)data[2];
@@ -887,7 +888,7 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                    #region MassHealing
+                #region MassHealing
 
                 case Spell.MassHealing:
                     value = (int)data[2];
@@ -934,7 +935,7 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                    #region ThunderStorm
+                #region ThunderStorm
 
                 case Spell.ThunderStorm:
                 case Spell.FlameField:
@@ -965,7 +966,7 @@ namespace Server.MirEnvir
                                         //Only targets
                                         if (!target.IsAttackTarget(player)) break;
 
-                                        if (target.Attacked(player, magic.Spell == Spell.FlameField || target.Undead ? value : value/10, DefenceType.MAC, false) <= 0) break;
+                                        if (target.Attacked(player, magic.Spell == Spell.FlameField || target.Undead ? value : value / 10, DefenceType.MAC, false) <= 0) break;
 
                                         train = true;
                                         break;
@@ -979,7 +980,7 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                    #region SummonShinsu
+                #region SummonShinsu
 
                 case Spell.SummonShinsu:
                     monster = (MonsterObject)data[2];
@@ -993,7 +994,7 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                    #region LionRoar
+                #region LionRoar
 
                 case Spell.LionRoar:
                     location = (Point)data[2];
@@ -1330,6 +1331,54 @@ namespace Server.MirEnvir
                         monster.Spawn(this, front);
                     else
                         monster.Spawn(player.CurrentMap, player.CurrentLocation);
+                    break;
+
+                #endregion
+
+                #region Curse
+
+                case Spell.Curse:
+                    value = (int)data[2];
+                    location = (Point)data[3];
+                    value2 = (int)data[4];
+                    type = BuffType.Curse;
+
+                    for (int y = location.Y - 3; y <= location.Y + 3; y++)
+                    {
+                        if (y < 0) continue;
+                        if (y >= Height) break;
+
+                        for (int x = location.X - 3; x <= location.X + 3; x++)
+                        {
+                            if (x < 0) continue;
+                            if (x >= Width) break;
+
+                            cell = GetCell(x, y);
+
+                            if (!cell.Valid || cell.Objects == null) continue;
+
+                            for (int i = 0; i < cell.Objects.Count; i++)
+                            {
+                                MapObject target = cell.Objects[i];
+                                switch (target.Race)
+                                {
+                                    case ObjectType.Monster:
+                                    case ObjectType.Player:
+                                        //Only targets
+                                        if (target.IsAttackTarget(player))
+                                        {
+                                            target.AddBuff(new Buff { Type = type, Caster = player, ExpireTime = Envir.Time + value * 1000, Value = value2 });
+                                            target.OperateTime = 0;
+                                            train = true;
+                                        }
+                                        break;
+                                }
+                            }
+
+                        }
+
+                    }
+
                     break;
 
                 #endregion

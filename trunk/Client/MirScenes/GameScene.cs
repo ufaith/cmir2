@@ -681,6 +681,10 @@ namespace Client.MirScenes
                 MirMessageBox messageBox = new MirMessageBox("You have died, Do you want to revive in town?", MirMessageBoxButtons.YesNo);
 
                 messageBox.YesButton.Click += (o, e) => Network.Enqueue(new C.TownRevive());
+                messageBox.AfterDraw += (o, e) =>
+                {
+                    if (!User.Dead) messageBox.Dispose();
+                };
 
                 messageBox.Show();
             }
@@ -1178,6 +1182,9 @@ namespace Client.MirScenes
                     image.Index = 862;
                     text = string.Format("DC increased by 0-{0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
                     break;
+                case BuffType.Curse:
+                    image.Index = 892;
+                    break;
             }
 
             if (text != "") GameScene.Scene.ChatDialog.ReceiveChat(text, ChatType.Hint);
@@ -1212,6 +1219,9 @@ namespace Client.MirScenes
                         break;
                     case BuffType.BlessedArmour:
                         image.Index = 871;
+                        break;
+                    case BuffType.Curse:
+                        image.Index = 892;
                         break;
                 }
 
@@ -5907,6 +5917,7 @@ namespace Client.MirScenes
                 case Spell.Revelation:
                 case Spell.Entrapment:
                 case Spell.StraightShot:
+                case Spell.DoubleShot:
                 case Spell.Hallucination:
                     if (User.NextMagicObject != null)
                     {
@@ -14877,6 +14888,9 @@ namespace Client.MirScenes
                     break;
                 case BuffType.UltimateEnhancer:
                     text = string.Format("UltimateEnhancer\nIncreases DC by: 0-{0}.\n", Value);
+                    break;
+                case BuffType.Curse:
+                    text = string.Format("Cursed\nDecreases DC/MC/SC/ASpeed by: {0}%.\n", Value);
                     break;
             }
 

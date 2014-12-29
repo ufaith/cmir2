@@ -98,7 +98,8 @@ namespace Server.MirDatabase
 
         //Archer
         public static MagicInfo Focus,
-                                StraightShot;
+                                StraightShot,
+                                DoubleShot;
 
 
         public Spell Spell;
@@ -199,8 +200,9 @@ namespace Server.MirDatabase
             CresentSlash = new MagicInfo { Spell = Spell.CrescentSlash, Icon = 71, Level1 = 50, Level2 = 53, Level3 = 56, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 19, LevelCost = 5 };
 
             //Archer
-            Focus = new MagicInfo { Spell = Spell.Focus, Icon = 88, Level1 = 7, Level2 = 9, Level3 = 11, Need1 = 100, Need2 = 200, Need3 = 300 };
-            StraightShot = new MagicInfo { Spell = Spell.StraightShot, Icon = 89, Level1 = 11, Level2 = 13, Level3 = 15, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 3, LevelCost = 2 };
+            Focus = new MagicInfo { Spell = Spell.Focus, Icon = 88, Level1 = 23, Level2 = 38, Level3 = 54, Need1 = 100, Need2 = 200, Need3 = 300 };
+            StraightShot = new MagicInfo { Spell = Spell.StraightShot, Icon = 89, Level1 = 12, Level2 = 15, Level3 = 18, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 3, LevelCost = 2 };
+            DoubleShot = new MagicInfo { Spell = Spell.DoubleShot, Icon = 90, Level1 = 15, Level2 = 19, Level3 = 23, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 3, LevelCost = 2 };
         }
 
         public MagicInfo()
@@ -334,12 +336,14 @@ namespace Server.MirDatabase
                     return 10;
                 case Spell.PoisonField:
                     return 40;
+                case Spell.Plague:
+                    return 10;
 
                 case Spell.StraightShot:
                     return 7;
+                case Spell.DoubleShot:
+                    return 4;
 
-                case Spell.Plague:
-                    return 10;
 
                 default:
                     return 0;
@@ -386,6 +390,8 @@ namespace Server.MirDatabase
 
                 case Spell.StraightShot:
                     return 3;
+                case Spell.DoubleShot:
+                    return 2;
 
                 case Spell.Plague:
                     return 8;

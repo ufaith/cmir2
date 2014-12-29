@@ -847,6 +847,15 @@ namespace Client.MirObjects
                                     GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
                                 }
                                 break;
+                            case Spell.DoubleShot:                          
+                                Frames.Frames.TryGetValue(MirAction.AttackRange2, out Frame);
+                                CurrentAction = MirAction.AttackRange2;
+                                if (this == User)
+                                {
+                                    MapControl.NextAction = CMain.Time + 1000;
+                                    GameScene.SpellTime = CMain.Time + 500; //Spell Delay
+                                }
+                                break;
                             default:
                                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
                                 break;
@@ -1918,7 +1927,6 @@ namespace Client.MirObjects
                         {
                             if (Cast)
                             {
-
                                 MapObject ob = MapControl.GetObject(TargetID);
 
                                 Missile missile;
@@ -1934,7 +1942,7 @@ namespace Client.MirObjects
                                             {
                                                 if (missile.Target.CurrentAction == MirAction.Dead) return;
                                                 missile.Target.Effects.Add(new Effect(Libraries.Magic3, 1370, 7, 600, missile.Target));
-                                                SoundManager.PlaySound(20000 + (ushort)Spell.SoulFireBall * 10 + 2);
+                                                SoundManager.PlaySound(20000 + (ushort)Spell.StraightShot * 10 + 2);
                                             };
                                         }
                                         break;
@@ -1953,6 +1961,28 @@ namespace Client.MirObjects
                         {
                             NextMotion += FrameInterval;
 
+                            Missile missile;
+                            switch (FrameIndex)
+                            {
+                                case 5:
+                                    switch(Spell)
+                                    {
+                                        case Spell.DoubleShot:
+                                            SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 0);
+                                            missile = CreateProjectile(1390, Libraries.Magic3, true, 5, 30, 5);
+
+                                            if (missile.Target != null)
+                                            {
+                                                missile.Complete += (o, e) =>
+                                                {
+                                                    if (missile.Target.CurrentAction == MirAction.Dead) return;
+                                                    SoundManager.PlaySound(20000 + (ushort)Spell.DoubleShot * 10 + 2);
+                                                };
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
                         }
                     }
                     if (WingEffect > 0 && CMain.Time >= NextMotion2)
@@ -2101,7 +2131,6 @@ namespace Client.MirObjects
                                             effect.SetStart(CMain.Time + i * 50);
                                             MapControl.Effects.Add(effect);
                                         }
-
 
                                         if (SpellLevel == 3)
                                         {

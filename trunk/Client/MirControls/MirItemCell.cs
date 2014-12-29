@@ -163,7 +163,7 @@ namespace Client.MirControls
         {
             if (Locked) return;
 
-            if (GameScene.PickedUpGold || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant) return;
+            if (GameScene.PickedUpGold || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant || GridType == MirGridType.QuestInventory || GridType == MirGridType.Fishing || GridType == MirGridType.Mount) return;
 
             base.OnMouseClick(e);
             
