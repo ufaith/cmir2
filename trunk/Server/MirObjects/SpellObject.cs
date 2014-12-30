@@ -49,8 +49,15 @@ namespace Server.MirObjects
         {
             if (Caster != null && Caster.Node == null) Caster = null;
 
-            if (Envir.Time > ExpireTime || (Spell == Spell.FireWall && Caster == null))
+            if (Envir.Time > ExpireTime || (Spell == Spell.FireWall && Caster == null) || (Spell == Spell.TrapHexagon))
             {
+                if (Spell == Spell.TrapHexagon)
+                {
+                    MonsterObject ob = (MonsterObject)Target;
+
+                    if (ob.ShockTime != 0) return;
+                }
+
                 if (Spell == Spell.Reincarnation)
                 {
                     Caster.ReincarnationReady = true;

@@ -1185,6 +1185,9 @@ namespace Client.MirScenes
                 case BuffType.Curse:
                     image.Index = 892;
                     break;
+                case BuffType.MoonLight:
+                    image.Index = 884;
+                    break;
             }
 
             if (text != "") GameScene.Scene.ChatDialog.ReceiveChat(text, ChatType.Hint);
@@ -1222,6 +1225,9 @@ namespace Client.MirScenes
                         break;
                     case BuffType.Curse:
                         image.Index = 892;
+                        break;
+                    case BuffType.MoonLight:
+                        image.Index = 884;
                         break;
                 }
 
@@ -5699,7 +5705,7 @@ namespace Client.MirScenes
                 direction = MouseDirection();
                 if (AutoRun)
                 {
-                    if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10)
+                    if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow)
                     {
                         User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount ? 3 : 2) };
                         return;
@@ -5760,7 +5766,7 @@ namespace Client.MirScenes
                             return;
                         }
 
-                        if (MapObject.MouseObject is MonsterObject && User.Class == MirClass.Archer && User.HasClassWeapon && !User.RidingMount) //ArcherTest - range attack
+                        if (MapObject.MouseObject is MonsterObject && User.Class == MirClass.Archer && MapObject.TargetObject != null && !MapObject.TargetObject.Dead && User.HasClassWeapon && !User.RidingMount) //ArcherTest - range attack
                         {
                             if (Functions.InRange(MapObject.MouseObject.CurrentLocation, User.CurrentLocation, 9))
                             {
@@ -5837,7 +5843,7 @@ namespace Client.MirScenes
                             }
                             return;
                         }
-                        if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10)
+                        if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow)
                         {
                             User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount ? 3 : 2) };
                             return;
@@ -5900,6 +5906,7 @@ namespace Client.MirScenes
 
             MapObject target = null;
 
+            bool selfCast = false;
 
             //Targeting
             switch (magic.Spell)
@@ -5983,6 +5990,9 @@ namespace Client.MirScenes
                             target = User.NextMagicObject;
                     }
                     break;
+                default:
+                    selfCast = true;
+                        break;
             }
 
 
@@ -5990,7 +6000,7 @@ namespace Client.MirScenes
 
             Point location = target != null ? target.CurrentLocation : User.NextMagicLocation;
 
-            if (!Functions.InRange(User.CurrentLocation, location, 9))
+            if (!Functions.InRange(User.CurrentLocation, location, 9) && !selfCast)
             {
                 if (CMain.Time >= OutputDelay)
                 {
@@ -14891,6 +14901,9 @@ namespace Client.MirScenes
                     break;
                 case BuffType.Curse:
                     text = string.Format("Cursed\nDecreases DC/MC/SC/ASpeed by: {0}%.\n", Value);
+                    break;
+                case BuffType.MoonLight:
+                    text = "MoonLight\nInvisible to many monsters and able to move.\n";
                     break;
             }
 

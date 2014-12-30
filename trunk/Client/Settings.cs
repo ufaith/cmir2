@@ -72,7 +72,7 @@ namespace Client
                              Password = "";
         public static bool
             SkillMode = false,
-            SkillBar = false,
+            SkillBar = true,
             SkillSet = true,
             Effect = true,
             DropView = true,

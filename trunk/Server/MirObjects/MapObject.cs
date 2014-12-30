@@ -291,6 +291,7 @@ namespace Server.MirObjects
                         {
                             MapObject ob = cell.Objects[i];
                             if (ob.ObjectID != targetID) continue;
+
                             return ob;
                         }
                     }
@@ -348,8 +349,11 @@ namespace Server.MirObjects
 
             switch (b.Type)
             {
+                case BuffType.MoonLight:
                 case BuffType.Hiding:
                     Hidden = true;
+
+                    if (b.Type == BuffType.MoonLight) Observer = true;
 
                     for (int y = CurrentLocation.Y - Globals.DataRange; y <= CurrentLocation.Y + Globals.DataRange; y++)
                     {
@@ -406,10 +410,7 @@ namespace Server.MirObjects
 
             CurrentMap.AddObject(this);
 
-            if (!Observer)
-            {
-                Broadcast(GetInfo());
-            }
+            Broadcast(GetInfo());
 
             if (effects) Broadcast(new S.ObjectTeleportIn { ObjectID = ObjectID, Type = effectnumber });
             
@@ -612,6 +613,7 @@ namespace Server.MirObjects
                 return false;
             }
         }
+
     }
 
     public class Poison
