@@ -913,6 +913,7 @@ public enum ClientPacketIds : short
     AcceptQuest,
     FinishQuest,
     AbandonQuest,
+    ShareQuest,
 
     AcceptReincarnation,
 }
@@ -2750,6 +2751,8 @@ public abstract class Packet
                 return new C.FinishQuest();
             case (short)ClientPacketIds.AbandonQuest:
                 return new C.AbandonQuest();
+            case (short)ClientPacketIds.ShareQuest:
+                return new C.ShareQuest();
             case (short)ClientPacketIds.AcceptReincarnation:
                 return new C.AcceptReincarnation();
             default:

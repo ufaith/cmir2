@@ -538,6 +538,10 @@ namespace Client.MirScenes.Dialogs
                 Sound = SoundList.ButtonA,
                 Visible = false
             };
+            _shareButton.Click += (o, e) =>
+            {
+                Network.Enqueue(new C.ShareQuest { QuestIndex = Quest.Id });
+            };
 
             _pauseButton = new MirButton
             {

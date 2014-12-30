@@ -4433,6 +4433,46 @@ namespace Server.MirObjects
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction);
             CurrentMap.ActionList.Add(action);
         }
+        private void TurnUndead(MapObject target, UserMagic magic)
+        {
+            if (target == null || !target.Undead || !target.IsAttackTarget(this)) return;
+            if (Envir.Random.Next(2) + Level - 1 <= target.Level)
+            {
+                if (target.Race == ObjectType.Monster) target.Target = this;
+                return;
+            }
+
+            int dif = Level - target.Level + 15;
+
+            if (Envir.Random.Next(100) >= (magic.Level + 1 << 3) + dif)
+            {
+                if (target.Race == ObjectType.Monster) target.Target = this;
+                return;
+            }
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, target);
+            ActionList.Add(action);
+
+        }
+        private void FlameDisruptor(MapObject target, UserMagic magic)
+        {
+            if (target == null || !target.IsAttackTarget(this)) return;
+
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            if (!target.Undead) damage = (int)(damage * 1.5F);
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, damage, target);
+
+            ActionList.Add(action);
+        }
+        private void ThunderStorm(UserMagic magic)
+        {
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation);
+            CurrentMap.ActionList.Add(action);
+        }
 
         private void Healing(MapObject target, UserMagic magic)
         {
@@ -4597,39 +4637,6 @@ namespace Server.MirObjects
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, value, location);
             CurrentMap.ActionList.Add(action);
         }
-        private void TurnUndead(MapObject target, UserMagic magic)
-        {
-            if (target == null || !target.Undead || !target.IsAttackTarget(this)) return;
-            if (Envir.Random.Next(2) + Level - 1 <= target.Level)
-            {
-                if (target.Race == ObjectType.Monster) target.Target = this;
-                return;
-            }
-
-            int dif = Level - target.Level + 15;
-
-            if (Envir.Random.Next(100) >= (magic.Level + 1 << 3) + dif)
-            {
-                if (target.Race == ObjectType.Monster) target.Target = this;
-                return;
-            }
-
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, target);
-            ActionList.Add(action);
-
-        }
-        private void FlameDisruptor(MapObject target, UserMagic magic)
-        {
-            if (target == null || !target.IsAttackTarget(this)) return;
-
-            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
-
-            if (!target.Undead) damage = (int)(damage * 1.5F);
-
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, damage, target);
-
-            ActionList.Add(action);
-        }
         private void Revelation(MapObject target, UserMagic magic)
         {
             if (target == null) return;
@@ -4641,20 +4648,6 @@ namespace Server.MirObjects
             ActionList.Add(action);
         }
 
-        private void HeavenlySword(UserMagic magic)
-        {
-            int damage = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
-
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction);
-            CurrentMap.ActionList.Add(action);
-        }
-        private void ThunderStorm(UserMagic magic)
-        {
-            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
-
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation);
-            CurrentMap.ActionList.Add(action);
-        }
         private void PoisonField(UserMagic magic, Point location, out bool cast)
         {
             cast = false;
@@ -4982,6 +4975,14 @@ namespace Server.MirObjects
             CurrentMap.ActionList.Add(action);
         }
 
+
+        private void HeavenlySword(UserMagic magic)
+        {
+            int damage = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction);
+            CurrentMap.ActionList.Add(action);
+        }
         private void MoonLight(UserMagic magic)
         {
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, GetAttackPower(MinAC, MaxAC) + (magic.Level + 1) * 5);
@@ -10168,40 +10169,35 @@ namespace Server.MirObjects
 
         #region Quests
 
-        public void AcceptQuest(uint npcIndex, int questIndex)
+        public bool AcceptQuest(int questIndex)
         {
-            NPCObject target = (NPCObject)FindObject(npcIndex, 10);
+            if (CurrentQuests.Exists(e => e.Info.Index == questIndex)) return false; //e.Info.NpcIndex == npcIndex && 
 
-            if (target == null)
+            //QuestInfo questInfo = target.Quests.FirstOrDefault(d => d.Index == questIndex);
+            QuestInfo info = Envir.QuestInfoList.FirstOrDefault(d => d.Index == questIndex);
+
+            if (info == null)
             {
-                ReceiveChat("Must be closer to the target to accept quest.", ChatType.System);
-                return;
+                return false;
             }
 
-            if (CurrentQuests.Exists(e => e.Info.NpcIndex == npcIndex && e.Info.Index == questIndex)) return;
-
-            QuestInfo questInfo = target.Quests.FirstOrDefault(d => d.Index == questIndex);
-
-            if (questInfo == null)
-            {
-                return;
-            }
-
-            if (!questInfo.CanAccept(this))
+            if (!info.CanAccept(this))
             {
                 //couldn't accept quest
-                return;
+                return false;
             }
+
+            //need to quest previous quests completed if chained
 
             if (CurrentQuests.Count >= Globals.MaxConcurrentQuests)
             {
                 ReceiveChat("Maximum amount of quests already taken.", ChatType.System);
-                return;
+                return false;
             }
 
-            if (questInfo.CarryItems.Count > 0)
+            if (info.CarryItems.Count > 0)
             {
-                foreach (QuestItemTask carryItem in questInfo.CarryItems)
+                foreach (QuestItemTask carryItem in info.CarryItems)
                 {
                     uint count = carryItem.Count;
 
@@ -10223,7 +10219,7 @@ namespace Server.MirObjects
                         if (!CanGainQuestItem(item))
                         {
                             RecalculateQuestBag();
-                            return;
+                            return false;
                         }
 
                         GainQuestItem(item);
@@ -10235,9 +10231,10 @@ namespace Server.MirObjects
 
             CurrentQuests.Add(quest);
             SendUpdateQuest(quest, QuestState.Add, true);
-            //SendQuestUpdate();
 
             CallDefaultNPC(DefaultNPCType.OnAcceptQuest, questIndex);
+
+            return true;
         }
         public void FinishQuest(int questIndex, int selectedItemIndex)
         {
@@ -10308,6 +10305,26 @@ namespace Server.MirObjects
             SendUpdateQuest(quest, QuestState.Remove);
 
             RecalculateQuestBag();
+        }
+        public void ShareQuest(int questIndex)
+        {
+            bool shared = false;
+
+            if (GroupMembers != null)
+            {
+                foreach (PlayerObject player in GroupMembers.
+                    Where(player => player.CurrentMap == CurrentMap &&
+                        Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) &&
+                        !player.Dead && player != this))
+                {
+                    if (player.AcceptQuest(questIndex)) shared = true;
+                }
+            }
+
+            if(!shared)
+            {
+                ReceiveChat("Quest could not be shared with anyone.", ChatType.System);
+            }
         }
 
         public void CheckNeedQuestKill(MonsterInfo mInfo)

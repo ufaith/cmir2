@@ -46,7 +46,6 @@ C:\Mir 2 Source\trunk SVN\Client\obj\Debug\Client.csprojResolveAssemblyReference
 C:\Mir 2\Client\Client.exe.config
 C:\Mir 2\Client\Client.exe
 C:\Mir 2\Client\Client.pdb
-C:\Mir 2 Source\Client\obj\Debug\Client.csprojResolveAssemblyReference.cache
 C:\Mir 2 Source\Client\obj\Debug\Client.CMain.resources
 C:\Mir 2 Source\Client\obj\Debug\Client.Properties.Resources.resources
 C:\Mir 2 Source\Client\obj\Debug\Client.csproj.GenerateResource.Cache
