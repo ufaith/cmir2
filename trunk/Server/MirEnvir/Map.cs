@@ -1353,6 +1353,8 @@ namespace Server.MirEnvir
                         }
                     }
 
+                    train = true;
+
                     break;
 
                 #endregion
@@ -1460,7 +1462,7 @@ namespace Server.MirEnvir
                                                     poison = PoisonType.Slow;
                                                     break;
                                                 case 1:
-                                                    poison = PoisonType.Paralysis;
+                                                    poison = PoisonType.Frozen;
                                                     break;
                                                 case 2:
                                                     poison = (PoisonType)data[4];
@@ -1500,7 +1502,6 @@ namespace Server.MirEnvir
 
             if (train)
                 player.LevelMagic(magic);
-
 
         }
 

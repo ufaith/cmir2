@@ -415,6 +415,9 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.AbandonQuest:
                     AbandonQuest((C.AbandonQuest)p);
                     break;
+                case (short)ClientPacketIds.ShareQuest:
+                    ShareQuest((C.ShareQuest)p);
+                    break;
                 case (short)ClientPacketIds.AcceptReincarnation:
                     Revive();
                     break;
@@ -1058,7 +1061,7 @@ namespace Server.MirNetwork
         {
             if (Stage != GameStage.Game) return;
 
-            Player.AcceptQuest(p.NPCIndex, p.QuestIndex);
+            Player.AcceptQuest(p.QuestIndex); //p.NPCIndex,
         }
 
         private void FinishQuest(C.FinishQuest p)
@@ -1073,6 +1076,13 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.AbandonQuest(p.QuestIndex);
+        }
+
+        private void ShareQuest(C.ShareQuest p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.ShareQuest(p.QuestIndex);
         }
 
         private void Revive()

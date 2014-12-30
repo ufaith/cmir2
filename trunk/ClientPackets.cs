@@ -1251,6 +1251,22 @@ namespace ClientPackets
         }
     }
 
+    public sealed class ShareQuest : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.ShareQuest; } }
+
+        public int QuestIndex;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            QuestIndex = reader.ReadInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(QuestIndex);
+        }
+    }
+
     public sealed class AcceptReincarnation : Packet
     {
         public override short Index { get { return (short)ClientPacketIds.AcceptReincarnation; } }
