@@ -1283,6 +1283,8 @@ namespace Server.MirEnvir
                     value = (int)data[2];
                     location = (Point)data[3];
 
+                    MonsterObject centerTarget = null;
+
                     for (int y = location.Y - 1; y <= location.Y + 1; y++)
                     {
                         if (y < 0) continue;
@@ -1300,6 +1302,12 @@ namespace Server.MirEnvir
                             for (int i = 0; i < cell.Objects.Count; i++)
                             {
                                 MapObject target = cell.Objects[i];
+
+                                if (y == location.Y && x == location.X && target.Race == ObjectType.Monster)
+                                {
+                                    centerTarget = (MonsterObject)target;
+                                }
+
                                 switch (target.Race)
                                 {
                                     case ObjectType.Monster:
@@ -1313,6 +1321,35 @@ namespace Server.MirEnvir
                                 }
                             }
 
+                        }
+                    }
+
+                    if (centerTarget != null)
+                    {
+                        for (byte i = 0; i < 8; i += 2)
+                        {
+                            Point startpoint = Functions.PointMove(location, (MirDirection)i, 2);
+                            for (byte j = 0; j <= 4; j += 4)
+                            {
+                                MirDirection spawndirection = i == 0 || i == 4 ? MirDirection.Right : MirDirection.Up;
+                                Point spawnpoint = Functions.PointMove(startpoint, spawndirection + j, 1);
+                                if (spawnpoint.X <= 0 || spawnpoint.X > centerTarget.CurrentMap.Width) continue;
+                                if (spawnpoint.Y <= 0 || spawnpoint.Y > centerTarget.CurrentMap.Height) continue;
+                                SpellObject ob = new SpellObject
+                                {
+                                    Spell = Spell.TrapHexagon,
+                                    ExpireTime = Envir.Time + value,
+                                    TickSpeed = 100,
+                                    Caster = player,
+                                    CurrentLocation = spawnpoint,
+                                    CastLocation = location,
+                                    CurrentMap = centerTarget.CurrentMap,
+                                    Target = centerTarget,
+                                };
+
+                                centerTarget.CurrentMap.AddObject(ob);
+                                ob.Spawned();
+                            }
                         }
                     }
 
@@ -1367,8 +1404,84 @@ namespace Server.MirEnvir
                                         //Only targets
                                         if (target.IsAttackTarget(player))
                                         {
+                                            target.ApplyPoison(new Poison { PType = PoisonType.Slow, Duration = value, TickSpeed = 1000, Value = value2 }, player);
                                             target.AddBuff(new Buff { Type = type, Caster = player, ExpireTime = Envir.Time + value * 1000, Value = value2 });
                                             target.OperateTime = 0;
+                                            train = true;
+                                        }
+                                        break;
+                                }
+                            }
+
+                        }
+
+                    }
+
+                    break;
+
+                #endregion
+
+                #region Plague
+
+                case Spell.Plague:
+                    value = (int)data[2];
+                    location = (Point)data[3];
+
+                    for (int y = location.Y - 3; y <= location.Y + 3; y++)
+                    {
+                        if (y < 0) continue;
+                        if (y >= Height) break;
+
+                        for (int x = location.X - 3; x <= location.X + 3; x++)
+                        {
+                            if (x < 0) continue;
+                            if (x >= Width) break;
+
+                            cell = GetCell(x, y);
+
+                            if (!cell.Valid || cell.Objects == null) continue;
+
+                            for (int i = 0; i < cell.Objects.Count; i++)
+                            {
+                                MapObject target = cell.Objects[i];
+                                switch (target.Race)
+                                {
+                                    case ObjectType.Monster:
+                                    case ObjectType.Player:
+                                        //Only targets
+                                        if (target.IsAttackTarget(player))
+                                        {
+                                            int chance = Envir.Random.Next(6);
+                                            PoisonType poison;
+
+                                            switch (chance)
+                                            {
+                                                case 0:
+                                                    poison = PoisonType.Slow;
+                                                    break;
+                                                case 1:
+                                                    poison = PoisonType.Paralysis;
+                                                    break;
+                                                case 2:
+                                                    poison = (PoisonType)data[4];
+                                                    break;
+                                                default:
+                                                    poison = PoisonType.None;
+                                                    break;
+                                            }
+
+                                            int tempValue = value + (magic.Level + 1) * 2;
+
+                                            if (poison != PoisonType.None)
+                                                target.ApplyPoison(new Poison { PType = poison, Duration = value + (magic.Level + 1) * 5, TickSpeed = 1000, Value = tempValue }, player);
+
+                                            if (target.Race == ObjectType.Player)
+                                            {
+                                                PlayerObject tempOb = (PlayerObject)target;
+
+                                                tempOb.ChangeMP(-tempValue);
+                                            }
+
                                             train = true;
                                         }
                                         break;
@@ -1393,7 +1506,6 @@ namespace Server.MirEnvir
 
         public void AddObject(MapObject ob)
         {
-            //  Objects.Add(ob);
             if (ob.Race == ObjectType.Player) Players.Add((PlayerObject)ob);
             if (ob.Race == ObjectType.Merchant) NPCs.Add((NPCObject)ob);
 

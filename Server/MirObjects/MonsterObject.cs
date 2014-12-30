@@ -195,7 +195,7 @@ namespace Server.MirObjects
 
         public const int RegenDelay = 10000, EXPOwnerDelay = 5000, DeadDelay = 180000, SearchDelay = 3000, RoamDelay = 1000, HealDelay = 600, RevivalDelay = 2000;
         public long ActionTime, MoveTime, AttackTime, RegenTime, DeadTime, SearchTime, RoamTime, HealTime;
-        public long ShockTime, RageTime;
+        public long ShockTime, RageTime, HallucinationTime;
 
         public byte PetLevel;
         public uint PetExperience;
@@ -378,12 +378,14 @@ namespace Server.MirObjects
                         byte rMaxDC = (byte)(((int)MaxDC / 100) * buff.Value);
                         byte rMaxMC = (byte)(((int)MaxMC / 100) * buff.Value);
                         byte rMaxSC = (byte)(((int)MaxSC / 100) * buff.Value);
-                        byte rASpeed = (byte)(((int)ASpeed / 100) * buff.Value);
+                        sbyte rASpeed = (sbyte)(((int)ASpeed / 100) * buff.Value);
+                        ushort rMSpeed = (ushort)((MoveSpeed / 100) * buff.Value);
 
                         MaxDC = (byte)Math.Max(byte.MinValue, MaxDC - rMaxDC);
                         MaxMC = (byte)Math.Max(byte.MinValue, MaxMC - rMaxMC);
                         MaxSC = (byte)Math.Max(byte.MinValue, MaxSC - rMaxSC);
                         ASpeed = (sbyte)Math.Min(sbyte.MaxValue, (Math.Max(sbyte.MinValue, ASpeed - rASpeed)));
+                        MoveSpeed = (ushort)Math.Max(ushort.MinValue, MoveSpeed - rMSpeed);
                         break;
                 }
 
@@ -423,6 +425,9 @@ namespace Server.MirObjects
                 colour = Color.Peru;
             else if (Envir.Time < RageTime)
                 colour = Color.Red;
+
+            if (Envir.Time < HallucinationTime)
+                colour = Color.MediumOrchid;
 
             if (colour == NameColour || !send) return;
 
@@ -704,6 +709,9 @@ namespace Server.MirObjects
             if (RageTime < time && RageTime > Envir.Time)
                 time = RageTime;
 
+            if (HallucinationTime < time && HallucinationTime > Envir.Time)
+                time = HallucinationTime;
+
             if (ActionTime < time && ActionTime > Envir.Time)
                 time = ActionTime;
 
@@ -853,6 +861,14 @@ namespace Server.MirObjects
                     case PoisonType.Stun:
                         PoisonRate -= 0.5F;
                         break;
+                    case PoisonType.Slow:
+                        MoveSpeed += 100;
+ 
+                        if (poison.Time >= poison.Duration)
+                        {
+                            MoveSpeed = Info.MoveSpeed;
+                        }
+                        break;
                 }
 
                 if ((int)type < (int)poison.PType)
@@ -880,6 +896,7 @@ namespace Server.MirObjects
 
                 switch (buff.Type)
                 {
+                    case BuffType.MoonLight:
                     case BuffType.Hiding:
                         Hidden = false;
                         break;
@@ -1048,7 +1065,7 @@ namespace Server.MirObjects
                                 case ObjectType.Player:
                                     PlayerObject playerob = (PlayerObject)ob;
                                     if (!ob.IsAttackTarget(this)) continue;
-                                    if (playerob.GMGameMaster || ob.Hidden && (!CoolEye || Level < ob.Level)) continue;
+                                    if (playerob.GMGameMaster || ob.Hidden && (!CoolEye || Level < ob.Level) || Envir.Time < HallucinationTime) continue;
                                     Target = ob;
                                     return;
                                 default:
@@ -1226,7 +1243,7 @@ namespace Server.MirObjects
         protected virtual void Attack()
         {
             ShockTime = 0;
-
+            
             if (!Target.IsAttackTarget(this))
             {
                 Target = null;
@@ -1455,6 +1472,8 @@ namespace Server.MirObjects
                     return true;
             }
 
+            if (Envir.Time < attacker.HallucinationTime) return true;
+
             return Envir.Time < attacker.RageTime;
         }
         public override bool IsFriendlyTarget(PlayerObject ally)
@@ -1547,12 +1566,18 @@ namespace Server.MirObjects
             if (attacker.HasParalysisRing && 1 == Envir.Random.Next(1, 15))
                 ApplyPoison(new Poison { PType = PoisonType.Paralysis, Duration = 5, TickSpeed = 1000 }, attacker);
             byte LevelOffset = (byte)(Level > attacker.Level ? 0 : Math.Min(10, attacker.Level - Level));
-            if (attacker.Freezing > 0)
+
+            if (attacker.Freezing > 0 && type != DefenceType.MAC && type != DefenceType.MACAgility)
+            {
                 if ((Envir.Random.Next(Settings.FreezingAttackWeight) < attacker.Freezing) && (Envir.Random.Next(LevelOffset) == 0))
                     ApplyPoison(new Poison { PType = PoisonType.Slow, Duration = Math.Min(10, (3 + Envir.Random.Next(attacker.Freezing))), TickSpeed = 1000 }, attacker);
+            }
+
             if (attacker.PoisonAttack > 0)
+            {
                 if ((Envir.Random.Next(Settings.PoisonAttackWeight) < attacker.PoisonAttack) && (Envir.Random.Next(LevelOffset) == 0))
                     ApplyPoison(new Poison { PType = PoisonType.Green, Duration = 5, TickSpeed = 1000, Value = Math.Min(10, 3 + Envir.Random.Next(attacker.PoisonAttack)) }, attacker);
+            }
 
             Broadcast(new S.ObjectStruck { ObjectID = ObjectID, AttackerID = attacker.ObjectID, Direction = Direction, Location = CurrentLocation });
 

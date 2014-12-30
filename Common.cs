@@ -237,6 +237,7 @@ public enum MirAction : byte
     Revive,
     SitDown,
     Mine,
+    Sneek,
 
     WalkingBow,
     RunningBow,
@@ -662,7 +663,8 @@ public enum BuffType : byte
     UltimateEnhancer,
     ProtectionField,
     Rage,
-    Curse
+    Curse,
+    MoonLight
 }
 
 public enum DefenceType : byte

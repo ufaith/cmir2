@@ -141,7 +141,8 @@ namespace Server.MirObjects.Monsters
             HP = 0;
             Dead = true;
 
-            DeadTime = Envir.Time + DeadDelay;
+            //DeadTime = Envir.Time + DeadDelay;
+            DeadTime = 0;
 
             Broadcast(new S.ObjectDied { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation, Type = (byte)(Master != null ? 1 : 0) });
 

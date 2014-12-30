@@ -324,6 +324,7 @@ namespace Client.MirObjects
                             case MirAction.Attack2:
                             case MirAction.Attack3:
                             case MirAction.Attack4:
+                            case MirAction.Sneek:
                                 AltAnim = true;
                                 break;
                         }
@@ -519,6 +520,7 @@ namespace Client.MirObjects
                 case MirAction.Pushed:
                 case MirAction.DashL:
                 case MirAction.DashR:
+                case MirAction.Sneek:
                     if (Frame == null)
                     {
                         OffSetMove = Point.Empty;
@@ -643,6 +645,7 @@ namespace Client.MirObjects
                     case MirAction.Pushed:
                     case MirAction.DashL:
                     case MirAction.DashR:
+                    case MirAction.Sneek:
                         return;
                 }
             }
@@ -769,6 +772,7 @@ namespace Client.MirObjects
                     case MirAction.Pushed:
                     case MirAction.DashL:
                     case MirAction.DashR:
+                    case MirAction.Sneek:
                         var steps = 0;
                         if (CurrentAction == MirAction.MountRunning) steps = 3;
                         else if (CurrentAction == MirAction.Running) steps = 2;
@@ -881,6 +885,12 @@ namespace Client.MirObjects
                     }
                 }
 
+                //Assassin Moonlight sneekyness
+                if (Hidden && Class == MirClass.Assassin && CurrentAction == MirAction.Walking)
+                {
+                    Frames.Frames.TryGetValue(MirAction.Sneek, out Frame);
+                }
+
                 SetLibraries(); //ArcherTest - calls after every cycle to refresh libraries
 
                 FrameIndex = 0;
@@ -908,6 +918,7 @@ namespace Client.MirObjects
                             break;
                         case MirAction.Walking:
                         case MirAction.MountWalking:
+                        case MirAction.Sneek:
                             Network.Enqueue(new C.Walk { Direction = Direction });
                             GameScene.Scene.MapControl.FloorValid = false;
                             GameScene.CanRun = true;
@@ -1060,6 +1071,7 @@ namespace Client.MirObjects
                     case MirAction.Running:
                     case MirAction.MountWalking:
                     case MirAction.MountRunning:
+                    case MirAction.Sneek:
                         GameScene.Scene.Redraw();
                         break;
                     case MirAction.Attack1:
@@ -1571,14 +1583,6 @@ namespace Client.MirObjects
 
                             #endregion
 
-                            #region Plague
-
-                            case Spell.Plague:
-                                Effects.Add(new Effect(Libraries.Magic3, 110, 10, 800, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
-                                break;
-
-                            #endregion
                         }
 
 
@@ -1633,6 +1637,7 @@ namespace Client.MirObjects
                 case MirAction.Running:
                 case MirAction.MountWalking:
                 case MirAction.MountRunning:
+                case MirAction.Sneek:
                     if (!GameScene.CanMove) return;
 
                     GameScene.Scene.MapControl.TextureValid = false;
@@ -2380,14 +2385,6 @@ namespace Client.MirObjects
 
                                     #endregion
 
-                                    //#region TrapHexagon
-
-                                    //case Spell.TrapHexagon:
-                                    //    missile = CreateProjectile(1160, Libraries.Magic, true, 3, 48, 7);
-                                    //    break;
-
-                                    //#endregion
-
                                     #region Lightning
 
                                     case Spell.Lightning:
@@ -2421,7 +2418,14 @@ namespace Client.MirObjects
                                     #region PoisonField
 
                                     case Spell.PoisonField:
-                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                        missile = CreateProjectile(1160, Libraries.Magic, true, 3, 30, 7);
+                                        missile.Explode = true;
+
+                                        missile.Complete += (o, e) =>
+                                            {
+                                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                            };
+
                                         break;
 
                                     #endregion
@@ -2474,12 +2478,23 @@ namespace Client.MirObjects
                                     #region Plague
 
                                     case Spell.Plague:
-                                        if (ob != null && ob != User)
-                                            ob.Effects.Add(new Effect(Libraries.Magic3, 110, 10, 800, ob));
+                                        //SoundManager.PlaySound(20000 + (ushort)Spell.SoulShield * 10);
+                                        missile = CreateProjectile(1160, Libraries.Magic, true, 3, 30, 7);
+                                        missile.Explode = true;
+
+                                        missile.Complete += (o, e) =>
+                                        {
+                                            MapControl.Effects.Add(new Effect(Libraries.Magic3, 110, 10, 1200, TargetPoint));
+                                            SoundManager.PlaySound(20000 + (ushort)Spell.Plague * 10 + 3);
+                                        };
                                         break;
 
                                     #endregion
 
+                                    case Spell.TrapHexagon:
+                                        if (ob != null)
+                                        SoundManager.PlaySound(20000 + (ushort)Spell.TrapHexagon * 10 + 1);
+                                        break;
                                 }
 
 
