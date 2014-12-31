@@ -179,7 +179,7 @@ namespace Server.MirObjects
         }
 
         public const long TurnDelay = 350, MoveDelay = 600, HarvestDelay = 350, RegenDelay = 10000, PotDelay = 200, HealDelay = 600, DuraDelay = 10000, VampDelay = 500, LoyaltyDelay = 1000, FishingCastDelay = 750, FishingDelay = 200;
-        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, DecreaseLoyaltyTime, IncreaseLoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, PoisonFieldTime, FishingTime;
+        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, DecreaseLoyaltyTime, IncreaseLoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, FishingTime;
 
         public bool MagicShield;
         public byte MagicShieldLv;
@@ -211,7 +211,7 @@ namespace Server.MirObjects
         public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();
 
         public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
-        public long FlamingSwordTime;
+        public long FlamingSwordTime, PoisonFieldTime;
         public bool ActiveBlizzard, ActiveReincarnation, ReincarnationReady;
         public PlayerObject ReincarnationTarget;
         public long ReincarnationExpireTime;
@@ -416,10 +416,6 @@ namespace Server.MirObjects
                 UpdateFish();
             }
 
-            if (HasClearRing)
-                AddBuff(new Buff { Type = BuffType.Hiding, Caster = this, ExpireTime = Envir.Time + 1, Infinite = true });
-
-
             for (int i = Pets.Count() - 1; i >= 0; i--)
             {
                 if (Pets[i].Dead)
@@ -427,6 +423,7 @@ namespace Server.MirObjects
             }
 
             ProcessBuffs();
+            ProcessInfiniteBuffs();
             ProcessRegen();
             ProcessPoison();
 
@@ -474,11 +471,19 @@ namespace Server.MirObjects
 
             RefreshNameColour();
 
+
+            //if (HasClearRing)
+            //    AddBuff(new Buff { Type = BuffType.Hiding, Caster = this, ExpireTime = Envir.Time + 1, Infinite = true });
+
+
+
         }
         public override void SetOperateTime()
         {
             OperateTime = Envir.Time;
         }
+
+        public bool RefreshInfiniteBuffs = false;
 
         private void ProcessBuffs()
         {
@@ -489,7 +494,7 @@ namespace Server.MirObjects
                 Buff buff = Buffs[i];
 
                 if (Envir.Time <= buff.ExpireTime) continue;
-                //if (buff.Infinite) continue;
+                if (buff.Infinite) continue;
 
                 Buffs.RemoveAt(i);
                 Enqueue(new S.RemoveBuff { Type = buff.Type });
@@ -508,6 +513,41 @@ namespace Server.MirObjects
 
             if (refresh) RefreshStats();
         }
+
+        private void ProcessInfiniteBuffs()
+        {
+            bool hiding = false;
+
+            for (int i = Buffs.Count - 1; i >= 0; i--)
+            {
+                Buff buff = Buffs[i];
+
+                if (!buff.Infinite) continue;
+
+                bool removeBuff = false;
+
+                switch (buff.Type)
+                {
+                    case BuffType.Hiding:
+                        hiding = true;
+                        if (!HasClearRing) removeBuff = true;
+                        break;
+                }
+
+                if (removeBuff)
+                {
+                    Buffs.RemoveAt(i);
+                    Enqueue(new S.RemoveBuff { Type = buff.Type });
+                }
+            }
+
+            if(HasClearRing && !hiding)
+            {
+                AddBuff(new Buff { Type = BuffType.Hiding, Caster = this, ExpireTime = Envir.Time + 100, Infinite = true });
+            }
+        }
+
+        
         private void ProcessRegen()
         {
             if (Dead) return;
@@ -1268,7 +1308,6 @@ namespace Server.MirObjects
             GetMapInfo();
             GetUserInfo();
             GetQuestInfo();
-            //SendQuestUpdate();
 
             GetCompletedQuests();
 
@@ -1820,6 +1859,8 @@ namespace Server.MirObjects
             {
                 RefreshMount();
             }
+
+            RefreshInfiniteBuffs = true;
         }
 
         private void RefreshItemSetStats()
@@ -3898,7 +3939,7 @@ namespace Server.MirObjects
             ChangeMP(-cost);
 
             Direction = dir;
-            if (spell != Spell.ShoulderDash)
+            if (spell != Spell.ShoulderDash && spell != Spell.BackStep)//ArcherSpells - Backstep
                 Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
 
             MapObject target = null;
@@ -4071,6 +4112,9 @@ namespace Server.MirObjects
                 case Spell.MoonLight:
                     MoonLight(magic);
                     break;
+                case Spell.BackStep://ArcherSpells - Backstep
+                    BackStep(magic);
+                    return;
                 default:
                     cast = false;
                     break;
@@ -5006,6 +5050,58 @@ namespace Server.MirObjects
             ActionList.Add(action);
 
             return true;
+        }
+        private void BackStep(UserMagic magic)//ArcherSpells - Backstep
+        {
+            ActionTime = Envir.Time;
+            if (!CanWalk) return;
+
+            int travel = 0;
+            bool blocked = false;
+            int jumpDistance = (magic.Level == 0) ? 1 : magic.Level;//3 max
+            MirDirection jumpDir = Functions.ReverseDirection(Direction);
+            Point location = CurrentLocation;
+            for (int i = 0; i < jumpDistance; i++)
+            {
+                location = Functions.PointMove(location, jumpDir, 1);
+                if (!CurrentMap.ValidPoint(location)) break;
+
+                Cell cInfo = CurrentMap.GetCell(location);
+                if (cInfo.Objects != null)
+                    for (int c = 0; c < cInfo.Objects.Count; c++)
+                    {
+                        MapObject ob = cInfo.Objects[c];
+                        if (!ob.Blocking) continue;
+                        blocked = true;
+                        if ((cInfo.Objects == null) || blocked) break;
+                    }
+                if (blocked) break;
+                travel++;
+            }
+
+            jumpDistance = travel;
+            if (jumpDistance > 0)
+            {
+                for (int i = 0; i < jumpDistance; i++)
+                {
+                    location = Functions.PointMove(CurrentLocation, jumpDir, 1);
+                    CurrentMap.GetCell(CurrentLocation).Remove(this);
+                    RemoveObjects(jumpDir, 1);
+                    CurrentLocation = location;
+                    CurrentMap.GetCell(CurrentLocation).Add(this);
+                    AddObjects(jumpDir, 1);
+                }
+                Enqueue(new S.UserBackStep { Direction = Direction, Location = location });
+                Broadcast(new S.ObjectBackStep { ObjectID = ObjectID, Direction = Direction, Location = location, Distance = jumpDistance });
+                LevelMagic(magic);
+            }
+            else
+            {
+                Broadcast(new S.ObjectBackStep { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation, Distance = jumpDistance });
+                ReceiveChat("Not enough jumping power.", ChatType.System);
+            }
+
+            CellTime = Envir.Time + 500;
         }
 
         private void CompleteMagic(IList<object> data)
@@ -10173,26 +10269,25 @@ namespace Server.MirObjects
         {
             if (CurrentQuests.Exists(e => e.Info.Index == questIndex)) return false; //e.Info.NpcIndex == npcIndex && 
 
-            //QuestInfo questInfo = target.Quests.FirstOrDefault(d => d.Index == questIndex);
             QuestInfo info = Envir.QuestInfoList.FirstOrDefault(d => d.Index == questIndex);
 
-            if (info == null)
+            if (info == null || !info.CanAccept(this))
             {
                 return false;
             }
-
-            if (!info.CanAccept(this))
-            {
-                //couldn't accept quest
-                return false;
-            }
-
-            //need to quest previous quests completed if chained
 
             if (CurrentQuests.Count >= Globals.MaxConcurrentQuests)
             {
                 ReceiveChat("Maximum amount of quests already taken.", ChatType.System);
                 return false;
+            }
+
+            //check previous chained quests have been completed
+            QuestInfo tempInfo = info;
+            while (tempInfo != null && tempInfo.RequiredQuest != 0)
+            {
+                if (!CompletedQuests.Contains(tempInfo.RequiredQuest)) return false;
+                tempInfo = Envir.QuestInfoList.FirstOrDefault(d => d.Index == tempInfo.RequiredQuest);
             }
 
             if (info.CarryItems.Count > 0)

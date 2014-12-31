@@ -3733,4 +3733,60 @@ namespace ServerPackets
 
     }
 
+    public sealed class UserBackStep : Packet//ArcherSpells - Backstep
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.UserBackStep; }
+        }
+
+        public Point Location;
+        public MirDirection Direction;
+
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Location = new Point(reader.ReadInt32(), reader.ReadInt32());
+            Direction = (MirDirection)reader.ReadByte();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Location.X);
+            writer.Write(Location.Y);
+            writer.Write((byte)Direction);
+        }
+    }
+
+    public sealed class ObjectBackStep : Packet//ArcherSpells - Backstep
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.ObjectBackStep; }
+        }
+
+        public uint ObjectID;
+        public Point Location;
+        public MirDirection Direction;
+        public int Distance;
+
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Location = new Point(reader.ReadInt32(), reader.ReadInt32());
+            Direction = (MirDirection)reader.ReadByte();
+            Distance = reader.ReadInt16();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Location.X);
+            writer.Write(Location.Y);
+            writer.Write((byte)Direction);
+            writer.Write(Distance);
+        }
+    }
+
 }

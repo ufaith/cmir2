@@ -64,6 +64,7 @@ namespace Client.MirObjects
 
         public Spell Spell;
         public byte SpellLevel;
+        public int JumpDistance;//ArcherSpells - Backstep
         public bool Cast;
         public uint TargetID;
         public Point TargetPoint;
@@ -215,6 +216,9 @@ namespace Client.MirObjects
                                 break;
                         }
                     }
+
+                    if (CurrentAction == MirAction.Jump) AltAnim = true;
+
                     #endregion
 
                     #region Armours
@@ -521,6 +525,7 @@ namespace Client.MirObjects
                 case MirAction.DashL:
                 case MirAction.DashR:
                 case MirAction.Sneek:
+                case MirAction.Jump://ArcherSpells - Backstep
                     if (Frame == null)
                     {
                         OffSetMove = Point.Empty;
@@ -532,6 +537,8 @@ namespace Client.MirObjects
                     if (CurrentAction == MirAction.MountRunning) i = 3;
                     else if (CurrentAction == MirAction.Running) i = 2;
                     else i = 1;
+
+                    if (CurrentAction == MirAction.Jump) i = -JumpDistance;//ArcherSpells - Backstep
 
                     Movement = Functions.PointMove(CurrentLocation, Direction, CurrentAction == MirAction.Pushed ? 0 : -i);
 
@@ -646,6 +653,7 @@ namespace Client.MirObjects
                     case MirAction.DashL:
                     case MirAction.DashR:
                     case MirAction.Sneek:
+                    case MirAction.Jump://ArcherSpells - Backstep
                         return;
                 }
             }
@@ -781,6 +789,9 @@ namespace Client.MirObjects
                         temp = Functions.PointMove(CurrentLocation, Direction, CurrentAction == MirAction.Pushed ? 0 : -steps);
 
                         break;
+                    case MirAction.Jump://ArcherSpells - Backstep
+                        temp = Functions.PointMove(CurrentLocation, Direction, JumpDistance);
+                        break;
                     default:
                         temp = CurrentLocation;
                         break;
@@ -812,6 +823,9 @@ namespace Client.MirObjects
                         Frames.Frames.TryGetValue(RidingMount ? MirAction.MountStanding : MirAction.Standing, out Frame);
                         //Frames.Frames.TryGetValue(MirAction.Standing, out Frame);
                         //CanSetAction = false;
+                        break;
+                    case MirAction.Jump://ArcherSpells - Backstep
+                        Frames.Frames.TryGetValue(MirAction.Jump, out Frame);
                         break;
                     case MirAction.Attack4:
                         Spell = (Spell)action.Params[0];
@@ -858,6 +872,19 @@ namespace Client.MirObjects
                                 {
                                     MapControl.NextAction = CMain.Time + 1000;
                                     GameScene.SpellTime = CMain.Time + 500; //Spell Delay
+                                }
+                                break;
+                            case Spell.BackStep://ArcherSpells - Backstep
+                                int sLevel = (byte)action.Params[3];
+                                GetBackStepDistance(sLevel);
+                                Frames.Frames.TryGetValue(MirAction.Jump, out Frame);
+                                CurrentAction = MirAction.Jump;
+                                CurrentLocation = Functions.PointMove(CurrentLocation, Functions.ReverseDirection(Direction), JumpDistance);
+                                if (this == User)
+                                {
+                                    MapControl.NextAction = CMain.Time + 800;
+                                    GameScene.SpellTime = CMain.Time + 2500; //Spell Delay
+                                    Network.Enqueue(new C.Magic { Spell = Spell, Direction = Direction, });
                                 }
                                 break;
                             default:
@@ -936,6 +963,7 @@ namespace Client.MirObjects
                             break;
                         case MirAction.DashL:
                         case MirAction.DashR:
+                        case MirAction.Jump://ArcherSpells - Backstep
                             GameScene.Scene.MapControl.FloorValid = false;
                             //CanSetAction = false;
                             break;
@@ -1058,6 +1086,7 @@ namespace Client.MirObjects
                         GameScene.Scene.Redraw();
                         break;
                     case MirAction.DashL:
+                    case MirAction.Jump://ArcherSpells - Backstep
                         FrameIndex = 0;
                         EffectFrameIndex = 0;
                         GameScene.Scene.Redraw();
@@ -1676,6 +1705,25 @@ namespace Client.MirObjects
                             NextMotion2 += EffectFrameInterval;
                     }
                     break;
+                    case MirAction.Jump://ArcherSpells - Backstep
+                    if (!GameScene.CanMove) return;
+                    GameScene.Scene.MapControl.TextureValid = false;
+                    if (this == User) GameScene.Scene.MapControl.FloorValid = false;
+                    if (SkipFrames) UpdateFrame();
+                    if (UpdateFrame() >= Frame.Count)
+                    {
+                        FrameIndex = Frame.Count - 1;
+                        SetAction();
+                    }
+                    else
+                    {
+                        if (this == User)
+                        {
+                            if (FrameIndex == 1 || FrameIndex == 7)
+                                PlayStepSound();
+                        }
+                    }
+                    break;
                 case MirAction.DashL:
                     if (!GameScene.CanMove) return;
 
@@ -1967,21 +2015,22 @@ namespace Client.MirObjects
                             NextMotion += FrameInterval;
 
                             Missile missile;
-                            switch (FrameIndex)
+                            //ArcherSpells - Doubleshot
+                            switch(Spell)
                             {
-                                case 5:
-                                    switch(Spell)
+                                case Spell.DoubleShot:
+                                    switch (FrameIndex)
                                     {
-                                        case Spell.DoubleShot:
-                                            SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 0);
-                                            missile = CreateProjectile(1390, Libraries.Magic3, true, 5, 30, 5);
-
+                                        case 7:
+                                        case 5:
+                                            missile = CreateProjectile(1030, Libraries.Magic3, true, 5, 30, 5);//normal arrow
+                                            StanceTime = CMain.Time + StanceDelay;
+                                            SoundManager.PlaySound(20000 + 121 * 10);
                                             if (missile.Target != null)
                                             {
                                                 missile.Complete += (o, e) =>
                                                 {
-                                                    if (missile.Target.CurrentAction == MirAction.Dead) return;
-                                                    SoundManager.PlaySound(20000 + (ushort)Spell.DoubleShot * 10 + 2);
+                                                    SoundManager.PlaySound(20000 + 121 * 10 + 2);
                                                 };
                                             }
                                             break;
@@ -3039,6 +3088,37 @@ namespace Client.MirObjects
         public void DrawMount()
         {
             MountLibrary.Draw(DrawFrame - 416 + MountOffset, DrawLocation, DrawColour, true);
+        }
+
+        public void GetBackStepDistance(int magicLevel)//ArcherSpells - Backstep
+        {
+            JumpDistance = 0;
+            if (InTrapRock) return;
+
+            int travel = 0;
+            bool blocked = false;
+            int dist = (magicLevel == 0) ? 1 : magicLevel;//3 max
+            MirDirection jumpDir = Functions.ReverseDirection(Direction);
+
+            Point location = CurrentLocation;
+            for (int i = 0; i < dist; i++)//step 1t/m3
+            {
+                location = Functions.PointMove(location, jumpDir, 1);
+                if (!GameScene.Scene.MapControl.ValidPoint(location)) break;
+
+                CellInfo cInfo = GameScene.Scene.MapControl.M2CellInfo[location.X, location.Y];
+                if (cInfo.CellObjects != null)
+                    for (int c = 0; c < cInfo.CellObjects.Count; c++)
+                    {
+                        MapObject ob = cInfo.CellObjects[c];
+                        if (!ob.Blocking) continue;
+                        blocked = true;
+                        if ((cInfo.CellObjects == null) || blocked) break;
+                    }
+                if (blocked) break;
+                travel++;
+            }
+            JumpDistance = travel;
         }
 
 
