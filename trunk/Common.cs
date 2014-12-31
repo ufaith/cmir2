@@ -835,6 +835,9 @@ public enum ServerPacketIds : short
 
     CancelReincarnation,
     RequestReincarnation,
+
+    UserBackStep,//ArcherSpells - Backstep
+    ObjectBackStep,//ArcherSpells - Backstep
 }
 
 public enum ClientPacketIds : short
@@ -3072,6 +3075,10 @@ public abstract class Packet
                 return new S.CancelReincarnation();
             case (short)ServerPacketIds.RequestReincarnation:
                 return new S.RequestReincarnation();
+            case (short)ServerPacketIds.UserBackStep://ArcherSpells - Backstep
+                return new S.UserBackStep();
+            case (short)ServerPacketIds.ObjectBackStep://ArcherSpells - Backstep
+                return new S.ObjectBackStep();
             default:
                 throw new NotImplementedException();
         }

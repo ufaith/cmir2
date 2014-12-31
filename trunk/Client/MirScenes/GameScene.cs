@@ -332,7 +332,12 @@ namespace Client.MirScenes
                     else GuildDialog.Hide();
                     break;
 
-                case Keys.U:
+                case Keys.Q:
+                    if (CMain.Alt)
+                    {
+                        QuitGame();
+                        return;
+                    }
                     if (!QuestLogDialog.Visible) QuestLogDialog.Show();
                     else QuestLogDialog.Hide();
                     break;
@@ -416,10 +421,6 @@ namespace Client.MirScenes
                 case Keys.X:
                     if (!CMain.Alt) break;
                     LogOut();
-                    break;
-                case Keys.Q:
-                    if (!CMain.Alt) break;
-                    QuitGame();
                     break;
                 case Keys.V:
                     MiniMapDialog.Toggle();
@@ -1126,6 +1127,12 @@ namespace Client.MirScenes
                     if (!User.Dead) return;
                     RequestReincarnation();
                     break;
+                case (short)ServerPacketIds.UserBackStep://ArcherSpells - Backstep
+                    UserBackStep((S.UserBackStep)p);
+                    break;
+                case (short)ServerPacketIds.ObjectBackStep://ArcherSpells - Backstep
+                    ObjectBackStep((S.ObjectBackStep)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1199,38 +1206,9 @@ namespace Client.MirScenes
             {
                 MirImageControl image = BuffList[i];
                 Buff buff = Buffs[i];
-                image.Location = new Point((Settings.ScreenWidth - 160) - i * 30, 15);
+                image.Location = new Point((Settings.ScreenWidth - 155) - i * 30, 6);
                 image.Hint = buff.ToString();
                 ((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : Math.Round((buff.Expire - CMain.Time) / 1000D).ToString();
-
-                switch (buff.Type)
-                {
-                    case BuffType.Teleport:
-                        image.Index = 885;
-                        break;
-                    case BuffType.Hiding:
-                        image.Index = 884;
-                        break;
-                    case BuffType.Haste:
-                        image.Index = 880;
-                        break;
-                    case BuffType.LightBody:
-                        image.Index = 882;
-                        break;
-                    case BuffType.SoulShield:
-                        image.Index = 870;
-                        break;
-                    case BuffType.BlessedArmour:
-                        image.Index = 871;
-                        break;
-                    case BuffType.Curse:
-                        image.Index = 892;
-                        break;
-                    case BuffType.MoonLight:
-                        image.Index = 884;
-                        break;
-                }
-
             }
         }
 
@@ -1835,27 +1813,6 @@ namespace Client.MirScenes
                 Scene.QuestLogDialog.DisplayQuests();
             }
         }
-
-        //private void UpdateQuests(S.UpdateQuests p)
-        //{
-        //    User.CurrentQuests = p.CurrentQuests;
-        //    User.CompletedQuests = p.CompletedQuests;
-
-        //    foreach (ClientQuestProgress quest in User.CurrentQuests)
-        //        BindQuest(quest);
-
-        //    QuestTrackingDialog.DisplayQuests();
-
-        //    if (Scene.QuestListDialog.Visible)
-        //    {
-        //        Scene.QuestListDialog.DisplayInfo();
-        //    }
-
-        //    if (Scene.QuestLogDialog.Visible)
-        //    {
-        //        Scene.QuestLogDialog.DisplayQuests();
-        //    }
-        //}
 
         private void PlayerUpdate(S.PlayerUpdate p)
         {
@@ -3037,6 +2994,32 @@ namespace Client.MirScenes
                 return;
             }
         }
+        private void UserBackStep(S.UserBackStep p)//ArcherSpells - Backstep
+        {
+            if (User.Direction == p.Direction && User.CurrentLocation == p.Location)
+            {
+                MapControl.NextAction = 0;
+                return;
+            }
+            User.ActionFeed.Add(new QueuedAction { Action = MirAction.Jump, Direction = p.Direction, Location = p.Location });
+        }
+        private void ObjectBackStep(S.ObjectBackStep p)//ArcherSpells - Backstep
+        {
+            if (p.ObjectID == User.ObjectID) return;
+
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID) continue;
+
+                ((PlayerObject)ob).JumpDistance = p.Distance;
+
+                ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Jump, Direction = p.Direction, Location = p.Location });
+
+                return;
+            }
+        }
+
         private void NPCConsign()
         {
             if (!NPCDialog.Visible) return;
@@ -4744,6 +4727,10 @@ namespace Client.MirScenes
                 OptionDialog = null;
                 MenuDialog = null;
                 NPCDialog = null;
+                QuestDetailDialog = null;
+                QuestListDialog = null;
+                QuestLogDialog = null;
+                QuestTrackingDialog = null;
 
                 CharacterDuraPanel = null;
                 DuraStatusPanel = null;
@@ -5327,7 +5314,7 @@ namespace Client.MirScenes
                 Effects[i].Draw();
 
         }
-        //FAR DrawLights
+
         private void DrawLights(LightSetting setting)
         {
             if (DXManager.Lights == null || DXManager.Lights.Count == 0) return;
@@ -5923,9 +5910,25 @@ namespace Client.MirScenes
                 case Spell.Vampirism:
                 case Spell.Revelation:
                 case Spell.Entrapment:
-                case Spell.StraightShot:
-                case Spell.DoubleShot:
                 case Spell.Hallucination:
+                    if (User.NextMagicObject != null)
+                    {
+                        if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
+                            target = User.NextMagicObject;
+                    }
+
+                    if (target == null) target = MapObject.MagicObject;
+
+                    if (target != null && target.Race == ObjectType.Monster) MapObject.MagicObject = target;
+                    break;
+                case Spell.StraightShot:
+                case Spell.DoubleShot://ArcherSpells - weapon fix
+                    if (!User.HasClassWeapon)
+                    {
+                        GameScene.Scene.OutputMessage("You must be wearing a bow to perform this skill.");
+                        User.ClearMagic();
+                        return;
+                    }
                     if (User.NextMagicObject != null)
                     {
                         if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
@@ -6015,6 +6018,7 @@ namespace Client.MirScenes
             User.QueuedAction.Params.Add(magic.Spell);
             User.QueuedAction.Params.Add(target != null ? target.ObjectID : 0);
             User.QueuedAction.Params.Add(location);
+            User.QueuedAction.Params.Add(magic.Level);//ArcherSpells - Backstep
         }
 
         public static MirDirection MouseDirection(float ratio = 45F) //22.5 = 16
@@ -6240,6 +6244,7 @@ namespace Client.MirScenes
             M2CellInfo[ob.MapLocation.X, ob.MapLocation.Y].Sort();
         }
     }
+
     public sealed class MainDialog : MirImageControl
     {
         public static UserObject User

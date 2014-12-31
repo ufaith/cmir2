@@ -99,7 +99,13 @@ namespace Server.MirDatabase
         //Archer
         public static MagicInfo Focus,
                                 StraightShot,
-                                DoubleShot;
+                                DoubleShot,
+                                ExplosiveTrap,
+                                DelayedExplosion,
+                                Meditation,
+                                BackStep,//ArcherSpells - Backstep
+                                ElementalShot,
+                                GatherElements;
 
 
         public Spell Spell;
@@ -203,6 +209,7 @@ namespace Server.MirDatabase
             Focus = new MagicInfo { Spell = Spell.Focus, Icon = 88, Level1 = 23, Level2 = 38, Level3 = 54, Need1 = 100, Need2 = 200, Need3 = 300 };
             StraightShot = new MagicInfo { Spell = Spell.StraightShot, Icon = 89, Level1 = 12, Level2 = 15, Level3 = 18, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 3, LevelCost = 2 };
             DoubleShot = new MagicInfo { Spell = Spell.DoubleShot, Icon = 90, Level1 = 15, Level2 = 19, Level3 = 23, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 3, LevelCost = 2 };
+            BackStep = new MagicInfo { Spell = Spell.BackStep, Icon = 95, Level1 = 31, Level2 = 36, Level3 = 41, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 2 };//ArcherSpell - Backstep
         }
 
         public MagicInfo()
