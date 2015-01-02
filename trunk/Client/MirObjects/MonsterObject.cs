@@ -23,7 +23,7 @@ namespace Client.MirObjects
         }
         public Point ManualLocationOffset
         {
-            get 
+            get
             {
                 switch (BaseImage)
                 {
@@ -1397,6 +1397,7 @@ namespace Client.MirObjects
             {
                 case Monster.BoneFamiliar:
                 case Monster.Shinsu:
+                case Monster.HolyDeva:
                     SoundManager.PlaySound(BaseSound + 5);
                     return;
             }

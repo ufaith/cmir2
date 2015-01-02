@@ -664,7 +664,8 @@ public enum BuffType : byte
     ProtectionField,
     Rage,
     Curse,
-    MoonLight
+    MoonLight,
+    General
 }
 
 public enum DefenceType : byte
@@ -829,6 +830,7 @@ public enum ServerPacketIds : short
 
     ChangeQuest,
     CompleteQuest,
+    ShareQuest,
     NewQuestInfo,
     GainedQuestItem,
     DeleteQuestItem,
@@ -2357,7 +2359,7 @@ public class ClientQuestInfo
     public List<string> TaskDescription = new List<string>();
     public List<string> CompletionDescription = new List<string>(); 
 
-    public int LevelNeeded;
+    public int MinLevelNeeded, MaxLevelNeeded;
     public int QuestNeeded;
     public RequiredClass ClassNeeded;
 
@@ -2375,9 +2377,7 @@ public class ClientQuestInfo
         get { return NPCIndex == FinishNPCIndex; }
     }
 
-    public ClientQuestInfo()
-    {
-    }
+    public ClientQuestInfo() { }
 
     public ClientQuestInfo(BinaryReader reader)
     {
@@ -2398,7 +2398,8 @@ public class ClientQuestInfo
         for (int i = 0; i < count; i++)
             CompletionDescription.Add(reader.ReadString());
 
-        LevelNeeded = reader.ReadInt32();
+        MinLevelNeeded = reader.ReadInt32();
+        MaxLevelNeeded = reader.ReadInt32();
         QuestNeeded = reader.ReadInt32();
         ClassNeeded = (RequiredClass)reader.ReadByte();
         Type = (QuestType)reader.ReadByte();
@@ -2436,7 +2437,8 @@ public class ClientQuestInfo
         for (int i = 0; i < CompletionDescription.Count; i++)
             writer.Write(CompletionDescription[i]);
 
-        writer.Write(LevelNeeded);
+        writer.Write(MinLevelNeeded);
+        writer.Write(MaxLevelNeeded);
         writer.Write(QuestNeeded);
         writer.Write((byte)ClassNeeded);
         writer.Write((byte)Type);
@@ -2505,9 +2507,7 @@ public class ClientQuestProgress
         }
     }
 
-    public ClientQuestProgress()
-    {
-    }
+    public ClientQuestProgress(){ }
 
     public ClientQuestProgress(BinaryReader reader)
     {
@@ -3065,6 +3065,8 @@ public abstract class Packet
                 return new S.ChangeQuest();
             case (short)ServerPacketIds.CompleteQuest:
                 return new S.CompleteQuest();
+            case (short)ServerPacketIds.ShareQuest:
+                return new S.ShareQuest();
             case (short)ServerPacketIds.NewQuestInfo:
                 return new S.NewQuestInfo();
             case (short)ServerPacketIds.GainedQuestItem:
@@ -3195,8 +3197,8 @@ public class BaseStats
                 HpGainRate = 3.25F;
                 MpGainRate = 0;
                 BagWeightGain = 4F; //done
-                WearWeightGain = 5F;
-                HandWeightGain = 5F;
+                WearWeightGain = 33F;
+                HandWeightGain = 30F;
                 MinAc = 0;
                 MaxAc = 0;
                 MinMac = 0;

@@ -82,7 +82,8 @@ namespace Server
                 QItemTextBox.Text = string.Empty;
                 QFlagTextBox.Text = string.Empty;
 
-                RequiredLevelTextBox.Text = string.Empty;
+                RequiredMinLevelTextBox.Text = string.Empty;
+                RequiredMaxLevelTextBox.Text = string.Empty;
                 RequiredQuestComboBox.SelectedItem = null;
                 RequiredClassComboBox.SelectedItem = null;
 
@@ -103,7 +104,10 @@ namespace Server
             QItemTextBox.Text = info.ItemMessage;
             QFlagTextBox.Text = info.FlagMessage;
 
-            RequiredLevelTextBox.Text = info.RequiredLevel.ToString();
+            RequiredMinLevelTextBox.Text = info.RequiredMinLevel.ToString();
+            RequiredMaxLevelTextBox.Text = info.RequiredMaxLevel.ToString();
+
+            if (Convert.ToInt32(RequiredMaxLevelTextBox.Text) <= 0) RequiredMaxLevelTextBox.Text = byte.MaxValue.ToString();
 
             QuestInfo tempQuest = Envir.QuestInfoList.FirstOrDefault(c => c.Index == info.RequiredQuest);
                 
@@ -129,10 +133,10 @@ namespace Server
                 if (QItemTextBox.Text != info.ItemMessage) QItemTextBox.Text = string.Empty;
                 if (QFlagTextBox.Text != info.ItemMessage) QFlagTextBox.Text = string.Empty;
 
-                RequiredLevelTextBox.Text = string.Empty;
+                RequiredMinLevelTextBox.Text = string.Empty;
+                RequiredMaxLevelTextBox.Text = byte.MaxValue.ToString();
                 RequiredQuestComboBox.SelectedItem = null;
                 RequiredClassComboBox.SelectedItem = null;
-
             }
         }
 
@@ -165,9 +169,9 @@ namespace Server
         {
             string data = Clipboard.GetText();
 
-            if (!data.StartsWith("NPC", StringComparison.OrdinalIgnoreCase))
+            if (!data.StartsWith("Quest", StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("Cannot Paste, Copied data is not NPC Information.");
+                MessageBox.Show("Cannot Paste, Copied data is not Quest Information.");
                 return;
             }
 
@@ -312,13 +316,14 @@ namespace Server
                 _selectedQuestInfos[i].FlagMessage = ActiveControl.Text;
         }
 
-        private void RequiredLevelTextBox_TextChanged(object sender, EventArgs e)
+
+        private void RequiredMinLevelTextBox_TextChanged(object sender, EventArgs e)
         {
             if (ActiveControl != sender) return;
 
             int temp;
 
-            if (!int.TryParse(ActiveControl.Text, out temp))
+            if (!int.TryParse(ActiveControl.Text, out temp) || temp > Convert.ToInt32(RequiredMaxLevelTextBox.Text) || temp < byte.MinValue)
             {
                 ActiveControl.BackColor = Color.Red;
                 return;
@@ -326,8 +331,24 @@ namespace Server
             ActiveControl.BackColor = SystemColors.Window;
 
             for (int i = 0; i < _selectedQuestInfos.Count; i++)
-                _selectedQuestInfos[i].RequiredLevel = temp;
+                _selectedQuestInfos[i].RequiredMinLevel = temp;
+        }
 
+        private void RequiredMaxLevelTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            int temp;
+
+            if (!int.TryParse(ActiveControl.Text, out temp) || temp < Convert.ToInt32(RequiredMinLevelTextBox.Text) || temp > byte.MaxValue)
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+
+            for (int i = 0; i < _selectedQuestInfos.Count; i++)
+                _selectedQuestInfos[i].RequiredMaxLevel = temp;
         }
 
         private void RequiredQuestComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -371,5 +392,8 @@ namespace Server
                 Process.Start(scriptPath);
             }
         }
+
+
+
     }
 }

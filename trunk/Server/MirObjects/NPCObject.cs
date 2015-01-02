@@ -1271,6 +1271,10 @@ namespace Server.MirObjects
                         acts.Add(new NPCActions(ActionType.Calc, "%" + parts[1], parts[2], valueToStore, parts[1].Insert(1, "-")));
 
                     break;
+                case "GIVEBUFF":
+                    if (parts.Length < 5) return;
+                    acts.Add(new NPCActions(ActionType.GiveBuff, parts[1], parts[2], parts[3], parts[4]));
+                    break;
             }
 
         }
@@ -1760,6 +1764,7 @@ namespace Server.MirObjects
                 int tempInt;
                 byte tempByte;
                 long tempLong;
+                bool tempBool;
                 ItemInfo info;
                 MonsterInfo monInfo;
 
@@ -2023,6 +2028,8 @@ namespace Server.MirObjects
                         Spell skill;
                         if (!Enum.TryParse(param[0], true, out skill)) return;
 
+                        if (player.Info.Magics.Any(e => e.Spell == skill)) break;
+
                         if (param.Count > 1)
                             spellLevel = byte.TryParse(param[1], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
 
@@ -2213,6 +2220,26 @@ namespace Server.MirObjects
                             AddVariable(player, param[3].Replace("-", ""), param[0] + param[2]);
                         }
                         break;
+
+                    case ActionType.GiveBuff:
+
+                        if (!Enum.IsDefined(typeof(BuffType), param[0])) return;
+
+                        long.TryParse(param[1], out tempLong);
+                        int.TryParse(param[2], out tempInt);
+                        bool.TryParse(param[3], out tempBool);
+
+                        Buff buff = new Buff
+                        {
+                            Type = (BuffType)(byte)Enum.Parse(typeof(BuffType), param[0]),
+                            Caster = player,
+                            ExpireTime = SMain.Envir.Time + tempLong * 1000,
+                            Value = tempInt,
+                            Infinite = tempBool
+                        };
+
+                        player.AddBuff(buff);
+                        break;
                 }
             }
         }
@@ -2326,6 +2353,7 @@ namespace Server.MirObjects
         DelayGoto,
         Mov,
         Calc,
+        GiveBuff
     }
     public enum CheckType
     {

@@ -1307,13 +1307,15 @@ namespace Server.MirEnvir
                                 {
                                     centerTarget = (MonsterObject)target;
                                 }
-
+                                
                                 switch (target.Race)
                                 {
                                     case ObjectType.Monster:
                                         if (target == null || !target.IsAttackTarget(player) || target.Node == null || target.Level > player.Level + 2) continue;
 
                                         MonsterObject mobTarget = (MonsterObject)target;
+
+                                        if (centerTarget == null) centerTarget = mobTarget;
 
                                         mobTarget.ShockTime = Envir.Time + value;
                                         mobTarget.Target = null;
@@ -1324,32 +1326,31 @@ namespace Server.MirEnvir
                         }
                     }
 
-                    if (centerTarget != null)
-                    {
-                        for (byte i = 0; i < 8; i += 2)
-                        {
-                            Point startpoint = Functions.PointMove(location, (MirDirection)i, 2);
-                            for (byte j = 0; j <= 4; j += 4)
-                            {
-                                MirDirection spawndirection = i == 0 || i == 4 ? MirDirection.Right : MirDirection.Up;
-                                Point spawnpoint = Functions.PointMove(startpoint, spawndirection + j, 1);
-                                if (spawnpoint.X <= 0 || spawnpoint.X > centerTarget.CurrentMap.Width) continue;
-                                if (spawnpoint.Y <= 0 || spawnpoint.Y > centerTarget.CurrentMap.Height) continue;
-                                SpellObject ob = new SpellObject
-                                {
-                                    Spell = Spell.TrapHexagon,
-                                    ExpireTime = Envir.Time + value,
-                                    TickSpeed = 100,
-                                    Caster = player,
-                                    CurrentLocation = spawnpoint,
-                                    CastLocation = location,
-                                    CurrentMap = centerTarget.CurrentMap,
-                                    Target = centerTarget,
-                                };
+                    if (centerTarget == null) return;
 
-                                centerTarget.CurrentMap.AddObject(ob);
-                                ob.Spawned();
-                            }
+                    for (byte i = 0; i < 8; i += 2)
+                    {
+                        Point startpoint = Functions.PointMove(location, (MirDirection)i, 2);
+                        for (byte j = 0; j <= 4; j += 4)
+                        {
+                            MirDirection spawndirection = i == 0 || i == 4 ? MirDirection.Right : MirDirection.Up;
+                            Point spawnpoint = Functions.PointMove(startpoint, spawndirection + j, 1);
+                            if (spawnpoint.X <= 0 || spawnpoint.X > centerTarget.CurrentMap.Width) continue;
+                            if (spawnpoint.Y <= 0 || spawnpoint.Y > centerTarget.CurrentMap.Height) continue;
+                            SpellObject ob = new SpellObject
+                            {
+                                Spell = Spell.TrapHexagon,
+                                ExpireTime = Envir.Time + value,
+                                TickSpeed = 100,
+                                Caster = player,
+                                CurrentLocation = spawnpoint,
+                                CastLocation = location,
+                                CurrentMap = centerTarget.CurrentMap,
+                                Target = centerTarget,
+                            };
+
+                            centerTarget.CurrentMap.AddObject(ob);
+                            ob.Spawned();
                         }
                     }
 

@@ -74,6 +74,8 @@ namespace Server.MirObjects
         public ushort PotHealthAmount, PotManaAmount, HealAmount, VampAmount;
         //public bool HealthChanged;
 
+        public float DropRate = 0;
+
         public bool CoolEye;
         private bool _hidden;
         public bool Hidden

@@ -101,6 +101,7 @@ namespace Server.MirObjects
         public byte LifeOnHit;
         public byte HpDrainRate;
         public float HpDrain = 0;
+        public float ExpRate = 0;
 
         public override int PKPoints
         {
@@ -471,19 +472,11 @@ namespace Server.MirObjects
 
             RefreshNameColour();
 
-
-            //if (HasClearRing)
-            //    AddBuff(new Buff { Type = BuffType.Hiding, Caster = this, ExpireTime = Envir.Time + 1, Infinite = true });
-
-
-
         }
         public override void SetOperateTime()
         {
             OperateTime = Envir.Time;
         }
-
-        public bool RefreshInfiniteBuffs = false;
 
         private void ProcessBuffs()
         {
@@ -538,6 +531,13 @@ namespace Server.MirObjects
                 {
                     Buffs.RemoveAt(i);
                     Enqueue(new S.RemoveBuff { Type = buff.Type });
+
+                    switch(buff.Type)
+                    {
+                        case BuffType.Hiding:
+                            Hidden = false;
+                            break;
+                    }
                 }
             }
 
@@ -1007,7 +1007,7 @@ namespace Server.MirObjects
 
         public override void WinExp(uint amount)
         {
-            amount = (uint)(amount * Settings.ExpRate);
+            amount = (uint)(amount * (Settings.ExpRate + ExpRate));
 
             if (GroupMembers != null)
             {
@@ -1630,6 +1630,8 @@ namespace Server.MirObjects
             Freezing = 0;
             PoisonAttack = 0;
 
+            ExpRate = 0;
+            DropRate = 0;
 
             MaxHP = (ushort)Math.Min(ushort.MaxValue, 14 + (Level / Settings.ClassBaseStats[(byte)Class].HpGain + Settings.ClassBaseStats[(byte)Class].HpGainRate) * Level);
 
@@ -1859,8 +1861,6 @@ namespace Server.MirObjects
             {
                 RefreshMount();
             }
-
-            RefreshInfiniteBuffs = true;
         }
 
         private void RefreshItemSetStats()
@@ -2213,6 +2213,10 @@ namespace Server.MirObjects
                         MaxMC = (byte)Math.Max(byte.MinValue, MaxMC - rMaxMC);
                         MaxSC = (byte)Math.Max(byte.MinValue, MaxSC - rMaxSC);
                         ASpeed = (sbyte)Math.Min(sbyte.MaxValue, (Math.Max(sbyte.MinValue, ASpeed - rASpeed)));
+                        break;
+                    case BuffType.General:
+                        ExpRate += buff.Value;
+                        DropRate += buff.Value;
                         break;
                 }
 
@@ -3421,7 +3425,7 @@ namespace Server.MirObjects
             else if (targetID > 0)
                 target = FindObject(targetID, 10);
 
-            if (target.Dead) return;
+            if (target != null && target.Dead) return;
 
             Direction = dir;
 
@@ -4934,7 +4938,7 @@ namespace Server.MirObjects
 
             Pets.Add(monster);
 
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, monster, Front);
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 1500, this, magic, monster, Front);
             CurrentMap.ActionList.Add(action);
         }
         private void Hallucination(MapObject target, UserMagic magic)
@@ -10265,29 +10269,42 @@ namespace Server.MirObjects
 
         #region Quests
 
-        public bool AcceptQuest(int questIndex)
+        public void AcceptQuest(int index)
         {
-            if (CurrentQuests.Exists(e => e.Info.Index == questIndex)) return false; //e.Info.NpcIndex == npcIndex && 
+            bool canAccept = true;
 
-            QuestInfo info = Envir.QuestInfoList.FirstOrDefault(d => d.Index == questIndex);
+            if (CurrentQuests.Exists(e => e.Info.Index == index)) return; //e.Info.NpcIndex == npcIndex && 
+
+            QuestInfo info = Envir.QuestInfoList.FirstOrDefault(d => d.Index == index);
 
             if (info == null || !info.CanAccept(this))
             {
-                return false;
+                canAccept = false;
             }
 
             if (CurrentQuests.Count >= Globals.MaxConcurrentQuests)
             {
                 ReceiveChat("Maximum amount of quests already taken.", ChatType.System);
-                return false;
+                canAccept = false;
             }
 
             //check previous chained quests have been completed
             QuestInfo tempInfo = info;
             while (tempInfo != null && tempInfo.RequiredQuest != 0)
             {
-                if (!CompletedQuests.Contains(tempInfo.RequiredQuest)) return false;
+                if (!CompletedQuests.Contains(tempInfo.RequiredQuest))
+                {
+                    canAccept = false;
+                    break;
+                }
+
                 tempInfo = Envir.QuestInfoList.FirstOrDefault(d => d.Index == tempInfo.RequiredQuest);
+            }
+
+            if (!canAccept)
+            {
+                ReceiveChat("Could not accept quest.", ChatType.System);
+                return;
             }
 
             if (info.CarryItems.Count > 0)
@@ -10314,7 +10331,7 @@ namespace Server.MirObjects
                         if (!CanGainQuestItem(item))
                         {
                             RecalculateQuestBag();
-                            return false;
+                            return;
                         }
 
                         GainQuestItem(item);
@@ -10322,22 +10339,42 @@ namespace Server.MirObjects
                 }
             }
 
-            QuestProgressInfo quest = new QuestProgressInfo(questIndex) { StartDateTime = DateTime.Now };
+            QuestProgressInfo quest = new QuestProgressInfo(index) { StartDateTime = DateTime.Now };
 
             CurrentQuests.Add(quest);
             SendUpdateQuest(quest, QuestState.Add, true);
 
-            CallDefaultNPC(DefaultNPCType.OnAcceptQuest, questIndex);
-
-            return true;
+            CallDefaultNPC(DefaultNPCType.OnAcceptQuest, index);
         }
-        public void FinishQuest(int questIndex, int selectedItemIndex)
+
+        public void FinishQuest(int questIndex, int selectedItemIndex = -1)
         {
             QuestProgressInfo quest = CurrentQuests.FirstOrDefault(e => e.Info.Index == questIndex);
 
-            if (quest == null) return;
-            if (!quest.CheckCompleted()) return;
-            if (!quest.Completed) return;
+            if (quest == null || !quest.Completed) return;
+
+            List<UserItem> rewardItems = new List<UserItem>();
+
+            foreach (ItemInfo iInfo in quest.Info.FixedRewards)
+            {
+                rewardItems.Add(Envir.CreateDropItem(iInfo));
+            }
+
+            if (selectedItemIndex >= 0)
+            {
+                for (int i = 0; i < quest.Info.SelectRewards.Count; i++)
+                {
+                    if (selectedItemIndex != i) continue;
+
+                    rewardItems.Add(Envir.CreateDropItem(quest.Info.SelectRewards[i]));
+                }
+            }
+
+            if (!CanGainItems(rewardItems.ToArray()))
+            {
+                ReceiveChat("Cannot hand in quest whilst bag is full.", ChatType.System);
+                return;
+            }
 
             if (quest.Info.Type != QuestType.Repeatable)
             {
@@ -10348,10 +10385,6 @@ namespace Server.MirObjects
 
             CurrentQuests.Remove(quest);
             SendUpdateQuest(quest, QuestState.Remove);
-
-            //SendQuestUpdate();
-
-            UserItem item;
 
             if (quest.Info.CarryItems.Count > 0)
             {
@@ -10366,24 +10399,12 @@ namespace Server.MirObjects
                 TakeQuestItem(iTask.Item, Convert.ToUInt32(iTask.Count));
             }
 
-            foreach (ItemInfo iInfo in quest.Info.FixedRewards)
+            foreach (UserItem item in rewardItems)
             {
-                item = Envir.CreateDropItem(iInfo);
-
-                if (CanGainItem(item, false)) GainItem(item);
+                GainItem(item);
             }
 
-            if (selectedItemIndex >= 0)
-            {
-                for (int i = 0; i < quest.Info.SelectRewards.Count; i++)
-                {
-                    if (selectedItemIndex != i) continue;
-
-                    item = Envir.CreateDropItem(quest.Info.SelectRewards[i]);
-
-                    if (CanGainItem(item, false)) GainItem(item);
-                }
-            }
+            RecalculateQuestBag();
 
             GainGold(quest.Info.GoldReward);
             GainExp(quest.Info.ExpReward);
@@ -10412,7 +10433,8 @@ namespace Server.MirObjects
                         Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) &&
                         !player.Dead && player != this))
                 {
-                    if (player.AcceptQuest(questIndex)) shared = true;
+                    player.Enqueue(new S.ShareQuest { QuestIndex = questIndex, SharerName = Name });
+                    shared = true;
                 }
             }
 
@@ -10448,7 +10470,7 @@ namespace Server.MirObjects
                 {
                     GainQuestItem(item);
                     quest.ProcessItem(Info.QuestInventory);
-                    //SendQuestUpdate();
+
                     SendUpdateQuest(quest, QuestState.Update);
                 }
                 return true;
@@ -10477,14 +10499,14 @@ namespace Server.MirObjects
                     Where(quest => quest.NeedKill(mInfo)))
             {
                 quest.ProcessKill(mInfo.Index);
-                //SendQuestUpdate();
+
                 SendUpdateQuest(quest, QuestState.Update);
             }
         }
 
         public void RecalculateQuestBag()
         {
-            for (int i = 0; i < Info.QuestInventory.Length; i++)
+            for (int i = Info.QuestInventory.Length - 1; i >= 0; i--)
             {
                 UserItem itm = Info.QuestInventory[i];
 
