@@ -187,7 +187,7 @@ namespace Client.MirObjects
         }
         public virtual void DrawBlend()
         {
-            DXManager.SetBlend(true, 0.8F);
+            DXManager.SetBlend(true, 0.3F); //0.8
             Draw();
             DXManager.SetBlend(false);
         }

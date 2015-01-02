@@ -681,7 +681,11 @@ namespace Client.MirScenes
                 ShowReviveMessage = false;
                 MirMessageBox messageBox = new MirMessageBox("You have died, Do you want to revive in town?", MirMessageBoxButtons.YesNo);
 
-                messageBox.YesButton.Click += (o, e) => Network.Enqueue(new C.TownRevive());
+                messageBox.YesButton.Click += (o, e) =>
+                {
+                    if (User.Dead) Network.Enqueue(new C.TownRevive());
+                };
+
                 messageBox.AfterDraw += (o, e) =>
                 {
                     if (!User.Dead) messageBox.Dispose();
@@ -1114,6 +1118,9 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.CompleteQuest:
                     CompleteQuest((S.CompleteQuest)p);
                     break;
+                case (short)ServerPacketIds.ShareQuest:
+                    ShareQuest((S.ShareQuest)p);
+                    break;
                 case (short)ServerPacketIds.GainedQuestItem:
                     GainedQuestItem((S.GainedQuestItem)p);
                     break;
@@ -1147,6 +1154,7 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Visible = true,
+                Sort = false
             };
 
             new MirLabel
@@ -1195,6 +1203,9 @@ namespace Client.MirScenes
                 case BuffType.MoonLight:
                     image.Index = 884;
                     break;
+                case BuffType.General:
+                    image.Index = 903;
+                    break;
             }
 
             if (text != "") GameScene.Scene.ChatDialog.ReceiveChat(text, ChatType.Hint);
@@ -1208,7 +1219,48 @@ namespace Client.MirScenes
                 Buff buff = Buffs[i];
                 image.Location = new Point((Settings.ScreenWidth - 155) - i * 30, 6);
                 image.Hint = buff.ToString();
+
                 ((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : Math.Round((buff.Expire - CMain.Time) / 1000D).ToString();
+
+                switch (buff.Type)
+                {
+                    case BuffType.Teleport:
+                        image.Index = 885;
+                        break;
+                    case BuffType.Hiding:
+                        image.Index = 884;
+                        break;
+                    case BuffType.Haste:
+                        image.Index = 880;
+                        break;
+                    case BuffType.LightBody:
+                        image.Index = 882;
+                        break;
+                    case BuffType.SoulShield:
+                        image.Index = 870;
+                        break;
+                    case BuffType.BlessedArmour:
+                        image.Index = 871;
+                        break;
+                    case BuffType.ProtectionField:
+                        image.Index = 861;
+                        break;
+                    case BuffType.Rage:
+                        image.Index = 860;
+                        break;
+                    case BuffType.UltimateEnhancer:
+                        image.Index = 862;
+                        break;
+                    case BuffType.Curse:
+                        image.Index = 892;
+                        break;
+                    case BuffType.MoonLight:
+                        image.Index = 884;
+                        break;
+                    case BuffType.General:
+                        image.Index = 903;
+                        break;
+                }
             }
         }
 
@@ -1757,6 +1809,19 @@ namespace Client.MirScenes
         private void CompleteQuest(S.CompleteQuest p)
         {
             User.CompletedQuests = p.CompletedQuests;
+        }
+
+        private void ShareQuest(S.ShareQuest p)
+        {
+            ClientQuestInfo quest = GameScene.QuestInfoList.FirstOrDefault(e => e.Index == p.QuestIndex);
+            
+            if (quest == null) return;
+
+            MirMessageBox messageBox = new MirMessageBox(string.Format("{0} would like to share a quest with you. Do you accept?", p.SharerName), MirMessageBoxButtons.YesNo);
+
+            messageBox.YesButton.Click += (o, e) => Network.Enqueue(new C.AcceptQuest { NPCIndex = 0, QuestIndex = quest.Index });
+
+            messageBox.Show();
         }
 
         private void ChangeQuest(S.ChangeQuest p)
@@ -6606,8 +6671,10 @@ namespace Client.MirScenes
             ExperienceLabel.Location = new Point((ExperienceBar.Size.Width / 2) - 20, -10);
             GoldLabel.Text = GameScene.Gold.ToString("###,###,##0");
             CharacterName.Text = User.Name;
-            //WeightLabel.Text = (User.MaxBagWeight - User.CurrentBagWeight).ToString();
             WeightLabel.Text = User.Inventory.Count(t => t == null).ToString();
+
+
+
         }
 
         private void Label_SizeChanged(object sender, EventArgs e)
@@ -8505,7 +8572,7 @@ namespace Client.MirScenes
         public MirButton ToggleButton, BigMapButton, MailButton;
         public MirLabel LocationLabel, MapNameLabel;
         private float _fade = 1F;
-        private bool _bigMode = true;
+        private bool _bigMode = true, _realBigMode = true;
 
         public MirLabel AModeLabel, PModeLabel;
 
@@ -8762,13 +8829,9 @@ namespace Client.MirScenes
             LocationLabel.Location = new Point(46, y);
             LightSetting.Location = new Point(102, y);
 
-            GameScene.Scene.MainDialog.SModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
-                Settings.HighResolution ? -463 - 108 : -295 - 108);
+            _realBigMode = false;
 
-            GameScene.Scene.MainDialog.AModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
-                Settings.HighResolution ? -448 - 108 : -280 - 108);
-
-            GameScene.Scene.DuraStatusPanel.Location = new Point((GameScene.Scene.MiniMapDialog.Location.X + 86),
+            GameScene.Scene.DuraStatusPanel.Location = new Point(GameScene.Scene.MiniMapDialog.Location.X + 86,
             GameScene.Scene.MiniMapDialog.Size.Height);
         }
 
@@ -8781,13 +8844,9 @@ namespace Client.MirScenes
             LocationLabel.Location = new Point(46, y);
             LightSetting.Location = new Point(102, y);
 
-            GameScene.Scene.MainDialog.SModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
-                Settings.HighResolution ? -463: -295);
+            _realBigMode = true;
 
-            GameScene.Scene.MainDialog.AModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
-                Settings.HighResolution ? -448 : -280);
-
-            GameScene.Scene.DuraStatusPanel.Location = new Point((GameScene.Scene.MiniMapDialog.Location.X + 86),
+            GameScene.Scene.DuraStatusPanel.Location = new Point(GameScene.Scene.MiniMapDialog.Location.X + 86,
             GameScene.Scene.MiniMapDialog.Size.Height);
         }
 
@@ -8798,6 +8857,13 @@ namespace Client.MirScenes
             MapNameLabel.Text = map.Title;
             LocationLabel.Text = Functions.PointToString(MapObject.User.CurrentLocation);
 
+            int offset = _realBigMode ? 0 : 108 ;
+
+            GameScene.Scene.MainDialog.SModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
+                Settings.HighResolution ? -463 - offset : -295 - offset);
+
+            GameScene.Scene.MainDialog.AModeLabel.Location = new Point(Settings.HighResolution ? 899 : 675,
+                Settings.HighResolution ? -448 - offset : -280 - offset);
         }
     }
     public sealed class InspectDialog : MirImageControl
@@ -13601,8 +13667,8 @@ namespace Client.MirScenes
         {
             NotControl = true;
             Location = new Point(130, 100);
-            Border = true;
-            BorderColour = Color.Lime;
+            //Border = true;
+            //BorderColour = Color.Lime;
             BeforeDraw += (o, e) => OnBeforeDraw();
             Sort = true;
         }
@@ -13627,7 +13693,7 @@ namespace Client.MirScenes
                 viewRect.Height = Size.Height;
 
             viewRect.X = (Settings.ScreenWidth - viewRect.Width) / 2;
-            viewRect.Y = (Settings.ScreenHeight - viewRect.Height) / 2;
+            viewRect.Y = (Settings.ScreenHeight - 120 - viewRect.Height) / 2;
 
             Location = viewRect.Location;
             Size = viewRect.Size;
@@ -14404,7 +14470,7 @@ namespace Client.MirScenes
                         Boots.Index = -1;
                     break;
                 case ItemType.Bracelet:
-                    if (item.UniqueID == GameScene.Scene.CharacterDialog.Grid[6].Item.UniqueID)
+                    if (GameScene.Scene.CharacterDialog.Grid[(byte)EquipmentSlot.BraceletR].Item != null && item.UniqueID == GameScene.Scene.CharacterDialog.Grid[(byte)EquipmentSlot.BraceletR].Item.UniqueID)
                     {
                         if (item.CurrentDura > Warning)
                             RightBracelet.Index = 2143;
@@ -14415,7 +14481,7 @@ namespace Client.MirScenes
                         if (item.CurrentDura == 0)
                             RightBracelet.Index = -1;
                     }
-                    if (item.UniqueID == GameScene.Scene.CharacterDialog.Grid[5].Item.UniqueID)
+                    else if (GameScene.Scene.CharacterDialog.Grid[(byte)EquipmentSlot.BraceletL].Item != null && item.UniqueID == GameScene.Scene.CharacterDialog.Grid[(byte)EquipmentSlot.BraceletL].Item.UniqueID)
                     {
                         if (item.CurrentDura > Warning)
                             LeftBracelet.Index = 2143;
@@ -14448,7 +14514,7 @@ namespace Client.MirScenes
                         Necklace.Index = -1;
                     break;
                 case ItemType.Ring:
-                    if (item.UniqueID == GameScene.Scene.CharacterDialog.Grid[8].Item.UniqueID)
+                    if (GameScene.Scene.CharacterDialog.Grid[(byte)EquipmentSlot.RingR].Item != null && item.UniqueID == GameScene.Scene.CharacterDialog.Grid[(byte)EquipmentSlot.RingR].Item.UniqueID)
                     {
                         if (item.CurrentDura > Warning)
                             RightRing.Index = 2131;
@@ -14459,7 +14525,7 @@ namespace Client.MirScenes
                         if (item.CurrentDura == 0)
                             RightRing.Index = -1;
                     }
-                    if (item.UniqueID == GameScene.Scene.CharacterDialog.Grid[7].Item.UniqueID)
+                    else if (GameScene.Scene.CharacterDialog.Grid[(byte)EquipmentSlot.RingL].Item != null && item.UniqueID == GameScene.Scene.CharacterDialog.Grid[(byte)EquipmentSlot.RingL].Item.UniqueID)
                     {
                         if (item.CurrentDura > Warning)
                             LeftRing.Index = 2131;
@@ -14909,6 +14975,9 @@ namespace Client.MirScenes
                     break;
                 case BuffType.MoonLight:
                     text = "MoonLight\nInvisible to many monsters and able to move.\n";
+                    break;
+                case BuffType.General:
+                    text = string.Format("Global Buff\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);
                     break;
             }
 

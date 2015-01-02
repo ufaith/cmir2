@@ -61,7 +61,7 @@ namespace Client.MirObjects
             MapLocation = info.Location;
             GameScene.Scene.MapControl.AddObject(this);
 
-            Quests = GameScene.QuestInfoList.Where(c => c.NPCIndex == ObjectID).ToList(); // && info.QuestIDs.All(w => w == c.Index)
+            Quests = GameScene.QuestInfoList.Where(c => c.NPCIndex == ObjectID).ToList();
 
             Image = info.Image;
             if (info.Image < Libraries.NPCs.Length)
@@ -133,7 +133,6 @@ namespace Client.MirObjects
                 case 34:
                     Frames = FrameSet.NPCs[3];
                     CanChangeDir = false;
-                    Blend = false;
                     break;
                 #endregion
 
@@ -142,7 +141,6 @@ namespace Client.MirObjects
                 case 80:
                     Frames = FrameSet.NPCs[4];
                     CanChangeDir = false;
-                    Blend = false;
                     break;
                 #endregion
 
@@ -163,8 +161,7 @@ namespace Client.MirObjects
                 case 40:
                 case 44:
                 case 45:
-                case 46:
-                
+                case 46:              
                 case 50:
                 case 51:
                 case 54:
@@ -544,7 +541,10 @@ namespace Client.MirObjects
             var offSet = BodyLibrary.GetOffSet(BaseIndex);
             var size = BodyLibrary.GetSize(BaseIndex);
 
-            Libraries.Prguse.Draw(981 + ((int)QuestIcon * 2) + QuestIndex, DrawLocation.Add(offSet).Add(0, -40), Color.White, false);
+            int imageIndex = 981 + ((int)QuestIcon * 2) + QuestIndex;
+
+            //Libraries.Prguse.Draw(981 + ((int)QuestIcon * 2) + QuestIndex, DrawLocation.Add(offSet).Add(0, -40), Color.White, false);
+            Libraries.Prguse.Draw(imageIndex, DrawLocation.Add(offSet).Add(size.Width / 2 - 28, -40), Color.White, false);
         }
 
         public override bool MouseOver(Point p)
@@ -624,47 +624,7 @@ namespace Client.MirObjects
 
             QuestIcon = bestIcon;
         }
-
-        public MirLabel GetMiniMapIcon()
-        {
-            string text = "";
-            Color color = Color.Empty;
-
-            switch (QuestIcon)
-            {
-                case QuestIcon.ExclamationBlue:
-                    color = Color.DodgerBlue;
-                    text = "!";
-                    break;
-                case QuestIcon.ExclamationYellow:
-                    color = Color.Yellow;
-                    text = "!";
-                    break;
-                case QuestIcon.QuestionBlue:
-                    color = Color.DodgerBlue;
-                    text = "?";
-                    break;
-                case QuestIcon.QuestionWhite:
-                    color = Color.White;
-                    text = "?";
-                    break;
-                case QuestIcon.QuestionYellow:
-                    color = Color.Yellow;
-                    text = "?";
-                    break;
-            }
-
-            return new MirLabel
-            {
-                AutoSize = true,
-                Font = new Font(Settings.FontName, 8f, FontStyle.Bold),
-                Text = text,
-                ForeColour = color,        
-                NotControl = true,
-                Visible = true
-            };
-        }
-
+    
         public List<ClientQuestProgress> GetAvailableQuests(bool returnFirst = false)
         {
             List<ClientQuestProgress> quests = new List<ClientQuestProgress>();
@@ -703,7 +663,7 @@ namespace Client.MirObjects
 
         public bool CanAccept(ClientQuestInfo quest)
         {
-            if (quest.LevelNeeded > User.Level)
+            if (quest.MinLevelNeeded > User.Level || quest.MaxLevelNeeded < User.Level)
                 return false;
 
             if (!quest.ClassNeeded.HasFlag(RequiredClass.None))
@@ -736,6 +696,7 @@ namespace Client.MirObjects
             //check against active quest list
             return quest.QuestNeeded <= 0 || User.CompletedQuests.Contains(quest.QuestNeeded);
         }
+
         #endregion
     }
 }

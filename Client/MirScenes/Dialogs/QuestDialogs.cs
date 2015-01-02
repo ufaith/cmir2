@@ -944,7 +944,7 @@ namespace Client.MirScenes.Dialogs
             IconImage.Visible = true;
 
             NameLabel.Text = Quest.QuestInfo.Name;
-            RequirementLabel.Text = Quest.QuestInfo.LevelNeeded > 0 ? "Lv " + Quest.QuestInfo.LevelNeeded : "";
+            RequirementLabel.Text = Quest.QuestInfo.MinLevelNeeded > 0 ? "Lv " + Quest.QuestInfo.MinLevelNeeded : "";
 
             SelectedImage.Visible = Selected;
         }
@@ -1696,10 +1696,10 @@ namespace Client.MirScenes.Dialogs
             TrackQuest = GameScene.Scene.QuestTrackingDialog.TrackedQuestsIds.Contains(quest.Id);
 
             string name = Quest.QuestInfo.Name;
-            string level = string.Format("Lv{0}", Quest.QuestInfo.LevelNeeded);
+            string level = string.Format("Lv{0}", Quest.QuestInfo.MinLevelNeeded);
             string state = quest.Completed ? "(Complete)" : "(Waiting)";
 
-            bool lowLevelQuest = (MapObject.User.Level - quest.QuestInfo.LevelNeeded) > 10;
+            bool lowLevelQuest = (MapObject.User.Level - quest.QuestInfo.MinLevelNeeded) > 10;
 
             BeforeDraw += QuestTaskSingleItem_BeforeDraw;
             AfterDraw += QuestTaskSingleItem_AfterDraw;

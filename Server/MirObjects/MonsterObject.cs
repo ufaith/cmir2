@@ -374,7 +374,6 @@ namespace Server.MirObjects
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
                         break;
                     case BuffType.Curse:
-
                         byte rMaxDC = (byte)(((int)MaxDC / 100) * buff.Value);
                         byte rMaxMC = (byte)(((int)MaxMC / 100) * buff.Value);
                         byte rMaxSC = (byte)(((int)MaxSC / 100) * buff.Value);
@@ -572,7 +571,8 @@ namespace Server.MirObjects
             {
                 DropInfo drop = Info.Drops[i];
 
-                int rate = (int)(drop.Chance / Settings.DropRate); if (rate < 1) rate = 1;
+                int rate = (int)(drop.Chance / (Settings.DropRate + (EXPOwner != null ? EXPOwner.DropRate : 0))); if (rate < 1) rate = 1;
+
                 if (Envir.Random.Next(rate) != 0) continue;
 
                 if (drop.Gold > 0)
@@ -1421,7 +1421,7 @@ namespace Server.MirObjects
 
             if (attacker.Info.AI == 6) // Guard
             {
-                if (Info.AI != 1 && Info.AI != 2 && (Master == null || Master.PKPoints >= 200)) //Not Dear/Hen or Red Master 
+                if (Info.AI != 1 && Info.AI != 2 && Info.AI != 3 && (Master == null || Master.PKPoints >= 200)) //Not Dear/Hen or Red Master 
                     return true;
             }
             else if (Master != null) //Pet Attacked

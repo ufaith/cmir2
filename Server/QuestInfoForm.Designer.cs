@@ -31,6 +31,10 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.QuestInfoPanel = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.RequiredMaxLevelTextBox = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.QFlagTextBox = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -42,7 +46,7 @@
             this.label7 = new System.Windows.Forms.Label();
             this.RequiredClassComboBox = new System.Windows.Forms.ComboBox();
             this.RequiredQuestComboBox = new System.Windows.Forms.ComboBox();
-            this.RequiredLevelTextBox = new System.Windows.Forms.TextBox();
+            this.RequiredMinLevelTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.QTypeComboBox = new System.Windows.Forms.ComboBox();
             this.label11 = new System.Windows.Forms.Label();
@@ -62,8 +66,6 @@
             this.ExportButton = new System.Windows.Forms.Button();
             this.ImportButton = new System.Windows.Forms.Button();
             this.ExportSelectedButton = new System.Windows.Forms.Button();
-            this.QFlagTextBox = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.QuestInfoPanel.SuspendLayout();
@@ -78,7 +80,7 @@
             this.tabControl1.Location = new System.Drawing.Point(174, 41);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(602, 302);
+            this.tabControl1.Size = new System.Drawing.Size(602, 287);
             this.tabControl1.TabIndex = 16;
             // 
             // tabPage1
@@ -87,7 +89,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(594, 276);
+            this.tabPage1.Size = new System.Drawing.Size(594, 261);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Info";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -97,6 +99,8 @@
             this.QuestInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.QuestInfoPanel.Controls.Add(this.label4);
+            this.QuestInfoPanel.Controls.Add(this.RequiredMaxLevelTextBox);
             this.QuestInfoPanel.Controls.Add(this.label3);
             this.QuestInfoPanel.Controls.Add(this.QFlagTextBox);
             this.QuestInfoPanel.Controls.Add(this.label14);
@@ -110,7 +114,7 @@
             this.QuestInfoPanel.Controls.Add(this.label7);
             this.QuestInfoPanel.Controls.Add(this.RequiredClassComboBox);
             this.QuestInfoPanel.Controls.Add(this.RequiredQuestComboBox);
-            this.QuestInfoPanel.Controls.Add(this.RequiredLevelTextBox);
+            this.QuestInfoPanel.Controls.Add(this.RequiredMinLevelTextBox);
             this.QuestInfoPanel.Controls.Add(this.label2);
             this.QuestInfoPanel.Controls.Add(this.QTypeComboBox);
             this.QuestInfoPanel.Controls.Add(this.label11);
@@ -125,8 +129,43 @@
             this.QuestInfoPanel.Enabled = false;
             this.QuestInfoPanel.Location = new System.Drawing.Point(3, 6);
             this.QuestInfoPanel.Name = "QuestInfoPanel";
-            this.QuestInfoPanel.Size = new System.Drawing.Size(585, 264);
+            this.QuestInfoPanel.Size = new System.Drawing.Size(585, 249);
             this.QuestInfoPanel.TabIndex = 11;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(349, 33);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(105, 13);
+            this.label4.TabIndex = 57;
+            this.label4.Text = "Required Max Level:";
+            // 
+            // RequiredMaxLevelTextBox
+            // 
+            this.RequiredMaxLevelTextBox.Location = new System.Drawing.Point(456, 28);
+            this.RequiredMaxLevelTextBox.MaxLength = 3;
+            this.RequiredMaxLevelTextBox.Name = "RequiredMaxLevelTextBox";
+            this.RequiredMaxLevelTextBox.Size = new System.Drawing.Size(121, 20);
+            this.RequiredMaxLevelTextBox.TabIndex = 56;
+            this.RequiredMaxLevelTextBox.TextChanged += new System.EventHandler(this.RequiredMaxLevelTextBox_TextChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(27, 220);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(54, 13);
+            this.label3.TabIndex = 55;
+            this.label3.Text = "Flag Text:";
+            // 
+            // QFlagTextBox
+            // 
+            this.QFlagTextBox.Location = new System.Drawing.Point(87, 217);
+            this.QFlagTextBox.Name = "QFlagTextBox";
+            this.QFlagTextBox.Size = new System.Drawing.Size(180, 20);
+            this.QFlagTextBox.TabIndex = 54;
+            this.QFlagTextBox.TextChanged += new System.EventHandler(this.QFlagTextBox_TextChanged);
             // 
             // label14
             // 
@@ -182,7 +221,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(373, 65);
+            this.label9.Location = new System.Drawing.Point(373, 85);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(81, 13);
             this.label9.TabIndex = 46;
@@ -191,7 +230,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(370, 37);
+            this.label8.Location = new System.Drawing.Point(370, 59);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(84, 13);
             this.label8.TabIndex = 45;
@@ -200,17 +239,17 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(372, 10);
+            this.label7.Location = new System.Drawing.Point(352, 7);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(82, 13);
+            this.label7.Size = new System.Drawing.Size(102, 13);
             this.label7.TabIndex = 44;
-            this.label7.Text = "Required Level:";
+            this.label7.Text = "Required Min Level:";
             // 
             // RequiredClassComboBox
             // 
             this.RequiredClassComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RequiredClassComboBox.FormattingEnabled = true;
-            this.RequiredClassComboBox.Location = new System.Drawing.Point(456, 62);
+            this.RequiredClassComboBox.Location = new System.Drawing.Point(456, 82);
             this.RequiredClassComboBox.Name = "RequiredClassComboBox";
             this.RequiredClassComboBox.Size = new System.Drawing.Size(121, 21);
             this.RequiredClassComboBox.TabIndex = 43;
@@ -220,19 +259,20 @@
             // 
             this.RequiredQuestComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RequiredQuestComboBox.FormattingEnabled = true;
-            this.RequiredQuestComboBox.Location = new System.Drawing.Point(456, 34);
+            this.RequiredQuestComboBox.Location = new System.Drawing.Point(456, 54);
             this.RequiredQuestComboBox.Name = "RequiredQuestComboBox";
             this.RequiredQuestComboBox.Size = new System.Drawing.Size(121, 21);
             this.RequiredQuestComboBox.TabIndex = 42;
             this.RequiredQuestComboBox.SelectedIndexChanged += new System.EventHandler(this.RequiredQuestComboBox_SelectedIndexChanged);
             // 
-            // RequiredLevelTextBox
+            // RequiredMinLevelTextBox
             // 
-            this.RequiredLevelTextBox.Location = new System.Drawing.Point(456, 7);
-            this.RequiredLevelTextBox.Name = "RequiredLevelTextBox";
-            this.RequiredLevelTextBox.Size = new System.Drawing.Size(121, 20);
-            this.RequiredLevelTextBox.TabIndex = 41;
-            this.RequiredLevelTextBox.TextChanged += new System.EventHandler(this.RequiredLevelTextBox_TextChanged);
+            this.RequiredMinLevelTextBox.Location = new System.Drawing.Point(456, 4);
+            this.RequiredMinLevelTextBox.MaxLength = 3;
+            this.RequiredMinLevelTextBox.Name = "RequiredMinLevelTextBox";
+            this.RequiredMinLevelTextBox.Size = new System.Drawing.Size(121, 20);
+            this.RequiredMinLevelTextBox.TabIndex = 41;
+            this.RequiredMinLevelTextBox.TextChanged += new System.EventHandler(this.RequiredMinLevelTextBox_TextChanged);
             // 
             // label2
             // 
@@ -249,7 +289,7 @@
             this.QTypeComboBox.FormattingEnabled = true;
             this.QTypeComboBox.Location = new System.Drawing.Point(87, 82);
             this.QTypeComboBox.Name = "QTypeComboBox";
-            this.QTypeComboBox.Size = new System.Drawing.Size(132, 21);
+            this.QTypeComboBox.Size = new System.Drawing.Size(180, 21);
             this.QTypeComboBox.TabIndex = 31;
             this.QTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.QTypeComboBox_SelectedIndexChanged);
             // 
@@ -328,7 +368,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(4, 7);
+            this.label1.Location = new System.Drawing.Point(14, 7);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(67, 13);
             this.label1.TabIndex = 4;
@@ -415,28 +455,11 @@
             this.ExportSelectedButton.UseVisualStyleBackColor = true;
             this.ExportSelectedButton.Click += new System.EventHandler(this.ExportSelected_Click);
             // 
-            // QFlagTextBox
-            // 
-            this.QFlagTextBox.Location = new System.Drawing.Point(87, 217);
-            this.QFlagTextBox.Name = "QFlagTextBox";
-            this.QFlagTextBox.Size = new System.Drawing.Size(180, 20);
-            this.QFlagTextBox.TabIndex = 54;
-            this.QFlagTextBox.TextChanged += new System.EventHandler(this.QFlagTextBox_TextChanged);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(27, 220);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(54, 13);
-            this.label3.TabIndex = 55;
-            this.label3.Text = "Flag Text:";
-            // 
             // QuestInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(788, 355);
+            this.ClientSize = new System.Drawing.Size(788, 333);
             this.Controls.Add(this.ExportSelectedButton);
             this.Controls.Add(this.ImportButton);
             this.Controls.Add(this.ExportButton);
@@ -484,7 +507,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox RequiredClassComboBox;
         private System.Windows.Forms.ComboBox RequiredQuestComboBox;
-        private System.Windows.Forms.TextBox RequiredLevelTextBox;
+        private System.Windows.Forms.TextBox RequiredMinLevelTextBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label14;
@@ -495,5 +518,7 @@
         private System.Windows.Forms.TextBox QGotoTextBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox QFlagTextBox;
+        private System.Windows.Forms.TextBox RequiredMaxLevelTextBox;
+        private System.Windows.Forms.Label label4;
     }
 }

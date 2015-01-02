@@ -21,7 +21,10 @@ namespace Server.MirObjects.Monsters
         public override void Turn(MirDirection dir)
         {
         }
-        public override bool Walk(MirDirection dir) { return false; }
+        public override bool Walk(MirDirection dir) 
+        { 
+            return false; 
+        }
 
         protected override void ProcessTarget() { }
 

@@ -1146,6 +1146,8 @@ namespace Client.MirObjects
                             case Spell.FlamingSword:
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 1);
                                 break;
+
+                            
                         }
                         break;
                     case MirAction.Attack4:
@@ -1178,6 +1180,7 @@ namespace Client.MirObjects
                             StruckWeapon = 1;
                             break;
                         }
+
                         PlayStruckSound();
                         PlayFlinchSound();
                         break;
@@ -1611,6 +1614,8 @@ namespace Client.MirObjects
                                 break;
 
                             #endregion
+
+
 
                         }
 
@@ -2540,10 +2545,16 @@ namespace Client.MirObjects
 
                                     #endregion
 
+                                    #region TrapHexagon
+
                                     case Spell.TrapHexagon:
                                         if (ob != null)
                                         SoundManager.PlaySound(20000 + (ushort)Spell.TrapHexagon * 10 + 1);
                                         break;
+
+                                    #endregion
+
+                                    
                                 }
 
 
@@ -2862,7 +2873,9 @@ namespace Client.MirObjects
             }
 
             if (Class == MirClass.Archer && HasClassWeapon)
+            {
                 return;
+            }
 
             switch (Weapon)
             {

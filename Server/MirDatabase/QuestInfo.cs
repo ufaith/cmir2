@@ -38,7 +38,7 @@ namespace Server.MirDatabase
         public List<string> TaskDescription = new List<string>(); 
         public List<string> CompletionDescription = new List<string>(); 
 
-        public int RequiredLevel, RequiredQuest;
+        public int RequiredMinLevel, RequiredMaxLevel, RequiredQuest;
         public RequiredClass RequiredClass = RequiredClass.None;
 
         public QuestType Type;
@@ -65,7 +65,14 @@ namespace Server.MirDatabase
             Name = reader.ReadString();
             Group = reader.ReadString();
             FileName = reader.ReadString();
-            RequiredLevel = reader.ReadInt32();
+            RequiredMinLevel = reader.ReadInt32();
+
+            if (Envir.LoadVersion >= 38)
+            {
+                RequiredMaxLevel = reader.ReadInt32();
+                if (RequiredMaxLevel == 0) RequiredMaxLevel = byte.MaxValue;
+            }
+
             RequiredQuest = reader.ReadInt32();
             RequiredClass = (RequiredClass)reader.ReadByte();
             Type = (QuestType)reader.ReadByte();
@@ -83,7 +90,8 @@ namespace Server.MirDatabase
             writer.Write(Name);
             writer.Write(Group);
             writer.Write(FileName);
-            writer.Write(RequiredLevel);
+            writer.Write(RequiredMinLevel);
+            writer.Write(RequiredMaxLevel);
             writer.Write(RequiredQuest);
             writer.Write((byte)RequiredClass);
             writer.Write((byte)Type);
@@ -303,7 +311,7 @@ namespace Server.MirDatabase
 
         public bool CanAccept(PlayerObject player)
         {
-            if (RequiredLevel > player.Level)
+            if (RequiredMinLevel > player.Level || RequiredMaxLevel < player.Level)
                 return false;
 
             if (RequiredQuest > 0 && !player.CompletedQuests.Contains(RequiredQuest))
@@ -348,7 +356,8 @@ namespace Server.MirDatabase
                 Description = Description,
                 TaskDescription = TaskDescription,
                 CompletionDescription = CompletionDescription,
-                LevelNeeded = RequiredLevel,
+                MinLevelNeeded = RequiredMinLevel,
+                MaxLevelNeeded = RequiredMaxLevel,
                 ClassNeeded = RequiredClass,
                 QuestNeeded = RequiredQuest,
                 Type = Type,
@@ -382,10 +391,11 @@ namespace Server.MirDatabase
             info.ItemMessage = data[6];
             info.FlagMessage = data[7];
 
-            int.TryParse(data[8], out info.RequiredLevel);
-            int.TryParse(data[9], out info.RequiredQuest);
+            int.TryParse(data[8], out info.RequiredMinLevel);
+            int.TryParse(data[9], out info.RequiredMaxLevel);
+            int.TryParse(data[10], out info.RequiredQuest);
 
-            byte.TryParse(data[10], out temp);
+            byte.TryParse(data[11], out temp);
 
             info.RequiredClass = (RequiredClass)temp;
 
@@ -395,8 +405,8 @@ namespace Server.MirDatabase
 
         public string ToText()
         {
-            return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}",
-                Name, Group, (byte)Type, FileName, GotoMessage, KillMessage, ItemMessage, FlagMessage, RequiredLevel, RequiredQuest, (byte)RequiredClass);
+            return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}",
+                Name, Group, (byte)Type, FileName, GotoMessage, KillMessage, ItemMessage, FlagMessage, RequiredMinLevel, RequiredMaxLevel, RequiredQuest, (byte)RequiredClass);
         }
 
         public override string ToString()
