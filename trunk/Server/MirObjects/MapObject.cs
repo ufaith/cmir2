@@ -74,7 +74,7 @@ namespace Server.MirObjects
         public ushort PotHealthAmount, PotManaAmount, HealAmount, VampAmount;
         //public bool HealthChanged;
 
-        public float DropRate = 0;
+        public float DropRateOffset = 0;
 
         public bool CoolEye;
         private bool _hidden;
@@ -388,6 +388,8 @@ namespace Server.MirObjects
             for (int i = 0; i < Buffs.Count; i++)
             {
                 if (Buffs[i].Type != b.Type) continue;
+
+                if (Buffs[i].Infinite) return;
 
                 Buffs[i] = b;
                 return;

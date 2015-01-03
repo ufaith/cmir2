@@ -1655,26 +1655,40 @@ namespace Server
 
                     for (int j = 0; j < _selectedMapInfos[i].Movements.Count; j++)
                     {
-                        string movement = string.Format("{0} {1} {2} {3} {4}", // 0 1,1 -> 1 2,2
-                           _selectedMapInfos[i].FileName,
-                           _selectedMapInfos[i].Movements[j].Source.X + "," + _selectedMapInfos[i].Movements[j].Source.Y,
-                           "->",
-                           Envir.MapInfoList[_selectedMapInfos[i].Movements[j].MapIndex - 1].FileName,
-                           _selectedMapInfos[i].Movements[j].Destination.X + "," + _selectedMapInfos[i].Movements[j].Destination.Y);
+                        try
+                        {
+                            string movement = string.Format("{0} {1} {2} {3} {4}", // 0 1,1 -> 1 2,2
+                               _selectedMapInfos[i].FileName,
+                               _selectedMapInfos[i].Movements[j].Source.X + "," + _selectedMapInfos[i].Movements[j].Source.Y,
+                               "->",
+                               Envir.MapInfoList[_selectedMapInfos[i].Movements[j].MapIndex - 1].FileName,
+                               _selectedMapInfos[i].Movements[j].Destination.X + "," + _selectedMapInfos[i].Movements[j].Destination.Y);
 
-                        sw.WriteLine(movement);
+                            sw.WriteLine(movement);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
                     }
 
                     for (int j = 0; j < _selectedMapInfos[i].MineZones.Count; j++)
                     {
-                        string mineZones = string.Format("MINEZONE {0} -> {1} {2} {3} {4}", // MINEZONE 0 -> 1 100 200 50
-                           _selectedMapInfos[i].FileName,
-                           _selectedMapInfos[i].MineZones[j].Mine.ToString(),
-                           _selectedMapInfos[i].MineZones[j].Location.X.ToString(),
-                           _selectedMapInfos[i].MineZones[j].Location.Y.ToString(),
-                           _selectedMapInfos[i].MineZones[j].Size.ToString());
+                        try
+                        {
+                            string mineZones = string.Format("MINEZONE {0} -> {1} {2} {3} {4}", // MINEZONE 0 -> 1 100 200 50
+                               _selectedMapInfos[i].FileName,
+                               _selectedMapInfos[i].MineZones[j].Mine.ToString(),
+                               _selectedMapInfos[i].MineZones[j].Location.X.ToString(),
+                               _selectedMapInfos[i].MineZones[j].Location.Y.ToString(),
+                               _selectedMapInfos[i].MineZones[j].Size.ToString());
 
-                        sw.WriteLine(mineZones);
+                            sw.WriteLine(mineZones);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
                     }
                 }
             }

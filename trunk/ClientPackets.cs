@@ -1278,4 +1278,21 @@ namespace ClientPackets
         {
         }
     }
+
+    public sealed class CombineItem : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.CombineItem; } }
+
+        public ulong IDFrom, IDTo;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            IDFrom = reader.ReadUInt64();
+            IDTo = reader.ReadUInt64();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(IDFrom);
+            writer.Write(IDTo);
+        }
+    }
 }

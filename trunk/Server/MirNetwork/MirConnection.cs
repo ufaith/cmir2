@@ -421,6 +421,9 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.AcceptReincarnation:
                     Revive();
                     break;
+                case (short)ClientPacketIds.CombineItem:
+                    CombineItem((C.CombineItem)p);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1090,6 +1093,13 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.Revive((uint)Player.MaxHP / 2, true);
+        }
+
+        private void CombineItem(C.CombineItem p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.CombineItem(p.IDFrom, p.IDTo);
         }
     }
 }

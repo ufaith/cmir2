@@ -257,15 +257,16 @@ namespace Client.MirControls
         {
             if (Locked || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant || GridType == MirGridType.GuildStorage) return;
 
-            if (MapObject.User.RidingMount || MapObject.User.Fishing) return;
+            if (MapObject.User.Fishing) return;
+            if (MapObject.User.RidingMount && Item.Info.Type != ItemType.Scroll && Item.Info.Type != ItemType.Potion) return;
 
             if (GridType == MirGridType.BuyBack)
             {
                 BuyItem();
                 return;
             }
-            if ((GridType != MirGridType.Inventory && GridType != MirGridType.Storage) || Item == null || !CanUseItem() || GameScene.SelectedCell == this) return;
 
+            if ((GridType != MirGridType.Inventory && GridType != MirGridType.Storage) || Item == null || !CanUseItem() || GameScene.SelectedCell == this) return;
 
             CharacterDialog dialog = GameScene.Scene.CharacterDialog;
 
@@ -581,6 +582,16 @@ namespace Client.MirControls
                             case MirGridType.Inventory: //From Invenotry
                                 if (Item != null)
                                 {
+                                    if (CMain.Ctrl)
+                                    {
+                                        //Combine
+                                        Network.Enqueue(new C.CombineItem { IDFrom = GameScene.SelectedCell.Item.UniqueID, IDTo = Item.UniqueID });
+                                        Locked = true;
+                                        GameScene.SelectedCell.Locked = true;
+                                        GameScene.SelectedCell = null;
+                                        return;
+                                    }
+
                                     if (GameScene.SelectedCell.Item.Info == Item.Info && Item.Count < Item.Info.StackSize)
                                     {
                                         //Merge.

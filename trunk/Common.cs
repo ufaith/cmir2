@@ -840,6 +840,8 @@ public enum ServerPacketIds : short
 
     UserBackStep,//ArcherSpells - Backstep
     ObjectBackStep,//ArcherSpells - Backstep
+
+    CombineItem
 }
 
 public enum ClientPacketIds : short
@@ -921,6 +923,7 @@ public enum ClientPacketIds : short
     ShareQuest,
 
     AcceptReincarnation,
+    CombineItem,
 }
 
 public class InIReader
@@ -2758,6 +2761,8 @@ public abstract class Packet
                 return new C.ShareQuest();
             case (short)ClientPacketIds.AcceptReincarnation:
                 return new C.AcceptReincarnation();
+            case (short)ClientPacketIds.CombineItem:
+                return new C.CombineItem();
             default:
                 throw new NotImplementedException();
         }
@@ -3081,6 +3086,8 @@ public abstract class Packet
                 return new S.UserBackStep();
             case (short)ServerPacketIds.ObjectBackStep://ArcherSpells - Backstep
                 return new S.ObjectBackStep();
+            case (short)ServerPacketIds.CombineItem:
+                return new S.CombineItem();
             default:
                 throw new NotImplementedException();
         }

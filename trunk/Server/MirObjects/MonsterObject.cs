@@ -571,7 +571,7 @@ namespace Server.MirObjects
             {
                 DropInfo drop = Info.Drops[i];
 
-                int rate = (int)(drop.Chance / (Settings.DropRate + (EXPOwner != null ? EXPOwner.DropRate : 0))); if (rate < 1) rate = 1;
+                int rate = (int)(drop.Chance / (Settings.DropRate + (EXPOwner != null ? EXPOwner.DropRateOffset : 0))); if (rate < 1) rate = 1;
 
                 if (Envir.Random.Next(rate) != 0) continue;
 
@@ -887,7 +887,6 @@ namespace Server.MirObjects
             bool refresh = false;
             for (int i = Buffs.Count - 1; i >= 0; i--)
             {
-
                 Buff buff = Buffs[i];
 
                 if (Envir.Time <= buff.ExpireTime) continue;
