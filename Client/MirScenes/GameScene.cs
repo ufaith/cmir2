@@ -1140,6 +1140,9 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.ObjectBackStep://ArcherSpells - Backstep
                     ObjectBackStep((S.ObjectBackStep)p);
                     break;
+                case (short)ServerPacketIds.CombineItem:
+                    CombineItem((S.CombineItem)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1220,7 +1223,9 @@ namespace Client.MirScenes
                 image.Location = new Point((Settings.ScreenWidth - 155) - i * 30, 6);
                 image.Hint = buff.ToString();
 
-                ((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : Math.Round((buff.Expire - CMain.Time) / 1000D).ToString();
+                double timeRemaining = Math.Round((buff.Expire - CMain.Time) / 1000D);
+
+                ((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : timeRemaining.ToString();
 
                 switch (buff.Type)
                 {
@@ -1499,6 +1504,23 @@ namespace Client.MirScenes
             UserItem i = fromCell.Item;
             fromCell.Item = null;
             toCell.Item = i;
+            User.RefreshStats();
+        }
+
+        private void CombineItem(S.CombineItem p)
+        {
+            MirItemCell fromCell = InventoryDialog.GetCell(p.IDFrom) ?? BeltDialog.GetCell(p.IDFrom);
+            MirItemCell toCell = InventoryDialog.GetCell(p.IDTo) ?? BeltDialog.GetCell(p.IDTo);
+
+            if (toCell == null || fromCell == null) return;
+
+            toCell.Locked = false;
+            fromCell.Locked = false;
+
+            if (!p.Success) return;
+
+            fromCell.Item = null;
+
             User.RefreshStats();
         }
 
@@ -14977,7 +14999,7 @@ namespace Client.MirScenes
                     text = "MoonLight\nInvisible to many monsters and able to move.\n";
                     break;
                 case BuffType.General:
-                    text = string.Format("Global Buff\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);
+                    text = string.Format("Mirian Buff\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);
                     break;
             }
 

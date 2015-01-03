@@ -101,7 +101,7 @@ namespace Server.MirObjects
         public byte LifeOnHit;
         public byte HpDrainRate;
         public float HpDrain = 0;
-        public float ExpRate = 0;
+        public float ExpRateOffset = 0;
 
         public override int PKPoints
         {
@@ -1007,7 +1007,7 @@ namespace Server.MirObjects
 
         public override void WinExp(uint amount)
         {
-            amount = (uint)(amount * (Settings.ExpRate + ExpRate));
+            amount = (uint)(amount * (Settings.ExpRate + ExpRateOffset));
 
             if (GroupMembers != null)
             {
@@ -1630,8 +1630,8 @@ namespace Server.MirObjects
             Freezing = 0;
             PoisonAttack = 0;
 
-            ExpRate = 0;
-            DropRate = 0;
+            ExpRateOffset = 0;
+            DropRateOffset = 0;
 
             MaxHP = (ushort)Math.Min(ushort.MaxValue, 14 + (Level / Settings.ClassBaseStats[(byte)Class].HpGain + Settings.ClassBaseStats[(byte)Class].HpGainRate) * Level);
 
@@ -2215,8 +2215,8 @@ namespace Server.MirObjects
                         ASpeed = (sbyte)Math.Min(sbyte.MaxValue, (Math.Max(sbyte.MinValue, ASpeed - rASpeed)));
                         break;
                     case BuffType.General:
-                        ExpRate += buff.Value;
-                        DropRate += buff.Value;
+                        ExpRateOffset = (float)Math.Min(float.MaxValue, ExpRateOffset + buff.Value);
+                        DropRateOffset = (float)Math.Min(float.MaxValue, DropRateOffset + buff.Value);
                         break;
                 }
 
@@ -3163,7 +3163,7 @@ namespace Server.MirObjects
                 {
                     if (Buffs[i].Type != BuffType.Hiding) continue;
 
-                    Hidden = false;
+                    //Hidden = false;
                     Buffs[i].ExpireTime = 0;
                     break;
                 }
@@ -4677,6 +4677,8 @@ namespace Server.MirObjects
 
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, this, magic, GetAttackPower(MinSC, MaxSC) * 2 + (magic.Level + 1) * 10, location);
             CurrentMap.ActionList.Add(action);
+
+            ConsumeItem(item, 1);
         }
         private void MassHealing(UserMagic magic, Point location)
         {
@@ -6340,6 +6342,7 @@ namespace Server.MirObjects
                 Enqueue(p);
                 return;
             }
+
             if (temp.Cursed && !UnlockCurse)
             {
                 Enqueue(p);
@@ -6543,7 +6546,7 @@ namespace Server.MirObjects
         {
             S.EquipItem p = new S.EquipItem { Grid = grid, UniqueID = id, To = to, Success = false };
 
-            if (RidingMount || Fishing)
+            if (Fishing)
             {
                 Enqueue(p);
                 return;
@@ -6554,6 +6557,7 @@ namespace Server.MirObjects
                 Enqueue(p);
                 return;
             }
+
             UserItem[] array;
             switch (grid)
             {
@@ -6598,6 +6602,12 @@ namespace Server.MirObjects
                 break;
             }
 
+            
+            if(RidingMount && temp.Info.Type != ItemType.Scroll && temp.Info.Type != ItemType.Potion)
+            {
+                Enqueue(p);
+                return;
+            }
 
             if (temp == null || index == -1)
             {
@@ -6628,8 +6638,10 @@ namespace Server.MirObjects
                     temp.SoulBoundId = Info.Index;
                     Enqueue(new S.RefreshItem { Item = temp });
                 }
-                if (UnlockCurse && Info.Equipment[to].Cursed)
+
+                if ((Info.Equipment[to] != null) && (Info.Equipment[to].Cursed) && (UnlockCurse))
                     UnlockCurse = false;
+
                 array[index] = Info.Equipment[to];
                 Info.Equipment[to] = temp;
                 p.Success = true;
@@ -6671,15 +6683,15 @@ namespace Server.MirObjects
                 case ItemType.Potion:
                     switch (item.Info.Shape)
                     {
-                        case 0:
+                        case 0: //NormalPotion
                             PotHealthAmount = (ushort)Math.Min(ushort.MaxValue, PotHealthAmount + item.Info.HP);
                             PotManaAmount = (ushort)Math.Min(ushort.MaxValue, PotManaAmount + item.Info.MP);
                             break;
-                        case 1: //Sun Potion
+                        case 1: //SunPotion
                             ChangeHP(item.Info.HP);
                             ChangeMP(item.Info.MP);
                             break;
-                        case 2:
+                        case 2: //MysteryWater
                             if (UnlockCurse)
                             {
                                 ReceiveChat("You can already unequip a cursed item.", ChatType.Hint);
@@ -6716,14 +6728,14 @@ namespace Server.MirObjects
                                 return;
                             }
                             break;
-                        case 3:
+                        case 3: //BenedictionOil
                             if (!TryLuckWeapon())
                             {
                                 Enqueue(p);
                                 return;
                             }
                             break;
-                        case 4:
+                        case 4: //RepairOil
                             temp = Info.Equipment[(int)EquipmentSlot.Weapon];
                             if (temp == null || temp.MaxDura == temp.CurrentDura)
                             {
@@ -6743,7 +6755,7 @@ namespace Server.MirObjects
                             ReceiveChat("Your weapon has been partially repaired", ChatType.Hint);
                             Enqueue(new S.ItemRepaired { UniqueID = temp.UniqueID, MaxDura = temp.MaxDura, CurrentDura = temp.CurrentDura });
                             break;
-                        case 5:
+                        case 5: //WarGodOil
                             temp = Info.Equipment[(int)EquipmentSlot.Weapon];
                             if (temp == null || temp.MaxDura == temp.CurrentDura)
                             {
@@ -7024,6 +7036,105 @@ namespace Server.MirObjects
             Enqueue(p);
             RefreshStats();
         }
+
+        public void CombineItem(ulong fromID, ulong toID)
+        {
+            S.CombineItem p = new S.CombineItem { IDFrom = fromID, IDTo = toID, Success = false };
+
+            UserItem[] array = Info.Inventory;
+            UserItem tempFrom = null;
+            UserItem tempTo = null;
+            int indexFrom = -1;
+            int indexTo = -1;
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] == null || array[i].UniqueID != fromID) continue;
+                indexFrom = i;
+                tempFrom = array[i];
+                break;
+            }
+
+            if (tempFrom == null || indexFrom == -1)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] == null || array[i].UniqueID != toID) continue;
+                indexTo = i;
+                tempTo = array[i];
+                break;
+            }
+
+            if (tempTo == null || indexTo == -1)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            bool canRepair = false;
+
+            if (tempFrom.Info.Type != ItemType.Nothing)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (tempTo.Info.Bind.HasFlag(BindMode.DontRepair))
+            {
+                Enqueue(p);
+                return;
+            }
+
+            switch (tempTo.Info.Type)
+            {
+                case ItemType.Weapon:
+                    switch (tempFrom.Info.Shape)
+                    {
+                        case 1: //repair weapons
+                            canRepair = true;
+                            break;
+                    }
+                    break;
+                case ItemType.Armour:
+                case ItemType.Helmet:
+                case ItemType.Ring:
+                case ItemType.Bracelet:
+                case ItemType.Boots:
+                case ItemType.Belt:
+                    switch (tempFrom.Info.Shape)
+                    {
+                        case 2: //repair armour
+                            canRepair = true;
+                            break;
+                    }
+                    break;
+            }
+
+            if (!canRepair)
+            {
+                Enqueue(p);
+                return;
+            }
+
+            if (canRepair)
+            {
+                tempTo.CurrentDura = (ushort)Math.Min(tempTo.MaxDura, tempTo.CurrentDura + tempFrom.CurrentDura);
+                tempTo.DuraChanged = false;
+
+                ReceiveChat("Item has been repaired.", ChatType.Hint);
+                Enqueue(new S.ItemRepaired { UniqueID = tempTo.UniqueID, MaxDura = tempTo.MaxDura, CurrentDura = tempTo.CurrentDura });
+            }
+
+            tempFrom = null;
+
+            p.Success = true;
+            Enqueue(p);
+        }
+
         public void DropItem(ulong id, uint count)
         {
             S.DropItem p = new S.DropItem { UniqueID = id, Count = count, Success = false };
