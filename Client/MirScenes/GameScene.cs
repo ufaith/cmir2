@@ -1157,7 +1157,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Visible = true,
-                Sort = false
+                Sort = false,
+                Index = BuffImage(buff.Type)
             };
 
             new MirLabel
@@ -1172,42 +1173,26 @@ namespace Client.MirScenes
 
             switch (buff.Type)
             {
-                case BuffType.Teleport:
-                    image.Index = 885;
-                    break;
-                case BuffType.Hiding:
-                    image.Index = 884;
-                    break;
-                case BuffType.Haste:
-                    image.Index = 880;
-                    break;
-                case BuffType.LightBody:
-                    image.Index = 882;
-                    break;
-                case BuffType.SoulShield:
-                    image.Index = 870;
-                    break;
-                case BuffType.BlessedArmour:
-                    image.Index = 871;
-                    break;
-                case BuffType.ProtectionField:
-                    image.Index = 861;
-                    break;
-                case BuffType.Rage:
-                    image.Index = 860;
-                    break;
                 case BuffType.UltimateEnhancer:
-                    image.Index = 862;
                     text = string.Format("DC increased by 0-{0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
                     break;
-                case BuffType.Curse:
-                    image.Index = 892;
+                case BuffType.Impact:
+                    text = string.Format("DC increased by 0-{0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
                     break;
-                case BuffType.MoonLight:
-                    image.Index = 884;
+                case BuffType.Magic:
+                    text = string.Format("MC increased by 0-{0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
                     break;
-                case BuffType.General:
-                    image.Index = 903;
+                case BuffType.Taoist:
+                    text = string.Format("SC increased by 0-{0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
+                    break;
+                case BuffType.Storm:
+                    text = string.Format("A.Speed increased by {0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
+                    break;
+                case BuffType.HealthAid:
+                    text = string.Format("HP increased by {0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
+                    break;
+                case BuffType.ManaAid:
+                    text = string.Format("MP increased by {0} for {1} seconds.", buff.Value, (buff.Expire - CMain.Time) / 1000);
                     break;
             }
 
@@ -1222,50 +1207,55 @@ namespace Client.MirScenes
                 Buff buff = Buffs[i];
                 image.Location = new Point((Settings.ScreenWidth - 155) - i * 30, 6);
                 image.Hint = buff.ToString();
+                image.Index = BuffImage(buff.Type);
 
                 double timeRemaining = Math.Round((buff.Expire - CMain.Time) / 1000D);
 
-                ((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : timeRemaining.ToString();
-
-                switch (buff.Type)
-                {
-                    case BuffType.Teleport:
-                        image.Index = 885;
-                        break;
-                    case BuffType.Hiding:
-                        image.Index = 884;
-                        break;
-                    case BuffType.Haste:
-                        image.Index = 880;
-                        break;
-                    case BuffType.LightBody:
-                        image.Index = 882;
-                        break;
-                    case BuffType.SoulShield:
-                        image.Index = 870;
-                        break;
-                    case BuffType.BlessedArmour:
-                        image.Index = 871;
-                        break;
-                    case BuffType.ProtectionField:
-                        image.Index = 861;
-                        break;
-                    case BuffType.Rage:
-                        image.Index = 860;
-                        break;
-                    case BuffType.UltimateEnhancer:
-                        image.Index = 862;
-                        break;
-                    case BuffType.Curse:
-                        image.Index = 892;
-                        break;
-                    case BuffType.MoonLight:
-                        image.Index = 884;
-                        break;
-                    case BuffType.General:
-                        image.Index = 903;
-                        break;
-                }
+                ((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : timeRemaining.ToString();   
+            }
+        }
+        public int BuffImage(BuffType type)
+        {
+            switch (type)
+            {
+                case BuffType.Teleport:
+                    return 885;
+                case BuffType.Hiding:
+                    return 884;
+                case BuffType.Haste:
+                    return 880;
+                case BuffType.LightBody:
+                    return 882;
+                case BuffType.SoulShield:
+                    return 870;
+                case BuffType.BlessedArmour:
+                    return 871;
+                case BuffType.ProtectionField:
+                    return 861;
+                case BuffType.Rage:
+                    return 860;
+                case BuffType.UltimateEnhancer:
+                    return 862;
+                case BuffType.Curse:
+                    return 892;
+                case BuffType.MoonLight:
+                    return 884;
+                case BuffType.General:
+                    return 903;
+                case BuffType.Impact:
+                    return 893;
+                case BuffType.Magic:
+                    return 901;
+                case BuffType.Taoist:
+                    return 889;
+                case BuffType.Storm:
+                    return 908;
+                case BuffType.HealthAid:
+                    return 873;
+                case BuffType.ManaAid:
+                    return 904;
+                default:
+                    return 0;
             }
         }
 
@@ -3686,6 +3676,9 @@ namespace Client.MirScenes
                 case ItemType.Scroll:
                     PotionItemInfo();
                     break;
+                case ItemType.Gem:
+                    GemItemInfo();
+                    break;
                 default:
                     EquipmentItemInfo(realItem);
                     break;
@@ -4040,6 +4033,63 @@ namespace Client.MirScenes
             ItemLabel.Visible = true;
         }
 
+        private void GemItemInfo()
+        {
+            if (HoverItem.Info.Durability > 0)
+            {
+                MirLabel label = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
+                    OutLine = false,
+                    Parent = ItemLabel,
+                    Text = string.Format("Durability: {0}/{1}", Math.Round(HoverItem.CurrentDura / 1000M),
+                                                   Math.Round(HoverItem.MaxDura / 1000M))
+                };
+
+                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
+            }
+
+            switch (HoverItem.Info.Shape)
+            {
+                case 1:
+                    {
+                        MirLabel label = new MirLabel
+                        {
+                            AutoSize = true,
+                            ForeColour = Color.White,
+                            Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                            OutLine = false,
+                            Parent = ItemLabel,
+                            Text = "Hold CTRL and left click to repair weapons."
+                        };
+
+                        ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                  label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    }
+                    break;
+                case 2:
+                    {
+                        MirLabel label = new MirLabel
+                        {
+                            AutoSize = true,
+                            ForeColour = Color.White,
+                            Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                            OutLine = false,
+                            Parent = ItemLabel,
+                            Text = "Hold CTRL and left click to repair armour\nand accessory items."
+                        };
+
+                        ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                  label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void PotionItemInfo()
         {
             if (HoverItem.Info.Durability > 0)
@@ -4051,51 +4101,180 @@ namespace Client.MirScenes
                     Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
                     OutLine = false,
                     Parent = ItemLabel,
-                    Text = string.Format("Range: {0}", HoverItem.Info.Durability)
+                    Text = string.Format(HoverItem.Info.Shape == 3 ? "Time: {0} (s)" : "Range: {0}", HoverItem.Info.Durability)
                 };
 
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
             }
-            int value = HoverItem.Info.HP;
-            int addedValue = HoverItem.HP;
+            int value = 0;
+            int addedValue = 0;
 
             //  int x = 4;
             //   int y = ItemLabel.DisplayRectangle.Bottom;
 
-            if (value > 0 || addedValue > 0)
+            switch(HoverItem.Info.Shape)
             {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue > 0 ? "Health Restoration: +{0}HP (+{1})" : "Health Restoration: +{0}HP", value + addedValue, addedValue)
-                };
+                case 3:
+                    #region Impact/Magic/Taoist/Storm/HealthAid/ManaAid
+                    {
+                        
+                        value = HoverItem.Info.MaxDC;
+                        addedValue = HoverItem.DC;
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
+                        if (value > 0 || addedValue > 0)
+                        {
+                            MirLabel label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue > 0 ? "Damage Increase: +0-{0} (+{1})" : "Damage Increase: +0-{0}", value + addedValue, addedValue)
+                            };
 
-            value = HoverItem.Info.MP;
-            addedValue = HoverItem.MP;
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
 
+                        value = HoverItem.Info.MaxMC;
+                        addedValue = HoverItem.MC;
 
-            if (value > 0 || addedValue > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue > 0 ? "Mana Restoration: +{0}MP (+{1})" : "Mana Restoration: +{0}MP", value + addedValue, addedValue)
-                };
+                        if (value > 0 || addedValue > 0)
+                        {
+                            MirLabel label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue > 0 ? "Magic Increase: +0-{0} (+{1})" : "Magic Increase: +0-{0}", value + addedValue, addedValue)
+                            };
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value = HoverItem.Info.MaxSC;
+                        addedValue = HoverItem.SC;
+
+                        if (value > 0 || addedValue > 0)
+                        {
+                            MirLabel label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue > 0 ? "Soul Increase: +0-{0} (+{1})" : "Soul Increase: +0-{0}", value + addedValue, addedValue)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value = HoverItem.Info.AttackSpeed;
+                        addedValue = HoverItem.AttackSpeed;
+
+                        if (value > 0 || addedValue > 0)
+                        {
+                            MirLabel label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue > 0 ? "A.Speed Increase: +{0} (+{1})" : "A.Speed Increase: +{0}", value + addedValue, addedValue)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value = HoverItem.Info.HP;
+                        addedValue = HoverItem.HP;
+
+                        if (value > 0 || addedValue > 0)
+                        {
+                            MirLabel label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue > 0 ? "Health Increase: +{0}HP (+{1})" : "Health Increase: +{0}HP", value + addedValue, addedValue)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value = HoverItem.Info.MP;
+                        addedValue = HoverItem.MP;
+
+                        if (value > 0 || addedValue > 0)
+                        {
+                            MirLabel label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue > 0 ? "Mana Increase: +{0}MP (+{1})" : "Mana Increase: +{0}MP", value + addedValue, addedValue)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+                    }
+                    break;
+                    #endregion
+                default:
+                    {
+                        value = HoverItem.Info.MP;
+                        addedValue = HoverItem.MP;
+
+                        if (value > 0 || addedValue > 0)
+                        {
+                            MirLabel label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue > 0 ? "Health Restoration: +{0}HP (+{1})" : "Health Restoration: +{0}HP", value + addedValue, addedValue)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value = HoverItem.Info.MP;
+                        addedValue = HoverItem.MP;
+
+                        if (value > 0 || addedValue > 0)
+                        {
+                            MirLabel label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue > 0 ? "Mana Restoration: +{0}MP (+{1})" : "Mana Restoration: +{0}MP", value + addedValue, addedValue)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+                    }
+                    break;
             }
 
         }
@@ -14990,17 +15169,39 @@ namespace Client.MirScenes
                     text = string.Format("Rage\nIncreases DC by: 0-{0}.\n", Value);
                     break;
                 case BuffType.UltimateEnhancer:
-                    text = string.Format("UltimateEnhancer\nIncreases DC by: 0-{0}.\n", Value);
+                    text = string.Format("Ultimate Enhancer\nIncreases DC by: 0-{0}.\n", Value);
                     break;
                 case BuffType.Curse:
                     text = string.Format("Cursed\nDecreases DC/MC/SC/ASpeed by: {0}%.\n", Value);
                     break;
                 case BuffType.MoonLight:
-                    text = "MoonLight\nInvisible to many monsters and able to move.\n";
+                    text = "Moon Light\nInvisible to many monsters and able to move.\n";
                     break;
                 case BuffType.General:
                     text = string.Format("Mirian Buff\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);
                     break;
+
+                case BuffType.Impact:
+                    text = string.Format("Impact\nIncreases DC by: 0-{0}.\n", Value);
+                    break;
+                case BuffType.Magic:
+                    text = string.Format("Magic\nIncreases MC by: 0-{0}.\n", Value);
+                    break;
+                case BuffType.Taoist:
+                    text = string.Format("Taoist\nIncreases SC by: 0-{0}.\n", Value);
+                    break;
+                case BuffType.Storm:
+                    text = string.Format("Storm\nIncreases A.Speed by: {0}.\n", Value);
+                    break;
+                case BuffType.HealthAid:
+                    text = string.Format("HealthAid\nIncreases HP by: {0}.\n", Value);
+                    break;
+                case BuffType.ManaAid:
+                    text = string.Format("ManaAid\nIncreases MP by: {0}.\n", Value);
+                    break;
+
+
+
             }
 
             if (Infinite)

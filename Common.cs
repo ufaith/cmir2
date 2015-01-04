@@ -665,7 +665,14 @@ public enum BuffType : byte
     Rage,
     Curse,
     MoonLight,
-    General
+    General,
+
+    Impact,
+    Magic,
+    Taoist,
+    Storm,
+    HealthAid,
+    ManaAid
 }
 
 public enum DefenceType : byte
