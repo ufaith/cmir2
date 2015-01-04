@@ -2218,6 +2218,25 @@ namespace Server.MirObjects
                         ExpRateOffset = (float)Math.Min(float.MaxValue, ExpRateOffset + buff.Value);
                         DropRateOffset = (float)Math.Min(float.MaxValue, DropRateOffset + buff.Value);
                         break;
+
+                    case BuffType.Impact:
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
+                        break;
+                    case BuffType.Magic:
+                        MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + buff.Value);
+                        break;
+                    case BuffType.Taoist:
+                        MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + buff.Value);
+                        break;
+                    case BuffType.Storm:
+                        ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + buff.Value)));
+                        break;
+                    case BuffType.HealthAid:
+                        HP = (ushort)Math.Min(ushort.MaxValue, HP + buff.Value);
+                        break;
+                    case BuffType.ManaAid:
+                        MP = (ushort)Math.Min(ushort.MaxValue, MP + buff.Value);
+                        break;
                 }
 
             }
@@ -6700,6 +6719,28 @@ namespace Server.MirObjects
                             }
                             ReceiveChat("You can now unequip a cursed item.", ChatType.Hint);
                             UnlockCurse = true;
+                            break;
+                        case 3:
+                            int time = item.Info.Durability;
+
+                            if (item.Info.MaxDC > 0)
+                                AddBuff(new Buff { Type = BuffType.Impact, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxDC });
+
+                            if (item.Info.MaxMC > 0)
+                                AddBuff(new Buff { Type = BuffType.Magic, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxMC });
+
+                            if (item.Info.MaxSC > 0)
+                                AddBuff(new Buff { Type = BuffType.Taoist, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxSC });
+
+                            if (item.Info.AttackSpeed > 0)
+                                AddBuff(new Buff { Type = BuffType.Storm, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.AttackSpeed });
+
+                            if (item.Info.HP > 0)
+                                AddBuff(new Buff { Type = BuffType.HealthAid, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.HP });
+
+                            if (item.Info.MP > 0)
+                                AddBuff(new Buff { Type = BuffType.ManaAid, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MP });
+
                             break;
                     }
                     break;

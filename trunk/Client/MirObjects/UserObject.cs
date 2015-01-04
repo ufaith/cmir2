@@ -575,7 +575,6 @@ namespace Client.MirObjects
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
                         break;
                     case BuffType.Curse:
-
                         byte rMaxDC = (byte)(((int)MaxDC / 100) * buff.Value);
                         byte rMaxMC = (byte)(((int)MaxMC / 100) * buff.Value);
                         byte rMaxSC = (byte)(((int)MaxSC / 100) * buff.Value);
@@ -585,6 +584,25 @@ namespace Client.MirObjects
                         MaxMC = (byte)Math.Max(byte.MinValue, MaxMC - rMaxMC);
                         MaxSC = (byte)Math.Max(byte.MinValue, MaxSC - rMaxSC);
                         ASpeed = (sbyte)Math.Min(sbyte.MaxValue, (Math.Max(sbyte.MinValue, ASpeed - rASpeed)));
+                        break;
+
+                    case BuffType.Impact:
+                        MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
+                        break;
+                    case BuffType.Magic:
+                        MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + buff.Value);
+                        break;
+                    case BuffType.Taoist:
+                        MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + buff.Value);
+                        break;
+                    case BuffType.Storm:
+                        ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + buff.Value)));
+                        break;
+                    case BuffType.HealthAid:
+                        HP = (ushort)Math.Min(ushort.MaxValue, HP + buff.Value);
+                        break;
+                    case BuffType.ManaAid:
+                        MP = (ushort)Math.Min(ushort.MaxValue, MP + buff.Value);
                         break;
                 }
 
