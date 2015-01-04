@@ -6086,7 +6086,10 @@ namespace Server.MirObjects
         }
         public override void AddBuff(Buff b)
         {
+            if (Buffs.Any(d => d.Infinite && d.Type == b.Type)) return; //cant overwrite infinite buff with regular buff
+
             base.AddBuff(b);
+
             Enqueue(new S.AddBuff { Type = b.Type, Caster = b.Caster.Name, Expire = b.ExpireTime - Envir.Time, Value = b.Value, Infinite = b.Infinite });
             RefreshStats();
         }
@@ -6723,23 +6726,23 @@ namespace Server.MirObjects
                         case 3:
                             int time = item.Info.Durability;
 
-                            if (item.Info.MaxDC > 0)
-                                AddBuff(new Buff { Type = BuffType.Impact, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxDC });
+                            if ((item.Info.MaxDC + item.DC) > 0)
+                                AddBuff(new Buff { Type = BuffType.Impact, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxDC + item.DC });
 
-                            if (item.Info.MaxMC > 0)
-                                AddBuff(new Buff { Type = BuffType.Magic, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxMC });
+                            if ((item.Info.MaxMC + item.MC) > 0)
+                                AddBuff(new Buff { Type = BuffType.Magic, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxMC + item.MC });
 
-                            if (item.Info.MaxSC > 0)
-                                AddBuff(new Buff { Type = BuffType.Taoist, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxSC });
+                            if ((item.Info.MaxSC + item.SC) > 0)
+                                AddBuff(new Buff { Type = BuffType.Taoist, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MaxSC + item.SC });
 
-                            if (item.Info.AttackSpeed > 0)
-                                AddBuff(new Buff { Type = BuffType.Storm, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.AttackSpeed });
+                            if ((item.Info.AttackSpeed + item.AttackSpeed) > 0)
+                                AddBuff(new Buff { Type = BuffType.Storm, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.AttackSpeed + item.AttackSpeed });
 
-                            if (item.Info.HP > 0)
-                                AddBuff(new Buff { Type = BuffType.HealthAid, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.HP });
+                            if ((item.Info.HP + item.HP) > 0)
+                                AddBuff(new Buff { Type = BuffType.HealthAid, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.HP + item.HP });
 
-                            if (item.Info.MP > 0)
-                                AddBuff(new Buff { Type = BuffType.ManaAid, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MP });
+                            if ((item.Info.MP + item.MP) > 0)
+                                AddBuff(new Buff { Type = BuffType.ManaAid, Caster = this, ExpireTime = Envir.Time + time * 1000, Value = item.Info.MP + item.MP });
 
                             break;
                     }
@@ -7118,7 +7121,7 @@ namespace Server.MirObjects
 
             bool canRepair = false;
 
-            if (tempFrom.Info.Type != ItemType.Nothing)
+            if (tempFrom.Info.Type != ItemType.Gem)
             {
                 Enqueue(p);
                 return;
@@ -7130,30 +7133,56 @@ namespace Server.MirObjects
                 return;
             }
 
-            switch (tempTo.Info.Type)
+            switch (tempFrom.Info.Shape)
             {
-                case ItemType.Weapon:
-                    switch (tempFrom.Info.Shape)
+                case 1: //repair weapons
+                    switch (tempTo.Info.Type)
                     {
-                        case 1: //repair weapons
+                        case ItemType.Weapon:
                             canRepair = true;
                             break;
                     }
                     break;
-                case ItemType.Armour:
-                case ItemType.Helmet:
-                case ItemType.Ring:
-                case ItemType.Bracelet:
-                case ItemType.Boots:
-                case ItemType.Belt:
-                    switch (tempFrom.Info.Shape)
+                case 2: //repair armour + accessories
+                    switch (tempTo.Info.Type)
                     {
-                        case 2: //repair armour
+                        case ItemType.Armour:
+                        case ItemType.Helmet:
+                        case ItemType.Ring:
+                        case ItemType.Bracelet:
+                        case ItemType.Boots:
+                        case ItemType.Belt:
                             canRepair = true;
                             break;
                     }
+                    break;
+                case 3: //gems
+                case 4: //orbs
+                    if(Envir.Random.Next(10) <= 3)
+                    {
+                        //upgrade has no effect
+
+                        if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(10) <= 2))
+                        {
+                            //item destroyed
+                        }
+                    }
+                    else
+                    {
+                        if((tempFrom.Info.MaxDC + tempFrom.DC) > 0)
+                            tempTo.DC = (byte)Math.Min(byte.MaxValue, tempTo.DC + tempFrom.Info.MaxDC + tempFrom.DC);
+
+                        if ((tempFrom.Info.MaxMC + tempFrom.MC) > 0)
+                            tempTo.MC = (byte)Math.Min(byte.MaxValue, tempTo.MC + tempFrom.Info.MaxMC + tempFrom.MC);
+
+                        if ((tempFrom.Info.MaxSC + tempFrom.SC) > 0)
+                            tempTo.SC = (byte)Math.Min(byte.MaxValue, tempTo.SC + tempFrom.Info.MaxSC + tempFrom.SC);
+                    }
+
                     break;
             }
+
+            RefreshBagWeight();
 
             if (!canRepair)
             {
