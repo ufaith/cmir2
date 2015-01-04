@@ -1205,7 +1205,7 @@ namespace Client.MirScenes
             {
                 MirImageControl image = BuffList[i];
                 Buff buff = Buffs[i];
-                image.Location = new Point((Settings.ScreenWidth - 155) - i * 30, 6);
+                image.Location = new Point((Settings.ScreenWidth - 155) - i * 26, 6);
                 image.Hint = buff.ToString();
                 image.Index = BuffImage(buff.Type);
 
@@ -3825,7 +3825,7 @@ namespace Client.MirScenes
                         Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                         OutLine = false,
                         Parent = ItemLabel,
-                        Text = "can't drop on death"
+                        Text = "Can't drop on death"
                     };
                     ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -3833,13 +3833,13 @@ namespace Client.MirScenes
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontDrop))
                 {
-                    text = "can't drop";
+                    text = "Can't drop";
                     count = 1;
                 }
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontUpgrade))
                 {
-                    text += (text == "") ? "can't upgrade" : ", can't upgrade";
+                    text += (text == "") ? "Can't upgrade" : ", can't upgrade";
                     count += 1;
                 }
                 if (count > 2)
@@ -3861,7 +3861,7 @@ namespace Client.MirScenes
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontSell))
                 {
-                    text += (text == "") ? "can't sell" : ", can't sell";
+                    text += (text == "") ? "Can't sell" : ", can't sell";
                     count += 1;
                 }
                 if (count > 2)
@@ -3883,7 +3883,7 @@ namespace Client.MirScenes
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontTrade))
                 {
-                    text += (text == "") ? "can't trade" : ", can't trade";
+                    text += (text == "") ? "Can't trade" : ", can't trade";
                     count += 1;
                 }
                 if (count > 2)
@@ -3905,7 +3905,7 @@ namespace Client.MirScenes
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontStore))
                 {
-                    text += (text == "") ? "can't store" : ", can't store";
+                    text += (text == "") ? "Can't store" : ", can't store";
                     count += 1;
                 }
                 if (count > 1)
@@ -3927,7 +3927,7 @@ namespace Client.MirScenes
 
                 if (HoverItem.Info.Bind.HasFlag(BindMode.DontRepair))
                 {
-                    text += (text == "") ? "can't repair" : ", can't repair";
+                    text += (text == "") ? "Can't repair" : ", can't repair";
                     count += 1;
                 }
                 if (count > 1)
@@ -3948,7 +3948,7 @@ namespace Client.MirScenes
                 }
                 if (HoverItem.Info.BindNoSRepair)
                 {
-                    text += (text == "") ? "can't  special repair" : ", can't special repair";
+                    text += (text == "") ? "Can't special repair" : ", can't special repair";
                     count += 1;
                 }
                 if (count > 1)
@@ -3976,7 +3976,7 @@ namespace Client.MirScenes
                         Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                         OutLine = false,
                         Parent = ItemLabel,
-                        Text = "destroyed when dropped"
+                        Text = "Destroyed when dropped"
                     };
                     ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
@@ -4130,7 +4130,7 @@ namespace Client.MirScenes
                                 Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                                 OutLine = false,
                                 Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Damage Increase: +0-{0} (+{1})" : "Damage Increase: +0-{0}", value + addedValue, addedValue)
+                                Text = string.Format(addedValue > 0 ? "Damage Increase: +{0} (+{1})" : "Damage Increase: +{0}", value + addedValue, addedValue)
                             };
 
                             ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
@@ -4149,7 +4149,7 @@ namespace Client.MirScenes
                                 Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                                 OutLine = false,
                                 Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Magic Increase: +0-{0} (+{1})" : "Magic Increase: +0-{0}", value + addedValue, addedValue)
+                                Text = string.Format(addedValue > 0 ? "Magic Increase: +{0} (+{1})" : "Magic Increase: +{0}", value + addedValue, addedValue)
                             };
 
                             ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
@@ -4168,7 +4168,7 @@ namespace Client.MirScenes
                                 Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
                                 OutLine = false,
                                 Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Soul Increase: +0-{0} (+{1})" : "Soul Increase: +0-{0}", value + addedValue, addedValue)
+                                Text = string.Format(addedValue > 0 ? "Spirit Increase: +{0} (+{1})" : "Spirit Increase: +{0}", value + addedValue, addedValue)
                             };
 
                             ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
@@ -4236,8 +4236,8 @@ namespace Client.MirScenes
                     #endregion
                 default:
                     {
-                        value = HoverItem.Info.MP;
-                        addedValue = HoverItem.MP;
+                        value = HoverItem.Info.HP;
+                        addedValue = HoverItem.HP;
 
                         if (value > 0 || addedValue > 0)
                         {

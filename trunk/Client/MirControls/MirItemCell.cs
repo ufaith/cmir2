@@ -594,7 +594,7 @@ namespace Client.MirControls
 
                                     if (GameScene.SelectedCell.Item.Info == Item.Info && Item.Count < Item.Info.StackSize)
                                     {
-                                        //Merge.
+                                        //Merge
                                         Network.Enqueue(new C.MergeItem { GridFrom = GameScene.SelectedCell.GridType, GridTo = GridType, IDFrom = GameScene.SelectedCell.Item.UniqueID, IDTo = Item.UniqueID });
 
                                         Locked = true;

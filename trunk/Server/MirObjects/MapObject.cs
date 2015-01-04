@@ -348,7 +348,6 @@ namespace Server.MirObjects
         public abstract void ApplyPoison(Poison p, MapObject Caster = null, bool NoResist = false);
         public virtual void AddBuff(Buff b)
         {
-
             switch (b.Type)
             {
                 case BuffType.MoonLight:
@@ -388,8 +387,6 @@ namespace Server.MirObjects
             for (int i = 0; i < Buffs.Count; i++)
             {
                 if (Buffs[i].Type != b.Type) continue;
-
-                if (Buffs[i].Infinite) return;
 
                 Buffs[i] = b;
                 return;
