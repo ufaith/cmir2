@@ -122,7 +122,7 @@ namespace Client.MirScenes
         public List<OutPutMessage> OutputMessages = new List<OutPutMessage>();
 
         public List<MirImageControl> BuffList = new List<MirImageControl>();
-        public static long PoisonFieldTime;
+        public static long PoisonFieldTime, SlashingBurstTime;
 
         public GameScene()
         {
@@ -307,7 +307,8 @@ namespace Client.MirScenes
                     else FishingDialog.Hide();
                     break;
 
-                case Keys.M:
+                //case Keys.M:
+                case Keys.Space:
                     if (GameScene.Scene.MountDialog.CanRide())
                         GameScene.Scene.MountDialog.Ride();
                     break;
@@ -432,40 +433,46 @@ namespace Client.MirScenes
                     Network.Enqueue(new C.TradeRequest());
                     break;
                 case Keys.A:
-                    switch (PMode)
+                    if (CMain.Ctrl)
                     {
-                        case PetMode.Both:
-                            Network.Enqueue(new C.ChangePMode { Mode = PetMode.MoveOnly });
-                            return;
-                        case PetMode.MoveOnly:
-                            Network.Enqueue(new C.ChangePMode { Mode = PetMode.AttackOnly });
-                            return;
-                        case PetMode.AttackOnly:
-                            Network.Enqueue(new C.ChangePMode { Mode = PetMode.None });
-                            return;
-                        case PetMode.None:
-                            Network.Enqueue(new C.ChangePMode { Mode = PetMode.Both });
-                            return;
+                        switch (PMode)
+                        {
+                            case PetMode.Both:
+                                Network.Enqueue(new C.ChangePMode { Mode = PetMode.MoveOnly });
+                                return;
+                            case PetMode.MoveOnly:
+                                Network.Enqueue(new C.ChangePMode { Mode = PetMode.AttackOnly });
+                                return;
+                            case PetMode.AttackOnly:
+                                Network.Enqueue(new C.ChangePMode { Mode = PetMode.None });
+                                return;
+                            case PetMode.None:
+                                Network.Enqueue(new C.ChangePMode { Mode = PetMode.Both });
+                                return;
+                        }
                     }
                     break;
                 case Keys.H:
-                    switch (AMode)
+                    if (CMain.Ctrl)
                     {
-                        case AttackMode.Peace:
-                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Group });
-                            return;
-                        case AttackMode.Group:
-                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Guild });
-                            return;
-                        case AttackMode.Guild:
-                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.RedBrown });
-                            return;
-                        case AttackMode.RedBrown:
-                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.All });
-                            return;
-                        case AttackMode.All:
-                            Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Peace });
-                            return;
+                        switch (AMode)
+                        {
+                            case AttackMode.Peace:
+                                Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Group });
+                                return;
+                            case AttackMode.Group:
+                                Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Guild });
+                                return;
+                            case AttackMode.Guild:
+                                Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.RedBrown });
+                                return;
+                            case AttackMode.RedBrown:
+                                Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.All });
+                                return;
+                            case AttackMode.All:
+                                Network.Enqueue(new C.ChangeAMode { Mode = AttackMode.Peace });
+                                return;
+                        }
                     }
                     break;
                 case Keys.D:
@@ -528,6 +535,7 @@ namespace Client.MirScenes
                 case Spell.SpiritSword:
                 case Spell.Slaying:
                 case Spell.Focus:
+                case Spell.Meditation://ArcherSpells - Elemental system
                     return;
                 case Spell.Thrusting:
                     if (CMain.Time < ToggleTime) return;
@@ -1143,6 +1151,21 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.CombineItem:
                     CombineItem((S.CombineItem)p);
                     break;
+                case (short)ServerPacketIds.ItemUpgraded:
+                    ItemUpgraded((S.ItemUpgraded)p);
+                    break;
+                case (short)ServerPacketIds.SetConcentration://ArcherSpells - Elemental system
+                    SetConcentration((S.SetConcentration)p);
+                    break;
+                case (short)ServerPacketIds.SetObjectConcentration://ArcherSpells - Elemental system
+                    SetObjectConcentration((S.SetObjectConcentration)p);
+                    break;
+                case (short)ServerPacketIds.SetElemental://ArcherSpells - Elemental system
+                    SetElemental((S.SetElemental)p);
+                    break;
+                case (short)ServerPacketIds.SetObjectElemental://ArcherSpells - Elemental system
+                    SetObjectElemental((S.SetObjectElemental)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1254,6 +1277,8 @@ namespace Client.MirScenes
                     return 873;
                 case BuffType.ManaAid:
                     return 904;
+                case BuffType.Concentration://ArcherSpells - Elemental system
+                    return 2365;//this is just a random number.  it needs a proper icon
                 default:
                     return 0;
             }
@@ -1453,6 +1478,7 @@ namespace Client.MirScenes
             UserItem i = fromCell.Item;
             fromCell.Item = toCell.Item;
             toCell.Item = i;
+            CharacterDuraPanel.UpdateCharacterDura(i);
             User.RefreshStats();
         }
         private void EquipSlotItem(S.EquipSlotItem p)
@@ -1506,6 +1532,8 @@ namespace Client.MirScenes
 
             toCell.Locked = false;
             fromCell.Locked = false;
+
+            if (p.Destroy) toCell.Item = null;
 
             if (!p.Success) return;
 
@@ -1615,6 +1643,7 @@ namespace Client.MirScenes
             if (!p.Success) return;
             toCell.Item = fromCell.Item;
             fromCell.Item = null;
+            CharacterDuraPanel.GetCharacterDura();
             User.RefreshStats();
         }
         private void TakeBackItem(S.TakeBackItem p)
@@ -2560,6 +2589,7 @@ namespace Client.MirScenes
 
             cell.Locked = false;
         }
+
         private void ItemRepaired(S.ItemRepaired p)
         {
             UserItem item = null;
@@ -2569,7 +2599,6 @@ namespace Client.MirScenes
                     item = User.Inventory[i];
                     break;
                 }
-
 
             if (item == null)
                 for (int i = 0; i < User.Equipment.Length; i++)
@@ -2590,6 +2619,42 @@ namespace Client.MirScenes
                 CreateItemLabel(item);
             }
         }
+
+        private void ItemUpgraded(S.ItemUpgraded p)
+        {
+            UserItem item = null;
+            for (int i = 0; i < User.Inventory.Length; i++)
+                if (User.Inventory[i] != null && User.Inventory[i].UniqueID == p.Item.UniqueID)
+                {
+                    item = User.Inventory[i];
+                    break;
+                }
+
+            if (item == null) return;
+
+            item.DC = p.Item.DC;
+            item.MC = p.Item.MC;
+            item.SC = p.Item.SC;
+
+            item.AC = p.Item.AC;
+            item.MAC = p.Item.MAC;
+            item.MaxDura = p.Item.MaxDura;
+
+            item.AttackSpeed = p.Item.AttackSpeed;
+            item.Agility = p.Item.Agility;
+            item.Accuracy = p.Item.Accuracy;
+            item.PoisonAttack = p.Item.PoisonAttack;
+            item.Freezing = p.Item.Freezing;
+            //Dissillusion
+            //Endurance
+
+            if (HoverItem == item)
+            {
+                DisposeItemLabel();
+                CreateItemLabel(item);
+            }
+        }
+
         private void NewMagic(S.NewMagic p)
         {
             User.Magics.Add(p.Magic);
@@ -2635,6 +2700,9 @@ namespace Client.MirScenes
             {
                 case Spell.PoisonField:
                     PoisonFieldTime = CMain.Time + (18 - p.Level * 2) * 1000;
+                    break;
+                case Spell.SlashingBurst:
+                    SlashingBurstTime = CMain.Time + (14 - p.Level * 4) * 1000;
                     break;
             }
         }
@@ -2732,6 +2800,30 @@ namespace Client.MirScenes
                         break;
                     case SpellEffect.Reflect:
                         ob.Effects.Add(new Effect(Libraries.Effect, 580, 10, 70, ob));
+                        break;
+                    case SpellEffect.ElementBarrierUp://ArcherSpells - Elemental system
+                        if (ob.Race != ObjectType.Player) return;
+                        player = (PlayerObject)ob;
+                        if (player.ElementalBarrierEffect != null)
+                        {
+                            player.ElementalBarrierEffect.Clear();
+                            player.ElementalBarrierEffect.Remove();
+                        }
+
+                        player.ElementalBarrier = true;
+                        player.Effects.Add(player.ElementalBarrierEffect = new Effect(Libraries.Magic3, 1890, 10, 2000, ob) { Repeat = true });
+                        break;
+                    case SpellEffect.ElementBarrierDown://ArcherSpells - Elemental system
+                        if (ob.Race != ObjectType.Player) return;
+                        player = (PlayerObject)ob;
+                        if (player.ElementalBarrierEffect != null)
+                        {
+                            player.ElementalBarrierEffect.Clear();
+                            player.ElementalBarrierEffect.Remove();
+                        }
+                        player.ElementalBarrierEffect = null;
+                        player.ElementalBarrier = false;
+                        player.Effects.Add(player.ElementalBarrierEffect = new Effect(Libraries.Magic3, 1910, 7, 1400, ob));
                         break;
                 }
                 return;
@@ -3094,6 +3186,87 @@ namespace Client.MirScenes
                 ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Jump, Direction = p.Direction, Location = p.Location });
 
                 return;
+            }
+        }
+
+        private void SetConcentration(S.SetConcentration p)//ArcherSpells - Elemental system
+        {
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID) continue;
+                User.Concentrating = p.Enabled;
+                User.ConcentrateInterrupted = p.Interrupted;
+                if (p.Enabled && !p.Interrupted)
+                {
+                    int idx = InterruptionEffect.GetOwnerEffectID(User.ObjectID);
+                    if (idx < 0)
+                    {
+                        //    InterruptionEffect.effectlist[idx] = new InterruptionEffect(Libraries.Magic3, 1860, 8, 8 * 100, User, true);
+                        //else
+                        User.Effects.Add(new InterruptionEffect(Libraries.Magic3, 1860, 8, 8 * 100, User, true));
+                        SoundManager.PlaySound(20000 + 129 * 10);
+                    }
+                }
+                break;
+            }
+        }
+        private void SetObjectConcentration(S.SetObjectConcentration p)//ArcherSpells - Elemental system
+        {
+            if (p.ObjectID == User.ObjectID) return;
+
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID) continue;
+
+                ((PlayerObject)ob).Concentrating = p.Enabled;
+                ((PlayerObject)ob).ConcentrateInterrupted = p.Interrupted;
+
+                if (p.Enabled && !p.Interrupted)
+                {
+                    //int idx = InterruptionEffect.GetOwnerEffectID(ob.ObjectID);
+                    //if (idx < 0)
+                    //    InterruptionEffect.effectlist[idx] = new InterruptionEffect(Libraries.Magic3, 1860, 8, 8 * 100, ob, true);
+                    if (((PlayerObject)ob).ConcentratingEffect == null)
+                    {
+                        ((PlayerObject)ob).Effects.Add(((PlayerObject)ob).ConcentratingEffect = new InterruptionEffect(Libraries.Magic3, 1860, 8, 8 * 100, ob, true));
+                        SoundManager.PlaySound(20000 + 129 * 10);
+                    }
+                }
+                break;
+            }
+        }
+
+        private void SetElemental(S.SetElemental p)//ArcherSpells - Elemental system
+        {
+            if (User.ObjectID != p.ObjectID) return;
+
+            User.HasElements = p.Enabled;
+            User.ElementsLevel = (int)p.Value;
+            int elementType = (int)p.ElementType;
+            int maxExp = (int)p.ExpLast;
+
+            if (p.Enabled && p.ElementType > 0)
+                User.Effects.Add(new ElementsEffect(Libraries.Magic3, 1630 + ((elementType - 1) * 10), 10, 10 * 100, User, true, 1 + (elementType - 1), maxExp, (elementType == 4 || elementType == 3) ? true : false));
+        }
+        private void SetObjectElemental(S.SetObjectElemental p)//ArcherSpells - Elemental system
+        {
+            if (p.ObjectID == User.ObjectID) return;
+
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID) continue;
+
+                ((PlayerObject)ob).HasElements = p.Enabled;
+                ((PlayerObject)ob).ElementCasted = p.Casted;
+                ((PlayerObject)ob).ElementsLevel = (int)p.Value;
+                int elementType = (int)p.ElementType;
+                int maxExp = (int)p.ExpLast;
+
+                if (p.Enabled && p.ElementType > 0)
+                    ((PlayerObject)ob).Effects.Add(new ElementsEffect(Libraries.Magic3, 1630 + ((elementType - 1) * 10), 10, 10 * 100, ob, true, 1 + (elementType - 1), maxExp));
             }
         }
 
@@ -3677,7 +3850,7 @@ namespace Client.MirScenes
                     PotionItemInfo();
                     break;
                 case ItemType.Gem:
-                    GemItemInfo();
+                    GemItemInfo(realItem);
                     break;
                 default:
                     EquipmentItemInfo(realItem);
@@ -4033,7 +4206,7 @@ namespace Client.MirScenes
             ItemLabel.Visible = true;
         }
 
-        private void GemItemInfo()
+        private void GemItemInfo(ItemInfo realItem)
         {
             if (HoverItem.Info.Durability > 0)
             {
@@ -4083,6 +4256,228 @@ namespace Client.MirScenes
 
                         ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                                   label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                    }
+                    break;
+                case 3:
+                case 4:
+                    {
+                        MirLabel label = new MirLabel
+                        {
+                            AutoSize = true,
+                            ForeColour = Color.White,
+                            Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                            OutLine = false,
+                            Parent = ItemLabel,
+                            Text = "Hold CTRL and left click to combine with an item."
+                        };
+
+                        ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                  label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+
+                        int value1 = realItem.MinAC;
+                        int value2 = realItem.MaxAC;
+                        int addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AC : 0;
+
+
+                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "AC: {0}-{1} (+{2})" : "AC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.MinMAC;
+                        value2 = realItem.MaxMAC;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MAC : 0;
+
+
+                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "MAC: {0}-{1} (+{2})" : "MAC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.MinDC;
+                        value2 = realItem.MaxDC;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.DC : 0;
+
+
+                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "DC: {0}-{1} (+{2})" : "DC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.MinMC;
+                        value2 = realItem.MaxMC;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MC : 0;
+
+
+                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "MC: {0}-{1} (+{2})" : "MC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.MinSC;
+                        value2 = realItem.MaxSC;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.SC : 0;
+
+
+                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "SC: {0}-{1} (+{2})" : "SC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.Accuracy;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Accuracy : 0;
+
+
+                        if (value1 > 0 || addedValue1 > 0)
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "Accuracy: +{0} (+{1})" : "Accuracy: +{0}", value1 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.Agility;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Agility : 0;
+
+
+                        if (value1 > 0 || addedValue1 > 0)
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "Agility: +{0} (+{1})" : "Agility: +{0}", value1 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.AttackSpeed;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AttackSpeed : 0;
+
+
+                        if (value1 > 0 || addedValue1 > 0 || (addedValue1 + value1 < 0))
+                        {
+                            string plus = (addedValue1 + value1 < 0) ? "" : "+";
+
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "A.Speed: " + plus + "{0} (+{1})" : "A.Speed: " + plus + "{0}", value1 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.Freezing;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Freezing : 0;
+
+                        if ((value1 > 0) || (addedValue1 > 0))
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "Freezing: +{0} (+{1})" : "Freezing: +{0}", value1 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.PoisonAttack;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonAttack : 0;
+
+                        if ((value1 > 0) || (addedValue1 > 0))
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "Poison: +{0} (+{1})" : "Poison: +{0}", value1 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
                     }
                     break;
                 default:
@@ -4937,6 +5332,7 @@ namespace Client.MirScenes
                 ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
                                           label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
+
             value1 = realItem.Strong;
             addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Strong : 0;
 
@@ -6159,8 +6555,6 @@ namespace Client.MirScenes
 
             MapObject target = null;
 
-            bool selfCast = false;
-
             //Targeting
             switch (magic.Spell)
             {
@@ -6189,6 +6583,7 @@ namespace Client.MirScenes
                     break;
                 case Spell.StraightShot:
                 case Spell.DoubleShot://ArcherSpells - weapon fix
+                case Spell.ElementalShot:
                     if (!User.HasClassWeapon)
                     {
                         GameScene.Scene.OutputMessage("You must be wearing a bow to perform this skill.");
@@ -6204,6 +6599,16 @@ namespace Client.MirScenes
                     if (target == null) target = MapObject.MagicObject;
 
                     if (target != null && target.Race == ObjectType.Monster) MapObject.MagicObject = target;
+
+                    //if (magic.Spell == Spell.ElementalShot && User.HasElements)
+                    //{
+                    //    if (target == null || !CanFly(target.CurrentLocation))
+                    //    {
+                    //        User.ClearMagic();
+                    //        return;
+                    //    }
+                    //}
+
                     break;
                 case Spell.Purification:
                 case Spell.Healing:
@@ -6244,6 +6649,19 @@ namespace Client.MirScenes
                         return;
                     }
                     break;
+                case Spell.SlashingBurst:
+                    if (CMain.Time < GameScene.SlashingBurstTime)
+                    {
+                        if (CMain.Time >= OutputDelay)
+                        {
+                            OutputDelay = CMain.Time + 1000;
+                            GameScene.Scene.OutputMessage(string.Format("You cannot cast SlashingBurst for another {0} seconds.", (GameScene.SlashingBurstTime - CMain.Time - 1) / 1000 + 1));
+                        }
+
+                        User.ClearMagic();
+                        return;
+                    }
+                    break;
                 case Spell.Blizzard:
                 case Spell.MeteorStrike:
                     if (User.NextMagicObject != null)
@@ -6260,16 +6678,58 @@ namespace Client.MirScenes
                     }
                     break;
                 default:
-                    selfCast = true;
+                    //selfCast = true;
                         break;
             }
 
+            //if (magic.Spell == Spell.ElementalShot && User.HasElements)//ArcherSpells - Elemental system
+            //{
+            //    //prevents losing gathered orbs on a miss
+            //    bool breakit = false;
+            //    if (target == null)
+            //    {
+            //        User.ClearMagic();
+            //        return;
+            //    }
+
+            //    Point nextloc = User.CurrentLocation;
+            //    while (nextloc != target.CurrentLocation)
+            //    {
+            //        MirDirection elementdir = Functions.DirectionFromPoint(nextloc, target.CurrentLocation);
+            //        nextloc = Functions.PointMove(nextloc, elementdir, 1);
+
+            //        if (nextloc.X < 0 || nextloc.Y < 0 || nextloc.X >= GameScene.Scene.MapControl.Width || nextloc.Y >= GameScene.Scene.MapControl.Height) breakit = true;
+
+            //        if (!GameScene.Scene.MapControl.ValidPoint(nextloc)) breakit = true;
+
+            //        if (breakit)
+            //        {
+            //            User.ClearMagic();
+            //            return;
+            //        }
+            //    }
+            //}
 
             MirDirection dir = (target == null || target == User) ? User.NextMagicDirection : Functions.DirectionFromPoint(User.CurrentLocation, target.CurrentLocation);
 
             Point location = target != null ? target.CurrentLocation : User.NextMagicLocation;
 
-            if (!Functions.InRange(User.CurrentLocation, location, 9) && !selfCast)
+            //ArcherSpells - Elemental system
+            bool isTargetSpell = true;
+
+            switch (magic.Spell)// should add all non target spells to this
+            {
+                case Spell.BackStep:
+                case Spell.Concentration:
+                case Spell.ElementalBarrier:
+                    isTargetSpell = false;
+                    break;
+                case Spell.ElementalShot:
+                    isTargetSpell = User.HasElements;
+                    break;
+            }
+
+            if (!Functions.InRange(User.CurrentLocation, location, 9) && isTargetSpell)
             {
                 if (CMain.Time >= OutputDelay)
                 {
@@ -6405,7 +6865,24 @@ namespace Client.MirScenes
             if (!M2CellInfo[point.X, point.Y].FishingCell) return false;
 
             return true;
-        } 
+        }
+
+        public bool CanFly(Point target)
+        {
+            Point location = User.CurrentLocation;
+            while (location != target)
+            {
+                MirDirection dir = Functions.DirectionFromPoint(location, target);
+
+                location = Functions.PointMove(location, dir, 1);
+
+                if (location.X < 0 || location.Y < 0 || location.X >= GameScene.Scene.MapControl.Width || location.Y >= GameScene.Scene.MapControl.Height) return false;
+
+                if (!GameScene.Scene.MapControl.ValidPoint(location)) return false;
+            }
+
+            return true;
+        }
 
         public bool ValidPoint(Point p)
         {
@@ -6810,7 +7287,7 @@ namespace Client.MirScenes
             switch (GameScene.Scene.AMode)
             {
                 case AttackMode.Peace:
-                    AModeLabel.Text = "[Mode: Peacefull]";
+                    AModeLabel.Text = "[Mode: Peaceful]";
                     break;
                 case AttackMode.Group:
                     AModeLabel.Text = "[Mode: Group]";
@@ -14627,15 +15104,17 @@ namespace Client.MirScenes
         {
             int Warning = item.MaxDura / 2;
             int Danger = item.MaxDura / 5;
+            uint AmuletWarning = item.Info.StackSize / 2;
+            uint AmuletDanger = item.Info.StackSize / 5;
 
             switch (item.Info.Type)
             {
                 case ItemType.Amulet: //Based on stacks of 5000
-                    if (item.Count > 2500)
+                    if (item.Count > AmuletWarning)
                         Amulet.Index = 2134;
-                    if (item.Count <= 2500)
+                    if (item.Count <= AmuletWarning)
                         Amulet.Index = 2135;
-                    if (item.Count <= 1000)
+                    if (item.Count <= AmuletDanger)
                         Amulet.Index = 2136;
                     if (item.Count == 0)
                         Amulet.Index = -1;
@@ -15178,7 +15657,10 @@ namespace Client.MirScenes
                     text = "Moon Light\nInvisible to many monsters and able to move.\n";
                     break;
                 case BuffType.General:
-                    text = string.Format("Mirian Buff\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);
+                    text = string.Format("Mirian Advantage\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);
+                    break;
+                case BuffType.Concentration://ArcherSpells - Elemental system
+                    text = "Concentrating\nIncreases chance on element extraction.\n";
                     break;
 
                 case BuffType.Impact:
@@ -15199,9 +15681,6 @@ namespace Client.MirScenes
                 case BuffType.ManaAid:
                     text = string.Format("ManaAid\nIncreases MP by: {0}.\n", Value);
                     break;
-
-
-
             }
 
             if (Infinite)

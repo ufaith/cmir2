@@ -628,6 +628,11 @@ namespace ServerPackets
         public bool RidingMount;
         public bool Fishing;
 
+        //ArcherSpells - Elemental system
+        public uint ElementOrbEffect;
+        public uint ElementOrbLvl;
+        public uint ElementOrbMax;
+
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
@@ -652,6 +657,11 @@ namespace ServerPackets
             MountType = reader.ReadInt16();
             RidingMount = reader.ReadBoolean();
             Fishing = reader.ReadBoolean();
+
+            //ArcherSpells - Elemental system
+            ElementOrbEffect = reader.ReadUInt32();
+            ElementOrbLvl = reader.ReadUInt32();
+            ElementOrbMax = reader.ReadUInt32();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -679,6 +689,11 @@ namespace ServerPackets
             writer.Write(MountType);
             writer.Write(RidingMount);
             writer.Write(Fishing);
+
+            //ArcherSpells - Elemental system
+            writer.Write(ElementOrbEffect);
+            writer.Write(ElementOrbLvl);
+            writer.Write(ElementOrbMax);
         }
     }
     public sealed class ObjectRemove : Packet
@@ -2320,6 +2335,8 @@ namespace ServerPackets
             writer.Write(CurrentDura);
         }
     }
+
+
     public sealed class NewMagic : Packet
     {
         public override short Index
@@ -3820,12 +3837,14 @@ namespace ServerPackets
 
         public ulong IDFrom, IDTo;
         public bool Success;
+        public bool Destroy;
 
         protected override void ReadPacket(BinaryReader reader)
         {
             IDFrom = reader.ReadUInt64();
             IDTo = reader.ReadUInt64();
             Success = reader.ReadBoolean();
+            Destroy = reader.ReadBoolean();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -3833,7 +3852,127 @@ namespace ServerPackets
             writer.Write(IDFrom);
             writer.Write(IDTo);
             writer.Write(Success);
+            writer.Write(Destroy);
         }
     }
 
+    public sealed class ItemUpgraded : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.ItemUpgraded; }
+        }
+
+        public UserItem Item;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Item = new UserItem(reader);
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            Item.Save(writer);
+        }
+    }
+
+    public sealed class SetConcentration : Packet//ArcherSpells - Elemental system
+    {
+        public override short Index { get { return (short)ServerPacketIds.SetConcentration; } }
+
+        public uint ObjectID;
+        public bool Enabled;
+        public bool Interrupted;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Enabled = reader.ReadBoolean();
+            Interrupted = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Enabled);
+            writer.Write(Interrupted);
+        }
+    }
+    public sealed class SetObjectConcentration : Packet//ArcherSpells - Elemental system
+    {
+        public override short Index { get { return (short)ServerPacketIds.SetObjectConcentration; } }
+
+        public uint ObjectID;
+        public bool Enabled;
+        public bool Interrupted;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Enabled = reader.ReadBoolean();
+            Interrupted = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Enabled);
+            writer.Write(Interrupted);
+        }
+    }
+    public sealed class SetElemental : Packet//ArcherSpells - Elemental system
+    {
+        public override short Index { get { return (short)ServerPacketIds.SetElemental; } }
+
+        public uint ObjectID;
+        public bool Enabled;
+        public uint Value;
+        public uint ElementType;
+        public uint ExpLast;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Enabled = reader.ReadBoolean();
+            Value = reader.ReadUInt32();
+            ElementType = reader.ReadUInt32();
+            ExpLast = reader.ReadUInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Enabled);
+            writer.Write(Value);
+            writer.Write(ElementType);
+            writer.Write(ExpLast);
+        }
+    }
+    public sealed class SetObjectElemental : Packet//ArcherSpells - Elemental system
+    {
+        public override short Index { get { return (short)ServerPacketIds.SetObjectElemental; } }
+
+        public uint ObjectID;
+        public bool Enabled;
+        public bool Casted;
+        public uint Value;
+        public uint ElementType;
+        public uint ExpLast;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Enabled = reader.ReadBoolean();
+            Casted = reader.ReadBoolean();
+            Value = reader.ReadUInt32();
+            ElementType = reader.ReadUInt32();
+            ExpLast = reader.ReadUInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Enabled);
+            writer.Write(Casted);
+            writer.Write(Value);
+            writer.Write(ElementType);
+            writer.Write(ExpLast);
+        }
+    }
 }

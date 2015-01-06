@@ -1592,6 +1592,7 @@ namespace Server.MirObjects
                 }
             }
 
+            attacker.GatherElement();//ArcherSpells - Elemental system
 
             ChangeHP(armour - damage);
 

@@ -1134,6 +1134,39 @@ namespace Server.MirEnvir
 
                 #endregion
 
+                #region SlashingBurst
+
+                case Spell.SlashingBurst:
+                    value = (int)data[2];
+                    location = (Point)data[3];
+                    dir = (MirDirection)data[4];
+                    count = (int)data[5];
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        location = Functions.PointMove(location, dir, 1);
+
+                        if (!ValidPoint(location)) continue;
+
+                        cell = GetCell(location);
+
+                        if (cell.Objects == null) continue;
+
+                        for (int o = 0; o < cell.Objects.Count; o++)
+                        {
+                            MapObject target = cell.Objects[o];
+                            if (target.Race != ObjectType.Player && target.Race != ObjectType.Monster) continue;
+
+                            if (!target.IsAttackTarget(player)) continue;
+                            if (target.Attacked(player, value, DefenceType.AC, false) > 0)
+                                train = true;
+                            break;
+                        }
+                    }
+                    break;
+
+                #endregion
+
                 #region Mirroring
 
                 case Spell.Mirroring:
@@ -1498,6 +1531,7 @@ namespace Server.MirEnvir
                     break;
 
                 #endregion
+
 
             }
 

@@ -59,6 +59,9 @@ namespace Server
 
         //Game
         public static List<long> ExperienceList = new List<long>();
+        public static List<long> OrbsExpList = new List<long>();//ArcherSpells - Elemental system
+        public static List<long> OrbsDefList = new List<long>();//ArcherSpells - Elemental system
+        public static List<long> OrbsDmgList = new List<long>();//ArcherSpells - Elemental system
 
         public static float DropRate = 1F, ExpRate = 1F;
 
@@ -396,6 +399,21 @@ namespace Server
             {
                 exp = reader.ReadInt64("Exp", "Level" + i, exp);
                 ExperienceList.Add(exp);
+            }
+
+            //ArcherSpells - Elemental system
+            reader = new InIReader(@".\OrbsExpList.ini");
+            for (int i = 1; i <= 4; i++)
+            {
+                exp = i * 50;//default exp value
+                exp = reader.ReadInt64("Exp", "Orb" + i, exp);
+                OrbsExpList.Add(exp);
+                exp = i * 2;//default defense value
+                exp = reader.ReadInt64("Def", "Orb" + i, exp);
+                OrbsDefList.Add(exp);
+                exp = i * 4;//default power value
+                exp = reader.ReadInt64("Att", "Orb" + i, exp);
+                OrbsDmgList.Add(exp);
             }
         }
         public static void LoadRandomItemStats()

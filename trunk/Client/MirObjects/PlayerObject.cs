@@ -74,6 +74,22 @@ namespace Client.MirObjects
         public byte WingEffect;
         private short StanceDelay = 2500;
 
+        //ArcherSpells - Elemental system
+        public bool ElementalBuff;
+        public bool Concentrating;
+        public InterruptionEffect ConcentratingEffect;
+        public bool ConcentrateInterrupted;
+        public bool HasElements;
+        public bool ElementCasted;
+        public int ElementEffect;//hold orb count for player(object) load
+        public int ElementsLevel;
+        public int ElementOrbMax;
+        public bool ElementalBarrier;
+        public Effect ElementalBarrierEffect;
+        //Elemental system END
+
+        public SpellEffect CurrentEffect; //Stephenking effect sync test
+
         public long StanceTime, BlizzardFreezeTime, ReincarnationStopTime;
 
         public string GuildName;
@@ -120,6 +136,7 @@ namespace Client.MirObjects
             Hidden = info.Hidden;
 
             WingEffect = info.WingEffect;
+            CurrentEffect = info.Effect; //Stephenking effect sync test
 
             MountType = info.MountType;
             RidingMount = info.RidingMount;
@@ -130,6 +147,10 @@ namespace Client.MirObjects
 
             if (Dead) ActionFeed.Add(new QueuedAction { Action = MirAction.Dead, Direction = Direction, Location = CurrentLocation });
             if (info.Extra) Effects.Add(new Effect(Libraries.Magic2, 670, 10, 800, this));
+
+            ElementEffect = (int)info.ElementOrbEffect;//ArcherSpells - Elemental system
+            ElementsLevel = (int)info.ElementOrbLvl;//ArcherSpells - Elemental system
+            ElementOrbMax = (int)info.ElementOrbMax;//ArcherSpells - Elemental system
 
             SetAction();
         }
@@ -714,6 +735,9 @@ namespace Client.MirObjects
                         CurrentAction = MirAction.Standing;
                     else
                         CurrentAction = CMain.Time > StanceTime ? MirAction.Standing : MirAction.Stance;
+
+                    if (Concentrating && ConcentrateInterrupted)//ArcherSpells - Elemental system
+                        Network.Enqueue(new C.SetConcentration { ObjectID = User.ObjectID, Enabled = Concentrating, Interrupted = false });
                 }
 
                 if (Fishing) CurrentAction = MirAction.FishingWait;
@@ -856,6 +880,17 @@ namespace Client.MirObjects
                                     GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
                                 }
                                 break;
+                            case Spell.SlashingBurst:
+                                Frames.Frames.TryGetValue(MirAction.Attack1, out Frame);
+                                //CurrentAction = MirAction.Attack1;
+                                //CurrentLocation = Functions.PointMove(CurrentLocation, Direction, 2);
+                                if (this == User)
+                                {
+                                    MapControl.NextAction = CMain.Time + 2000; // 80%
+                                    GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
+                                    Network.Enqueue(new C.Magic { Spell = Spell, Direction = Direction });
+                                }
+                                break;
                             case Spell.StraightShot:
                                 Frames.Frames.TryGetValue(MirAction.AttackRange2, out Frame);
                                 CurrentAction = MirAction.AttackRange2;
@@ -884,8 +919,22 @@ namespace Client.MirObjects
                                 {
                                     MapControl.NextAction = CMain.Time + 800;
                                     GameScene.SpellTime = CMain.Time + 2500; //Spell Delay
-                                    Network.Enqueue(new C.Magic { Spell = Spell, Direction = Direction, });
+                                    Network.Enqueue(new C.Magic { Spell = Spell, Direction = Direction });
                                 }
+                                break;
+                            case Spell.ElementalShot://ArcherSpells - Elemental system
+                                if (HasElements && !ElementCasted)
+                                {
+                                    Frames.Frames.TryGetValue(MirAction.AttackRange2, out Frame);
+                                    CurrentAction = MirAction.AttackRange2;
+                                    if (this == User)
+                                    {
+                                        MapControl.NextAction = CMain.Time + 1000;
+                                        GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
+                                    }
+                                }
+                                else Frames.Frames.TryGetValue(CurrentAction, out Frame);
+                                if (ElementCasted) ElementCasted = false;
                                 break;
                             default:
                                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
@@ -1580,6 +1629,15 @@ namespace Client.MirObjects
 
                             #endregion
 
+                            #region SlashingBurst
+
+                            case Spell.SlashingBurst:
+                                Effects.Add(new Effect(Libraries.Magic2, 1700 + (int)Direction * 10, 10, 10 * FrameInterval, this));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
+
+                            #endregion
+
                             #region Mirroring
 
                             case Spell.Mirroring:
@@ -1638,6 +1696,29 @@ namespace Client.MirObjects
 
             NextMotion = CMain.Time + FrameInterval;
             NextMotion2 = CMain.Time + EffectFrameInterval;
+
+            //ArcherSpells - Elemental system
+            if (ElementalBarrier)
+            {
+                switch (CurrentAction)
+                {
+                    case MirAction.Struck:
+                    case MirAction.MountStruck:
+                        if (ElementalBarrierEffect != null)
+                        {
+                            ElementalBarrierEffect.Clear();
+                            ElementalBarrierEffect.Remove();
+                        }
+
+                        Effects.Add(ElementalBarrierEffect = new Effect(Libraries.Magic3, 1910, 5, 600, this));
+                        ElementalBarrierEffect.Complete += (o, e) => Effects.Add(ElementalBarrierEffect = new Effect(Libraries.Magic3, 1890, 16, 3200, this) { Repeat = true });
+                        break;
+                    default:
+                        if (ElementalBarrierEffect == null)
+                            Effects.Add(ElementalBarrierEffect = new Effect(Libraries.Magic3, 1890, 16, 3200, this) { Repeat = true });
+                        break;
+                }
+            }
 
             if (!MagicShield) return;
 
@@ -1722,11 +1803,22 @@ namespace Client.MirObjects
                     }
                     else
                     {
-                        if (this == User)
-                        {
-                            if (FrameIndex == 1 || FrameIndex == 7)
-                                PlayStepSound();
-                        }
+                        if (FrameIndex == 1)
+                            SoundManager.PlaySound(20000 + 127 * 10 + (Gender == MirGender.Male ? 5 : 6));
+                        if (FrameIndex == 7)
+                            SoundManager.PlaySound(20000 + 127 * 10 + 7);
+                    }
+                    //Backstep wingeffect
+                    if (WingEffect > 0 && CMain.Time >= NextMotion2)
+                    {
+                        if (this == User) GameScene.Scene.MapControl.TextureValid = false;
+
+                        if (SkipFrames) UpdateFrame2();
+
+                        if (UpdateFrame2() >= Frame.EffectCount)
+                            EffectFrameIndex = Frame.EffectCount - 1;
+                        else
+                            NextMotion2 += EffectFrameInterval;
                     }
                     break;
                 case MirAction.DashL:
@@ -2040,6 +2132,27 @@ namespace Client.MirObjects
                                             }
                                             break;
                                     }
+                                    break;
+                                case Spell.ElementalShot://ArcherSpells - Elemental system
+                                    if (HasElements && !ElementCasted)
+                                        switch (FrameIndex)
+                                        {
+                                            case 7:
+                                                missile = CreateProjectile(1690, Libraries.Magic3, true, 6, 30, 4);//elemental arrow
+                                                StanceTime = CMain.Time + StanceDelay;
+                                                if (missile.Target != null)
+                                                {
+                                                    missile.Complete += (o, e) =>
+                                                    {
+                                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 2);//sound M128-2
+                                                    };
+                                                }
+                                                break;
+                                            case 1:
+                                                Effects.Add(new Effect(Libraries.Magic3, 1681, 5, Frame.Count * FrameInterval, this));
+                                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 0);//sound M128-0
+                                                break;
+                                        }
                                     break;
                             }
                         }
@@ -2554,7 +2667,17 @@ namespace Client.MirObjects
 
                                     #endregion
 
-                                    
+                                    #region ElementalBarrier ArcherSpells - Elemental system
+
+                                    case Spell.ElementalBarrier:
+                                        if (HasElements && !ElementalBarrier)
+                                        {
+                                            Effects.Add(new Effect(Libraries.Magic3, 1880, 8, Frame.Count * FrameInterval, this));
+                                            SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                        }
+                                        break;
+
+                                    #endregion
                                 }
 
 
@@ -2943,7 +3066,8 @@ namespace Client.MirObjects
 
         public void PlayDieSound()
         {
-
+            if (Gender == 0) { SoundManager.PlaySound(SoundList.MaleDie); }
+            else { SoundManager.PlaySound(SoundList.FemaleDie); }
         }
 
         public void PlayMountSound()
@@ -2988,6 +3112,8 @@ namespace Client.MirObjects
             DrawHead();
 
             if (this != User) DrawWings();
+
+            if (this != User) DrawCurrentEffects(); //Stephenking effect sync test
 
             if (!RidingMount)
             {
@@ -3056,6 +3182,41 @@ namespace Client.MirObjects
 
 
         }
+
+        public void DrawCurrentEffects()//Stephenking - shows current effect someone is carrying during load of objects, this works :D
+        {
+            if (CurrentEffect == SpellEffect.MagicShieldUp && !MagicShield)
+            {
+                MagicShield = true;
+                Effects.Add(ShieldEffect = new Effect(Libraries.Magic, 3890, 3, 600, this) { Repeat = true });
+                CurrentEffect = SpellEffect.None;
+            }
+
+            if (CurrentEffect == SpellEffect.ElementBarrierUp && !ElementalBarrier)//ArcherSpells - Elemental system
+            {
+                ElementalBarrier = true;
+                Effects.Add(ElementalBarrierEffect = new Effect(Libraries.Magic3, 1890, 16, 3200, this) { Repeat = true });
+                CurrentEffect = SpellEffect.None;
+            }
+
+            if (ElementEffect > 0 && !HasElements)//ArcherSpells - Elemental system
+            {
+                HasElements = true;
+                if (ElementEffect == 4)
+                    Effects.Add(new ElementsEffect(Libraries.Magic3, 1660, 10, 10 * 100, this, true, 4, ElementOrbMax));
+                else
+                {
+                    if (ElementEffect >= 1)
+                        Effects.Add(new ElementsEffect(Libraries.Magic3, 1630, 10, 10 * 100, this, true, 1, ElementOrbMax));
+                    if (ElementEffect >= 2)
+                        Effects.Add(new ElementsEffect(Libraries.Magic3, 1640, 10, 10 * 100, this, true, 2, ElementOrbMax));
+                    if (ElementEffect == 3)
+                        Effects.Add(new ElementsEffect(Libraries.Magic3, 1650, 10, 10 * 100, this, true, 3, ElementOrbMax));
+                }
+                ElementEffect = 0;
+            }
+        }
+
         public override void DrawBlend()
         {
             DXManager.SetBlend(true, 0.3F);

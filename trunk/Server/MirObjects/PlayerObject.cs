@@ -186,6 +186,30 @@ namespace Server.MirObjects
         public byte MagicShieldLv;
         public long MagicShieldTime;
 
+        //ArcherSpells - Elemental system
+        public bool HasElemental;
+        public int ElementsLevel;
+        private bool _concentrating;
+        public bool Concentrating
+        {
+            get
+            {
+                return _concentrating;
+            }
+            set
+            {
+                if (_concentrating == value) return;
+                _concentrating = value;
+            }
+
+        }
+        public bool ConcentrateInterrupted;
+        public long ConcentrateInterruptTime;
+        public bool ElementalBarrier;
+        public byte ElementalBarrierLv;
+        public long ElementalBarrierTime;
+        //Elemental system end
+
         private int _runCounter, _fishCounter;
 
         public NPCObject DefaultNPC
@@ -212,7 +236,7 @@ namespace Server.MirObjects
         public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();
 
         public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
-        public long FlamingSwordTime, PoisonFieldTime;
+        public long FlamingSwordTime, PoisonFieldTime, SlashingBurstTime;
         public bool ActiveBlizzard, ActiveReincarnation, ReincarnationReady;
         public PlayerObject ReincarnationTarget;
         public long ReincarnationExpireTime;
@@ -382,6 +406,15 @@ namespace Server.MirObjects
                 MagicShieldTime = 0;
                 CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.MagicShieldDown }, CurrentLocation);
             }
+
+            if (ElementalBarrier && Envir.Time > ElementalBarrierTime)//ArcherSpells - Elemental system
+            {
+                ElementalBarrier = false;
+                ElementalBarrierLv = 0;
+                ElementalBarrierTime = 0;
+                CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.ElementBarrierDown }, CurrentLocation);
+            }
+
             if (FlamingSword && Envir.Time >= FlamingSwordTime * 2)
             {
                 FlamingSword = false;
@@ -499,9 +532,25 @@ namespace Server.MirObjects
                         Hidden = false;
                         Observer = false;
                         break;
+                    case BuffType.Concentration://ArcherSpells - Elemental system
+                        ConcentrateInterrupted = false;
+                        ConcentrateInterruptTime = 0;
+                        Concentrating = false;
+                        UpdateConcentration();//Update & send to client
+                        break;
                 }
 
                 refresh = true;
+            }
+
+            if (Concentrating && !ConcentrateInterrupted && (ConcentrateInterruptTime != 0))//ArcherSpells - Elemental system
+            {
+                //check for reenable
+                if (ConcentrateInterruptTime <= SMain.Envir.Time)
+                {
+                    ConcentrateInterruptTime = 0;
+                    UpdateConcentration();//Update & send to client
+                }
             }
 
             if (refresh) RefreshStats();
@@ -3175,6 +3224,18 @@ namespace Server.MirObjects
                     return;
                 }
 
+            if (Concentrating)//ArcherSpells - Elemental system
+            {
+                if (ConcentrateInterrupted)
+                    ConcentrateInterruptTime = SMain.Envir.Time + 3000;// needs adjusting
+                else
+                {
+                    ConcentrateInterruptTime = SMain.Envir.Time + 3000;// needs adjusting
+                    ConcentrateInterrupted = true;
+                    UpdateConcentration();//Update & send to client
+                }
+            }
+
             if (Hidden && !HasClearRing)
             {
                 //Hidden = false;
@@ -3310,6 +3371,18 @@ namespace Server.MirObjects
                 DecreaseMountLoyalty(2);
             }
 
+            if (Concentrating)//ArcherSpells - Elemental system
+            {
+                if (ConcentrateInterrupted)
+                    ConcentrateInterruptTime = SMain.Envir.Time + 3000;// needs adjusting
+                else
+                {
+                    ConcentrateInterruptTime = SMain.Envir.Time + 3000;// needs adjusting
+                    ConcentrateInterrupted = true;
+                    UpdateConcentration();//Update & send to client
+                }
+            }
+
             if (Hidden && !HasClearRing)
             {
                 for (int i = 0; i < Buffs.Count; i++)
@@ -3419,6 +3492,18 @@ namespace Server.MirObjects
 
             if (result > 0)
             {
+                if (Concentrating)//ArcherSpells - Elemental system
+                {
+                    if (ConcentrateInterrupted)
+                        ConcentrateInterruptTime = SMain.Envir.Time + 3000;// needs adjusting
+                    else
+                    {
+                        ConcentrateInterruptTime = SMain.Envir.Time + 3000;// needs adjusting
+                        ConcentrateInterrupted = true;
+                        UpdateConcentration();//Update & send to client
+                    }
+                }
+
                 cell = CurrentMap.GetCell(CurrentLocation);
 
                 for (int i = 0; i < cell.Objects.Count; i++)
@@ -4093,6 +4178,9 @@ namespace Server.MirObjects
                 case Spell.BladeAvalanche:
                     BladeAvalanche(magic);
                     break;
+                case Spell.SlashingBurst:
+                    SlashingBurst(magic, out cast);
+                    break;
                 case Spell.ProtectionField:
                     ProtectionField(magic);
                     break;
@@ -4138,6 +4226,15 @@ namespace Server.MirObjects
                 case Spell.BackStep://ArcherSpells - Backstep
                     BackStep(magic);
                     return;
+                case Spell.Concentration://ArcherSpells - Elemental system
+                    Concentration(magic);
+                    break;
+                case Spell.ElementalShot://ArcherSpells - Elemental system
+                    if (!ElementalShot(target, magic)) targetID = 0;
+                    break;
+                case Spell.ElementalBarrier://ArcherSpells - Elemental system
+                    ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, magic.GetPower(GetAttackPower(MinMC, MaxMC) + 20)));
+                    break;
                 default:
                     cast = false;
                     break;
@@ -4312,6 +4409,136 @@ namespace Server.MirObjects
 
             CellTime = Envir.Time + 500;
         }
+
+        //ArcherSpells - Elemental system
+        private void Concentration(UserMagic magic)
+        {
+            int duration = 45 + (15 * magic.Level);
+            int count = Buffs.Where(x => x.Type == BuffType.Concentration).ToList().Count();
+            if (count > 0) return;
+
+            AddBuff(new Buff { Type = BuffType.Concentration, Caster = this, ExpireTime = Envir.Time + duration * 1000, Value = magic.Level });
+
+            LevelMagic(magic);
+
+            ConcentrateInterruptTime = 0;
+            ConcentrateInterrupted = false;
+            Concentrating = true;
+            UpdateConcentration();//Update & send to client
+
+            OperateTime = 0;
+        }
+        public void UpdateConcentration()
+        {
+            Enqueue(new S.SetConcentration { ObjectID = ObjectID, Enabled = Concentrating, Interrupted = ConcentrateInterrupted });
+            Broadcast(new S.SetObjectConcentration { ObjectID = ObjectID, Enabled = Concentrating, Interrupted = ConcentrateInterrupted });
+        }
+        private bool ElementalShot(MapObject target, UserMagic magic)
+        {
+            if (HasElemental)
+            {
+                if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return false;
+
+                int orbPower = magic.GetPower() + GetElementalOrbPower(false);//base power + orbpower
+
+                int damage = GetAttackPower(MinMC, MaxMC) + orbPower;
+                int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
+
+                DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, magic, damage, target);
+                ActionList.Add(action);
+            }
+            else
+            {
+                ObtainElement(true);//gather orb through casting
+                LevelMagic(magic);
+                return false;
+            }
+            return true;
+        }
+        public int HasSpell(Spell spell)
+        {
+            UserMagic magic = GetMagic(spell);
+            if (magic != null)
+                return (int)magic.Level;
+            else return -1;
+        }
+        public void GatherElement()
+        {
+            int MeditationLvl = HasSpell(Spell.Meditation);
+            if (MeditationLvl == -1) return;
+            int ConcentrateLvl = HasSpell(Spell.Concentration);
+
+            int MeditateChance = 0;
+            int ConcentrateChance = 0;
+
+            if (Concentrating && !ConcentrateInterrupted && ConcentrateLvl >= 0)
+                ConcentrateChance = 1 + ConcentrateLvl;
+
+            if (MeditationLvl >= 0)
+            {
+                MeditateChance = (8 - MeditationLvl);
+                int rnd = Envir.Random.Next(10);
+                if (rnd >= (MeditateChance - ConcentrateChance))
+                {
+                    ObtainElement(false);
+                    LevelMagic(GetMagic(Spell.Meditation));
+                }
+            }
+        }
+        public void ObtainElement(bool cast)
+        {
+            int orbType = 0;
+            int maxOrbs = (int)Settings.OrbsExpList[Settings.OrbsExpList.Count - 1];
+
+            if (cast)
+            {
+                ElementsLevel = (int)Settings.OrbsExpList[0];
+                HasElemental = true;
+                orbType = 1;
+            }
+            else
+            {
+                ElementsLevel++;
+                HasElemental = false;
+                if (ElementsLevel >= Settings.OrbsExpList[0]) HasElemental = true;
+
+                for (int i = 0; i <= Settings.OrbsExpList.Count - 1; i++)
+                {
+                    if (Settings.OrbsExpList[i] != ElementsLevel) continue;
+                    orbType = i + 1;
+                    break;
+                }
+            }
+
+            Enqueue(new S.SetElemental { ObjectID = ObjectID, Enabled = HasElemental, Value = (uint)ElementsLevel, ElementType = (uint)orbType, ExpLast = (uint)maxOrbs });
+            Broadcast(new S.SetObjectElemental { ObjectID = ObjectID, Enabled = HasElemental, Casted = cast, Value = (uint)ElementsLevel, ElementType = (uint)orbType, ExpLast = (uint)maxOrbs });
+        }
+        public int GetElementalOrbCount()
+        {
+            int OrbCount = 0;
+            for (int i = Settings.OrbsExpList.Count - 1; i >= 0; i--)
+            {
+                if (ElementsLevel >= Settings.OrbsExpList[i])
+                {
+                    OrbCount = i + 1;
+                    break;
+                }
+            }
+            return OrbCount;
+        }
+        public int GetElementalOrbPower(bool defensive)
+        {
+            if (!HasElemental) return 0;
+
+            if (defensive)
+                return (int)Settings.OrbsDefList[GetElementalOrbCount() - 1];
+
+            if (!defensive)
+                return (int)Settings.OrbsDmgList[GetElementalOrbCount() - 1];
+
+            return 0;
+        }
+        //Elemental system END
 
         private bool Fireball(MapObject target, UserMagic magic)
         {
@@ -4766,6 +4993,56 @@ namespace Server.MirObjects
             location = Functions.PointMove(CurrentLocation, MirDirection.Left, 1);
             action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, Direction, 3);
             CurrentMap.ActionList.Add(action);
+        }
+        private void SlashingBurst(UserMagic magic, out bool cast)
+        {
+            cast = false;
+
+            // delayTime
+            if (Envir.Time < SlashingBurstTime) return;
+
+            SlashingBurstTime = Envir.Time + (14 - magic.Level * 4) * 1000;
+            cast = true;
+
+            // damage
+            int damage = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
+
+            // objects = this, magic, damage, currentlocation, direction, attackRange
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction, 1);
+            CurrentMap.ActionList.Add(action);
+
+            // telpo location
+            Point location = Functions.PointMove(CurrentLocation, Direction, 2);
+
+            if (!CurrentMap.ValidPoint(location)) return;
+
+            Cell cInfo = CurrentMap.GetCell(location);
+
+            bool blocked = false;
+            if (cInfo.Objects != null)
+            {
+                for (int c = 0; c < cInfo.Objects.Count; c++)
+                {
+                    MapObject ob = cInfo.Objects[c];
+                    if (!ob.Blocking) continue;
+                    blocked = true;
+                    if ((cInfo.Objects == null) || blocked) break;
+                }
+            }
+
+            // blocked telpo cancel
+            if (blocked) return;
+
+            // move character
+            CurrentMap.GetCell(CurrentLocation).Remove(this);
+            RemoveObjects(Direction, 1);
+
+            CurrentLocation = location;
+
+            CurrentMap.GetCell(CurrentLocation).Add(this);
+            AddObjects(Direction, 1);
+
+            Enqueue(new S.UserLocation { Direction = Direction, Location = location });
         }
         private void ProtectionField(UserMagic magic)
         {
@@ -5431,6 +5708,42 @@ namespace Server.MirObjects
                     break;
 
                 #endregion
+
+                #region ElementalBarrier, ElementalShot         ArcherSpells - Elemental system
+
+                case Spell.ElementalBarrier:
+                    if (ElementalBarrier) return;
+                    if (!HasElemental)
+                    {
+                        ObtainElement(true);//gather orb through casting
+                        LevelMagic(magic);
+                        return;
+                    }
+
+                    int barrierPower = GetElementalOrbPower(true);//defensive orbpower
+                    //destroy orbs
+                    ElementsLevel = 0;
+                    ObtainElement(false);
+                    LevelMagic(magic);
+                    //
+                    ElementalBarrier = true;
+                    ElementalBarrierLv = (byte)((int)magic.Level + barrierPower);//compensate for lower mc then wizard
+                    ElementalBarrierTime = Envir.Time + ((int)data[1] + (int)magic.Level) * 1000;
+                    CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.ElementBarrierUp }, CurrentLocation);
+                    break;
+                case Spell.ElementalShot://ArcherSpells - Elemental system
+                    //destroy orbs
+                    ElementsLevel = 0;
+                    ObtainElement(false);//update and send to client
+                    //
+                    value = (int)data[1];
+                    target = (MapObject)data[2];
+
+                    if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null) return;
+                    if (target.Attacked(this, value, DefenceType.MAC, false) > 0) LevelMagic(magic);
+                    break;
+
+                #endregion
             }
 
 
@@ -5744,6 +6057,8 @@ namespace Server.MirObjects
 
         private Packet GetUpdateInfo()
         {
+            UpdateConcentration();
+
             return new S.PlayerUpdate
             {
                 ObjectID = ObjectID,
@@ -5776,11 +6091,16 @@ namespace Server.MirObjects
                 Poison = CurrentPoison,
                 Dead = Dead,
                 Hidden = Hidden,
-                Effect = MagicShield ? SpellEffect.MagicShieldUp : SpellEffect.None,
+                Effect = MagicShield ? SpellEffect.MagicShieldUp : (ElementalBarrier ? SpellEffect.ElementBarrierUp : SpellEffect.None),//ArcherSpells - Elemental system
                 WingEffect = Looks_Wings,
                 MountType = MountType,
                 RidingMount = RidingMount,
-                Fishing = Fishing
+                Fishing = Fishing,
+
+                //ArcherSpells - Elemental system
+                ElementOrbEffect = (uint)GetElementalOrbCount(),
+                ElementOrbLvl = (uint)ElementsLevel,
+                ElementOrbMax = (uint)Settings.OrbsExpList[Settings.OrbsExpList.Count - 1]
             };
         }
 
@@ -5939,9 +6259,14 @@ namespace Server.MirObjects
             if (MagicShield)
                 damage -= damage * (MagicShieldLv + 2) / 10;
 
+            if (ElementalBarrier)//ArcherSpells - Elemental system
+                damage -= damage * ElementalBarrierLv / 10;
+
             if (armour >= damage) return 0;
 
             MagicShieldTime -= (damage - armour) * 60;
+
+            ElementalBarrierTime -= (damage - armour) * 60;//ArcherSpells - Elemental system
 
             if (attacker.LifeOnHit > 0)
                 attacker.ChangeHP(attacker.LifeOnHit);
@@ -5980,6 +6305,8 @@ namespace Server.MirObjects
                 if ((Envir.Random.Next(Settings.PoisonAttackWeight) < attacker.PoisonAttack) && (Envir.Random.Next(LevelOffset) == 0))
                     ApplyPoison(new Poison { PType = PoisonType.Green, Duration = 5, TickSpeed = 1000, Value = Math.Min(10, 3 + Envir.Random.Next(attacker.PoisonAttack)) }, attacker);
             }
+
+            attacker.GatherElement();//ArcherSpells - Elemental system
 
             DamageDura();
             ActiveBlizzard = false;
@@ -6042,10 +6369,14 @@ namespace Server.MirObjects
             if (MagicShield)
                 damage -= damage * (MagicShieldLv + 2) / 10;
 
+            if (ElementalBarrier)//ArcherSpells - Elemental system
+                damage -= damage * ElementalBarrierLv / 10;
+
             if (armour >= damage) return 0;
 
             MagicShieldTime -= (damage - armour) * 60;
 
+            ElementalBarrierTime -= (damage - armour) * 60;//ArcherSpells - Elemental system
 
             LastHitter = attacker.Master ?? attacker;
             LastHitTime = Envir.Time + 10000;
@@ -7091,6 +7422,12 @@ namespace Server.MirObjects
             int indexFrom = -1;
             int indexTo = -1;
 
+            if (Dead)
+            {
+                Enqueue(p);
+                return;
+            }
+
             for (int i = 0; i < array.Length; i++)
             {
                 if (array[i] == null || array[i].UniqueID != fromID) continue;
@@ -7120,14 +7457,9 @@ namespace Server.MirObjects
             }
 
             bool canRepair = false;
+            bool canUpgrade = false;
 
             if (tempFrom.Info.Type != ItemType.Gem)
-            {
-                Enqueue(p);
-                return;
-            }
-
-            if (tempTo.Info.Bind.HasFlag(BindMode.DontRepair))
             {
                 Enqueue(p);
                 return;
@@ -7136,6 +7468,12 @@ namespace Server.MirObjects
             switch (tempFrom.Info.Shape)
             {
                 case 1: //repair weapons
+                    if (tempTo.Info.Bind.HasFlag(BindMode.DontRepair))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+
                     switch (tempTo.Info.Type)
                     {
                         case ItemType.Weapon:
@@ -7144,6 +7482,19 @@ namespace Server.MirObjects
                     }
                     break;
                 case 2: //repair armour + accessories
+                    if (tempTo.Info.Bind.HasFlag(BindMode.DontRepair))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+
+                    if (tempTo.CurrentDura == tempTo.MaxDura)
+                    {
+                        ReceiveChat("Item does not need to be repaired.", ChatType.Hint);
+                        Enqueue(p);
+                        return;
+                    }
+
                     switch (tempTo.Info.Type)
                     {
                         case ItemType.Armour:
@@ -7158,17 +7509,31 @@ namespace Server.MirObjects
                     break;
                 case 3: //gems
                 case 4: //orbs
-                    if(Envir.Random.Next(10) <= 3)
+
+                    if (tempTo.Info.Bind.HasFlag(BindMode.DontUpgrade))
+                    {
+                        Enqueue(p);
+                        return;
+                    }
+
+                    if(Envir.Random.Next(10) < 4)
                     {
                         //upgrade has no effect
+                        ReceiveChat("Upgrade has no effect.", ChatType.Hint);
 
-                        if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(10) <= 2))
+                        if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(10) < 5))
                         {
                             //item destroyed
+                            ReceiveChat("Item has been destroyed.", ChatType.Hint);
+
+                            Info.Inventory[indexTo] = null;
+                            p.Destroy = true;
                         }
                     }
                     else
                     {
+                        canUpgrade = true;
+
                         if((tempFrom.Info.MaxDC + tempFrom.DC) > 0)
                             tempTo.DC = (byte)Math.Min(byte.MaxValue, tempTo.DC + tempFrom.Info.MaxDC + tempFrom.DC);
 
@@ -7177,6 +7542,33 @@ namespace Server.MirObjects
 
                         if ((tempFrom.Info.MaxSC + tempFrom.SC) > 0)
                             tempTo.SC = (byte)Math.Min(byte.MaxValue, tempTo.SC + tempFrom.Info.MaxSC + tempFrom.SC);
+
+                        if ((tempFrom.Info.MaxAC + tempFrom.AC) > 0)
+                            tempTo.AC = (byte)Math.Min(byte.MaxValue, tempTo.AC + tempFrom.Info.MaxAC + tempFrom.AC);
+
+                        if ((tempFrom.Info.MaxMAC + tempFrom.MAC) > 0)
+                            tempTo.MAC = (byte)Math.Min(byte.MaxValue, tempTo.MAC + tempFrom.Info.MaxMAC + tempFrom.MAC);
+
+                        if ((tempFrom.Info.Durability) > 0)
+                            tempTo.MaxDura = (ushort)Math.Min(ushort.MaxValue, tempTo.MaxDura + tempFrom.MaxDura);
+
+                        if ((tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed) > 0)
+                            tempTo.AttackSpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, tempTo.AttackSpeed + tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed)));
+
+                        if ((tempFrom.Agility) > 0)
+                            tempTo.Agility = (byte)Math.Min(byte.MaxValue, tempTo.Agility + tempFrom.Agility);
+
+                        if ((tempFrom.Accuracy) > 0)
+                            tempTo.Accuracy = (byte)Math.Min(byte.MaxValue, tempTo.Accuracy + tempFrom.Accuracy);
+
+                        if ((tempFrom.PoisonAttack) > 0)
+                            tempTo.PoisonAttack = (byte)Math.Min(byte.MaxValue, tempTo.PoisonAttack + tempFrom.PoisonAttack);
+
+                        if ((tempFrom.Freezing) > 0)
+                            tempTo.Freezing = (byte)Math.Min(byte.MaxValue, tempTo.Freezing + tempFrom.Freezing);
+
+                        //Dissillusion
+                        //Endurance
                     }
 
                     break;
@@ -7184,13 +7576,7 @@ namespace Server.MirObjects
 
             RefreshBagWeight();
 
-            if (!canRepair)
-            {
-                Enqueue(p);
-                return;
-            }
-
-            if (canRepair)
+            if (canRepair && Info.Inventory[indexTo] != null)
             {
                 tempTo.CurrentDura = (ushort)Math.Min(tempTo.MaxDura, tempTo.CurrentDura + tempFrom.CurrentDura);
                 tempTo.DuraChanged = false;
@@ -7199,8 +7585,16 @@ namespace Server.MirObjects
                 Enqueue(new S.ItemRepaired { UniqueID = tempTo.UniqueID, MaxDura = tempTo.MaxDura, CurrentDura = tempTo.CurrentDura });
             }
 
-            tempFrom = null;
+            if (canUpgrade && Info.Inventory[indexTo] != null)
+            {
+                ReceiveChat("Item has been upgraded.", ChatType.Hint);
+                Enqueue(new S.ItemUpgraded { Item = tempTo });
+            }
 
+            if (tempFrom.Count > 1) tempFrom.Count--;
+            else Info.Inventory[indexFrom] = null;
+
+            //item merged ok
             p.Success = true;
             Enqueue(p);
         }
