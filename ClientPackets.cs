@@ -1295,4 +1295,26 @@ namespace ClientPackets
             writer.Write(IDTo);
         }
     }
+
+    public sealed class SetConcentration : Packet//ArcherSpells - Elemental system
+    {
+        public override short Index { get { return (short)ClientPacketIds.SetConcentration; } }
+
+        public uint ObjectID;
+        public bool Enabled;
+        public bool Interrupted;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Enabled = reader.ReadBoolean();
+            Interrupted = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Enabled);
+            writer.Write(Interrupted);
+        }
+    }
 }

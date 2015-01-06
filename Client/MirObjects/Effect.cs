@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Client.MirGraphics;
 using Client.MirScenes;
+using Client.MirSounds;
 
 namespace Client.MirObjects
 {
@@ -198,5 +199,105 @@ namespace Client.MirObjects
                 Library.DrawBlend(index, DrawLocation, Color.White, true, Rate);
         }
 
+    }
+
+    public class InterruptionEffect : Effect//ArcherSpells - Elemental system
+    {
+        public static List<InterruptionEffect> effectlist = new List<InterruptionEffect>();
+        bool noProcess = false;
+
+        public InterruptionEffect(MLibrary library, int baseIndex, int count, int duration, MapObject owner, bool blend, long starttime = 0)
+            : base(library, baseIndex, count, duration, owner)
+        {
+            Repeat = true;
+            Blend = blend;
+            effectlist.Add(this);
+        }
+
+        public override void Process()
+        {
+            if (!noProcess)
+                base.Process();
+        }
+
+        public override void Remove()
+        {
+            base.Remove();
+            effectlist.Remove(this);
+        }
+
+        public override void Draw()
+        {
+            if (!((PlayerObject)Owner).Concentrating)
+                Remove();
+            else if (((PlayerObject)Owner).ConcentrateInterrupted)
+                noProcess = true;
+            else
+                noProcess = false;
+            if (!noProcess)
+                base.Draw();
+        }
+
+        public static int GetOwnerEffectID(uint objectID)
+        {
+            for (int i = 0; i < effectlist.Count; i++)
+            {
+                if (effectlist[i].Owner.ObjectID != objectID) continue;
+                return i;
+            }
+            return -1;
+        }
+    }
+
+    public class ElementsEffect : Effect//ArcherSpells - Elemental system
+    {
+        int myType;//1 = green orb, 2 = blue orb, 3 = red orb, 4 = mixed orbs
+        long killAt;//holds the exp value for 4 orbs : kills all orbs when myType 4 is reached
+        bool loopit = false;//soundloop
+
+        public ElementsEffect(MLibrary library, int baseIndex, int count, int duration, MapObject owner, bool blend, int elementType, int killtime, bool loopon = false)
+            : base(library, baseIndex, count, duration, owner)
+        {
+            Repeat = true;
+            Blend = blend;
+            myType = elementType;
+            killAt = killtime;
+            //
+            loopit = loopon;
+            StopSounds();
+            StartSound();
+        }
+
+        public override void Process()
+        {
+
+            base.Process();
+        }
+
+        private void StartSound()
+        {
+            SoundManager.PlaySound(20000 + 126 * 10 + 4 + myType, loopit);
+        }
+
+        private void StopSounds()
+        {
+            for (int i = 0; i <= 3; i++)
+                SoundManager.StopSound(20000 + 126 * 10 + 5 + i);
+        }
+
+        public override void Remove()
+        {
+            SoundManager.StopSound(20000 + 126 * 10 + 4 + myType);
+            base.Remove();
+        }
+
+        public override void Draw()
+        {
+            if (!((PlayerObject)Owner).HasElements)
+                Remove();
+            if (((PlayerObject)Owner).ElementsLevel >= killAt && myType < 4)
+                Remove();
+            base.Draw();
+        }
     }
 }

@@ -424,6 +424,9 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.CombineItem:
                     CombineItem((C.CombineItem)p);
                     break;
+                case (short)ClientPacketIds.SetConcentration://ArcherSpells - Elemental system
+                    SetConcentration((C.SetConcentration)p);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1100,6 +1103,13 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.CombineItem(p.IDFrom, p.IDTo);
+        }
+
+        private void SetConcentration(C.SetConcentration p)//ArcherSpells - Elemental system
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.ConcentrateInterrupted = p.Interrupted;
         }
     }
 }

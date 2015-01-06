@@ -354,6 +354,7 @@ public enum ItemType : byte
     Fish = 33,
     Quest = 34
 }
+
 public enum MirGridType : byte
 {
     None = 0,
@@ -621,8 +622,20 @@ public enum Spell : byte
     DoubleShot = 123,
     ExplosiveTrap = 124,
     DelayedExplosion = 125,
-    Meditation = 126,
+    Meditation = 126,     //Elemental system   
     BackStep = 127,
+    ElementalShot = 128,//Elemental system
+    Concentration = 129,//Elemental system
+    Stonetrap = 130,
+    ElementalBarrier = 131,//Elemental system
+    SummonVampire = 132,
+    VampireShot = 133,
+    SummonToad = 134,
+    PoisonShot = 135,
+    CrippleShot = 136,
+    SummonSnakes = 137,
+    NapalmShot = 138,
+    OneWithNature = 139,
 
 
     //Map Events
@@ -649,6 +662,8 @@ public enum SpellEffect : byte
     Reflect,
     Critical,
     Mine,
+    ElementBarrierUp,//ArcherSpells - Elemental system
+    ElementBarrierDown
 }
 
 public enum BuffType : byte
@@ -666,6 +681,7 @@ public enum BuffType : byte
     Curse,
     MoonLight,
     General,
+    Concentration, //ArcherSpells - Elemental system
 
     Impact,
     Magic,
@@ -848,7 +864,13 @@ public enum ServerPacketIds : short
     UserBackStep,//ArcherSpells - Backstep
     ObjectBackStep,//ArcherSpells - Backstep
 
-    CombineItem
+    CombineItem,
+    ItemUpgraded,
+
+    SetConcentration,//ArcherSpells - Elemental system
+    SetObjectConcentration,//ArcherSpells - Elemental system
+    SetElemental,//ArcherSpells - Elemental system
+    SetObjectElemental,//ArcherSpells - Elemental system
 }
 
 public enum ClientPacketIds : short
@@ -931,6 +953,8 @@ public enum ClientPacketIds : short
 
     AcceptReincarnation,
     CombineItem,
+
+    SetConcentration,//ArcherSpells - Elemental system
 }
 
 public class InIReader
@@ -2770,6 +2794,8 @@ public abstract class Packet
                 return new C.AcceptReincarnation();
             case (short)ClientPacketIds.CombineItem:
                 return new C.CombineItem();
+            case (short)ClientPacketIds.SetConcentration://ArcherSpells - Elemental system
+                return new C.SetConcentration();
             default:
                 throw new NotImplementedException();
         }
@@ -3095,6 +3121,16 @@ public abstract class Packet
                 return new S.ObjectBackStep();
             case (short)ServerPacketIds.CombineItem:
                 return new S.CombineItem();
+            case (short)ServerPacketIds.ItemUpgraded:
+                return new S.ItemUpgraded();
+            case (short)ServerPacketIds.SetConcentration://ArcherSpells - Elemental system
+                return new S.SetConcentration();
+            case (short)ServerPacketIds.SetObjectConcentration://ArcherSpells - Elemental system
+                return new S.SetObjectConcentration();
+            case (short)ServerPacketIds.SetElemental://ArcherSpells - Elemental system
+                return new S.SetElemental();
+            case (short)ServerPacketIds.SetObjectElemental://ArcherSpells - Elemental system
+                return new S.SetObjectElemental();
             default:
                 throw new NotImplementedException();
         }
