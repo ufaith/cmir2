@@ -548,6 +548,7 @@ public enum Spell : byte
     Rage = 13,
     CounterAttack = 14,
     SlashingBurst = 15,
+    Fury = 16,
 
     //Wizard
     FireBall = 31,
@@ -664,6 +665,8 @@ public enum SpellEffect : byte
     Mine,
     ElementBarrierUp,//ArcherSpells - Elemental system
     ElementBarrierDown,
+    FuryUp,
+    FuryDown,
 }
 
 public enum BuffType : byte
@@ -672,6 +675,7 @@ public enum BuffType : byte
     Teleport,
     Hiding,
     Haste,
+    Fury,
     SoulShield,
     BlessedArmour,
     LightBody,

@@ -71,6 +71,8 @@ namespace Client.MirObjects
 
         public bool MagicShield;
         public Effect ShieldEffect;
+        public bool Fury;
+        public Effect FuryEffect;
         public byte WingEffect;
         private short StanceDelay = 2500;
 
@@ -1362,6 +1364,17 @@ namespace Client.MirObjects
                             case Spell.Haste:
                                 Effects.Add(new Effect(Libraries.Magic2, 2140 + (int)Direction * 10, 6, Frame.Count * FrameInterval, this));
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
+
+                            #endregion
+
+                            #region Fury
+
+                            case Spell.Fury:
+                                Effects.Add(new Effect(Libraries.Magic3, 200, 8, 8 * FrameInterval, this));
+                                Effects.Add(new Effect(Libraries.Magic3, 187, 10, 10 * FrameInterval, this));
+                                //i don't know sound
+                                //SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
                             #endregion
@@ -3193,6 +3206,13 @@ namespace Client.MirObjects
             {
                 ElementalBarrier = true;
                 Effects.Add(ElementalBarrierEffect = new Effect(Libraries.Magic3, 1890, 16, 3200, this) { Repeat = true });
+                CurrentEffect = SpellEffect.None;
+            }
+
+            if (CurrentEffect == SpellEffect.FuryUp && !Fury)
+            {
+                Fury = true;
+                Effects.Add(FuryEffect = new Effect(Libraries.Magic3, 190, 7, 1400, this) { Repeat = true });
                 CurrentEffect = SpellEffect.None;
             }
 
