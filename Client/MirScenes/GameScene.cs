@@ -122,7 +122,7 @@ namespace Client.MirScenes
         public List<OutPutMessage> OutputMessages = new List<OutPutMessage>();
 
         public List<MirImageControl> BuffList = new List<MirImageControl>();
-        public static long PoisonFieldTime, SlashingBurstTime;
+        public static long PoisonFieldTime, SlashingBurstTime, FuryCoolTime;
 
         public GameScene()
         {
@@ -1271,6 +1271,8 @@ namespace Client.MirScenes
                     return 884;
                 case BuffType.Haste:
                     return 880;
+                case BuffType.Fury:
+                    return 860;
                 case BuffType.LightBody:
                     return 882;
                 case BuffType.SoulShield:
@@ -2728,6 +2730,9 @@ namespace Client.MirScenes
                 case Spell.SlashingBurst:
                     SlashingBurstTime = CMain.Time + (14 - p.Level * 4) * 1000;
                     break;
+                case Spell.Fury:
+                    FuryCoolTime = CMain.Time + 600000 - p.Level * 120000;
+                    break;
             }
         }
 
@@ -2848,6 +2853,28 @@ namespace Client.MirScenes
                         player.ElementalBarrierEffect = null;
                         player.ElementalBarrier = false;
                         player.Effects.Add(player.ElementalBarrierEffect = new Effect(Libraries.Magic3, 1910, 7, 1400, ob));
+                        break;
+                    case SpellEffect.FuryUp://warrior skill - BloodDragonSword;
+                        if (ob.Race != ObjectType.Player) return;
+                        player = (PlayerObject)ob;
+                        if (player.FuryEffect != null)
+                        {
+                            player.FuryEffect.Clear();
+                            player.FuryEffect.Remove();
+                        }
+                        player.Fury = true;
+                        player.Effects.Add(player.FuryEffect = new Effect(Libraries.Magic3, 190, 7, 1400, ob) { Repeat = true });
+                        break;
+                    case SpellEffect.FuryDown://warrior skill - BloodDragonSword;
+                        if (ob.Race != ObjectType.Player) return;
+                        player = (PlayerObject)ob;
+                        if (player.FuryEffect != null)
+                        {
+                            player.FuryEffect.Clear();
+                            player.FuryEffect.Remove();
+                        }
+                        player.FuryEffect = null;
+                        player.Fury = false;
                         break;
                 }
                 return;
@@ -6762,6 +6789,19 @@ namespace Client.MirScenes
                         {
                             OutputDelay = CMain.Time + 1000;
                             GameScene.Scene.OutputMessage(string.Format("You cannot cast SlashingBurst for another {0} seconds.", (GameScene.SlashingBurstTime - CMain.Time - 1) / 1000 + 1));
+                        }
+
+                        User.ClearMagic();
+                        return;
+                    }
+                    break;
+                case Spell.Fury:
+                    if (CMain.Time < GameScene.FuryCoolTime)
+                    {
+                        if (CMain.Time >= OutputDelay)
+                        {
+                            OutputDelay = CMain.Time + 1000;
+                            GameScene.Scene.OutputMessage(string.Format("You cannot cast Fury for another {0} seconds.", (GameScene.FuryCoolTime - CMain.Time - 1) / 1000 + 1));
                         }
 
                         User.ClearMagic();
@@ -15683,6 +15723,9 @@ namespace Client.MirScenes
                     break;
                 case BuffType.Haste:
                     text = string.Format("Haste\nIncreases Attack Speed by: {0}.\n", Value);
+                    break;
+                case BuffType.Fury:
+                    text = string.Format("Fury\nIncreases Attack Speed by: {0}.\n", Value);
                     break;
                 case BuffType.LightBody:
                     text = string.Format("Light Body\nIncreases Agility by: {0}.\n", Value);

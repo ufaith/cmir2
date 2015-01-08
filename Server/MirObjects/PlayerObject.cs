@@ -235,8 +235,8 @@ namespace Server.MirObjects
         public List<ItemSets> ItemSets = new List<ItemSets>();
         public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();
 
-        public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
-        public long FlamingSwordTime, PoisonFieldTime, SlashingBurstTime;
+        public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword, Fury;
+        public long FlamingSwordTime, PoisonFieldTime, SlashingBurstTime, FuryTime, FuryCoolTime;
         public bool ActiveBlizzard, ActiveReincarnation, ReincarnationReady;
         public PlayerObject ReincarnationTarget;
         public long ReincarnationExpireTime;
@@ -413,6 +413,13 @@ namespace Server.MirObjects
                 ElementalBarrierLv = 0;
                 ElementalBarrierTime = 0;
                 CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.ElementBarrierDown }, CurrentLocation);
+            }
+
+            if (Fury && Envir.Time > FuryTime)
+            {
+                Fury = false;
+                FuryTime = 0;
+                CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.FuryDown }, CurrentLocation);
             }
 
             if (FlamingSword && Envir.Time >= FlamingSwordTime * 2)
@@ -2231,6 +2238,7 @@ namespace Server.MirObjects
                 switch (buff.Type)
                 {
                     case BuffType.Haste:
+                    case BuffType.Fury:
                         ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + buff.Value)));
                         break;
                     case BuffType.LightBody:
@@ -4108,6 +4116,9 @@ namespace Server.MirObjects
                 case Spell.LightBody:
                     ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic));
                     break;
+                case Spell.Fury:
+                    FurySpell(magic, out cast);
+                    break;
                 case Spell.FireBang:
                 case Spell.IceStorm:
                     FireBang(magic, target == null ? location : target.CurrentLocation);
@@ -5051,6 +5062,17 @@ namespace Server.MirObjects
 
             Enqueue(new S.UserAttackMove { Direction = Direction, Location = location });
         }
+        private void FurySpell(UserMagic magic, out bool cast)
+        {
+            cast = false;
+
+            // delayTime
+            if (Envir.Time < FuryCoolTime) return;
+            cast = true;
+            FuryCoolTime = 600000 - magic.Level * 120000;
+            ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic));
+        }
+
         private void ProtectionField(UserMagic magic)
         {
             int count = Buffs.Where(x => x.Type == BuffType.ProtectionField).ToList().Count();
@@ -5584,6 +5606,19 @@ namespace Server.MirObjects
 
                 #endregion
 
+                #region Fury
+
+                case Spell.Fury:
+                    if (Fury) return;
+                    Fury = true;
+                    AddBuff(new Buff { Type = BuffType.Fury, Caster = this, ExpireTime = Envir.Time + 60000 + magic.Level * 10000, Value = 4 });
+                    FuryTime = Envir.Time + 60000 + magic.Level * 10000;
+                    CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.FuryUp }, CurrentLocation);
+                    LevelMagic(magic);
+                    break;
+
+                #endregion
+
                 #region LightBody
 
                 case Spell.LightBody:
@@ -6099,7 +6134,7 @@ namespace Server.MirObjects
                 Poison = CurrentPoison,
                 Dead = Dead,
                 Hidden = Hidden,
-                Effect = MagicShield ? SpellEffect.MagicShieldUp : (ElementalBarrier ? SpellEffect.ElementBarrierUp : SpellEffect.None),//ArcherSpells - Elemental system
+                Effect = MagicShield ? SpellEffect.MagicShieldUp : (ElementalBarrier ? SpellEffect.ElementBarrierUp : Fury ? SpellEffect.FuryUp : SpellEffect.None),//ArcherSpells - Elemental system
                 WingEffect = Looks_Wings,
                 MountType = MountType,
                 RidingMount = RidingMount,
