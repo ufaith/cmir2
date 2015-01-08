@@ -129,6 +129,8 @@ namespace Server.MirObjects
                     return new Trainer(info);
                 case 57:
                     return new TownArcher(info);
+                case 58:
+                    return new Guard(info);
                 default:
                     return new MonsterObject(info);
             }
@@ -1420,7 +1422,12 @@ namespace Server.MirObjects
 
             if (attacker.Info.AI == 6) // Guard
             {
-                if (Info.AI != 1 && Info.AI != 2 && Info.AI != 3 && (Master == null || Master.PKPoints >= 200)) //Not Dear/Hen or Red Master 
+                if (Info.AI != 1 && Info.AI != 2 && Info.AI != 3 && (Master == null || Master.PKPoints >= 200)) //Not Dear/Hen/Tree/Pets or Red Master 
+                    return true;
+            }
+            else if (attacker.Info.AI == 58) // Tao Guard - attacks Pets
+            {
+                if (Info.AI != 1 && Info.AI != 2 && Info.AI != 3) //Not Dear/Hen/Tree
                     return true;
             }
             else if (Master != null) //Pet Attacked
@@ -1635,7 +1642,7 @@ namespace Server.MirObjects
             
             ShockTime = 0;
 
-            if (attacker.Info.AI == 6)
+            if (attacker.Info.AI == 6 || attacker.Info.AI == 58)
                 EXPOwner = null;
 
             else if (attacker.Master != null)

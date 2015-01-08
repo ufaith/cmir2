@@ -4187,6 +4187,7 @@ namespace Server.MirObjects
                 case Spell.Rage:
                     Rage(magic);
                     break;
+
                 case Spell.Mirroring:
                     Mirroring(magic);
                     break;
@@ -4455,18 +4456,24 @@ namespace Server.MirObjects
             }
             return true;
         }
-        public int HasSpell(Spell spell)
-        {
-            UserMagic magic = GetMagic(spell);
-            if (magic != null)
-                return (int)magic.Level;
-            else return -1;
-        }
+        //public int HasSpell(Spell spell)
+        //{
+        //    UserMagic magic = GetMagic(spell);
+        //    if (magic != null)
+        //        return (int)magic.Level;
+        //    else return -1;
+        //}
         public void GatherElement()
         {
-            int MeditationLvl = HasSpell(Spell.Meditation);
-            if (MeditationLvl == -1) return;
-            int ConcentrateLvl = HasSpell(Spell.Concentration);
+            UserMagic magic = GetMagic(Spell.Meditation);
+
+            if (magic == null) return;
+
+            int MeditationLvl = magic.Level;
+
+            magic = GetMagic(Spell.Concentration);
+
+            int ConcentrateLvl = magic != null ? magic.Level : -1;
 
             int MeditateChance = 0;
             int ConcentrateChance = 0;
@@ -5005,7 +5012,7 @@ namespace Server.MirObjects
             cast = true;
 
             // damage
-            int damage = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
+            int damage = GetAttackPower(MaxDC, MaxDC) * magic.GetPower();
 
             // objects = this, magic, damage, currentlocation, direction, attackRange
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction, 1);
@@ -5042,7 +5049,7 @@ namespace Server.MirObjects
             CurrentMap.GetCell(CurrentLocation).Add(this);
             AddObjects(Direction, 1);
 
-            Enqueue(new S.UserLocation { Direction = Direction, Location = location });
+            Enqueue(new S.UserAttackMove { Direction = Direction, Location = location });
         }
         private void ProtectionField(UserMagic magic)
         {
@@ -5744,6 +5751,7 @@ namespace Server.MirObjects
                     break;
 
                 #endregion
+
             }
 
 
@@ -6130,7 +6138,7 @@ namespace Server.MirObjects
         {
             if (attacker == null || attacker.Node == null) return false;
             if (Dead || attacker.Master == this || GMGameMaster) return false;
-            if (attacker.Info.AI == 6) return PKPoints >= 200;
+            if (attacker.Info.AI == 6 || attacker.Info.AI == 58) return PKPoints >= 200;
             if (attacker.Master == null) return true;
             if (InSafeZone || attacker.Master.InSafeZone) return false;
             if (LastHitter != attacker.Master && attacker.Master.LastHitter != this)
@@ -7456,6 +7464,12 @@ namespace Server.MirObjects
                 return;
             }
 
+            if((byte)tempTo.Info.Type < 1 || (byte)tempTo.Info.Type > 11)
+            {
+                Enqueue(p);
+                return;
+            }
+
             bool canRepair = false;
             bool canUpgrade = false;
 
@@ -7567,11 +7581,19 @@ namespace Server.MirObjects
                         if ((tempFrom.Freezing) > 0)
                             tempTo.Freezing = (byte)Math.Min(byte.MaxValue, tempTo.Freezing + tempFrom.Freezing);
 
+                        if ((tempFrom.MagicResist) > 0)
+                            tempTo.MagicResist = (byte)Math.Min(byte.MaxValue, tempTo.MagicResist + tempFrom.MagicResist);
+
+                        if ((tempFrom.PoisonResist) > 0)
+                            tempTo.PoisonResist = (byte)Math.Min(byte.MaxValue, tempTo.PoisonResist + tempFrom.PoisonResist);
+
                         //Dissillusion
                         //Endurance
                     }
-
                     break;
+                default:
+                    Enqueue(p);
+                    return;
             }
 
             RefreshBagWeight();

@@ -368,6 +368,9 @@ namespace Server.MirDatabase
                 case Spell.Plague:
                     return 10;
 
+                case Spell.SlashingBurst:
+                    return 1;
+
                 case Spell.StraightShot:
                     return 7;
                 case Spell.DoubleShot:
@@ -411,6 +414,8 @@ namespace Server.MirDatabase
                 case Spell.FlameField:
                     return 25;
 
+                case Spell.SlashingBurst:
+                    return 3;
 
                 case Spell.SoulFireBall:
                     return 3;
