@@ -622,12 +622,12 @@ public enum Spell : byte
     DoubleShot = 123,
     ExplosiveTrap = 124,
     DelayedExplosion = 125,
-    Meditation = 126,     //Elemental system   
+    Meditation = 126,
     BackStep = 127,
-    ElementalShot = 128,//Elemental system
-    Concentration = 129,//Elemental system
+    ElementalShot = 128,
+    Concentration = 129,
     Stonetrap = 130,
-    ElementalBarrier = 131,//Elemental system
+    ElementalBarrier = 131,
     SummonVampire = 132,
     VampireShot = 133,
     SummonToad = 134,
@@ -663,7 +663,7 @@ public enum SpellEffect : byte
     Critical,
     Mine,
     ElementBarrierUp,//ArcherSpells - Elemental system
-    ElementBarrierDown
+    ElementBarrierDown,
 }
 
 public enum BuffType : byte
@@ -682,7 +682,6 @@ public enum BuffType : byte
     MoonLight,
     General,
     Concentration, //ArcherSpells - Elemental system
-
     Impact,
     Magic,
     Taoist,
@@ -863,7 +862,7 @@ public enum ServerPacketIds : short
 
     UserBackStep,//ArcherSpells - Backstep
     ObjectBackStep,//ArcherSpells - Backstep
-
+    UserAttackMove,
     CombineItem,
     ItemUpgraded,
 
@@ -3119,6 +3118,8 @@ public abstract class Packet
                 return new S.UserBackStep();
             case (short)ServerPacketIds.ObjectBackStep://ArcherSpells - Backstep
                 return new S.ObjectBackStep();
+            case (short)ServerPacketIds.UserAttackMove://Warrior Skill - SlashingBurst
+                return new S.UserAttackMove();
             case (short)ServerPacketIds.CombineItem:
                 return new S.CombineItem();
             case (short)ServerPacketIds.ItemUpgraded:

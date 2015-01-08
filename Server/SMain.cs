@@ -98,6 +98,7 @@ namespace Server
         private void stopServerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Envir.Stop();
+            Envir.MonsterCount = 0;
         }
 
         private void gameToolStripMenuItem_Click(object sender, EventArgs e)

@@ -173,7 +173,6 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Walking, new Frame(32, 6, 0, 100));
             frame.Frames.Add(MirAction.Attack1, new Frame(80, 6, 0, 100));
 
-
             //1
             Monsters.Add(frame = new FrameSet());
             frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
@@ -629,6 +628,11 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Struck, new Frame(176, 2, 0 , 100));
             frame.Frames.Add(MirAction.Die, new Frame(192, 10, 0, 100));
             frame.Frames.Add(MirAction.Dead, new Frame(201, 1, 9, 1000));
+
+            //48 - Taoist Guard
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
+            frame.Frames.Add(MirAction.Attack1, new Frame(32, 6, 0, 100));
 
             #endregion
 

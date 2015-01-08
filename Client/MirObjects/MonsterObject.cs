@@ -110,8 +110,7 @@ namespace Client.MirObjects
 
             switch (BaseImage)
             {
-                case Monster.Guard: 
-                case Monster.Guard1: 
+                case Monster.Guard:
                 case Monster.Guard2: 
                     Frames = FrameSet.Monsters[0];
                     break;
@@ -337,6 +336,9 @@ namespace Client.MirObjects
                     break;
                 case Monster.ArcherGuard:
                     Frames = FrameSet.Monsters[47];
+                    break;
+                case Monster.Guard1:
+                    Frames = FrameSet.Monsters[48];
                     break;
                 default:
                     Frames = FrameSet.Monsters[0];
@@ -1830,6 +1832,14 @@ namespace Client.MirObjects
                             break;
                         case MirAction.Die:
                             Libraries.Monsters[(ushort)Monster.GreatFoxSpirit].DrawBlend(318 + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
+                case Monster.Guard1:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Attack1:
+                            Libraries.Monsters[(ushort)Monster.Guard1].DrawBlend(80 + ((int)Direction * 3) + FrameIndex, DrawLocation, Color.White, true);
                             break;
                     }
                     break;

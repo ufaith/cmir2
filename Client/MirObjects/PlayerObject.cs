@@ -881,14 +881,11 @@ namespace Client.MirObjects
                                 }
                                 break;
                             case Spell.SlashingBurst:
-                                Frames.Frames.TryGetValue(MirAction.Attack1, out Frame);
-                                //CurrentAction = MirAction.Attack1;
-                                //CurrentLocation = Functions.PointMove(CurrentLocation, Direction, 2);
+                                 Frames.Frames.TryGetValue(MirAction.Attack1, out Frame);
                                 if (this == User)
                                 {
                                     MapControl.NextAction = CMain.Time + 2000; // 80%
                                     GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
-                                    Network.Enqueue(new C.Magic { Spell = Spell, Direction = Direction });
                                 }
                                 break;
                             case Spell.StraightShot:

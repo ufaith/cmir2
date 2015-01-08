@@ -3828,6 +3828,32 @@ namespace ServerPackets
         }
     }
 
+    public sealed class UserAttackMove : Packet//warrior skill - SlashingBurst move packet 
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.UserAttackMove; }
+        }
+
+
+        public Point Location;
+        public MirDirection Direction;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Location = new Point(reader.ReadInt32(), reader.ReadInt32());
+            Direction = (MirDirection)reader.ReadByte();
+        }
+
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Location.X);
+            writer.Write(Location.Y);
+            writer.Write((byte)Direction);
+        }
+    }
+
     public sealed class CombineItem : Packet
     {
         public override short Index

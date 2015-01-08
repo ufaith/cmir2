@@ -81,7 +81,7 @@ namespace Client.MirScenes
 
         public QuestListDialog QuestListDialog;
         public QuestDetailDialog QuestDetailDialog;
-        public QuestLogDialog QuestLogDialog;
+        public QuestDiaryDialog QuestLogDialog;
         public QuestTrackingDialog QuestTrackingDialog;
 
         public SkillBarDialog SkillBarDialog;
@@ -180,7 +180,7 @@ namespace Client.MirScenes
             QuestListDialog = new QuestListDialog { Parent = this, Visible = false };
             QuestDetailDialog = new QuestDetailDialog {Parent = this, Visible = false};
             QuestTrackingDialog = new QuestTrackingDialog { Parent = this, Visible = false };
-            QuestLogDialog = new QuestLogDialog {Parent = this, Visible = false};
+            QuestLogDialog = new QuestDiaryDialog {Parent = this, Visible = false};
 
             SkillBarDialog = new SkillBarDialog { Parent = this, Visible = false };
 
@@ -307,8 +307,8 @@ namespace Client.MirScenes
                     else FishingDialog.Hide();
                     break;
 
-                //case Keys.M:
-                case Keys.Space:
+                case Keys.M:
+                //case Keys.Space:
                     if (GameScene.Scene.MountDialog.CanRide())
                         GameScene.Scene.MountDialog.Ride();
                     break;
@@ -1148,6 +1148,9 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.ObjectBackStep://ArcherSpells - Backstep
                     ObjectBackStep((S.ObjectBackStep)p);
                     break;
+                case (short)ServerPacketIds.UserAttackMove://Warrior Skill - SlashingBurst
+                    UserAttackMove((S.UserAttackMove)p);
+                    break;
                 case (short)ServerPacketIds.CombineItem:
                     CombineItem((S.CombineItem)p);
                     break;
@@ -1175,13 +1178,23 @@ namespace Client.MirScenes
         public void CreateBuff(Buff buff)
         {
             string text = "";
+            int buffImage = BuffImage(buff.Type);
+
+            MLibrary buffLibrary = Libraries.Prguse;
+
+            if (buffImage >= 10000)
+            {
+                buffImage -= 10000;
+                buffLibrary = Libraries.Prguse2;
+            }
+
             MirImageControl image = new MirImageControl
             {
-                Library = Libraries.Prguse,
+                Library = buffLibrary,
                 Parent = this,
                 Visible = true,
                 Sort = false,
-                Index = BuffImage(buff.Type)
+                Index = buffImage
             };
 
             new MirLabel
@@ -1228,9 +1241,20 @@ namespace Client.MirScenes
             {
                 MirImageControl image = BuffList[i];
                 Buff buff = Buffs[i];
+
+                int buffImage = BuffImage(buff.Type);
+                MLibrary buffLibrary = Libraries.Prguse;
+
+                if (buffImage >= 10000)
+                {
+                    buffImage -= 10000;
+                    buffLibrary = Libraries.Prguse2;
+                }
+
                 image.Location = new Point((Settings.ScreenWidth - 155) - i * 26, 6);
                 image.Hint = buff.ToString();
-                image.Index = BuffImage(buff.Type);
+                image.Index = buffImage;
+                image.Library = buffLibrary;
 
                 double timeRemaining = Math.Round((buff.Expire - CMain.Time) / 1000D);
 
@@ -1278,7 +1302,7 @@ namespace Client.MirScenes
                 case BuffType.ManaAid:
                     return 904;
                 case BuffType.Concentration://ArcherSpells - Elemental system
-                    return 2365;//this is just a random number.  it needs a proper icon
+                    return 11162; //Prguse2
                 default:
                     return 0;
             }
@@ -2645,8 +2669,8 @@ namespace Client.MirScenes
             item.Accuracy = p.Item.Accuracy;
             item.PoisonAttack = p.Item.PoisonAttack;
             item.Freezing = p.Item.Freezing;
-            //Dissillusion
-            //Endurance
+            item.MagicResist = p.Item.MagicResist;
+            item.PoisonResist = p.Item.PoisonResist;
 
             if (HoverItem == item)
             {
@@ -3187,6 +3211,42 @@ namespace Client.MirScenes
 
                 return;
             }
+        }
+
+        private void UserAttackMove(S.UserAttackMove p)//Warrior Skill - SlashingBurst
+        {
+            MapControl.NextAction = 0;
+            if (User.CurrentLocation == p.Location && User.Direction == p.Direction) return;
+
+
+            MapControl.RemoveObject(User);
+            User.CurrentLocation = p.Location;
+            User.MapLocation = p.Location;
+            MapControl.AddObject(User);
+
+
+            MapControl.FloorValid = false;
+            MapControl.InputDelay = CMain.Time + 400;
+
+
+            if (User.Dead) return;
+
+
+            User.ClearMagic();
+            User.QueuedAction = null;
+
+
+            for (int i = User.ActionFeed.Count - 1; i >= 0; i--)
+            {
+                if (User.ActionFeed[i].Action == MirAction.Pushed) continue;
+                User.ActionFeed.RemoveAt(i);
+            }
+
+
+            User.SetAction();
+
+
+            User.ActionFeed.Add(new QueuedAction { Action = MirAction.Standing, Direction = p.Direction, Location = p.Location });
         }
 
         private void SetConcentration(S.SetConcentration p)//ArcherSpells - Elemental system
@@ -4473,6 +4533,44 @@ namespace Client.MirScenes
                                 OutLine = false,
                                 Parent = ItemLabel,
                                 Text = string.Format(addedValue1 > 0 ? "Poison: +{0} (+{1})" : "Poison: +{0}", value1 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.MagicResist;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MagicResist : 0;
+
+                        if ((value1 > 0) || (addedValue1 > 0))
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "Magic Resist: +{0} (+{1})" : "Magic Resist: +{0}", value1 + addedValue1, addedValue1)
+                            };
+
+                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
+                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                        }
+
+                        value1 = realItem.PoisonResist;
+                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonResist : 0;
+
+                        if ((value1 > 0) || (addedValue1 > 0))
+                        {
+                            label = new MirLabel
+                            {
+                                AutoSize = true,
+                                ForeColour = Color.White,
+                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                                OutLine = false,
+                                Parent = ItemLabel,
+                                Text = string.Format(addedValue1 > 0 ? "Poison Resist: +{0} (+{1})" : "Poison Resist: +{0}", value1 + addedValue1, addedValue1)
                             };
 
                             ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
@@ -6553,6 +6651,9 @@ namespace Client.MirScenes
                 return;
             }
 
+            //ArcherSpells - Elemental system
+            bool isTargetSpell = true;
+
             MapObject target = null;
 
             //Targeting
@@ -6582,7 +6683,7 @@ namespace Client.MirScenes
                     if (target != null && target.Race == ObjectType.Monster) MapObject.MagicObject = target;
                     break;
                 case Spell.StraightShot:
-                case Spell.DoubleShot://ArcherSpells - weapon fix
+                case Spell.DoubleShot:
                 case Spell.ElementalShot:
                     if (!User.HasClassWeapon)
                     {
@@ -6599,6 +6700,11 @@ namespace Client.MirScenes
                     if (target == null) target = MapObject.MagicObject;
 
                     if (target != null && target.Race == ObjectType.Monster) MapObject.MagicObject = target;
+
+                    if(magic.Spell == Spell.ElementalShot)
+                    {
+                        isTargetSpell = User.HasElements;
+                    }
 
                     //if (magic.Spell == Spell.ElementalShot && User.HasElements)
                     //{
@@ -6678,56 +6784,14 @@ namespace Client.MirScenes
                     }
                     break;
                 default:
-                    //selfCast = true;
+                    isTargetSpell = false;
                         break;
             }
-
-            //if (magic.Spell == Spell.ElementalShot && User.HasElements)//ArcherSpells - Elemental system
-            //{
-            //    //prevents losing gathered orbs on a miss
-            //    bool breakit = false;
-            //    if (target == null)
-            //    {
-            //        User.ClearMagic();
-            //        return;
-            //    }
-
-            //    Point nextloc = User.CurrentLocation;
-            //    while (nextloc != target.CurrentLocation)
-            //    {
-            //        MirDirection elementdir = Functions.DirectionFromPoint(nextloc, target.CurrentLocation);
-            //        nextloc = Functions.PointMove(nextloc, elementdir, 1);
-
-            //        if (nextloc.X < 0 || nextloc.Y < 0 || nextloc.X >= GameScene.Scene.MapControl.Width || nextloc.Y >= GameScene.Scene.MapControl.Height) breakit = true;
-
-            //        if (!GameScene.Scene.MapControl.ValidPoint(nextloc)) breakit = true;
-
-            //        if (breakit)
-            //        {
-            //            User.ClearMagic();
-            //            return;
-            //        }
-            //    }
-            //}
 
             MirDirection dir = (target == null || target == User) ? User.NextMagicDirection : Functions.DirectionFromPoint(User.CurrentLocation, target.CurrentLocation);
 
             Point location = target != null ? target.CurrentLocation : User.NextMagicLocation;
 
-            //ArcherSpells - Elemental system
-            bool isTargetSpell = true;
-
-            switch (magic.Spell)// should add all non target spells to this
-            {
-                case Spell.BackStep:
-                case Spell.Concentration:
-                case Spell.ElementalBarrier:
-                    isTargetSpell = false;
-                    break;
-                case Spell.ElementalShot:
-                    isTargetSpell = User.HasElements;
-                    break;
-            }
 
             if (!Functions.InRange(User.CurrentLocation, location, 9) && isTargetSpell)
             {
@@ -9190,6 +9254,14 @@ namespace Client.MirScenes
             Location = new Point(0, 224);
             Sort = true;
 
+            MirImageControl TitleLabel = new MirImageControl
+            {
+                Index = 0,
+                Library = Libraries.Title,
+                Location = new Point(18, 5),
+                Parent = this
+            };
+
             CloseButton = new MirButton
             {
                 HoverIndex = 361,
@@ -9557,7 +9629,7 @@ namespace Client.MirScenes
         public byte Hair;
         public byte Level;
 
-        public MirButton CloseButton, GroupButton, FriendButton, MailButton;
+        public MirButton CloseButton, GroupButton, FriendButton, MailButton, TradeButton;
         public MirImageControl CharacterPage, ClassImage;
         public MirLabel NameLabel;
         public MirLabel GuildLabel, LoverLabel;
@@ -9680,6 +9752,21 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 439,
                 Sound = SoundList.ButtonA,
+            };
+
+            TradeButton = new MirButton
+            {
+                HoverIndex = 524,
+                Index = 523,
+                Location = new Point(175, 379),
+                Library = Libraries.Prguse,
+                Parent = this,
+                PressedIndex = 525,
+                Sound = SoundList.ButtonA,
+            };
+            TradeButton.Click += (o, e) =>
+            {
+                Network.Enqueue(new C.TradeRequest());
             };
 
             NameLabel = new MirLabel
@@ -10251,8 +10338,7 @@ namespace Client.MirScenes
                 PressedIndex = 1972,
                 Parent = this,
                 Library = Libraries.Prguse,
-                Location = new Point(3, 69),
-                Visible = false
+                Location = new Point(3, 50)
             };
             HelpButton.Click += (o, e) =>
             {
@@ -10260,6 +10346,7 @@ namespace Client.MirScenes
                     GameScene.Scene.HelpDialog.Hide();
                 else GameScene.Scene.HelpDialog.Show();
             };
+
             KeyboardLayoutButton = new MirButton
             {
                 Index = 1973,
@@ -12533,6 +12620,8 @@ namespace Client.MirScenes
 
         void FishingStatusDialog_BeforeDraw(object sender, EventArgs e)
         {
+            bool oldCanAutoCast = _canAutoCast;
+
             if (MapObject.User.HasFishingRod)
             {
                 UserItem rod = MapObject.User.Equipment[(int)EquipmentSlot.Weapon];
@@ -12551,6 +12640,14 @@ namespace Client.MirScenes
                     _canAutoCast = true;
                     AutoCastBox.Visible = true;
                 }
+            }
+
+            if(_autoCast && !_canAutoCast)
+            {
+                AutoCastTick.Visible = false;
+                _autoCast = false;
+
+                Network.Enqueue(new C.FishingChangeAutocast { AutoCast = _autoCast });
             }
         }
 
@@ -12597,6 +12694,8 @@ namespace Client.MirScenes
 
         public void UpdateFishing(S.FishingUpdate p)
         {
+
+
             ProgressPercent = p.ProgressPercent;
             ChancePercent = p.ChancePercent;
 
@@ -15268,53 +15367,6 @@ namespace Client.MirScenes
     }
 
     //uncoded
-    public sealed class HelpDialog : MirImageControl
-    {
-        public MirImageControl TitleLabel;
-        public MirButton CloseButton;
-
-        public HelpDialog()
-        {
-            Index = 920;
-            Library = Libraries.Prguse;
-            Movable = true;
-            Sort = true;
-            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
-
-
-            TitleLabel = new MirImageControl
-            {
-                Index = 57,
-                Library = Libraries.Title,
-                Location = new Point(18, 5),
-                Parent = this
-            };
-
-            CloseButton = new MirButton
-            {
-                HoverIndex = 361,
-                Index = 360,
-                Location = new Point(509, 3),
-                Library = Libraries.Prguse2,
-                Parent = this,
-                PressedIndex = 362,
-                Sound = SoundList.ButtonA,
-            };
-            CloseButton.Click += (o, e) => Hide();
-        }
-
-
-        public void Hide()
-        {
-            if (!Visible) return;
-            Visible = false;
-        }
-        public void Show()
-        {
-            if (Visible) return;
-            Visible = true;
-        }
-    }
     public sealed class KeyboardLayoutDialog : MirImageControl
     {
         public MirImageControl TitleLabel;

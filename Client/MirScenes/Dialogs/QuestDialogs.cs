@@ -43,6 +43,14 @@ namespace Client.MirScenes.Dialogs
             Sort = true;
             Location = new Point(GameScene.Scene.NPCDialog.Size.Width + 47, 0);
 
+            MirImageControl TitleLabel = new MirImageControl
+            {
+                Index = 14,
+                Library = Libraries.Title,
+                Location = new Point(18, 5),
+                Parent = this
+            };
+
             #region QuestSelection
 
             MirButton upQuestButton = new MirButton
@@ -460,6 +468,14 @@ namespace Client.MirScenes.Dialogs
             Sort = true;
             Location = new Point(Settings.ScreenWidth / 2 + 20, 60);
 
+            MirImageControl TitleLabel = new MirImageControl
+            {
+                Index = 16,
+                Library = Libraries.Title,
+                Location = new Point(18, 5),
+                Parent = this
+            };
+
             #region Message Area
 
             MirButton upButton = new MirButton
@@ -614,7 +630,7 @@ namespace Client.MirScenes.Dialogs
             Visible = false;
         }
     }
-    public sealed class QuestLogDialog : MirImageControl
+    public sealed class QuestDiaryDialog : MirImageControl
     {
         public List<ClientQuestProgress> Quests = new List<ClientQuestProgress>();
         public List<QuestGroupQuestItem> TaskGroups = new List<QuestGroupQuestItem>();
@@ -624,13 +640,21 @@ namespace Client.MirScenes.Dialogs
         private MirButton _closeButton;
         private MirLabel _takenQuestsLabel;
 
-        public QuestLogDialog()
+        public QuestDiaryDialog()
         {
             Index = 961;
             Library = Libraries.Prguse;
             Movable = true;
             Sort = true;
             Location = new Point(Settings.ScreenWidth / 2 - 300 - 20, 60);
+
+            MirImageControl TitleLabel = new MirImageControl
+            {
+                Index = 15,
+                Library = Libraries.Title,
+                Location = new Point(18, 5),
+                Parent = this
+            };
 
             _takenQuestsLabel = new MirLabel
             {

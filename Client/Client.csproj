@@ -130,6 +130,7 @@
     <Compile Include="MirObjects\PlayerObject.cs" />
     <Compile Include="MirObjects\SpellObject.cs" />
     <Compile Include="MirObjects\UserObject.cs" />
+    <Compile Include="MirScenes\Dialogs\HelpDialog.cs" />
     <Compile Include="MirScenes\GameScene.cs" />
     <Compile Include="MirScenes\LoginScene.cs" />
     <Compile Include="MirNetwork\Network.cs" />
