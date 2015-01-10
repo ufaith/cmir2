@@ -844,7 +844,7 @@ namespace Client.MirScenes
             
             public CharacterButton()
             {
-                Index = 45;
+                Index = 44; //45 locked
                 Library = Libraries.Prguse;
                 Sound = SoundList.ButtonA;
 
@@ -877,7 +877,7 @@ namespace Client.MirScenes
             {
                 if (info == null)
                 {
-                    Index = 45;
+                    Index = 44;
                     Library = Libraries.Prguse;
                     NameLabel.Text = string.Empty;
                     LevelLabel.Text = string.Empty;

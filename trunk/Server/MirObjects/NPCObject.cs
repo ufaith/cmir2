@@ -1764,7 +1764,9 @@ namespace Server.MirObjects
                 int tempInt;
                 byte tempByte;
                 long tempLong;
+                float tempFloat;
                 bool tempBool;
+                decimal tempDecimal;
                 ItemInfo info;
                 MonsterInfo monInfo;
 

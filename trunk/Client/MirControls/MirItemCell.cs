@@ -258,11 +258,17 @@ namespace Client.MirControls
             if (Locked || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant || GridType == MirGridType.GuildStorage) return;
 
             if (MapObject.User.Fishing) return;
-            if (MapObject.User.RidingMount && Item.Info.Type != ItemType.Scroll && Item.Info.Type != ItemType.Potion) return;
+            if (MapObject.User.RidingMount && Item.Info.Type != ItemType.Scroll && Item.Info.Type != ItemType.Potion && Item.Info.Type != ItemType.Torch) return;
 
             if (GridType == MirGridType.BuyBack)
             {
                 BuyItem();
+                return;
+            }
+
+            if (GridType == MirGridType.Equipment)
+            {
+                RemoveItem();
                 return;
             }
 
@@ -297,7 +303,7 @@ namespace Client.MirControls
                         dialog.Grid[(int)EquipmentSlot.Helmet].Locked = true;
                         Locked = true;
                     }
-                    return;
+                    break;
                 case ItemType.Necklace:
                     if (dialog.Grid[(int)EquipmentSlot.Necklace].CanWearItem(Item))
                     {
@@ -551,6 +557,46 @@ namespace Client.MirControls
                         Locked = true;
                     }
                     break;
+            }
+        }
+        public void RemoveItem()
+        {
+            if (Item != null && CanRemoveItem(Item))
+            {
+                if (Item.Info.StackSize > 1)
+                {
+                    UserItem item = null;
+
+                    for (int i = 0; i < GameScene.Scene.InventoryDialog.Grid.Length; i++)
+                    {
+                        MirItemCell cell = GameScene.Scene.InventoryDialog.Grid[i];
+
+                        if (cell.Item == null || cell.Item.Info != Item.Info) continue;
+
+                        item = cell.Item;
+                    }
+
+                    if (item != null)
+                    {
+                        //Merge.
+                        Network.Enqueue(new C.MergeItem { GridFrom = MirGridType.Equipment, GridTo = MirGridType.Inventory, IDFrom = Item.UniqueID, IDTo = item.UniqueID });
+
+                        Locked = true;
+                        return;
+                    }
+                }
+
+                for (int i = 0; i < GameScene.Scene.InventoryDialog.Grid.Length; i++)
+                {
+                    MirItemCell itemCell = GameScene.Scene.InventoryDialog.Grid[i];
+
+                    if (itemCell.Item != null) continue;
+
+                    Network.Enqueue(new C.RemoveItem { Grid = MirGridType.Inventory, UniqueID = Item.UniqueID, To = i });
+
+                    Locked = true;
+                    return;
+                }
             }
         }
 
@@ -1064,7 +1110,7 @@ namespace Client.MirControls
                     SoundManager.PlaySound(SoundList.ClickArmour);
                     break;
                 case ItemType.Helmet:
-                    SoundManager.PlaySound(SoundList.ClickHelemt);
+                    SoundManager.PlaySound(SoundList.ClickHelmet);
                     break;
                 case ItemType.Necklace:
                     SoundManager.PlaySound(SoundList.ClickNecklace);
@@ -1099,6 +1145,10 @@ namespace Client.MirControls
 
         private bool CanRemoveItem(UserItem i)
         {
+            if(MapObject.User.RidingMount && i.Info.Type != ItemType.Torch)
+            {
+                return false;
+            }
             //stuck
             return FreeSpace() > 0;
         }
@@ -1144,7 +1194,6 @@ namespace Client.MirControls
         private bool CanUseItem()
         {
             if (Item == null) return false;
-
 
             switch (MapObject.User.Gender)
             {

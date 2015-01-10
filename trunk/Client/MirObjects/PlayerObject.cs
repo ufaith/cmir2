@@ -71,8 +71,7 @@ namespace Client.MirObjects
 
         public bool MagicShield;
         public Effect ShieldEffect;
-        public bool Fury;
-        public Effect FuryEffect;
+
         public byte WingEffect;
         private short StanceDelay = 2500;
 
@@ -105,6 +104,8 @@ namespace Client.MirObjects
         public bool Fishing;
         public Point FishingPoint;
         public bool FoundFish;
+
+        public List<BuffType> Buffs = new List<BuffType>();
 
         public PlayerObject(uint objectID)
             : base(objectID)
@@ -154,6 +155,10 @@ namespace Client.MirObjects
             ElementsLevel = (int)info.ElementOrbLvl;//ArcherSpells - Elemental system
             ElementOrbMax = (int)info.ElementOrbMax;//ArcherSpells - Elemental system
 
+            Buffs = info.Buffs;
+
+            ProcessBuffs();
+
             SetAction();
         }
         public void Update(S.PlayerUpdate info)
@@ -163,6 +168,14 @@ namespace Client.MirObjects
             Light = info.Light;
             WingEffect = info.WingEffect;
             SetLibraries();
+        }
+
+        public void ProcessBuffs()
+        {
+            for (int i = 0; i < Buffs.Count; i++)
+            {
+                AddBuffEffect(Buffs[i]);
+            }
         }
 
         public void MountUpdate(S.MountUpdate info)
@@ -534,7 +547,6 @@ namespace Client.MirObjects
                 DrawFrame = Frame.Start + (Frame.OffSet * (byte)Direction) + FrameIndex;
                 DrawWingFrame = Frame.EffectStart + (Frame.EffectOffSet * (byte)Direction) + EffectFrameIndex;
             }
-
 
             #region Moving OffSet
 
@@ -3206,13 +3218,6 @@ namespace Client.MirObjects
             {
                 ElementalBarrier = true;
                 Effects.Add(ElementalBarrierEffect = new Effect(Libraries.Magic3, 1890, 16, 3200, this) { Repeat = true });
-                CurrentEffect = SpellEffect.None;
-            }
-
-            if (CurrentEffect == SpellEffect.FuryUp && !Fury)
-            {
-                Fury = true;
-                Effects.Add(FuryEffect = new Effect(Libraries.Magic3, 190, 7, 1400, this) { Repeat = true });
                 CurrentEffect = SpellEffect.None;
             }
 

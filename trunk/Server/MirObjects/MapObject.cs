@@ -629,6 +629,8 @@ namespace Server.MirObjects
     {
         public BuffType Type;
         public MapObject Caster;
+        public bool Visible;
+        public uint ObjectID;
         public long ExpireTime;
         public int Value;
         public bool Infinite;

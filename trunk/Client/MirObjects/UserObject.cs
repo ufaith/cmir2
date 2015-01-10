@@ -554,6 +554,7 @@ namespace Client.MirObjects
                 switch (buff.Type)
                 {
                     case BuffType.Haste:
+                    case BuffType.Fury:
                         ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + buff.Value)));
                         break;
                     case BuffType.LightBody:

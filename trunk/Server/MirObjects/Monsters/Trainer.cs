@@ -43,16 +43,16 @@ namespace Server.MirObjects.Monsters
             switch (type)
             {
                 case DefenceType.ACAgility:
-                    attacker.ReceiveChat(damage + " AC Agility Damage inflicted on the trainer.", ChatType.Trainer);
+                    attacker.ReceiveChat(damage + " Physical Agility Damage inflicted on the trainer.", ChatType.Trainer);
                     break;
                 case DefenceType.AC:
-                    attacker.ReceiveChat(damage + " AC Damage inflicted on the trainer.", ChatType.Trainer);
+                    attacker.ReceiveChat(damage + " Physical Damage inflicted on the trainer.", ChatType.Trainer);
                     break;
                 case DefenceType.MACAgility:
-                    attacker.ReceiveChat(damage + " MAC Agility Damage inflicted on the trainer.", ChatType.Trainer);
+                    attacker.ReceiveChat(damage + " Magic Agility Damage inflicted on the trainer.", ChatType.Trainer);
                     break;
                 case DefenceType.MAC:
-                    attacker.ReceiveChat(damage + " MAC Damage inflicted on the trainer.", ChatType.Trainer);
+                    attacker.ReceiveChat(damage + " Magic Damage inflicted on the trainer.", ChatType.Trainer);
                     break;
                 case DefenceType.Agility:
                     attacker.ReceiveChat(damage + " Agility Damage inflicted on the trainer.", ChatType.Trainer);
