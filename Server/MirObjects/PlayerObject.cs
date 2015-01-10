@@ -235,8 +235,8 @@ namespace Server.MirObjects
         public List<ItemSets> ItemSets = new List<ItemSets>();
         public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();
 
-        public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword, Fury;
-        public long FlamingSwordTime, PoisonFieldTime, SlashingBurstTime, FuryTime, FuryCoolTime;
+        public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
+        public long FlamingSwordTime, PoisonFieldTime, SlashingBurstTime, FuryTime;
         public bool ActiveBlizzard, ActiveReincarnation, ReincarnationReady;
         public PlayerObject ReincarnationTarget;
         public long ReincarnationExpireTime;
@@ -381,9 +381,9 @@ namespace Server.MirObjects
             SetBind();
 
             Level = 1;
-            Hair = 1;
+            Hair = (byte)SMain.Envir.Random.Next(0, 9);
 
-
+            
             for (int i = 0; i < Envir.StartItems.Count; i++)
             {
                 ItemInfo info = Envir.StartItems[i];
@@ -413,13 +413,6 @@ namespace Server.MirObjects
                 ElementalBarrierLv = 0;
                 ElementalBarrierTime = 0;
                 CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.ElementBarrierDown }, CurrentLocation);
-            }
-
-            if (Fury && Envir.Time > FuryTime)
-            {
-                Fury = false;
-                FuryTime = 0;
-                CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.FuryDown }, CurrentLocation);
             }
 
             if (FlamingSword && Envir.Time >= FlamingSwordTime * 2)
@@ -530,7 +523,10 @@ namespace Server.MirObjects
                 if (buff.Infinite) continue;
 
                 Buffs.RemoveAt(i);
-                Enqueue(new S.RemoveBuff { Type = buff.Type });
+                Enqueue(new S.RemoveBuff { Type = buff.Type, ObjectID = ObjectID });
+
+                if (buff.Visible)
+                    Broadcast(new S.RemoveBuff { Type = buff.Type, ObjectID = ObjectID });
 
                 switch (buff.Type)
                 {
@@ -586,7 +582,7 @@ namespace Server.MirObjects
                 if (removeBuff)
                 {
                     Buffs.RemoveAt(i);
-                    Enqueue(new S.RemoveBuff { Type = buff.Type });
+                    Enqueue(new S.RemoveBuff { Type = buff.Type, ObjectID = ObjectID });
 
                     switch(buff.Type)
                     {
@@ -2941,6 +2937,27 @@ namespace Server.MirObjects
                         SMain.Enqueue(string.Format("Player {0} has been given {1} gold", player.Name, count));
                         break;
 
+                    case "GIVESKILL":
+                        if (!IsGM) return;
+                        if (parts.Length < 2) return;
+
+                        byte spellLevel = 0;
+
+                        Spell skill;
+                        if (!Enum.TryParse(parts[1], true, out skill)) return;
+
+                        if (Info.Magics.Any(e => e.Spell == skill)) break;
+
+                        if (parts.Length > 2)
+                            spellLevel = byte.TryParse(parts[2], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
+
+                        var magic = new UserMagic(skill) { Level = spellLevel };
+
+                        ReceiveChat(string.Format("Learned {0} at level {1}", parts[1], spellLevel), ChatType.Hint);
+                        Info.Magics.Add(magic);
+                        Enqueue(magic.GetInfo());
+                        break;
+
                     case "FIND":
                         if (!IsGM && !HasProbeNecklace) return;
 
@@ -2963,11 +2980,13 @@ namespace Server.MirObjects
                             LastProbeTime = Envir.Time + 180000;
                         ReceiveChat((string.Format("{0} is located at {1} ({2},{3})", player.Name, player.CurrentMap.Info.Title, player.CurrentLocation.X, player.CurrentLocation.Y)), ChatType.System);
                         break;
+
                     case "LEAVEGUILD":
                         if (MyGuild == null) return;
                         if (MyGuildRank == null) return;
                         MyGuild.DeleteMember(this, Name);
                         break;
+
                     case "CREATEGUILD":
                         if (!IsGM) return;
                         if (parts.Length < 3) return;
@@ -3091,11 +3110,16 @@ namespace Server.MirObjects
                         Die();
                         break;
 
+                    case "HAIR":
+                        if (!IsGM) return;
+                        Info.Hair = (byte)SMain.Envir.Random.Next(0, 9);
+                        break;
+
                     default:
                         foreach (string command in Envir.CustomCommands)
                         {
-                            if (parts[0] == command)
-                                CallDefaultNPC(DefaultNPCType.CustomCommand, parts[0]);
+                            if (parts[0] != command) continue;
+                            CallDefaultNPC(DefaultNPCType.CustomCommand, parts[0]);
                         }
                         break;
                 }
@@ -3571,7 +3595,7 @@ namespace Server.MirObjects
 
                     int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500 + 50; //50 MS per Step
 
-                    DelayedAction action = new DelayedAction(DelayedType.Damage, Envir.Time + delay, target, damage, DefenceType.AC, true);
+                    DelayedAction action = new DelayedAction(DelayedType.Damage, Envir.Time + delay, target, damage, DefenceType.ACAgility, true);
                     ActionList.Add(action);
                 }
             }
@@ -5067,9 +5091,9 @@ namespace Server.MirObjects
             cast = false;
 
             // delayTime
-            if (Envir.Time < FuryCoolTime) return;
+            if (Envir.Time < FuryTime) return;
             cast = true;
-            FuryCoolTime = 600000 - magic.Level * 120000;
+            FuryTime = 600000 - magic.Level * 120000;
             ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic));
         }
 
@@ -5609,11 +5633,7 @@ namespace Server.MirObjects
                 #region Fury
 
                 case Spell.Fury:
-                    if (Fury) return;
-                    Fury = true;
-                    AddBuff(new Buff { Type = BuffType.Fury, Caster = this, ExpireTime = Envir.Time + 60000 + magic.Level * 10000, Value = 4 });
-                    FuryTime = Envir.Time + 60000 + magic.Level * 10000;
-                    CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.FuryUp }, CurrentLocation);
+                    AddBuff(new Buff { Type = BuffType.Fury, Caster = this, ExpireTime = Envir.Time + 60000 + magic.Level * 10000, Value = 4, Visible = true });
                     LevelMagic(magic);
                     break;
 
@@ -6134,7 +6154,7 @@ namespace Server.MirObjects
                 Poison = CurrentPoison,
                 Dead = Dead,
                 Hidden = Hidden,
-                Effect = MagicShield ? SpellEffect.MagicShieldUp : (ElementalBarrier ? SpellEffect.ElementBarrierUp : Fury ? SpellEffect.FuryUp : SpellEffect.None),//ArcherSpells - Elemental system
+                Effect = MagicShield ? SpellEffect.MagicShieldUp : (ElementalBarrier ? SpellEffect.ElementBarrierUp : SpellEffect.None),//ArcherSpells - Elemental system
                 WingEffect = Looks_Wings,
                 MountType = MountType,
                 RidingMount = RidingMount,
@@ -6143,7 +6163,9 @@ namespace Server.MirObjects
                 //ArcherSpells - Elemental system
                 ElementOrbEffect = (uint)GetElementalOrbCount(),
                 ElementOrbLvl = (uint)ElementsLevel,
-                ElementOrbMax = (uint)Settings.OrbsExpList[Settings.OrbsExpList.Count - 1]
+                ElementOrbMax = (uint)Settings.OrbsExpList[Settings.OrbsExpList.Count - 1],
+
+                Buffs = Buffs.Where(d => d.Visible).Select(e => e.Type).ToList()
             };
         }
 
@@ -6464,7 +6486,11 @@ namespace Server.MirObjects
 
             base.AddBuff(b);
 
-            Enqueue(new S.AddBuff { Type = b.Type, Caster = b.Caster.Name, Expire = b.ExpireTime - Envir.Time, Value = b.Value, Infinite = b.Infinite });
+            S.AddBuff addBuff = new S.AddBuff { Type = b.Type, Caster = b.Caster.Name, Expire = b.ExpireTime - Envir.Time, Value = b.Value, Infinite = b.Infinite, ObjectID = ObjectID, Visible = b.Visible };
+            Enqueue(addBuff);
+
+            if (b.Visible) Broadcast(addBuff);
+
             RefreshStats();
         }
 
@@ -6998,13 +7024,6 @@ namespace Server.MirObjects
                 break;
             }
 
-            
-            if(RidingMount && temp.Info.Type != ItemType.Scroll && temp.Info.Type != ItemType.Potion)
-            {
-                Enqueue(p);
-                return;
-            }
-
             if (temp == null || index == -1)
             {
                 Enqueue(p);
@@ -7531,7 +7550,7 @@ namespace Server.MirObjects
                     }
                     break;
                 case 2: //repair armour + accessories
-                    if (tempTo.Info.Bind.HasFlag(BindMode.DontRepair))
+                    if (tempTo.Info.Bind.HasFlag(BindMode.DontRepair) || tempTo.Info.Unique != SpecialItemMode.None)
                     {
                         Enqueue(p);
                         return;
@@ -7565,7 +7584,7 @@ namespace Server.MirObjects
                         return;
                     }
 
-                    if(Envir.Random.Next(10) < 4)
+                    if (Envir.Random.Next(15) < 5 + (Luck / 2))
                     {
                         //upgrade has no effect
                         ReceiveChat("Upgrade has no effect.", ChatType.Hint);
@@ -7581,49 +7600,55 @@ namespace Server.MirObjects
                     }
                     else
                     {
+                        if (tempTo.GemCount >= 7)
+                        {
+                            ReceiveChat("Item has already reached maximum added stats", ChatType.Hint);
+                            Enqueue(p);
+                            return;
+                        }
+
+                        byte itemType = (byte)tempTo.Info.Type;
+
                         canUpgrade = true;
 
-                        if((tempFrom.Info.MaxDC + tempFrom.DC) > 0)
+                        if ((tempFrom.Info.MaxDC + tempFrom.DC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
                             tempTo.DC = (byte)Math.Min(byte.MaxValue, tempTo.DC + tempFrom.Info.MaxDC + tempFrom.DC);
 
-                        if ((tempFrom.Info.MaxMC + tempFrom.MC) > 0)
+                        if ((tempFrom.Info.MaxMC + tempFrom.MC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
                             tempTo.MC = (byte)Math.Min(byte.MaxValue, tempTo.MC + tempFrom.Info.MaxMC + tempFrom.MC);
 
-                        if ((tempFrom.Info.MaxSC + tempFrom.SC) > 0)
+                        if ((tempFrom.Info.MaxSC + tempFrom.SC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
                             tempTo.SC = (byte)Math.Min(byte.MaxValue, tempTo.SC + tempFrom.Info.MaxSC + tempFrom.SC);
 
-                        if ((tempFrom.Info.MaxAC + tempFrom.AC) > 0)
+                        if ((tempFrom.Info.MaxAC + tempFrom.AC) > 0 && (itemType != 5 && itemType != 1))
                             tempTo.AC = (byte)Math.Min(byte.MaxValue, tempTo.AC + tempFrom.Info.MaxAC + tempFrom.AC);
 
-                        if ((tempFrom.Info.MaxMAC + tempFrom.MAC) > 0)
+                        if ((tempFrom.Info.MaxMAC + tempFrom.MAC) > 0 && (itemType != 5 && itemType != 1))
                             tempTo.MAC = (byte)Math.Min(byte.MaxValue, tempTo.MAC + tempFrom.Info.MaxMAC + tempFrom.MAC);
 
                         if ((tempFrom.Info.Durability) > 0)
                             tempTo.MaxDura = (ushort)Math.Min(ushort.MaxValue, tempTo.MaxDura + tempFrom.MaxDura);
 
-                        if ((tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed) > 0)
+                        if ((tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed) > 0 && (itemType == 5 || itemType == 7 || itemType == 1))
                             tempTo.AttackSpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, tempTo.AttackSpeed + tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed)));
 
-                        if ((tempFrom.Agility) > 0)
-                            tempTo.Agility = (byte)Math.Min(byte.MaxValue, tempTo.Agility + tempFrom.Agility);
+                        if ((tempFrom.Info.Agility + tempFrom.Agility) > 0 && (itemType != 4 && itemType != 5 && itemType != 7 && itemType != 1))
+                            tempTo.Agility = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Agility + tempTo.Agility + tempFrom.Agility);
 
-                        if ((tempFrom.Accuracy) > 0)
-                            tempTo.Accuracy = (byte)Math.Min(byte.MaxValue, tempTo.Accuracy + tempFrom.Accuracy);
+                        if ((tempFrom.Info.Accuracy + tempFrom.Accuracy) > 0 && (itemType != 2 && itemType != 7 && itemType != 10 && itemType != 1))
+                            tempTo.Accuracy = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Accuracy + tempTo.Accuracy + tempFrom.Accuracy);
 
-                        if ((tempFrom.PoisonAttack) > 0)
-                            tempTo.PoisonAttack = (byte)Math.Min(byte.MaxValue, tempTo.PoisonAttack + tempFrom.PoisonAttack);
+                        if ((tempFrom.Info.PoisonAttack + tempFrom.PoisonAttack) > 0 && (itemType == 5 || itemType == 7 || itemType == 1 ))
+                            tempTo.PoisonAttack = (byte)Math.Min(byte.MaxValue, tempFrom.Info.PoisonAttack + tempTo.PoisonAttack + tempFrom.PoisonAttack);
 
-                        if ((tempFrom.Freezing) > 0)
-                            tempTo.Freezing = (byte)Math.Min(byte.MaxValue, tempTo.Freezing + tempFrom.Freezing);
+                        if ((tempFrom.Info.Freezing + tempFrom.Freezing) > 0 && (itemType == 5 || itemType == 7 || itemType == 1))
+                            tempTo.Freezing = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Freezing + tempTo.Freezing + tempFrom.Freezing);
 
-                        if ((tempFrom.MagicResist) > 0)
-                            tempTo.MagicResist = (byte)Math.Min(byte.MaxValue, tempTo.MagicResist + tempFrom.MagicResist);
+                        if ((tempFrom.Info.MagicResist + tempFrom.MagicResist) > 0 && (itemType == 2 || itemType == 4 || itemType == 5))
+                            tempTo.MagicResist = (byte)Math.Min(byte.MaxValue, tempFrom.Info.MagicResist + tempTo.MagicResist + tempFrom.MagicResist);
 
-                        if ((tempFrom.PoisonResist) > 0)
-                            tempTo.PoisonResist = (byte)Math.Min(byte.MaxValue, tempTo.PoisonResist + tempFrom.PoisonResist);
-
-                        //Dissillusion
-                        //Endurance
+                        if ((tempFrom.Info.PoisonResist + tempFrom.PoisonResist) > 0 && (itemType == 2 || itemType == 9 || itemType == 4))
+                            tempTo.PoisonResist = (byte)Math.Min(byte.MaxValue, tempFrom.Info.PoisonResist + tempTo.PoisonResist + tempFrom.PoisonResist);
                     }
                     break;
                 default:
@@ -7644,6 +7669,7 @@ namespace Server.MirObjects
 
             if (canUpgrade && Info.Inventory[indexTo] != null)
             {
+                tempTo.GemCount++;
                 ReceiveChat("Item has been upgraded.", ChatType.Hint);
                 Enqueue(new S.ItemUpgraded { Item = tempTo });
             }
@@ -8100,6 +8126,11 @@ namespace Server.MirObjects
                     break;
             }
 
+            if (RidingMount && item.Info.Type != ItemType.Scroll && item.Info.Type != ItemType.Potion)
+            {
+                return false;
+            }
+
             //if (item.Info.Type == ItemType.Book)
             //    for (int i = 0; i < Info.Magics.Count; i++)
             //        if (Info.Magics[i].Spell == (Spell)item.Info.Shape) return false;
@@ -8238,12 +8269,16 @@ namespace Server.MirObjects
                 if (item.Weight - (Info.Equipment[slot] != null ? Info.Equipment[slot].Weight : 0) + CurrentWearWeight > MaxWearWeight)
                     return false;
 
+            if (RidingMount && item.Info.Type != ItemType.Torch)
+            {
+                return false;
+            }
+
             return true;
         }
         private bool CanRemoveItem(MirGridType grid, UserItem item)
         {
             //Item  Stuck
-
 
             UserItem[] array;
             switch (grid)
@@ -8256,6 +8291,11 @@ namespace Server.MirObjects
                     break;
                 default:
                     return false;
+            }
+
+            if (RidingMount && item.Info.Type != ItemType.Torch)
+            {
+                return false;
             }
 
             return FreeSpace(array) > 0;

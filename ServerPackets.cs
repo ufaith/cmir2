@@ -633,6 +633,8 @@ namespace ServerPackets
         public uint ElementOrbLvl;
         public uint ElementOrbMax;
 
+        public List<BuffType> Buffs = new List<BuffType>();
+
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
@@ -662,6 +664,12 @@ namespace ServerPackets
             ElementOrbEffect = reader.ReadUInt32();
             ElementOrbLvl = reader.ReadUInt32();
             ElementOrbMax = reader.ReadUInt32();
+
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                Buffs.Add((BuffType)reader.ReadByte());
+            }
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -694,6 +702,12 @@ namespace ServerPackets
             writer.Write(ElementOrbEffect);
             writer.Write(ElementOrbLvl);
             writer.Write(ElementOrbMax);
+
+            writer.Write(Buffs.Count);
+            for (int i = 0; i < Buffs.Count; i++)
+            {
+                writer.Write((byte)Buffs[i]);
+            }
         }
     }
     public sealed class ObjectRemove : Packet
@@ -2812,6 +2826,8 @@ namespace ServerPackets
 
         public BuffType Type;
         public string Caster = string.Empty;
+        public uint ObjectID;
+        public bool Visible;
         public long Expire;
         public int Value;
         public bool Infinite;
@@ -2820,6 +2836,8 @@ namespace ServerPackets
         {
             Type = (BuffType)reader.ReadByte();
             Caster = reader.ReadString();
+            Visible = reader.ReadBoolean();
+            ObjectID = reader.ReadUInt32();
             Expire = reader.ReadInt64();
             Value = reader.ReadInt32();
             Infinite = reader.ReadBoolean();
@@ -2828,6 +2846,8 @@ namespace ServerPackets
         {
             writer.Write((byte)Type);
             writer.Write(Caster);
+            writer.Write(Visible);
+            writer.Write(ObjectID);
             writer.Write(Expire);
             writer.Write(Value);
             writer.Write(Infinite);
@@ -2838,14 +2858,17 @@ namespace ServerPackets
         public override short Index { get { return (short)ServerPacketIds.RemoveBuff; } }
 
         public BuffType Type;
+        public uint ObjectID;
 
         protected override void ReadPacket(BinaryReader reader)
         {
             Type = (BuffType)reader.ReadByte();
+            ObjectID = reader.ReadUInt32();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write((byte)Type);
+            writer.Write(ObjectID);
         }
     }
     public sealed class ObjectHidden :Packet

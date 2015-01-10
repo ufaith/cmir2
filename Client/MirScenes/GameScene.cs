@@ -1272,7 +1272,7 @@ namespace Client.MirScenes
                 case BuffType.Haste:
                     return 880;
                 case BuffType.Fury:
-                    return 860;
+                    return 868;
                 case BuffType.LightBody:
                     return 882;
                 case BuffType.SoulShield:
@@ -1282,7 +1282,7 @@ namespace Client.MirScenes
                 case BuffType.ProtectionField:
                     return 861;
                 case BuffType.Rage:
-                    return 860;
+                    return 905;
                 case BuffType.UltimateEnhancer:
                     return 862;
                 case BuffType.Curse:
@@ -2854,28 +2854,6 @@ namespace Client.MirScenes
                         player.ElementalBarrier = false;
                         player.Effects.Add(player.ElementalBarrierEffect = new Effect(Libraries.Magic3, 1910, 7, 1400, ob));
                         break;
-                    case SpellEffect.FuryUp://warrior skill - BloodDragonSword;
-                        if (ob.Race != ObjectType.Player) return;
-                        player = (PlayerObject)ob;
-                        if (player.FuryEffect != null)
-                        {
-                            player.FuryEffect.Clear();
-                            player.FuryEffect.Remove();
-                        }
-                        player.Fury = true;
-                        player.Effects.Add(player.FuryEffect = new Effect(Libraries.Magic3, 190, 7, 1400, ob) { Repeat = true });
-                        break;
-                    case SpellEffect.FuryDown://warrior skill - BloodDragonSword;
-                        if (ob.Race != ObjectType.Player) return;
-                        player = (PlayerObject)ob;
-                        if (player.FuryEffect != null)
-                        {
-                            player.FuryEffect.Clear();
-                            player.FuryEffect.Remove();
-                        }
-                        player.FuryEffect = null;
-                        player.Fury = false;
-                        break;
                 }
                 return;
             }
@@ -3080,31 +3058,63 @@ namespace Client.MirScenes
         }
         private void AddBuff(S.AddBuff p)
         {
-            Buff buff = new Buff { Type = p.Type, Caster = p.Caster, Expire = CMain.Time + p.Expire, Value = p.Value, Infinite = p.Infinite };
-            for (int i = 0; i < Buffs.Count; i++)
-            {
-                if (Buffs[i].Type != buff.Type) continue;
+            Buff buff = new Buff { Type = p.Type, Caster = p.Caster, Expire = CMain.Time + p.Expire, Value = p.Value, Infinite = p.Infinite, ObjectID = p.ObjectID, Visible = p.Visible };
 
-                Buffs[i] = buff;
+            if (buff.ObjectID == User.ObjectID)
+            {
+                for (int i = 0; i < Buffs.Count; i++)
+                {
+                    if (Buffs[i].Type != buff.Type) continue;
+
+                    Buffs[i] = buff;
+                    User.RefreshStats();
+                    return;
+                }
+
+                Buffs.Add(buff);
+                CreateBuff(buff);
                 User.RefreshStats();
+            }
+
+            if (!buff.Visible || buff.ObjectID <= 0) return;
+
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != buff.ObjectID) continue;
+                if (!(ob is PlayerObject) && !(ob is MonsterObject)) continue;
+
+                ob.AddBuffEffect(buff.Type);
                 return;
             }
-            Buffs.Add(buff);
-            CreateBuff(buff);
-            User.RefreshStats();
         }
         private void RemoveBuff(S.RemoveBuff p)
         {
             for (int i = 0; i < Buffs.Count; i++)
             {
-                if (Buffs[i].Type != p.Type) continue;
+                if (Buffs[i].Type != p.Type || User.ObjectID != p.ObjectID) continue;
 
                 Buffs.RemoveAt(i);
                 BuffList[i].Dispose();
                 BuffList.RemoveAt(i);
             }
-            User.RefreshStats();
+
+            if (User.ObjectID == p.ObjectID)
+                User.RefreshStats();
+
+            if (p.ObjectID <= 0) return;
+
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+
+                if (ob.ObjectID != p.ObjectID) continue;
+
+                ob.RemoveBuffEffect(p.Type);
+                return;
+            }
         }
+
         private void ObjectHidden(S.ObjectHidden p)
         {
             for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
@@ -11611,12 +11621,12 @@ namespace Client.MirScenes
 
             NoneButton = new MirButton
             {
+                Index = 287, //154
+                HoverIndex = 288,
+                PressedIndex = 289,
                 Library = Libraries.Title,
                 Parent = this,
                 Location = new Point(284, 64),
-                Index = 153,
-                HoverIndex = 154,
-                PressedIndex = 155,
             };
             NoneButton.Click += (o, e) => Key = 0;
 
@@ -15705,6 +15715,8 @@ namespace Client.MirScenes
     {
         public BuffType Type;
         public string Caster;
+        public bool Visible;
+        public uint ObjectID;
         public long Expire;
         public int Value;
         public bool Infinite;

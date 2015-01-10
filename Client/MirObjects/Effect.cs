@@ -28,6 +28,8 @@ namespace Client.MirObjects
         public Point DrawLocation;
         public bool Repeat;
         public long RepeatUntil;
+
+        public BuffType LinkedToBuff;
         
         public event EventHandler Complete;
 

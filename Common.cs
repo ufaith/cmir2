@@ -2050,7 +2050,7 @@ public class UserItem
 
     public ItemInfo Info;
     public ushort CurrentDura, MaxDura;
-    public uint Count = 1;
+    public uint Count = 1, GemCount = 0;
 
     public byte AC, MAC, DC, MC, SC, Accuracy, Agility, HP, MP, Strong, MagicResist, PoisonResist, HealthRecovery, ManaRecovery, PoisonRecovery, CriticalRate, CriticalDamage, Freezing, PoisonAttack;
     public sbyte AttackSpeed, Luck;

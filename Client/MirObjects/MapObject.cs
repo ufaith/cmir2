@@ -95,6 +95,27 @@ namespace Client.MirObjects
         public abstract void Draw();
         public abstract bool MouseOver(Point p);
 
+        public void AddBuffEffect(BuffType type)
+        {
+            if (Effects.Any(b => b.LinkedToBuff == type)) return;
+
+            switch (type)
+            {
+                case BuffType.Fury:
+                    Effects.Add(new Effect(Libraries.Magic3, 190, 7, 1400, this) { Repeat = true, LinkedToBuff = type });
+                    break;
+            }
+        }
+        public void RemoveBuffEffect(BuffType type)
+        {
+            for (int s = 0; s < Effects.Count; s++)
+            {
+                if (Effects[s].LinkedToBuff == BuffType.None) continue;
+
+                if (Effects[s].LinkedToBuff == type)
+                    Effects[s].Repeat = false;
+            }
+        }
 
         public void Chat(string text)
         {
@@ -182,7 +203,7 @@ namespace Client.MirObjects
             if (NameLabel == null) return;
             
             NameLabel.Text = Name;
-            NameLabel.Location = new Point(DisplayRectangle.X + (48 - NameLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - NameLabel.Size.Height / 2) + (Dead ? 35 : 8));
+            NameLabel.Location = new Point(DisplayRectangle.X + (50 - NameLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - NameLabel.Size.Height / 2) + (Dead ? 35 : 8)); //was 48 -
             NameLabel.Draw();
         }
         public virtual void DrawBlend()

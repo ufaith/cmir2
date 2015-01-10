@@ -130,7 +130,7 @@ namespace Client.MirSounds
             ClickRing = 10113,
             ClickBracelet = 10114,
             ClickNecklace = 10115,
-            ClickHelemt = 10116,
+            ClickHelmet = 10116,
             ClickBoots = 10117,
             ClickItem = 10118,
 
