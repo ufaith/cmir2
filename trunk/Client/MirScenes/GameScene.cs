@@ -122,7 +122,7 @@ namespace Client.MirScenes
         public List<OutPutMessage> OutputMessages = new List<OutPutMessage>();
 
         public List<MirImageControl> BuffList = new List<MirImageControl>();
-        public static long PoisonFieldTime, SlashingBurstTime, FuryCoolTime;
+        public static long PoisonCloudTime, SlashingBurstTime, FuryCoolTime;
 
         public GameScene()
         {
@@ -2724,8 +2724,8 @@ namespace Client.MirScenes
 
             switch (p.Spell)
             {
-                case Spell.PoisonField:
-                    PoisonFieldTime = CMain.Time + (18 - p.Level * 2) * 1000;
+                case Spell.PoisonCloud:
+                    PoisonCloudTime = CMain.Time + (18 - p.Level * 2) * 1000;
                     break;
                 case Spell.SlashingBurst:
                     SlashingBurstTime = CMain.Time + (14 - p.Level * 4) * 1000;
@@ -6774,18 +6774,18 @@ namespace Client.MirScenes
                             target = User.NextMagicObject;
                     }
                     break;
-                case Spell.PoisonField:
+                case Spell.PoisonCloud:
                     if (User.NextMagicObject != null)
                     {
                         if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
                             target = User.NextMagicObject;
                     }
-                    if (CMain.Time < GameScene.PoisonFieldTime)
+                    if (CMain.Time < GameScene.PoisonCloudTime)
                     {
                         if (CMain.Time >= OutputDelay)
                         {
                             OutputDelay = CMain.Time + 1000;
-                            GameScene.Scene.OutputMessage(string.Format("You cannot cast Poison Field for another {0} seconds.", (GameScene.PoisonFieldTime - CMain.Time - 1) / 1000 + 1));
+                            GameScene.Scene.OutputMessage(string.Format("You cannot cast Poison Cloud for another {0} seconds.", (GameScene.PoisonCloudTime - CMain.Time - 1) / 1000 + 1));
                         }
 
                         User.ClearMagic();
@@ -8014,6 +8014,7 @@ namespace Client.MirScenes
                     ChatTextBox.Location = new Point(1, 54 + 96);
                     break;
             }
+
             Location = new Point(Location.X, y - Size.Height);
 
             UpdateBackground();
@@ -8785,7 +8786,14 @@ namespace Client.MirScenes
                 if (Grid[(int)EquipmentSlot.Helmet].Item != null)
                     Libraries.StateItems.Draw(Grid[(int)EquipmentSlot.Helmet].Item.Info.Image, DisplayLocation, Color.White, true, 1F);
                 else
-                    Libraries.Prguse.Draw(440 + MapObject.User.Hair + (MapObject.User.Gender == MirGender.Male ? 0 : 40), DisplayLocation, Color.White, true, 1F);
+                {
+                    int hair = 441 + MapObject.User.Hair + (MapObject.User.Class == MirClass.Assassin ? 20 : 0) + (MapObject.User.Gender == MirGender.Male ? 0 : 40);
+
+                    int offSetX = MapObject.User.Class == MirClass.Assassin ? (MapObject.User.Gender == MirGender.Male ? 6 : 4) : 0;
+                    int offSetY = MapObject.User.Class == MirClass.Assassin ? (MapObject.User.Gender == MirGender.Male ? 25 : 18) : 0;
+
+                    Libraries.Prguse.Draw(hair, new Point(DisplayLocation.X + offSetX, DisplayLocation.Y + offSetY), Color.White, true, 1F);
+                }
             };
 
             StatusPage = new MirImageControl
@@ -9965,19 +9973,19 @@ namespace Client.MirScenes
             switch (Class)
             {
                 case MirClass.Warrior:
-                    ClassImage.Index = 100 + offSet * 5;
+                    ClassImage.Index = 100;// + offSet * 5;
                     break;
                 case MirClass.Wizard:
-                    ClassImage.Index = 101 + offSet * 5;
+                    ClassImage.Index = 101;// + offSet * 5;
                     break;
                 case MirClass.Taoist:
-                    ClassImage.Index = 102 + offSet * 5;
+                    ClassImage.Index = 102;// + offSet * 5;
                     break;
                 case MirClass.Assassin:
-                    ClassImage.Index = 103 + offSet * 5;
+                    ClassImage.Index = 103;// + offSet * 5;
                     break;
                 case MirClass.Archer:
-                    ClassImage.Index = 104 + offSet * 5;
+                    ClassImage.Index = 104;// + offSet * 5;
                     break;
             }
 

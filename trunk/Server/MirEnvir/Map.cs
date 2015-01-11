@@ -533,7 +533,7 @@ namespace Server.MirEnvir
             PlayerObject player = (PlayerObject)data[0];
             UserMagic magic = (UserMagic)data[1];
 
-            int value, value2;
+            int value, value2, value3;
             Point location;
             Cell cell;
             MirDirection dir;
@@ -1032,9 +1032,9 @@ namespace Server.MirEnvir
 
                 #endregion
 
-                #region PoisonField
+                #region PoisonCloud
 
-                case Spell.PoisonField:
+                case Spell.PoisonCloud:
                     value = (int)data[2];
                     location = (Point)data[3];
                     byte bonusdmg = (byte)data[4];
@@ -1060,7 +1060,7 @@ namespace Server.MirEnvir
                                 for (int o = 0; o < cell.Objects.Count; o++)
                                 {
                                     MapObject target = cell.Objects[o];
-                                    if (target.Race != ObjectType.Spell || ((SpellObject) target).Spell != Spell.PoisonField) continue;
+                                    if (target.Race != ObjectType.Spell || ((SpellObject)target).Spell != Spell.PoisonCloud) continue;
 
                                     cast = false;
                                     break;
@@ -1070,7 +1070,7 @@ namespace Server.MirEnvir
 
                             SpellObject ob = new SpellObject
                                 {
-                                    Spell = Spell.PoisonField,
+                                    Spell = Spell.PoisonCloud,
                                     Value = value + bonusdmg,
                                     ExpireTime = Envir.Time + 6000,
                                     TickSpeed = 1000,
@@ -1437,6 +1437,9 @@ namespace Server.MirEnvir
                                 {
                                     case ObjectType.Monster:
                                     case ObjectType.Player:
+
+                                        if (Envir.Random.Next(10) >= 4) continue;
+
                                         //Only targets
                                         if (target.IsAttackTarget(player))
                                         {

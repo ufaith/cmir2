@@ -2604,9 +2604,9 @@ namespace Client.MirObjects
 
                                     #endregion
 
-                                    #region PoisonField
+                                    #region PoisonCloud
 
-                                    case Spell.PoisonField:
+                                    case Spell.PoisonCloud:
                                         missile = CreateProjectile(1160, Libraries.Magic, true, 3, 30, 7);
                                         missile.Explode = true;
 

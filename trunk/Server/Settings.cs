@@ -48,7 +48,9 @@ namespace Server
                            AllowLogin = true,
                            AllowNewCharacter = true,
                            AllowDeleteCharacter = true,
-                           AllowStartGame;
+                           AllowStartGame = false,
+                           AllowCreateAssassin = true,
+                           AllowCreateArcher = true;
 
         //Optional
         public static bool SafeZoneBorder = false,
@@ -153,6 +155,8 @@ namespace Server
             AllowNewCharacter = Reader.ReadBoolean("Permission", "AllowNewCharacter", AllowNewCharacter);
             AllowDeleteCharacter = Reader.ReadBoolean("Permission", "AllowDeleteCharacter", AllowDeleteCharacter);
             AllowStartGame = Reader.ReadBoolean("Permission", "AllowStartGame", AllowStartGame);
+            AllowCreateAssassin = Reader.ReadBoolean("Permission", "AllowCreateAssassin", AllowCreateAssassin);
+            AllowCreateArcher = Reader.ReadBoolean("Permission", "AllowCreateArcher", AllowCreateArcher);
 
             //Optional
             SafeZoneBorder = Reader.ReadBoolean("Optional", "SafeZoneBorder", SafeZoneBorder);
@@ -303,7 +307,9 @@ namespace Server
             Reader.Write("Permission", "AllowNewCharacter", AllowNewCharacter);
             Reader.Write("Permission", "AllowDeleteCharacter", AllowDeleteCharacter);
             Reader.Write("Permission", "AllowStartGame", AllowStartGame);
-            
+            Reader.Write("Permission", "AllowCreateAssassin", AllowCreateAssassin);
+            Reader.Write("Permission", "AllowCreateArcher", AllowCreateArcher);
+
             //Optional
             Reader.Write("Optional", "SafeZoneBorder", SafeZoneBorder);
             Reader.Write("Optional", "SafeZoneHealing", SafeZoneHealing);

@@ -597,7 +597,7 @@ public enum Spell : byte
     SummonHolyDeva = 80,
     Curse = 81,
     Plague = 82,
-    PoisonField = 83,
+    PoisonCloud = 83,
     EnergyShield = 84,
     
     //Assassin

@@ -561,31 +561,31 @@ namespace Client.MirControls
         }
         public void RemoveItem()
         {
-            if (Item != null && CanRemoveItem(Item))
+            if (Item != null || !CanRemoveItem(Item)) return;
+
+            if (Item.Info.StackSize > 1)
             {
-                if (Item.Info.StackSize > 1)
+                UserItem item = null;
+
+                for (int i = 0; i < GameScene.Scene.InventoryDialog.Grid.Length; i++)
                 {
-                    UserItem item = null;
+                    MirItemCell cell = GameScene.Scene.InventoryDialog.Grid[i];
 
-                    for (int i = 0; i < GameScene.Scene.InventoryDialog.Grid.Length; i++)
-                    {
-                        MirItemCell cell = GameScene.Scene.InventoryDialog.Grid[i];
+                    if (cell.Item == null || cell.Item.Info != Item.Info) continue;
 
-                        if (cell.Item == null || cell.Item.Info != Item.Info) continue;
-
-                        item = cell.Item;
-                    }
-
-                    if (item != null)
-                    {
-                        //Merge.
-                        Network.Enqueue(new C.MergeItem { GridFrom = MirGridType.Equipment, GridTo = MirGridType.Inventory, IDFrom = Item.UniqueID, IDTo = item.UniqueID });
-
-                        Locked = true;
-                        return;
-                    }
+                    item = cell.Item;
                 }
 
+                if (item != null)
+                {
+                    //Merge.
+                    Network.Enqueue(new C.MergeItem { GridFrom = MirGridType.Equipment, GridTo = MirGridType.Inventory, IDFrom = Item.UniqueID, IDTo = item.UniqueID });
+
+                    Locked = true;
+                }
+            }
+            else
+            {
                 for (int i = 0; i < GameScene.Scene.InventoryDialog.Grid.Length; i++)
                 {
                     MirItemCell itemCell = GameScene.Scene.InventoryDialog.Grid[i];
@@ -595,9 +595,11 @@ namespace Client.MirControls
                     Network.Enqueue(new C.RemoveItem { Grid = MirGridType.Inventory, UniqueID = Item.UniqueID, To = i });
 
                     Locked = true;
-                    return;
+                    break;
                 }
             }
+
+            PlayItemSound();
         }
 
         private void MoveItem()

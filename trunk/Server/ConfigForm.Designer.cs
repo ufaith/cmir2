@@ -56,10 +56,12 @@
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.SaveDelayTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.VPathDialog = new System.Windows.Forms.OpenFileDialog();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.SafeZoneBorderCheckBox = new System.Windows.Forms.CheckBox();
             this.SafeZoneHealingCheckBox = new System.Windows.Forms.CheckBox();
+            this.SafeZoneBorderCheckBox = new System.Windows.Forms.CheckBox();
+            this.VPathDialog = new System.Windows.Forms.OpenFileDialog();
+            this.AllowAssassinCheckBox = new System.Windows.Forms.CheckBox();
+            this.AllowArcherCheckBox = new System.Windows.Forms.CheckBox();
             this.configTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -255,6 +257,8 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.AllowArcherCheckBox);
+            this.tabPage3.Controls.Add(this.AllowAssassinCheckBox);
             this.tabPage3.Controls.Add(this.StartGameCheckBox);
             this.tabPage3.Controls.Add(this.DCharacterCheckBox);
             this.tabPage3.Controls.Add(this.NCharacterCheckBox);
@@ -359,11 +363,6 @@
             this.label6.TabIndex = 24;
             this.label6.Text = "Save Delay:";
             // 
-            // VPathDialog
-            // 
-            this.VPathDialog.FileName = "Mir2.Exe";
-            this.VPathDialog.Filter = "Executable Files (*.exe)|*.exe";
-            // 
             // tabPage5
             // 
             this.tabPage5.Controls.Add(this.SafeZoneHealingCheckBox);
@@ -376,6 +375,16 @@
             this.tabPage5.Text = "Optional";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
+            // SafeZoneHealingCheckBox
+            // 
+            this.SafeZoneHealingCheckBox.AutoSize = true;
+            this.SafeZoneHealingCheckBox.Location = new System.Drawing.Point(24, 43);
+            this.SafeZoneHealingCheckBox.Name = "SafeZoneHealingCheckBox";
+            this.SafeZoneHealingCheckBox.Size = new System.Drawing.Size(112, 17);
+            this.SafeZoneHealingCheckBox.TabIndex = 1;
+            this.SafeZoneHealingCheckBox.Text = "SafeZone Healing";
+            this.SafeZoneHealingCheckBox.UseVisualStyleBackColor = true;
+            // 
             // SafeZoneBorderCheckBox
             // 
             this.SafeZoneBorderCheckBox.AutoSize = true;
@@ -386,15 +395,30 @@
             this.SafeZoneBorderCheckBox.Text = "SafeZone Border";
             this.SafeZoneBorderCheckBox.UseVisualStyleBackColor = true;
             // 
-            // SafeZoneHealingCheckBox
+            // VPathDialog
             // 
-            this.SafeZoneHealingCheckBox.AutoSize = true;
-            this.SafeZoneHealingCheckBox.Location = new System.Drawing.Point(24, 43);
-            this.SafeZoneHealingCheckBox.Name = "SafeZoneHealingCheckBox";
-            this.SafeZoneHealingCheckBox.Size = new System.Drawing.Size(112, 17);
-            this.SafeZoneHealingCheckBox.TabIndex = 1;
-            this.SafeZoneHealingCheckBox.Text = "SafeZone Healing";
-            this.SafeZoneHealingCheckBox.UseVisualStyleBackColor = true;
+            this.VPathDialog.FileName = "Mir2.Exe";
+            this.VPathDialog.Filter = "Executable Files (*.exe)|*.exe";
+            // 
+            // AllowAssassinCheckBox
+            // 
+            this.AllowAssassinCheckBox.AutoSize = true;
+            this.AllowAssassinCheckBox.Location = new System.Drawing.Point(24, 173);
+            this.AllowAssassinCheckBox.Name = "AllowAssassinCheckBox";
+            this.AllowAssassinCheckBox.Size = new System.Drawing.Size(129, 17);
+            this.AllowAssassinCheckBox.TabIndex = 12;
+            this.AllowAssassinCheckBox.Text = "Allow Create Assassin";
+            this.AllowAssassinCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // AllowArcherCheckBox
+            // 
+            this.AllowArcherCheckBox.AutoSize = true;
+            this.AllowArcherCheckBox.Location = new System.Drawing.Point(24, 197);
+            this.AllowArcherCheckBox.Name = "AllowArcherCheckBox";
+            this.AllowArcherCheckBox.Size = new System.Drawing.Size(119, 17);
+            this.AllowArcherCheckBox.TabIndex = 13;
+            this.AllowArcherCheckBox.Text = "Allow Create Archer";
+            this.AllowArcherCheckBox.UseVisualStyleBackColor = true;
             // 
             // ConfigForm
             // 
@@ -455,5 +479,7 @@
         private System.Windows.Forms.TabPage tabPage5;
         private System.Windows.Forms.CheckBox SafeZoneBorderCheckBox;
         private System.Windows.Forms.CheckBox SafeZoneHealingCheckBox;
+        private System.Windows.Forms.CheckBox AllowArcherCheckBox;
+        private System.Windows.Forms.CheckBox AllowAssassinCheckBox;
     }
 }

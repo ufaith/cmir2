@@ -544,14 +544,13 @@ namespace Client.MirScenes.Dialogs
 
             _shareButton = new MirButton
             {
-                Index = 270,
-                HoverIndex = 271,
-                PressedIndex = 272,
+                Index = 630,
+                HoverIndex = 631,
+                PressedIndex = 632,
                 Library = Libraries.Title,
                 Parent = this,
                 Location = new Point(40, 437),
-                Sound = SoundList.ButtonA,
-                Visible = false
+                Sound = SoundList.ButtonA
             };
             _shareButton.Click += (o, e) =>
             {
