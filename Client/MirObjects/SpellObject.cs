@@ -56,7 +56,7 @@ namespace Client.MirObjects
                     Light = 3;
                     Blend = true;
                     break;
-                case Spell.PoisonField:
+                case Spell.PoisonCloud:
                     BodyLibrary = Libraries.Magic2;
                     DrawFrame = 1650;
                     FrameInterval = 120;

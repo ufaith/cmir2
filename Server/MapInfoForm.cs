@@ -1830,7 +1830,7 @@ namespace Server
                             _selectedMapInfos[i].FileName,
                             _selectedMapInfos[i].Respawns[j].Location.X,
                             _selectedMapInfos[i].Respawns[j].Location.Y,
-                            Envir.MonsterInfoList[_selectedMapInfos[i].Respawns[j].MonsterIndex].Name.Replace(' ', '*'),
+                            Envir.MonsterInfoList[_selectedMapInfos[i].Respawns[j].MonsterIndex - 1].Name.Replace(' ', '*'),
                            _selectedMapInfos[i].Respawns[j].Spread,
                            _selectedMapInfos[i].Respawns[j].Count,
                            _selectedMapInfos[i].Respawns[j].Delay,

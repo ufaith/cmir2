@@ -102,7 +102,7 @@ namespace Server.MirObjects
                     ob.HealAmount += 25;
                     Broadcast(new S.ObjectEffect {ObjectID = ob.ObjectID, Effect = SpellEffect.Healing});
                     break;
-                case Spell.PoisonField:
+                case Spell.PoisonCloud:
                     if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) return;
                     if (ob.Dead) return;
 
@@ -230,7 +230,7 @@ namespace Server.MirObjects
             {
                 case Spell.Healing:
                     return null;
-                case Spell.PoisonField:
+                case Spell.PoisonCloud:
                 case Spell.Blizzard:
                 case Spell.MeteorStrike:
                     if (!Show)

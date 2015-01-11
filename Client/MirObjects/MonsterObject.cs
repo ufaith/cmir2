@@ -204,6 +204,8 @@ namespace Client.MirObjects
                 case Monster.FlailOma:
                 case Monster.OmaGuard:
                 case Monster.KatanaGuard:
+                case Monster.RedFrogSpider:
+                case Monster.BrownFrogSpider:
                     Frames = FrameSet.Monsters[2];
                     break;
                 case Monster.CannibalPlant:

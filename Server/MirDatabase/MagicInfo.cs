@@ -77,7 +77,7 @@ namespace Server.MirDatabase
                                 SummonHolyDeva,
                                 Curse,
                                 Plague,
-                                PoisonField,
+                                PoisonCloud,
                                 EnergyShield;
 
         //Assassin
@@ -191,7 +191,7 @@ namespace Server.MirDatabase
             SummonHolyDeva = new MagicInfo { Spell = Spell.SummonHolyDeva, Icon = 40, Level1 = 38, Level2 = 41, Level3 = 43, Need1 = 4000, Need2 = 6000, Need3 = 9000, BaseCost = 28, LevelCost = 4 };
             Curse = new MagicInfo { Spell = Spell.Curse, Icon = 45, Level1 = 40, Level2 = 42, Level3 = 44, Need1 = 4000, Need2 = 6000, Need3 = 9000, BaseCost = 17, LevelCost = 3 };
             Plague = new MagicInfo { Spell = Spell.Plague, Icon = 74, Level1 = 42, Level2 = 44, Level3 = 47, Need1 = 5000, Need2 = 9000, Need3 = 13000, BaseCost = 20, LevelCost = 5 };
-            PoisonField = new MagicInfo { Spell = Spell.PoisonField, Icon = 54, Level1 = 43, Level2 = 45, Level3 = 48, Need1 = 4000, Need2 = 8000, Need3 = 12000, BaseCost = 30, LevelCost = 5 };
+            PoisonCloud = new MagicInfo { Spell = Spell.PoisonCloud, Icon = 54, Level1 = 43, Level2 = 45, Level3 = 48, Need1 = 4000, Need2 = 8000, Need3 = 12000, BaseCost = 30, LevelCost = 5 };
             EnergyShield = new MagicInfo { Spell = Spell.EnergyShield, Icon = 57, Level1 = 48, Level2 = 51, Level3 = 54, Need1 = 5000, Need2 = 9000, Need3 = 13000, BaseCost = 50, LevelCost = 20 };
 
             //Assassin
@@ -365,7 +365,7 @@ namespace Server.MirDatabase
                     return 8;
                 case Spell.MassHealing:
                     return 10;
-                case Spell.PoisonField:
+                case Spell.PoisonCloud:
                     return 40;
                 case Spell.Plague:
                     return 10;
@@ -423,7 +423,7 @@ namespace Server.MirDatabase
                     return 3;
                 case Spell.MassHealing:
                     return 4;
-                case Spell.PoisonField:
+                case Spell.PoisonCloud:
                     return 20;
                 case Spell.Plague:
                     return 8;

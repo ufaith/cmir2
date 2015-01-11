@@ -426,8 +426,7 @@ namespace Server.MirObjects
                 colour = Color.Peru;
             else if (Envir.Time < RageTime)
                 colour = Color.Red;
-
-            if (Envir.Time < HallucinationTime)
+            else if (Envir.Time < HallucinationTime)
                 colour = Color.MediumOrchid;
 
             if (colour == NameColour || !send) return;

@@ -236,7 +236,7 @@ namespace Server.MirObjects
         public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();
 
         public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
-        public long FlamingSwordTime, PoisonFieldTime, SlashingBurstTime, FuryTime;
+        public long FlamingSwordTime, PoisonCloudTime, SlashingBurstTime, FuryTime;
         public bool ActiveBlizzard, ActiveReincarnation, ReincarnationReady;
         public PlayerObject ReincarnationTarget;
         public long ReincarnationExpireTime;
@@ -2946,10 +2946,15 @@ namespace Server.MirObjects
                         Spell skill;
                         if (!Enum.TryParse(parts[1], true, out skill)) return;
 
-                        if (Info.Magics.Any(e => e.Spell == skill)) break;
-
                         if (parts.Length > 2)
                             spellLevel = byte.TryParse(parts[2], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
+
+                        if (Info.Magics.Any(e => e.Spell == skill))
+                        {
+                            Info.Magics.FirstOrDefault(e => e.Spell == skill).Level = spellLevel;
+                            ReceiveChat(string.Format("Spell {0} changed to level {1}", parts[1], spellLevel), ChatType.Hint);
+                            return;
+                        }
 
                         var magic = new UserMagic(skill) { Level = spellLevel };
 
@@ -3112,7 +3117,16 @@ namespace Server.MirObjects
 
                     case "HAIR":
                         if (!IsGM) return;
-                        Info.Hair = (byte)SMain.Envir.Random.Next(0, 9);
+                        if(parts.Length < 2)
+                            Info.Hair = (byte)SMain.Envir.Random.Next(0, 9);
+                        else
+                        {
+                            byte tempByte = 0;
+
+                            byte.TryParse(parts[1], out tempByte);
+
+                            Info.Hair = tempByte;
+                        }
                         break;
 
                     default:
@@ -4204,8 +4218,8 @@ namespace Server.MirObjects
                 case Spell.Revelation:
                     Revelation(target, magic);
                     break;
-                case Spell.PoisonField:
-                    PoisonField(magic, location, out cast);
+                case Spell.PoisonCloud:
+                    PoisonCloud(magic, location, out cast);
                     break;
                 case Spell.Entrapment:
                     Entrapment(target, magic);
@@ -4986,11 +5000,11 @@ namespace Server.MirObjects
             ActionList.Add(action);
         }
 
-        private void PoisonField(UserMagic magic, Point location, out bool cast)
+        private void PoisonCloud(UserMagic magic, Point location, out bool cast)
         {
             cast = false;
 
-            if (Envir.Time < PoisonFieldTime) return;
+            if (Envir.Time < PoisonCloudTime) return;
 
             UserItem amulet = GetAmulet(5);
             if (amulet == null) return;
@@ -5006,7 +5020,7 @@ namespace Server.MirObjects
             ConsumeItem(amulet, 5);
             ConsumeItem(poison, 5);
 
-            PoisonFieldTime = Envir.Time + (18 - magic.Level * 2) * 1000;
+            PoisonCloudTime = Envir.Time + (18 - magic.Level * 2) * 1000;
 
             CurrentMap.ActionList.Add(action);
             cast = true;
@@ -5368,10 +5382,15 @@ namespace Server.MirObjects
             if (item == null) return;
             cast = true;
 
+            ConsumeItem(item, 1);
+
+            if (Envir.Random.Next(10 - ((magic.Level + 1) * 2)) > 2) return;
+
             int delay = Functions.MaxDistance(CurrentLocation, location) * 50 + 500; //50 MS per Step
 
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, this, magic, GetAttackPower(MinSC, MaxSC) * 2 + (magic.Level + 1) * 10, location, 8 + ((magic.Level + 1) * 2));
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, this, magic, GetAttackPower(MinSC, MaxSC) + (magic.Level + 1) * 5, location, 8 + ((magic.Level + 1) * 2));
             CurrentMap.ActionList.Add(action);
+
         }
 
 

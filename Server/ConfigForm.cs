@@ -26,6 +26,8 @@ namespace Server
             NCharacterCheckBox.Checked = Settings.AllowNewCharacter;
             DCharacterCheckBox.Checked = Settings.AllowDeleteCharacter;
             StartGameCheckBox.Checked = Settings.AllowStartGame;
+            AllowAssassinCheckBox.Checked = Settings.AllowCreateAssassin;
+            AllowArcherCheckBox.Checked = Settings.AllowCreateArcher;
 
             SafeZoneBorderCheckBox.Checked = Settings.SafeZoneBorder;
             SafeZoneHealingCheckBox.Checked = Settings.SafeZoneHealing;
@@ -76,6 +78,9 @@ namespace Server
             Settings.AllowNewCharacter = NCharacterCheckBox.Checked;
             Settings.AllowDeleteCharacter = DCharacterCheckBox.Checked;
             Settings.AllowStartGame = StartGameCheckBox.Checked;
+            Settings.AllowCreateAssassin = AllowAssassinCheckBox.Checked;
+            Settings.AllowCreateArcher = AllowArcherCheckBox.Checked;
+
 
             Settings.SafeZoneBorder = SafeZoneBorderCheckBox.Checked;
             Settings.SafeZoneHealing = SafeZoneHealingCheckBox.Checked;

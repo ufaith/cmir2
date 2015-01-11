@@ -932,6 +932,13 @@ namespace Server.MirEnvir
                 return;
             }
 
+            if((p.Class == MirClass.Assassin && !Settings.AllowCreateAssassin) ||
+                (p.Class == MirClass.Archer && !Settings.AllowCreateArcher))
+            {
+                c.Enqueue(new ServerPackets.NewCharacter { Result = 3 });
+                return;
+            }
+
             int count = 0;
 
             for (int i = 0; i < c.Account.Characters.Count; i++)
