@@ -7543,7 +7543,7 @@ namespace Server.MirObjects
                 return;
             }
 
-            bool canRepair = false, canUpgrade = false, succeeded = false;
+            bool canRepair = false, canUpgrade = false;
 
             if (tempFrom.Info.Type != ItemType.Gem)
             {
@@ -7610,7 +7610,7 @@ namespace Server.MirObjects
                     }
 
                     //check if combine will succeed
-                    succeeded = Envir.Random.Next(20) < (5 + (Luck / 2));
+                    bool succeeded = Envir.Random.Next(20) < (5 + (Luck / 2));
                     canUpgrade = true;
 
                     byte itemType = (byte)tempTo.Info.Type;
@@ -7685,28 +7685,30 @@ namespace Server.MirObjects
                         Enqueue(p);
                         return;
                     }
+
+                    if (!succeeded)
+                    {
+                        //upgrade has no effect
+                        ReceiveChat("Upgrade has no effect.", ChatType.Hint);
+
+                        if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(10) < 3))
+                        {
+                            //item destroyed
+                            ReceiveChat("Item has been destroyed.", ChatType.Hint);
+
+                            Info.Inventory[indexTo] = null;
+                            p.Destroy = true;
+                        }
+
+                        canUpgrade = false;
+                    }
                     break;
                 default:
                     Enqueue(p);
                     return;
             }
 
-            if(!succeeded)
-            {
-                //upgrade has no effect
-                ReceiveChat("Upgrade has no effect.", ChatType.Hint);
-
-                if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(10) < 7))
-                {
-                    //item destroyed
-                    ReceiveChat("Item has been destroyed.", ChatType.Hint);
-
-                    Info.Inventory[indexTo] = null;
-                    p.Destroy = true;
-                }
-
-                canUpgrade = false;
-            }
+            
 
             RefreshBagWeight();
 
