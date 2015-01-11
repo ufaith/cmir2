@@ -296,6 +296,7 @@ namespace Client.MirObjects
                 HpDrainRate = (byte)Math.Max(100, Math.Min(byte.MaxValue, HpDrainRate + RealItem.HpDrainRate));
 
 
+                
                 if (RealItem.Light > Light) Light = RealItem.Light;
                 if (RealItem.Unique != SpecialItemMode.None)
                 {

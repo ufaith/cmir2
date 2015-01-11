@@ -561,7 +561,7 @@ namespace Client.MirControls
         }
         public void RemoveItem()
         {
-            if (Item != null || !CanRemoveItem(Item)) return;
+            if (Item == null || !CanRemoveItem(Item)) return;
 
             if (Item.Info.StackSize > 1)
             {
