@@ -2139,7 +2139,12 @@ public class UserItem
             UserItem item = new UserItem(reader, version);
             Slots[i] = item;
         }
+
+        if (version <= 38) return;
+
+        GemCount = reader.ReadUInt32();
     }
+
     public void Save(BinaryWriter writer)
     {
         writer.Write(UniqueID);
@@ -2187,6 +2192,8 @@ public class UserItem
 
             Slots[i].Save(writer);
         }
+
+        writer.Write(GemCount);
     }
 
 

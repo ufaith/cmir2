@@ -7543,8 +7543,7 @@ namespace Server.MirObjects
                 return;
             }
 
-            bool canRepair = false;
-            bool canUpgrade = false;
+            bool canRepair = false, canUpgrade = false, succeeded = false;
 
             if (tempFrom.Info.Type != ItemType.Gem)
             {
@@ -7569,7 +7568,7 @@ namespace Server.MirObjects
                     }
                     break;
                 case 2: //repair armour + accessories
-                    if (tempTo.Info.Bind.HasFlag(BindMode.DontRepair) || tempTo.Info.Unique != SpecialItemMode.None)
+                    if (tempTo.Info.Bind.HasFlag(BindMode.DontRepair))
                     {
                         Enqueue(p);
                         return;
@@ -7597,82 +7596,116 @@ namespace Server.MirObjects
                 case 3: //gems
                 case 4: //orbs
 
-                    if (tempTo.Info.Bind.HasFlag(BindMode.DontUpgrade))
+                    if (tempTo.Info.Bind.HasFlag(BindMode.DontUpgrade) || tempTo.Info.Unique != SpecialItemMode.None)
                     {
                         Enqueue(p);
                         return;
                     }
 
-                    if (Envir.Random.Next(15) < 5 + (Luck / 2))
+                    if (tempTo.GemCount >= 7)
                     {
-                        //upgrade has no effect
-                        ReceiveChat("Upgrade has no effect.", ChatType.Hint);
+                        ReceiveChat("Item has already reached maximum added stats", ChatType.Hint);
+                        Enqueue(p);
+                        return;
+                    }
 
-                        if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(10) < 5))
-                        {
-                            //item destroyed
-                            ReceiveChat("Item has been destroyed.", ChatType.Hint);
+                    //check if combine will succeed
+                    succeeded = Envir.Random.Next(20) < (5 + (Luck / 2));
+                    canUpgrade = true;
 
-                            Info.Inventory[indexTo] = null;
-                            p.Destroy = true;
-                        }
+                    byte itemType = (byte)tempTo.Info.Type;
+
+                    if ((tempFrom.Info.MaxDC + tempFrom.DC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
+                    {
+                        if (succeeded) tempTo.DC = (byte)Math.Min(byte.MaxValue, tempTo.DC + tempFrom.Info.MaxDC + tempFrom.DC);
+                    }
+
+                    else if ((tempFrom.Info.MaxMC + tempFrom.MC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
+                    {
+                        if (succeeded) tempTo.MC = (byte)Math.Min(byte.MaxValue, tempTo.MC + tempFrom.Info.MaxMC + tempFrom.MC);
+                    }
+
+                    else if ((tempFrom.Info.MaxSC + tempFrom.SC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
+                    {
+                        if (succeeded) tempTo.SC = (byte)Math.Min(byte.MaxValue, tempTo.SC + tempFrom.Info.MaxSC + tempFrom.SC);
+                    }
+
+                    else if ((tempFrom.Info.MaxAC + tempFrom.AC) > 0 && (itemType != 5 && itemType != 1))
+                    {
+                        if (succeeded) tempTo.AC = (byte)Math.Min(byte.MaxValue, tempTo.AC + tempFrom.Info.MaxAC + tempFrom.AC);
+                    }
+
+                    else if ((tempFrom.Info.MaxMAC + tempFrom.MAC) > 0 && (itemType != 5 && itemType != 1))
+                    {
+                        if (succeeded) tempTo.MAC = (byte)Math.Min(byte.MaxValue, tempTo.MAC + tempFrom.Info.MaxMAC + tempFrom.MAC);
+                    }
+
+                    else if ((tempFrom.Info.Durability) > 0)
+                    {
+                        if (succeeded) tempTo.MaxDura = (ushort)Math.Min(ushort.MaxValue, tempTo.MaxDura + tempFrom.MaxDura);
+                    }
+
+                    else if ((tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed) > 0 && (itemType == 5 || itemType == 7 || itemType == 1))
+                    {
+                        if (succeeded) tempTo.AttackSpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, tempTo.AttackSpeed + tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed)));
+                    }
+
+                    else if ((tempFrom.Info.Agility + tempFrom.Agility) > 0 && (itemType != 4 && itemType != 5 && itemType != 7 && itemType != 1))
+                    {
+                        if (succeeded) tempTo.Agility = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Agility + tempTo.Agility + tempFrom.Agility);
+                    }
+
+                    else if ((tempFrom.Info.Accuracy + tempFrom.Accuracy) > 0 && (itemType != 2 && itemType != 7 && itemType != 10 && itemType != 1))
+                    {
+                        if (succeeded) tempTo.Accuracy = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Accuracy + tempTo.Accuracy + tempFrom.Accuracy);
+                    }
+
+                    else if ((tempFrom.Info.PoisonAttack + tempFrom.PoisonAttack) > 0 && (itemType == 5 || itemType == 7 || itemType == 1))
+                    {
+                        if (succeeded) tempTo.PoisonAttack = (byte)Math.Min(byte.MaxValue, tempFrom.Info.PoisonAttack + tempTo.PoisonAttack + tempFrom.PoisonAttack);
+                    }
+
+                    else if ((tempFrom.Info.Freezing + tempFrom.Freezing) > 0 && (itemType == 5 || itemType == 7 || itemType == 1))
+                    {
+                        if (succeeded) tempTo.Freezing = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Freezing + tempTo.Freezing + tempFrom.Freezing);
+                    }
+
+                    else if ((tempFrom.Info.MagicResist + tempFrom.MagicResist) > 0 && (itemType == 2 || itemType == 4 || itemType == 5))
+                    {
+                        if (succeeded) tempTo.MagicResist = (byte)Math.Min(byte.MaxValue, tempFrom.Info.MagicResist + tempTo.MagicResist + tempFrom.MagicResist);
+                    }
+
+                    else if ((tempFrom.Info.PoisonResist + tempFrom.PoisonResist) > 0 && (itemType == 2 || itemType == 9 || itemType == 4))
+                    {
+                        if (succeeded) tempTo.PoisonResist = (byte)Math.Min(byte.MaxValue, tempFrom.Info.PoisonResist + tempTo.PoisonResist + tempFrom.PoisonResist);
                     }
                     else
                     {
-                        if (tempTo.GemCount >= 7)
-                        {
-                            ReceiveChat("Item has already reached maximum added stats", ChatType.Hint);
-                            Enqueue(p);
-                            return;
-                        }
-
-                        byte itemType = (byte)tempTo.Info.Type;
-
-                        canUpgrade = true;
-
-                        if ((tempFrom.Info.MaxDC + tempFrom.DC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
-                            tempTo.DC = (byte)Math.Min(byte.MaxValue, tempTo.DC + tempFrom.Info.MaxDC + tempFrom.DC);
-
-                        if ((tempFrom.Info.MaxMC + tempFrom.MC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
-                            tempTo.MC = (byte)Math.Min(byte.MaxValue, tempTo.MC + tempFrom.Info.MaxMC + tempFrom.MC);
-
-                        if ((tempFrom.Info.MaxSC + tempFrom.SC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
-                            tempTo.SC = (byte)Math.Min(byte.MaxValue, tempTo.SC + tempFrom.Info.MaxSC + tempFrom.SC);
-
-                        if ((tempFrom.Info.MaxAC + tempFrom.AC) > 0 && (itemType != 5 && itemType != 1))
-                            tempTo.AC = (byte)Math.Min(byte.MaxValue, tempTo.AC + tempFrom.Info.MaxAC + tempFrom.AC);
-
-                        if ((tempFrom.Info.MaxMAC + tempFrom.MAC) > 0 && (itemType != 5 && itemType != 1))
-                            tempTo.MAC = (byte)Math.Min(byte.MaxValue, tempTo.MAC + tempFrom.Info.MaxMAC + tempFrom.MAC);
-
-                        if ((tempFrom.Info.Durability) > 0)
-                            tempTo.MaxDura = (ushort)Math.Min(ushort.MaxValue, tempTo.MaxDura + tempFrom.MaxDura);
-
-                        if ((tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed) > 0 && (itemType == 5 || itemType == 7 || itemType == 1))
-                            tempTo.AttackSpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, tempTo.AttackSpeed + tempFrom.Info.AttackSpeed + tempFrom.AttackSpeed)));
-
-                        if ((tempFrom.Info.Agility + tempFrom.Agility) > 0 && (itemType != 4 && itemType != 5 && itemType != 7 && itemType != 1))
-                            tempTo.Agility = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Agility + tempTo.Agility + tempFrom.Agility);
-
-                        if ((tempFrom.Info.Accuracy + tempFrom.Accuracy) > 0 && (itemType != 2 && itemType != 7 && itemType != 10 && itemType != 1))
-                            tempTo.Accuracy = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Accuracy + tempTo.Accuracy + tempFrom.Accuracy);
-
-                        if ((tempFrom.Info.PoisonAttack + tempFrom.PoisonAttack) > 0 && (itemType == 5 || itemType == 7 || itemType == 1 ))
-                            tempTo.PoisonAttack = (byte)Math.Min(byte.MaxValue, tempFrom.Info.PoisonAttack + tempTo.PoisonAttack + tempFrom.PoisonAttack);
-
-                        if ((tempFrom.Info.Freezing + tempFrom.Freezing) > 0 && (itemType == 5 || itemType == 7 || itemType == 1))
-                            tempTo.Freezing = (byte)Math.Min(byte.MaxValue, tempFrom.Info.Freezing + tempTo.Freezing + tempFrom.Freezing);
-
-                        if ((tempFrom.Info.MagicResist + tempFrom.MagicResist) > 0 && (itemType == 2 || itemType == 4 || itemType == 5))
-                            tempTo.MagicResist = (byte)Math.Min(byte.MaxValue, tempFrom.Info.MagicResist + tempTo.MagicResist + tempFrom.MagicResist);
-
-                        if ((tempFrom.Info.PoisonResist + tempFrom.PoisonResist) > 0 && (itemType == 2 || itemType == 9 || itemType == 4))
-                            tempTo.PoisonResist = (byte)Math.Min(byte.MaxValue, tempFrom.Info.PoisonResist + tempTo.PoisonResist + tempFrom.PoisonResist);
+                        ReceiveChat("Cannot combine these items.", ChatType.Hint);
+                        Enqueue(p);
+                        return;
                     }
                     break;
                 default:
                     Enqueue(p);
                     return;
+            }
+
+            if(!succeeded)
+            {
+                //upgrade has no effect
+                ReceiveChat("Upgrade has no effect.", ChatType.Hint);
+
+                if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(10) < 7))
+                {
+                    //item destroyed
+                    ReceiveChat("Item has been destroyed.", ChatType.Hint);
+
+                    Info.Inventory[indexTo] = null;
+                    p.Destroy = true;
+                }
+
+                canUpgrade = false;
             }
 
             RefreshBagWeight();

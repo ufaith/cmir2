@@ -7,6 +7,10 @@ namespace Server.MirObjects.Monsters
 {
     public class Trainer : MonsterObject
     {
+        private PlayerObject _CurrentAttacker = null;
+        private int _hitCount = 0, _totalDamage = 0;
+        private long _lastAttackTime = 0;
+
         protected override bool CanAttack { get { return false; } }
         protected override bool CanMove { get { return false; } }
         protected override bool CanRegen { get { return false; } }
@@ -35,10 +39,32 @@ namespace Server.MirObjects.Monsters
             base.Spawned();
         }
 
+        public override void Process()
+        {
+            base.Process();
+
+            if (_CurrentAttacker != null && _lastAttackTime + 5000 < Envir.Time)
+            {
+                OutputAverage();
+                ResetStats();
+            }
+        }
+
         // Player attacking trainer.
         public override int Attacked(PlayerObject attacker, int damage, DefenceType type = DefenceType.ACAgility, bool damageWeapon = false)
         {
             if (attacker == null) return 0;
+
+            if (_CurrentAttacker != null && _CurrentAttacker != attacker)
+            {
+                OutputAverage();
+                ResetStats();
+            }
+
+            _CurrentAttacker = attacker;
+            _hitCount++;
+            _totalDamage += damage;
+            _lastAttackTime = Envir.Time;
 
             switch (type)
             {
@@ -70,6 +96,18 @@ namespace Server.MirObjects.Monsters
             byte _masterMaxMC = attacker.Master.MaxMC; // max 256
             int _total = (_masterLevel * 10) + _masterMaxMC;
 
+            if (_CurrentAttacker != null && _CurrentAttacker != attacker.Master)
+            {
+                OutputAverage();
+                ResetStats();
+            }
+
+            _CurrentAttacker = (PlayerObject)attacker.Master;
+            _hitCount++;
+            _totalDamage += damage;
+            _lastAttackTime = Envir.Time;
+
+
             switch (type)
             {
                 case DefenceType.ACAgility:
@@ -91,6 +129,21 @@ namespace Server.MirObjects.Monsters
 
             attacker.PetExp((uint)_total);
             return 1;
+        }
+
+        private void ResetStats()
+        {
+            _CurrentAttacker = null;
+            _hitCount = 0;
+            _totalDamage = 0;
+            _lastAttackTime = 0;
+        }
+
+        private void OutputAverage()
+        {
+            if (_CurrentAttacker == null) return;
+
+            _CurrentAttacker.ReceiveChat((_totalDamage / _hitCount) + " Average Damage inflicted on the trainer.", ChatType.Trainer);
         }
     }
 }
