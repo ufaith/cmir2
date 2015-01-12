@@ -54,7 +54,8 @@ namespace Server
 
         //Optional
         public static bool SafeZoneBorder = false,
-                           SafeZoneHealing = false;
+                           SafeZoneHealing = false,
+                           GatherOrbsPerLevel = true;
 
         //Database
         public static int SaveDelay = 5;
@@ -161,6 +162,7 @@ namespace Server
             //Optional
             SafeZoneBorder = Reader.ReadBoolean("Optional", "SafeZoneBorder", SafeZoneBorder);
             SafeZoneHealing = Reader.ReadBoolean("Optional", "SafeZoneHealing", SafeZoneHealing);
+            GatherOrbsPerLevel = Reader.ReadBoolean("Optional", "GatherOrbsPerLevel", GatherOrbsPerLevel);
 
             //Database
             SaveDelay = Reader.ReadInt32("Database", "SaveDelay", SaveDelay);
@@ -316,6 +318,7 @@ namespace Server
             //Optional
             Reader.Write("Optional", "SafeZoneBorder", SafeZoneBorder);
             Reader.Write("Optional", "SafeZoneHealing", SafeZoneHealing);
+            Reader.Write("Optional", "GatherOrbsPerLevel", GatherOrbsPerLevel);
 
             //Database
             Reader.Write("Database", "SaveDelay", SaveDelay);

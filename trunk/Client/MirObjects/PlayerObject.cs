@@ -1695,7 +1695,17 @@ namespace Client.MirObjects
 
                             #endregion
 
+                            #region ElementalBarrier ArcherSpells - Elemental system
 
+                            case Spell.ElementalBarrier:
+                                if (HasElements && !ElementalBarrier)
+                                {
+                                    Effects.Add(new Effect(Libraries.Magic3, 1880, 8, Frame.Count * FrameInterval, this));
+                                    SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                }
+                                break;
+
+                            #endregion
 
                         }
 
@@ -2689,17 +2699,6 @@ namespace Client.MirObjects
 
                                     #endregion
 
-                                    #region ElementalBarrier ArcherSpells - Elemental system
-
-                                    case Spell.ElementalBarrier:
-                                        if (HasElements && !ElementalBarrier)
-                                        {
-                                            Effects.Add(new Effect(Libraries.Magic3, 1880, 8, Frame.Count * FrameInterval, this));
-                                            SoundManager.PlaySound(20000 + (ushort)Spell * 10);
-                                        }
-                                        break;
-
-                                    #endregion
                                 }
 
 

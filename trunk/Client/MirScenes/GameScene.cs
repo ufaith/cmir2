@@ -1291,6 +1291,10 @@ namespace Client.MirScenes
                     return 884;
                 case BuffType.General:
                     return 903;
+                case BuffType.Exp:
+                    return 907;
+                case BuffType.Drop:
+                    return 872;
                 case BuffType.Impact:
                     return 893;
                 case BuffType.Magic:
@@ -2853,6 +2857,7 @@ namespace Client.MirScenes
                         player.ElementalBarrierEffect = null;
                         player.ElementalBarrier = false;
                         player.Effects.Add(player.ElementalBarrierEffect = new Effect(Libraries.Magic3, 1910, 7, 1400, ob));
+                        SoundManager.PlaySound(20000 + 131 * 10 + 5);
                         break;
                 }
                 return;
@@ -10706,6 +10711,18 @@ namespace Client.MirScenes
                 Sound = SoundList.ButtonA,
             };
             CloseButton.Click += (o, e) => Hide();
+
+            MirButton helpButton = new MirButton
+            {
+                Index = 257,
+                HoverIndex = 258,
+                PressedIndex = 259,
+                Library = Libraries.Prguse2,
+                Parent = this,
+                Location = new Point(390, 3),
+                Sound = SoundList.ButtonA,
+            };
+            helpButton.Click += (o, e) => GameScene.Scene.HelpDialog.DisplayPage("Purchasing");
         }
 
         void NPCDialog_MouseWheel(object sender, MouseEventArgs e)
@@ -12170,7 +12187,7 @@ namespace Client.MirScenes
     public sealed class MountDialog : MirImageControl
     {
         public MirLabel MountName, MountLoyalty;
-        public MirButton CloseButton, MountButton;
+        public MirButton CloseButton, MountButton, HelpButton;
         private MirAnimatedControl MountImage;
         public MirItemCell[] Grid;
 
@@ -12225,6 +12242,17 @@ namespace Client.MirScenes
                 Sound = SoundList.ButtonA,
             };
             CloseButton.Click += (o, e) => Hide();
+
+            HelpButton = new MirButton
+            {
+                Index = 257,
+                HoverIndex = 258,
+                PressedIndex = 259,
+                Library = Libraries.Prguse2,
+                Parent = this,
+                Sound = SoundList.ButtonA,
+            };
+            HelpButton.Click += (o, e) => GameScene.Scene.HelpDialog.DisplayPage("Mounts");
 
             MountImage = new MirAnimatedControl
             {
@@ -12322,6 +12350,7 @@ namespace Client.MirScenes
                     MountButton.PressedIndex = 166;
                     MountButton.Location = new Point(210, 70);
                     CloseButton.Location = new Point(245, 3);
+                    HelpButton.Location = new Point(221, 3);
                     Grid[(int)MountSlot.Mask].Visible = false;
                     x = 1; y = 1;
                     break;
@@ -12336,6 +12365,7 @@ namespace Client.MirScenes
                     MountButton.PressedIndex = 157;
                     MountButton.Location = new Point(262, 70);
                     CloseButton.Location = new Point(297, 3);
+                    HelpButton.Location = new Point(274, 3);
                     Grid[(int)MountSlot.Mask].Visible = true;
                     x = 0; y = 0;
                     break;
@@ -15773,6 +15803,12 @@ namespace Client.MirScenes
                     break;
                 case BuffType.General:
                     text = string.Format("Mirian Advantage\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);
+                    break;
+                case BuffType.Exp:
+                    text = string.Format("ExpRate\nIncreased by x{0}\n", Value);
+                    break;
+                case BuffType.Drop:
+                    text = string.Format("DropRate\nIncreased by x{0}\n", Value);
                     break;
                 case BuffType.Concentration://ArcherSpells - Elemental system
                     text = "Concentrating\nIncreases chance on element extraction.\n";

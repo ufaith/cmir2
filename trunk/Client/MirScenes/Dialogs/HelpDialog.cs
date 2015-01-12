@@ -86,7 +86,7 @@ namespace Client.MirScenes.Dialogs
                 DrawFormat = TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter,
                 Parent = this,
                 NotControl = true,
-                Location = new Point(230, 482),
+                Location = new Point(230, 480),
                 Size = new Size(80, 20)
             };
 
@@ -112,12 +112,51 @@ namespace Client.MirScenes.Dialogs
             Point location = new Point(12, 35);
 
             List<HelpPage> pages = new List<HelpPage> { 
-                new HelpPage("Movement", 0, null) { Parent = this, Location = location, Visible = false }, 
-                new HelpPage("Attacking", 1, null) { Parent = this, Location = location, Visible = false }, 
-                new HelpPage("Grouping", 2, null) { Parent = this, Location = location, Visible = false }, 
+                new HelpPage("Equipment", 0, null) { Parent = this, Location = location, Visible = false }, 
+                new HelpPage("Movements", 1, null) { Parent = this, Location = location, Visible = false }, 
+                new HelpPage("Attacking", 2, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Collecting Items", 3, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Health", 4, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Skills", 5, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Skills", 6, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Mana", 7, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Chatting", 8, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Groups", 9, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Durability", 10, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Purchasing", 11, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Selling", 12, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Repairing", 13, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Trading", 14, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Inspecting", 15, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Statistics", 16, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Statistics", 17, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Statistics", 18, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Statistics", 19, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Statistics", 20, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Statistics", 21, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Quests", 22, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Quests", 23, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Quests", 24, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Quests", 25, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Mounts", 26, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Mounts", 27, null) { Parent = this, Location = location, Visible = false },
+                new HelpPage("Fishing", 28, null) { Parent = this, Location = location, Visible = false },
             };
 
             Pages.AddRange(pages);
+        }
+
+        public void DisplayPage(string pageName)
+        {
+            if (Pages.Count < 1) return;
+
+            for (int i = 0; i < Pages.Count; i++)
+            {
+                if (Pages[i].Title.ToLower() != pageName.ToLower()) continue;
+
+                DisplayPage(i);
+                break;
+            }
         }
 
         public void DisplayPage(int id = 0)
@@ -138,6 +177,8 @@ namespace Client.MirScenes.Dialogs
             CurrentPageNumber = id;
 
             PageLabel.Text = string.Format("{0} / {1}", id + 1, Pages.Count);
+
+            Show();
         }
 
         public void Show()

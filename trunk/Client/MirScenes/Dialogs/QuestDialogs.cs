@@ -234,7 +234,7 @@ namespace Client.MirScenes.Dialogs
                 Font = new Font(Settings.FontName, 8F),
                 Parent = this,
                 AutoSize = true,
-                Location = new Point(230, 8)
+                Location = new Point(210, 8)
             };
 
             MirButton closeButton = new MirButton
@@ -248,6 +248,18 @@ namespace Client.MirScenes.Dialogs
                 Sound = SoundList.ButtonA,
             };
             closeButton.Click += (o, e) => Hide();
+
+            MirButton helpButton = new MirButton
+            {
+                Index = 257,
+                HoverIndex = 258,
+                PressedIndex = 259,
+                Library = Libraries.Prguse2,
+                Parent = this,
+                Location = new Point(266, 3),
+                Sound = SoundList.ButtonA,
+            };
+            helpButton.Click += (o, e) => GameScene.Scene.HelpDialog.DisplayPage("Quests");
 
         }
 
@@ -604,6 +616,19 @@ namespace Client.MirScenes.Dialogs
                 Sound = SoundList.ButtonA,
             };
             closeButton.Click += (o, e) => Hide();
+
+            //MirButton helpButton = new MirButton
+            //{
+            //    Index = 257,
+            //    HoverIndex = 258,
+            //    PressedIndex = 259,
+            //    Library = Libraries.Prguse2,
+            //    Parent = this,
+            //    Location = new Point(266, 3),
+            //    Sound = SoundList.ButtonA,
+            //};
+            //helpButton.Click += (o, e) => GameScene.Scene.HelpDialog.DisplayPage("Quests");
+
         }
 
         public void DisplayQuestDetails(ClientQuestProgress quest)
@@ -660,7 +685,7 @@ namespace Client.MirScenes.Dialogs
                 Font = new Font(Settings.FontName, 8F),
                 Parent = this,
                 AutoSize = true,
-                Location = new Point(220, 7)
+                Location = new Point(210, 7)
             };
 
             _closeButton = new MirButton
@@ -686,6 +711,19 @@ namespace Client.MirScenes.Dialogs
                 Sound = SoundList.ButtonA,
             };
             closeButton.Click += (o, e) => Hide();
+
+            //MirButton helpButton = new MirButton
+            //{
+            //    Index = 257,
+            //    HoverIndex = 258,
+            //    PressedIndex = 259,
+            //    Library = Libraries.Prguse2,
+            //    Parent = this,
+            //    Location = new Point(266, 3),
+            //    Sound = SoundList.ButtonA,
+            //};
+            //helpButton.Click += (o, e) => GameScene.Scene.HelpDialog.DisplayPage("Quests");
+
         }
 
         public void DisplayQuests()
@@ -800,7 +838,7 @@ namespace Client.MirScenes.Dialogs
             Movable = true;
             Location = new Point(0, 100);
             Sort = false;
-            Size = new Size(150, 150);
+            //Size = new Size(150, 50);
         }
 
         public void DisplayQuests()
@@ -1720,7 +1758,7 @@ namespace Client.MirScenes.Dialogs
 
             string name = Quest.QuestInfo.Name;
             string level = string.Format("Lv{0}", Quest.QuestInfo.MinLevelNeeded);
-            string state = quest.Completed ? "(Complete)" : "(Waiting)";
+            string state = quest.Completed ? "(Complete)" : "(In Progress)";
 
             bool lowLevelQuest = (MapObject.User.Level - quest.QuestInfo.MinLevelNeeded) > 10;
 
@@ -1786,7 +1824,7 @@ namespace Client.MirScenes.Dialogs
                 Font = new Font(Settings.FontName, 8F),
                 ForeColour = lowLevelQuest ? Color.Gray : quest.New ? Color.Yellow : Color.White,
                 Parent = this,
-                Location = new Point(190, 0),
+                Location = new Point(185, 0),
                 Sound = SoundList.ButtonA
             };
         }

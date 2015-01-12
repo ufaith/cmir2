@@ -21,7 +21,6 @@ namespace Server
         private List<MapInfo> _selectedMapInfos;
         private List<SafeZoneInfo> _selectedSafeZoneInfos;
         private List<RespawnInfo> _selectedRespawnInfos;
-        private List<NPCInfo> _selectedNPCInfos;
         private List<MovementInfo> _selectedMovementInfos;
         private List<MineZone> _selectedMineZones;
         private MapInfo _info;
@@ -175,7 +174,6 @@ namespace Server
 
             UpdateSafeZoneInterface();
             UpdateRespawnInterface();
-            UpdateNPCInterface();
             UpdateMovementInterface();
             UpdateMineZoneInterface();
         }
@@ -313,78 +311,6 @@ namespace Server
                 if (DirectionTextBox.Text != info.Direction.ToString()) DirectionTextBox.Text = string.Empty;
                 if (RoutePathTextBox.Text != info.RoutePath) RoutePathTextBox.Text = string.Empty;
             }
-        }
-        private void UpdateNPCInterface()
-        {
-            if (_selectedMapInfos.Count != 1)
-            {
-                NPCInfoListBox.Items.Clear();
-                if (_selectedNPCInfos != null && _selectedNPCInfos.Count > 0)
-                    _selectedNPCInfos.Clear();
-                _info = null;
-
-                NPCInfoPanel.Enabled = false;
-
-                NFileNameTextBox.Text = string.Empty;
-                NNameTextBox.Text = string.Empty;
-                NXTextBox.Text = string.Empty;
-                NYTextBox.Text = string.Empty;
-                NImageTextBox.Text = string.Empty;
-                NRateTextBox.Text = string.Empty;
-                return;
-            }
-
-            if (_info != _selectedMapInfos[0])
-            {
-                NPCInfoListBox.Items.Clear();
-                _info = _selectedMapInfos[0];
-            }
-
-            if (NPCInfoListBox.Items.Count != _info.NPCs.Count)
-            {
-                NPCInfoListBox.Items.Clear();
-                for (int i = 0; i < _info.NPCs.Count; i++) NPCInfoListBox.Items.Add(_info.NPCs[i]);
-            }
-            _selectedNPCInfos = NPCInfoListBox.SelectedItems.Cast<NPCInfo>().ToList();
-
-            if (_selectedNPCInfos.Count == 0)
-            {
-                NPCInfoPanel.Enabled = false;
-
-                NFileNameTextBox.Text = string.Empty;
-                NNameTextBox.Text = string.Empty;
-                NXTextBox.Text = string.Empty;
-                NYTextBox.Text = string.Empty;
-                NImageTextBox.Text = string.Empty;
-                NRateTextBox.Text = string.Empty;
-                return;
-            }
-
-            NPCInfo info = _selectedNPCInfos[0];
-
-            NPCInfoPanel.Enabled = true;
-
-            NFileNameTextBox.Text = info.FileName;
-            NNameTextBox.Text = info.Name;
-            NXTextBox.Text = info.Location.X.ToString();
-            NYTextBox.Text = info.Location.Y.ToString();
-            NImageTextBox.Text = info.Image.ToString();
-            NRateTextBox.Text = info.Rate.ToString();
-
-
-            for (int i = 1; i < _selectedNPCInfos.Count; i++)
-            {
-                info = _selectedNPCInfos[i];
-
-                if (NFileNameTextBox.Text != info.FileName) NFileNameTextBox.Text = string.Empty;
-                if (NNameTextBox.Text != info.Name) NNameTextBox.Text = string.Empty;
-                if (NXTextBox.Text != info.Location.X.ToString()) NXTextBox.Text = string.Empty;
-
-                if (NYTextBox.Text != info.Location.Y.ToString()) NYTextBox.Text = string.Empty;
-                if (NImageTextBox.Text != info.Image.ToString()) NImageTextBox.Text = string.Empty;
-                if (NRateTextBox.Text != info.Rate.ToString()) NRateTextBox.Text = string.Empty;
-            }
-
         }
         private void UpdateMovementInterface()
         {
@@ -560,19 +486,6 @@ namespace Server
 
             RespawnInfoListBox.SelectedIndexChanged += RespawnInfoListBox_SelectedIndexChanged;
         }
-        private void RefreshNPCList()
-        {
-            NPCInfoListBox.SelectedIndexChanged -= NPCInfoListBox_SelectedIndexChanged;
-
-            List<bool> selected = new List<bool>();
-
-            for (int i = 0; i < NPCInfoListBox.Items.Count; i++) selected.Add(NPCInfoListBox.GetSelected(i));
-            NPCInfoListBox.Items.Clear();
-            for (int i = 0; i < _info.NPCs.Count; i++) NPCInfoListBox.Items.Add(_info.NPCs[i]);
-            for (int i = 0; i < selected.Count; i++) NPCInfoListBox.SetSelected(i, selected[i]);
-
-            NPCInfoListBox.SelectedIndexChanged += NPCInfoListBox_SelectedIndexChanged;
-        }
         private void RefreshMovementList()
         {
             MovementInfoListBox.SelectedIndexChanged -= MovementInfoListBox_SelectedIndexChanged;
@@ -625,7 +538,6 @@ namespace Server
             SafeZoneInfoListBox.Items.Clear();
             RespawnInfoListBox.Items.Clear();
             MovementInfoListBox.Items.Clear();
-            NPCInfoListBox.Items.Clear();
             MZListlistBox.Items.Clear();
             UpdateInterface();
         }
@@ -951,118 +863,7 @@ namespace Server
         //RCopy
 
 
-        private void AddNButton_Click(object sender, EventArgs e)
-        {
-            if (_info == null) return;
-
-            _info.CreateNPCInfo();
-            UpdateNPCInterface();
-        }
-        private void RemoveNButton_Click(object sender, EventArgs e)
-        {
-            if (_selectedNPCInfos.Count == 0) return;
-
-            if (MessageBox.Show("Are you sure you want to remove the selected NPCs?", "Remove NPCs?", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
-
-            for (int i = 0; i < _selectedNPCInfos.Count; i++) _info.NPCs.Remove(_selectedNPCInfos[i]);
-
-            UpdateNPCInterface();
-        }
-        private void NPCInfoListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            UpdateNPCInterface();
-        }
-        private void NFileNameTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (ActiveControl != sender) return;
-
-            for (int i = 0; i < _selectedMapInfos.Count; i++)
-                _selectedNPCInfos[i].FileName = ActiveControl.Text;
-        }
-        private void NNameTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (ActiveControl != sender) return;
-
-            for (int i = 0; i < _selectedMapInfos.Count; i++)
-                _selectedNPCInfos[i].Name = ActiveControl.Text;
-
-            RefreshNPCList();
-        }
-        private void NXTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (ActiveControl != sender) return;
-
-            int temp;
-
-            if (!int.TryParse(ActiveControl.Text, out temp))
-            {
-                ActiveControl.BackColor = Color.Red;
-                return;
-            }
-            ActiveControl.BackColor = SystemColors.Window;
-
-
-            for (int i = 0; i < _selectedNPCInfos.Count; i++)
-                _selectedNPCInfos[i].Location.X = temp;
-
-            RefreshNPCList();
-        }
-        private void NYTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (ActiveControl != sender) return;
-
-            int temp;
-
-            if (!int.TryParse(ActiveControl.Text, out temp))
-            {
-                ActiveControl.BackColor = Color.Red;
-                return;
-            }
-            ActiveControl.BackColor = SystemColors.Window;
-
-
-            for (int i = 0; i < _selectedNPCInfos.Count; i++)
-                _selectedNPCInfos[i].Location.Y = temp;
-
-            RefreshNPCList();
-        }
-        private void NImageTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (ActiveControl != sender) return;
-
-            byte temp;
-
-            if (!byte.TryParse(ActiveControl.Text, out temp))
-            {
-                ActiveControl.BackColor = Color.Red;
-                return;
-            }
-            ActiveControl.BackColor = SystemColors.Window;
-
-
-            for (int i = 0; i < _selectedNPCInfos.Count; i++)
-                _selectedNPCInfos[i].Image = temp;
-
-        }
-        private void NRateTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (ActiveControl != sender) return;
-
-            ushort temp;
-
-            if (!ushort.TryParse(ActiveControl.Text, out temp))
-            {
-                ActiveControl.BackColor = Color.Red;
-                return;
-            }
-            ActiveControl.BackColor = SystemColors.Window;
-
-
-            for (int i = 0; i < _selectedNPCInfos.Count; i++)
-                _selectedNPCInfos[i].Rate = temp;
-        }
-
-
+        
 
         private void AddMButton_Click(object sender, EventArgs e)
         {
@@ -1361,22 +1162,6 @@ namespace Server
 
             for (int i = 0; i < _selectedMapInfos.Count; i++)
                 _selectedMapInfos[i].LightningDamage = temp;
-        }
-
-        private void OpenNButton_Click(object sender, EventArgs e)
-        {
-            if (NFileNameTextBox.Text == string.Empty) return;
-
-            var scriptPath = Settings.NPCPath + NFileNameTextBox.Text + ".txt";
-
-            if (File.Exists(scriptPath))
-                Process.Start(scriptPath);
-            else
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(scriptPath));
-                File.Create(scriptPath).Close();
-                Process.Start(scriptPath);
-            }
         }
 
         private void ClearHButton_Click(object sender, EventArgs e)
@@ -1693,77 +1478,6 @@ namespace Server
                 }
             }
             MessageBox.Show("Map Info Export Complete");
-        }
-
-        private void ImportNPCInfoButton_Click(object sender, EventArgs e)
-        {
-            bool hasImported = false;
-
-            if (Envir.MapInfoList.Count == 0) return;
-
-            MirForms.ConvertNPCInfo.Start();
-            for (int i = 0; i < MirForms.ConvertNPCInfo.NPCInfoList.Count; i++)
-            {
-                try
-                {
-                    NPCInfo npcinfo = new NPCInfo
-                    {
-                        FileName = MirForms.ConvertNPCInfo.NPCInfoList[i].FileName,
-                        Location = new Point(MirForms.ConvertNPCInfo.NPCInfoList[i].X, MirForms.ConvertNPCInfo.NPCInfoList[i].Y),
-                        Name = MirForms.ConvertNPCInfo.NPCInfoList[i].Title.Replace('*', ' '),
-                        Image = (byte)MirForms.ConvertNPCInfo.NPCInfoList[i].Image,
-                        Rate = (ushort)MirForms.ConvertNPCInfo.NPCInfoList[i].Rate
-                    };
-
-                    int index = Envir.MapInfoList.FindIndex(a => a.FileName == MirForms.ConvertNPCInfo.NPCInfoList[i].Map);
-                    if (index == -1) continue;
-
-                    Envir.MapInfoList[index].NPCs.Add(npcinfo);
-                    hasImported = true;
-                }
-                catch (Exception)
-                {
-                    continue;
-                }
-            }
-            MirForms.ConvertNPCInfo.Stop();
-
-            if (!hasImported) return;
-
-            UpdateInterface();
-            MessageBox.Show("NPC Import complete");
-        }
-        private void ExportNPCInfoButton_Click(object sender, EventArgs e)
-        {
-            if (_selectedMapInfos.Count == 0) return;
-
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = Application.StartupPath + @"\Exports";
-            sfd.Filter = "Text File|*.txt";
-            sfd.ShowDialog();
-
-            if (sfd.FileName == string.Empty) return;
-
-            for (int i = 0; i < _selectedMapInfos.Count; i++)
-            {
-                using (StreamWriter sw = File.AppendText(sfd.FileNames[0]))
-                {
-                    for (int j = 0; j < _selectedMapInfos[i].NPCs.Count; j++)
-                    {
-                        string Output = string.Format("{0},{1},{2},{3},{4},{5},{6}",
-                            _selectedMapInfos[i].NPCs[j].FileName,
-                            _selectedMapInfos[i].FileName,
-                            _selectedMapInfos[i].NPCs[j].Location.X,
-                            _selectedMapInfos[i].NPCs[j].Location.Y,
-                            _selectedMapInfos[i].NPCs[j].Name,
-                            _selectedMapInfos[i].NPCs[j].Image,
-                            _selectedMapInfos[i].NPCs[j].Rate);
-
-                        sw.WriteLine(Output);
-                    }
-                }
-            }
-            MessageBox.Show("NPC Export complete");
         }
 
         private void ImportMonGenButton_Click(object sender, EventArgs e)

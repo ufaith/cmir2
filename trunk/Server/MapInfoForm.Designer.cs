@@ -122,25 +122,6 @@ namespace Server
             this.label20 = new System.Windows.Forms.Label();
             this.SourceXTextBox = new System.Windows.Forms.TextBox();
             this.MovementInfoListBox = new System.Windows.Forms.ListBox();
-            this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.OpenNButton = new System.Windows.Forms.Button();
-            this.RemoveNButton = new System.Windows.Forms.Button();
-            this.AddNButton = new System.Windows.Forms.Button();
-            this.NPCInfoPanel = new System.Windows.Forms.Panel();
-            this.label11 = new System.Windows.Forms.Label();
-            this.NFileNameTextBox = new System.Windows.Forms.TextBox();
-            this.label29 = new System.Windows.Forms.Label();
-            this.NRateTextBox = new System.Windows.Forms.TextBox();
-            this.ClearHButton = new System.Windows.Forms.Button();
-            this.NNameTextBox = new System.Windows.Forms.TextBox();
-            this.label23 = new System.Windows.Forms.Label();
-            this.label25 = new System.Windows.Forms.Label();
-            this.NImageTextBox = new System.Windows.Forms.TextBox();
-            this.label26 = new System.Windows.Forms.Label();
-            this.NYTextBox = new System.Windows.Forms.TextBox();
-            this.label28 = new System.Windows.Forms.Label();
-            this.NXTextBox = new System.Windows.Forms.TextBox();
-            this.NPCInfoListBox = new System.Windows.Forms.ListBox();
             this.tabPage7 = new System.Windows.Forms.TabPage();
             this.MZDeletebutton = new System.Windows.Forms.Button();
             this.MZAddbutton = new System.Windows.Forms.Button();
@@ -163,8 +144,6 @@ namespace Server
             this.ExportMapInfoButton = new System.Windows.Forms.Button();
             this.ImportMongenButton = new System.Windows.Forms.Button();
             this.ExportMongenButton = new System.Windows.Forms.Button();
-            this.ImportNPCInfoButton = new System.Windows.Forms.Button();
-            this.ExportNPCInfoButton = new System.Windows.Forms.Button();
             this.VisualizerButton = new System.Windows.Forms.Button();
             this.MapTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -175,8 +154,6 @@ namespace Server
             this.RespawnInfoPanel.SuspendLayout();
             this.tabPage4.SuspendLayout();
             this.MovementInfoPanel.SuspendLayout();
-            this.tabPage5.SuspendLayout();
-            this.NPCInfoPanel.SuspendLayout();
             this.tabPage7.SuspendLayout();
             this.MineZonepanel.SuspendLayout();
             this.SuspendLayout();
@@ -191,7 +168,6 @@ namespace Server
             this.MapTabs.Controls.Add(this.tabPage3);
             this.MapTabs.Controls.Add(this.tabPage2);
             this.MapTabs.Controls.Add(this.tabPage4);
-            this.MapTabs.Controls.Add(this.tabPage5);
             this.MapTabs.Controls.Add(this.tabPage7);
             this.MapTabs.Location = new System.Drawing.Point(207, 62);
             this.MapTabs.Name = "MapTabs";
@@ -1134,206 +1110,6 @@ namespace Server
             this.MovementInfoListBox.TabIndex = 13;
             this.MovementInfoListBox.SelectedIndexChanged += new System.EventHandler(this.MovementInfoListBox_SelectedIndexChanged);
             // 
-            // tabPage5
-            // 
-            this.tabPage5.Controls.Add(this.OpenNButton);
-            this.tabPage5.Controls.Add(this.RemoveNButton);
-            this.tabPage5.Controls.Add(this.AddNButton);
-            this.tabPage5.Controls.Add(this.NPCInfoPanel);
-            this.tabPage5.Controls.Add(this.NPCInfoListBox);
-            this.tabPage5.Location = new System.Drawing.Point(4, 22);
-            this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage5.Size = new System.Drawing.Size(532, 230);
-            this.tabPage5.TabIndex = 4;
-            this.tabPage5.Text = "NPCs";
-            this.tabPage5.UseVisualStyleBackColor = true;
-            // 
-            // OpenNButton
-            // 
-            this.OpenNButton.Location = new System.Drawing.Point(254, 6);
-            this.OpenNButton.Name = "OpenNButton";
-            this.OpenNButton.Size = new System.Drawing.Size(75, 23);
-            this.OpenNButton.TabIndex = 19;
-            this.OpenNButton.Text = "Open Script";
-            this.OpenNButton.UseVisualStyleBackColor = true;
-            this.OpenNButton.Click += new System.EventHandler(this.OpenNButton_Click);
-            // 
-            // RemoveNButton
-            // 
-            this.RemoveNButton.Location = new System.Drawing.Point(108, 6);
-            this.RemoveNButton.Name = "RemoveNButton";
-            this.RemoveNButton.Size = new System.Drawing.Size(75, 23);
-            this.RemoveNButton.TabIndex = 16;
-            this.RemoveNButton.Text = "Remove";
-            this.RemoveNButton.UseVisualStyleBackColor = true;
-            this.RemoveNButton.Click += new System.EventHandler(this.RemoveNButton_Click);
-            // 
-            // AddNButton
-            // 
-            this.AddNButton.Location = new System.Drawing.Point(6, 6);
-            this.AddNButton.Name = "AddNButton";
-            this.AddNButton.Size = new System.Drawing.Size(75, 23);
-            this.AddNButton.TabIndex = 15;
-            this.AddNButton.Text = "Add";
-            this.AddNButton.UseVisualStyleBackColor = true;
-            this.AddNButton.Click += new System.EventHandler(this.AddNButton_Click);
-            // 
-            // NPCInfoPanel
-            // 
-            this.NPCInfoPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.NPCInfoPanel.Controls.Add(this.label11);
-            this.NPCInfoPanel.Controls.Add(this.NFileNameTextBox);
-            this.NPCInfoPanel.Controls.Add(this.label29);
-            this.NPCInfoPanel.Controls.Add(this.NRateTextBox);
-            this.NPCInfoPanel.Controls.Add(this.ClearHButton);
-            this.NPCInfoPanel.Controls.Add(this.NNameTextBox);
-            this.NPCInfoPanel.Controls.Add(this.label23);
-            this.NPCInfoPanel.Controls.Add(this.label25);
-            this.NPCInfoPanel.Controls.Add(this.NImageTextBox);
-            this.NPCInfoPanel.Controls.Add(this.label26);
-            this.NPCInfoPanel.Controls.Add(this.NYTextBox);
-            this.NPCInfoPanel.Controls.Add(this.label28);
-            this.NPCInfoPanel.Controls.Add(this.NXTextBox);
-            this.NPCInfoPanel.Enabled = false;
-            this.NPCInfoPanel.Location = new System.Drawing.Point(254, 35);
-            this.NPCInfoPanel.Name = "NPCInfoPanel";
-            this.NPCInfoPanel.Size = new System.Drawing.Size(260, 139);
-            this.NPCInfoPanel.TabIndex = 18;
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(8, 6);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(57, 13);
-            this.label11.TabIndex = 23;
-            this.label11.Text = "File Name:";
-            // 
-            // NFileNameTextBox
-            // 
-            this.NFileNameTextBox.Location = new System.Drawing.Point(71, 3);
-            this.NFileNameTextBox.MaxLength = 50;
-            this.NFileNameTextBox.Name = "NFileNameTextBox";
-            this.NFileNameTextBox.Size = new System.Drawing.Size(180, 20);
-            this.NFileNameTextBox.TabIndex = 22;
-            this.NFileNameTextBox.TextChanged += new System.EventHandler(this.NFileNameTextBox_TextChanged);
-            // 
-            // label29
-            // 
-            this.label29.AutoSize = true;
-            this.label29.Cursor = System.Windows.Forms.Cursors.Default;
-            this.label29.Location = new System.Drawing.Point(127, 85);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(33, 13);
-            this.label29.TabIndex = 21;
-            this.label29.Text = "Rate:";
-            // 
-            // NRateTextBox
-            // 
-            this.NRateTextBox.Location = new System.Drawing.Point(166, 80);
-            this.NRateTextBox.MaxLength = 3;
-            this.NRateTextBox.Name = "NRateTextBox";
-            this.NRateTextBox.Size = new System.Drawing.Size(37, 20);
-            this.NRateTextBox.TabIndex = 20;
-            this.NRateTextBox.TextChanged += new System.EventHandler(this.NRateTextBox_TextChanged);
-            // 
-            // ClearHButton
-            // 
-            this.ClearHButton.Location = new System.Drawing.Point(139, 106);
-            this.ClearHButton.Name = "ClearHButton";
-            this.ClearHButton.Size = new System.Drawing.Size(75, 23);
-            this.ClearHButton.TabIndex = 19;
-            this.ClearHButton.Text = "Clear History";
-            this.ClearHButton.UseVisualStyleBackColor = true;
-            this.ClearHButton.Click += new System.EventHandler(this.ClearHButton_Click);
-            // 
-            // NNameTextBox
-            // 
-            this.NNameTextBox.Location = new System.Drawing.Point(71, 29);
-            this.NNameTextBox.Name = "NNameTextBox";
-            this.NNameTextBox.Size = new System.Drawing.Size(180, 20);
-            this.NNameTextBox.TabIndex = 14;
-            this.NNameTextBox.TextChanged += new System.EventHandler(this.NNameTextBox_TextChanged);
-            // 
-            // label23
-            // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(27, 32);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(38, 13);
-            this.label23.TabIndex = 15;
-            this.label23.Text = "Name:";
-            // 
-            // label25
-            // 
-            this.label25.AutoSize = true;
-            this.label25.Cursor = System.Windows.Forms.Cursors.Default;
-            this.label25.Location = new System.Drawing.Point(26, 85);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(39, 13);
-            this.label25.TabIndex = 13;
-            this.label25.Text = "Image:";
-            // 
-            // NImageTextBox
-            // 
-            this.NImageTextBox.Location = new System.Drawing.Point(71, 81);
-            this.NImageTextBox.MaxLength = 3;
-            this.NImageTextBox.Name = "NImageTextBox";
-            this.NImageTextBox.Size = new System.Drawing.Size(28, 20);
-            this.NImageTextBox.TabIndex = 11;
-            this.NImageTextBox.TextChanged += new System.EventHandler(this.NImageTextBox_TextChanged);
-            // 
-            // label26
-            // 
-            this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(117, 58);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(43, 13);
-            this.label26.TabIndex = 10;
-            this.label26.Text = "From Y:";
-            // 
-            // NYTextBox
-            // 
-            this.NYTextBox.Location = new System.Drawing.Point(166, 55);
-            this.NYTextBox.MaxLength = 5;
-            this.NYTextBox.Name = "NYTextBox";
-            this.NYTextBox.Size = new System.Drawing.Size(37, 20);
-            this.NYTextBox.TabIndex = 3;
-            this.NYTextBox.TextChanged += new System.EventHandler(this.NYTextBox_TextChanged);
-            // 
-            // label28
-            // 
-            this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(22, 58);
-            this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(43, 13);
-            this.label28.TabIndex = 3;
-            this.label28.Text = "From X:";
-            // 
-            // NXTextBox
-            // 
-            this.NXTextBox.Location = new System.Drawing.Point(71, 55);
-            this.NXTextBox.MaxLength = 5;
-            this.NXTextBox.Name = "NXTextBox";
-            this.NXTextBox.Size = new System.Drawing.Size(37, 20);
-            this.NXTextBox.TabIndex = 2;
-            this.NXTextBox.TextChanged += new System.EventHandler(this.NXTextBox_TextChanged);
-            // 
-            // NPCInfoListBox
-            // 
-            this.NPCInfoListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.NPCInfoListBox.FormattingEnabled = true;
-            this.NPCInfoListBox.Location = new System.Drawing.Point(6, 35);
-            this.NPCInfoListBox.Name = "NPCInfoListBox";
-            this.NPCInfoListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.NPCInfoListBox.Size = new System.Drawing.Size(242, 134);
-            this.NPCInfoListBox.TabIndex = 17;
-            this.NPCInfoListBox.SelectedIndexChanged += new System.EventHandler(this.NPCInfoListBox_SelectedIndexChanged);
-            // 
             // tabPage7
             // 
             this.tabPage7.Controls.Add(this.MZDeletebutton);
@@ -1525,7 +1301,7 @@ namespace Server
             // 
             // ImportMapInfoButton
             // 
-            this.ImportMapInfoButton.Location = new System.Drawing.Point(478, 4);
+            this.ImportMapInfoButton.Location = new System.Drawing.Point(564, 4);
             this.ImportMapInfoButton.Name = "ImportMapInfoButton";
             this.ImportMapInfoButton.Size = new System.Drawing.Size(87, 23);
             this.ImportMapInfoButton.TabIndex = 25;
@@ -1535,7 +1311,7 @@ namespace Server
             // 
             // ExportMapInfoButton
             // 
-            this.ExportMapInfoButton.Location = new System.Drawing.Point(478, 33);
+            this.ExportMapInfoButton.Location = new System.Drawing.Point(564, 33);
             this.ExportMapInfoButton.Name = "ExportMapInfoButton";
             this.ExportMapInfoButton.Size = new System.Drawing.Size(87, 23);
             this.ExportMapInfoButton.TabIndex = 26;
@@ -1545,7 +1321,7 @@ namespace Server
             // 
             // ImportMongenButton
             // 
-            this.ImportMongenButton.Location = new System.Drawing.Point(571, 3);
+            this.ImportMongenButton.Location = new System.Drawing.Point(657, 3);
             this.ImportMongenButton.Name = "ImportMongenButton";
             this.ImportMongenButton.Size = new System.Drawing.Size(86, 23);
             this.ImportMongenButton.TabIndex = 27;
@@ -1555,7 +1331,7 @@ namespace Server
             // 
             // ExportMongenButton
             // 
-            this.ExportMongenButton.Location = new System.Drawing.Point(571, 33);
+            this.ExportMongenButton.Location = new System.Drawing.Point(657, 33);
             this.ExportMongenButton.Name = "ExportMongenButton";
             this.ExportMongenButton.Size = new System.Drawing.Size(86, 23);
             this.ExportMongenButton.TabIndex = 28;
@@ -1563,29 +1339,9 @@ namespace Server
             this.ExportMongenButton.UseVisualStyleBackColor = true;
             this.ExportMongenButton.Click += new System.EventHandler(this.ExportMonGenButton_Click);
             // 
-            // ImportNPCInfoButton
-            // 
-            this.ImportNPCInfoButton.Location = new System.Drawing.Point(664, 4);
-            this.ImportNPCInfoButton.Name = "ImportNPCInfoButton";
-            this.ImportNPCInfoButton.Size = new System.Drawing.Size(75, 23);
-            this.ImportNPCInfoButton.TabIndex = 29;
-            this.ImportNPCInfoButton.Text = "Import NPCs";
-            this.ImportNPCInfoButton.UseVisualStyleBackColor = true;
-            this.ImportNPCInfoButton.Click += new System.EventHandler(this.ImportNPCInfoButton_Click);
-            // 
-            // ExportNPCInfoButton
-            // 
-            this.ExportNPCInfoButton.Location = new System.Drawing.Point(664, 33);
-            this.ExportNPCInfoButton.Name = "ExportNPCInfoButton";
-            this.ExportNPCInfoButton.Size = new System.Drawing.Size(75, 23);
-            this.ExportNPCInfoButton.TabIndex = 30;
-            this.ExportNPCInfoButton.Text = "Export NPCs";
-            this.ExportNPCInfoButton.UseVisualStyleBackColor = true;
-            this.ExportNPCInfoButton.Click += new System.EventHandler(this.ExportNPCInfoButton_Click);
-            // 
             // VisualizerButton
             // 
-            this.VisualizerButton.Location = new System.Drawing.Point(397, 4);
+            this.VisualizerButton.Location = new System.Drawing.Point(483, 4);
             this.VisualizerButton.Name = "VisualizerButton";
             this.VisualizerButton.Size = new System.Drawing.Size(75, 23);
             this.VisualizerButton.TabIndex = 31;
@@ -1599,8 +1355,6 @@ namespace Server
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(759, 319);
             this.Controls.Add(this.VisualizerButton);
-            this.Controls.Add(this.ExportNPCInfoButton);
-            this.Controls.Add(this.ImportNPCInfoButton);
             this.Controls.Add(this.ExportMongenButton);
             this.Controls.Add(this.ImportMongenButton);
             this.Controls.Add(this.ExportMapInfoButton);
@@ -1628,9 +1382,6 @@ namespace Server
             this.tabPage4.ResumeLayout(false);
             this.MovementInfoPanel.ResumeLayout(false);
             this.MovementInfoPanel.PerformLayout();
-            this.tabPage5.ResumeLayout(false);
-            this.NPCInfoPanel.ResumeLayout(false);
-            this.NPCInfoPanel.PerformLayout();
             this.tabPage7.ResumeLayout(false);
             this.MineZonepanel.ResumeLayout(false);
             this.MineZonepanel.PerformLayout();
@@ -1689,27 +1440,9 @@ namespace Server
         private Label label20;
         private TextBox SourceXTextBox;
         private ListBox MovementInfoListBox;
-        private TabPage tabPage5;
-        private Button RemoveNButton;
-        private Button AddNButton;
-        private Panel NPCInfoPanel;
-        private Label label29;
-        private TextBox NRateTextBox;
-        private Button ClearHButton;
-        private TextBox NNameTextBox;
-        private Label label23;
-        private Label label25;
-        private TextBox NImageTextBox;
-        private Label label26;
-        private TextBox NYTextBox;
-        private Label label28;
-        private TextBox NXTextBox;
-        private ListBox NPCInfoListBox;
         private Button RemoveButton;
         private Button AddButton;
         private ListBox MapInfoListBox;
-        private Label label11;
-        private TextBox NFileNameTextBox;
         private Button PasteMapButton;
         private Button CopyMapButton;
         private TabPage tabPage1;
@@ -1743,7 +1476,6 @@ namespace Server
         private CheckBox NoRecallCheckbox;
         private CheckBox NoEscapeCheckbox;
         private CheckBox NoRandomCheckbox;
-        private Button OpenNButton;
         private CheckBox NeedHoleMCheckBox;
         private Button ImportMapInfoButton;
         private Button ExportMapInfoButton;
@@ -1766,8 +1498,6 @@ namespace Server
         private Label label33;
         private Button ImportMongenButton;
         private Button ExportMongenButton;
-        private Button ImportNPCInfoButton;
-        private Button ExportNPCInfoButton;
         private Button VisualizerButton;
         private CheckBox NeedBridleCheckbox;
         private CheckBox NoMountCheckbox;
