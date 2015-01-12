@@ -2607,8 +2607,14 @@ public abstract class Packet
             short id = reader.ReadInt16();
 
             p = IsServer ? GetClientPacket(id) : GetServerPacket(id);
-
-            p.ReadPacket(reader);
+            try
+            {
+                p.ReadPacket(reader);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         extra = new byte[rawBytes.Length - length];
