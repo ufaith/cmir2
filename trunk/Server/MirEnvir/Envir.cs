@@ -555,7 +555,9 @@ namespace Server.MirEnvir
 
             if (!File.Exists(path))
             {
-                File.Create(path);
+                FileStream newfile = File.Create(path);
+                newfile.Close();
+                
             }
 
             string[] lines = File.ReadAllLines(path);

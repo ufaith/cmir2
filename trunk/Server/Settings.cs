@@ -264,7 +264,10 @@ namespace Server
             string fileName = Path.Combine(Settings.NPCPath, DefaultNPCFilename + ".txt");
 
             if (!File.Exists(fileName))
-                File.Create(fileName);
+            {
+                FileStream NewFile = File.Create(fileName);
+                NewFile.Close();
+            }
 
             LoadVersion();
             LoadEXP();
