@@ -572,7 +572,7 @@ namespace Server.MirObjects
             {
                 DropInfo drop = Info.Drops[i];
 
-                int rate = (int)(drop.Chance / (Settings.DropRate + (EXPOwner != null ? EXPOwner.DropRateOffset : 0))); if (rate < 1) rate = 1;
+                int rate = (int)(drop.Chance / (Settings.DropRate + (EXPOwner != null ? EXPOwner.ItemDropRateOffset : 0))); if (rate < 1) rate = 1;
 
                 if (Envir.Random.Next(rate) != 0) continue;
 

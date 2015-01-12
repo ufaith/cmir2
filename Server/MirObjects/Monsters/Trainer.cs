@@ -7,7 +7,7 @@ namespace Server.MirObjects.Monsters
 {
     public class Trainer : MonsterObject
     {
-        private PlayerObject _CurrentAttacker = null;
+        private PlayerObject _currentAttacker = null;
         private int _hitCount = 0, _totalDamage = 0;
         private long _lastAttackTime = 0;
 
@@ -23,7 +23,12 @@ namespace Server.MirObjects.Monsters
 
         public override bool Blocking { get { return true; } }
         public override bool IsAttackTarget(PlayerObject attacker) { return true; }
-        public override bool IsAttackTarget(MonsterObject attacker) { return true; }
+        public override bool IsAttackTarget(MonsterObject attacker) 
+        {
+            if (attacker.Master == null) return false;
+
+            return true; 
+        }
 
         public override void Die() { }
         public override void ReceiveChat(string text, ChatType type) { }
@@ -43,7 +48,7 @@ namespace Server.MirObjects.Monsters
         {
             base.Process();
 
-            if (_CurrentAttacker != null && _lastAttackTime + 5000 < Envir.Time)
+            if (_currentAttacker != null && _lastAttackTime + 5000 < Envir.Time)
             {
                 OutputAverage();
                 ResetStats();
@@ -55,13 +60,13 @@ namespace Server.MirObjects.Monsters
         {
             if (attacker == null) return 0;
 
-            if (_CurrentAttacker != null && _CurrentAttacker != attacker)
+            if (_currentAttacker != null && _currentAttacker != attacker)
             {
                 OutputAverage();
                 ResetStats();
             }
 
-            _CurrentAttacker = attacker;
+            _currentAttacker = attacker;
             _hitCount++;
             _totalDamage += damage;
             _lastAttackTime = Envir.Time;
@@ -96,13 +101,13 @@ namespace Server.MirObjects.Monsters
             byte _masterMaxMC = attacker.Master.MaxMC; // max 256
             int _total = (_masterLevel * 10) + _masterMaxMC;
 
-            if (_CurrentAttacker != null && _CurrentAttacker != attacker.Master)
+            if (_currentAttacker != null && _currentAttacker != attacker.Master)
             {
                 OutputAverage();
                 ResetStats();
             }
 
-            _CurrentAttacker = (PlayerObject)attacker.Master;
+            _currentAttacker = (PlayerObject)attacker.Master;
             _hitCount++;
             _totalDamage += damage;
             _lastAttackTime = Envir.Time;
@@ -133,7 +138,7 @@ namespace Server.MirObjects.Monsters
 
         private void ResetStats()
         {
-            _CurrentAttacker = null;
+            _currentAttacker = null;
             _hitCount = 0;
             _totalDamage = 0;
             _lastAttackTime = 0;
@@ -141,9 +146,9 @@ namespace Server.MirObjects.Monsters
 
         private void OutputAverage()
         {
-            if (_CurrentAttacker == null) return;
+            if (_currentAttacker == null) return;
 
-            _CurrentAttacker.ReceiveChat((_totalDamage / _hitCount) + " Average Damage inflicted on the trainer.", ChatType.Trainer);
+            _currentAttacker.ReceiveChat((_totalDamage / _hitCount) + " Average Damage inflicted on the trainer.", ChatType.Trainer);
         }
     }
 }

@@ -685,6 +685,8 @@ public enum BuffType : byte
     Curse,
     MoonLight,
     General,
+    Exp,
+    Drop,
     Concentration, //ArcherSpells - Elemental system
     Impact,
     Magic,

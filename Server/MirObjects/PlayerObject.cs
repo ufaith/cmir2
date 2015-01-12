@@ -1683,7 +1683,7 @@ namespace Server.MirObjects
             PoisonAttack = 0;
 
             ExpRateOffset = 0;
-            DropRateOffset = 0;
+            ItemDropRateOffset = 0;
 
             MaxHP = (ushort)Math.Min(ushort.MaxValue, 14 + (Level / Settings.ClassBaseStats[(byte)Class].HpGain + Settings.ClassBaseStats[(byte)Class].HpGainRate) * Level);
 
@@ -2269,9 +2269,14 @@ namespace Server.MirObjects
                         break;
                     case BuffType.General:
                         ExpRateOffset = (float)Math.Min(float.MaxValue, ExpRateOffset + buff.Value);
-                        DropRateOffset = (float)Math.Min(float.MaxValue, DropRateOffset + buff.Value);
+                        ItemDropRateOffset = (float)Math.Min(float.MaxValue, ItemDropRateOffset + buff.Value);
                         break;
-
+                    case BuffType.Exp:
+                        ExpRateOffset = (float)Math.Min(float.MaxValue, ExpRateOffset + buff.Value);
+                        break;
+                    case BuffType.Drop:
+                        ItemDropRateOffset = (float)Math.Min(float.MaxValue, ItemDropRateOffset + buff.Value);
+                        break;
                     case BuffType.Impact:
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
                         break;
@@ -2939,28 +2944,37 @@ namespace Server.MirObjects
 
                     case "GIVESKILL":
                         if (!IsGM) return;
-                        if (parts.Length < 2) return;
+                        if (parts.Length < 3) return;
 
                         byte spellLevel = 0;
 
+                        player = this;
                         Spell skill;
-                        if (!Enum.TryParse(parts[1], true, out skill)) return;
+                        if (!Enum.TryParse(parts[2], true, out skill)) return;
 
-                        if (parts.Length > 2)
-                            spellLevel = byte.TryParse(parts[2], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
-
-                        if (Info.Magics.Any(e => e.Spell == skill))
+                        if (parts.Length > 3)
                         {
-                            Info.Magics.FirstOrDefault(e => e.Spell == skill).Level = spellLevel;
-                            ReceiveChat(string.Format("Spell {0} changed to level {1}", parts[1], spellLevel), ChatType.Hint);
+                            spellLevel = byte.TryParse(parts[3], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
+                            player = Envir.GetPlayer(parts[1]);
+
+                            if (player == null)
+                            {
+                                ReceiveChat(string.Format("Player {0} was not found.", parts[1]), ChatType.System);
+                                return;
+                            }
+                        }
+                        if (player.Info.Magics.Any(e => e.Spell == skill))
+                        {
+                            player.Info.Magics.FirstOrDefault(e => e.Spell == skill).Level = spellLevel;
+                            player.ReceiveChat(string.Format("{0}, Spell {1} changed to level {2}",parts[1], parts[2], spellLevel), ChatType.Hint);
                             return;
                         }
 
                         var magic = new UserMagic(skill) { Level = spellLevel };
-
-                        ReceiveChat(string.Format("Learned {0} at level {1}", parts[1], spellLevel), ChatType.Hint);
-                        Info.Magics.Add(magic);
-                        Enqueue(magic.GetInfo());
+                        player.ReceiveChat(string.Format("You have learned {0} at level {1}", parts[2], spellLevel), ChatType.Hint);
+                        ReceiveChat(string.Format("{0} has learned {1} at level {2}", parts[1], parts[2], spellLevel), ChatType.Hint);
+                        player.Info.Magics.Add(magic);
+                        player.Enqueue(magic.GetInfo());
                         break;
 
                     case "FIND":
@@ -4544,20 +4558,44 @@ namespace Server.MirObjects
         public void ObtainElement(bool cast)
         {
             int orbType = 0;
+            int meditateLevel = 0;
+
+            UserMagic spell = GetMagic(Spell.Meditation);
+
+            if(spell != null)
+                meditateLevel = spell.Level;
+
             int maxOrbs = (int)Settings.OrbsExpList[Settings.OrbsExpList.Count - 1];
 
             if (cast)
             {
                 ElementsLevel = (int)Settings.OrbsExpList[0];
-                HasElemental = true;
                 orbType = 1;
+                if (Settings.GatherOrbsPerLevel)//Meditation Orbs per level
+                    if (meditateLevel == 3)
+                    {
+                        Enqueue(new S.SetElemental { ObjectID = ObjectID, Enabled = true, Value = (uint)Settings.OrbsExpList[0], ElementType = 1, ExpLast = (uint)maxOrbs });
+                        Broadcast(new S.SetObjectElemental { ObjectID = ObjectID, Enabled = true, Casted = true, Value = (uint)Settings.OrbsExpList[0], ElementType = 1, ExpLast = (uint)maxOrbs });
+                        ElementsLevel = (int)Settings.OrbsExpList[1];
+                        orbType = 2;
+                    }
+
+                HasElemental = true;
             }
             else
             {
-                ElementsLevel++;
                 HasElemental = false;
-                if (ElementsLevel >= Settings.OrbsExpList[0]) HasElemental = true;
+                ElementsLevel++;
 
+                if (Settings.GatherOrbsPerLevel)//Meditation Orbs per level
+                    if (ElementsLevel > Settings.OrbsExpList[GetMagic(Spell.Meditation).Level])
+                    {
+                        HasElemental = true;
+                        ElementsLevel = (int)Settings.OrbsExpList[GetMagic(Spell.Meditation).Level];
+                        return;
+                    }
+
+                if (ElementsLevel >= Settings.OrbsExpList[0]) HasElemental = true;
                 for (int i = 0; i <= Settings.OrbsExpList.Count - 1; i++)
                 {
                     if (Settings.OrbsExpList[i] != ElementsLevel) continue;
@@ -4569,6 +4607,7 @@ namespace Server.MirObjects
             Enqueue(new S.SetElemental { ObjectID = ObjectID, Enabled = HasElemental, Value = (uint)ElementsLevel, ElementType = (uint)orbType, ExpLast = (uint)maxOrbs });
             Broadcast(new S.SetObjectElemental { ObjectID = ObjectID, Enabled = HasElemental, Casted = cast, Value = (uint)ElementsLevel, ElementType = (uint)orbType, ExpLast = (uint)maxOrbs });
         }
+
         public int GetElementalOrbCount()
         {
             int OrbCount = 0;
@@ -5478,6 +5517,23 @@ namespace Server.MirObjects
             CellTime = Envir.Time + 500;
         }
 
+        public void DoKnockback(MapObject target, UserMagic magic)//ElementalShot - knockback
+        {
+            Cell cell = CurrentMap.GetCell(target.CurrentLocation);
+            if (!cell.Valid || cell.Objects == null) return;
+
+            if (target.CurrentLocation.Y < 0 || target.CurrentLocation.Y >= CurrentMap.Height || target.CurrentLocation.X < 0 || target.CurrentLocation.X >= CurrentMap.Height) return;
+
+            if (target.Race != ObjectType.Monster && target.Race != ObjectType.Player) return;
+            if (!target.IsAttackTarget(this) || target.Level >= Level) return;
+
+            if (Envir.Random.Next(20) >= 6 + magic.Level * 3 + Level - target.Level) return;
+            int distance = 1 + Math.Max(0, magic.Level - 1) + Envir.Random.Next(2);
+            MirDirection dir = Functions.DirectionFromPoint(CurrentLocation, target.CurrentLocation);
+
+            target.Pushed(this, dir, distance);
+        }
+
         private void CompleteMagic(IList<object> data)
         {
             UserMagic magic = (UserMagic)data[0];
@@ -5812,16 +5868,21 @@ namespace Server.MirObjects
                     ElementalBarrierTime = Envir.Time + ((int)data[1] + (int)magic.Level) * 1000;
                     CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.ElementBarrierUp }, CurrentLocation);
                     break;
+
                 case Spell.ElementalShot://ArcherSpells - Elemental system
                     //destroy orbs
                     ElementsLevel = 0;
                     ObtainElement(false);//update and send to client
-                    //
+                   
                     value = (int)data[1];
                     target = (MapObject)data[2];
 
                     if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null) return;
-                    if (target.Attacked(this, value, DefenceType.MAC, false) > 0) LevelMagic(magic);
+                    if (target.Attacked(this, value, DefenceType.MAC, false) > 0)
+                    {
+                        DoKnockback(target, magic);//ElementalShot - Knockback
+                        LevelMagic(magic);
+                    }
                     break;
 
                 #endregion
