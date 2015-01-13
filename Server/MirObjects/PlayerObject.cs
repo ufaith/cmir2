@@ -2950,11 +2950,15 @@ namespace Server.MirObjects
 
                         player = this;
                         Spell skill;
-                        if (!Enum.TryParse(parts[2], true, out skill)) return;
+
+                        if (!Enum.TryParse(parts.Length > 3 ? parts[2] : parts[1], true, out skill)) return;
+
+                        if (skill == Spell.None) return;
+
+                        spellLevel = byte.TryParse(parts.Length > 3 ? parts[3] : parts[2], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
 
                         if (parts.Length > 3)
                         {
-                            spellLevel = byte.TryParse(parts[3], out spellLevel) ? Math.Min((byte)3, spellLevel) : (byte)0;
                             player = Envir.GetPlayer(parts[1]);
 
                             if (player == null)
@@ -2963,16 +2967,22 @@ namespace Server.MirObjects
                                 return;
                             }
                         }
+
                         if (player.Info.Magics.Any(e => e.Spell == skill))
                         {
                             player.Info.Magics.FirstOrDefault(e => e.Spell == skill).Level = spellLevel;
-                            player.ReceiveChat(string.Format("{0}, Spell {1} changed to level {2}",parts[1], parts[2], spellLevel), ChatType.Hint);
+                            player.ReceiveChat(string.Format("Spell {0} changed to level {1}", skill.ToString(), spellLevel), ChatType.Hint);
                             return;
                         }
 
                         var magic = new UserMagic(skill) { Level = spellLevel };
-                        player.ReceiveChat(string.Format("You have learned {0} at level {1}", parts[2], spellLevel), ChatType.Hint);
-                        ReceiveChat(string.Format("{0} has learned {1} at level {2}", parts[1], parts[2], spellLevel), ChatType.Hint);
+                        player.ReceiveChat(string.Format("You have learned {0} at level {1}", skill.ToString(), spellLevel), ChatType.Hint);
+
+                        if (player != this)
+                        {
+                            ReceiveChat(string.Format("{0} has learned {1} at level {2}", player.Name, skill.ToString(), spellLevel), ChatType.Hint);
+                        }
+
                         player.Info.Magics.Add(magic);
                         player.Enqueue(magic.GetInfo());
                         break;
