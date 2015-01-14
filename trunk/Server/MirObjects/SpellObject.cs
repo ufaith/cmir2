@@ -35,6 +35,9 @@ namespace Server.MirObjects
         public Point CastLocation;
         public bool Show;
 
+        public int ExplosiveTrapID;//ArcherSpells - Explosive Trap
+        public bool DetonatedTrap;//ArcherSpells - Explosive Trap
+
         public override uint Health
         {
             get { throw new NotSupportedException(); }
@@ -49,7 +52,7 @@ namespace Server.MirObjects
         {
             if (Caster != null && Caster.Node == null) Caster = null;
 
-            if (Envir.Time > ExpireTime || (Spell == Spell.FireWall && Caster == null) || (Spell == Spell.TrapHexagon && Target != null))
+            if (Envir.Time > ExpireTime || ((Spell == Spell.FireWall || Spell == Spell.ExplosiveTrap) && Caster == null) || (Spell == Spell.TrapHexagon && Target != null))
             {
                 if (Spell == Spell.TrapHexagon && Target != null)
                 {
@@ -70,6 +73,13 @@ namespace Server.MirObjects
             }
 
             if (Spell == Spell.Reincarnation && !Caster.ActiveReincarnation)
+            {
+                CurrentMap.RemoveObject(this);
+                Despawn();
+                return;
+            }
+
+            if (Spell == Spell.ExplosiveTrap && FindObject(Caster.ObjectID, 20) == null && Caster != null)//ArcherSpells - Explosive Trap
             {
                 CurrentMap.RemoveObject(this);
                 Despawn();
@@ -140,7 +150,22 @@ namespace Server.MirObjects
                     if (!ob.IsAttackTarget(Caster)) return;
                     ob.Attacked(Caster, Value, DefenceType.MACAgility, false);
                     break;
+                case Spell.ExplosiveTrap://ArcherSpells - Explosive Trap
+                    if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) return;
+                    if (ob.Dead) return;
+                    if (!ob.IsAttackTarget(Caster)) return;
+                    if (DetonatedTrap) return;//make sure explosion happens only once
+                    DetonateTrapNow();
+                    ob.Attacked(Caster, Value, DefenceType.MAC, false);
+                    break;
             }
+        }
+
+        public void DetonateTrapNow()//ArcherSpells - Explosive Trap
+        {
+            DetonatedTrap = true;
+            Broadcast(GetInfo());
+            ExpireTime = Envir.Time + 1000;
         }
 
         public override void SetOperateTime()
@@ -243,6 +268,15 @@ namespace Server.MirObjects
                         Spell = Spell,
                         Direction = Direction
                     };
+                case Spell.ExplosiveTrap://ArcherSpells - Explosive Trap
+                    return new S.ObjectSpell
+                    {
+                        ObjectID = ObjectID,
+                        Location = CurrentLocation,
+                        Spell = Spell,
+                        Direction = Direction,
+                        Param = DetonatedTrap
+                    };
 
                 default:
                     return new S.ObjectSpell
@@ -281,6 +315,9 @@ namespace Server.MirObjects
                 Caster.ActiveReincarnation = false;
                 Caster.Enqueue(new S.CancelReincarnation { });
             }
+
+            if (Spell == Spell.ExplosiveTrap && Caster != null)//ArcherSpells - Explosive Trap
+                Caster.ExplosiveTrapDetonated(ExplosiveTrapID);
         }
     }
 }

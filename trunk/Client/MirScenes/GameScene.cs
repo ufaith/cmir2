@@ -1169,6 +1169,9 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.SetObjectElemental://ArcherSpells - Elemental system
                     SetObjectElemental((S.SetObjectElemental)p);
                     break;
+                case (short)ServerPacketIds.RemoveDelayedExplosion://ArcherSpells - DelayedExplosion
+                    RemoveDelayedExplosion((S.RemoveDelayedExplosion)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -2859,6 +2862,21 @@ namespace Client.MirScenes
                         player.Effects.Add(player.ElementalBarrierEffect = new Effect(Libraries.Magic3, 1910, 7, 1400, ob));
                         SoundManager.PlaySound(20000 + 131 * 10 + 5);
                         break;
+                    case SpellEffect.DelayedExplosion://ArcherSpells - DelayedExplosion
+                        int effectid = DelayedExplosionEffect.GetOwnerEffectID(ob.ObjectID);
+                        if (effectid < 0)
+                            ob.Effects.Add(new DelayedExplosionEffect(Libraries.Magic3, 1590, 8, 1200, ob, true, 0, 0));
+                        else if (effectid >= 0)
+                        {
+                            if (DelayedExplosionEffect.effectlist[effectid].stage < p.EffectType)
+                            {
+                                DelayedExplosionEffect.effectlist[effectid].Remove();
+                                ob.Effects.Add(new DelayedExplosionEffect(Libraries.Magic3, 1590 + ((int)p.EffectType * 10), 8, 1200, ob, true, (int)p.EffectType, 0));
+                            }
+                        }
+                        //else
+                        //    ob.Effects.Add(new DelayedExplosionEffect(Libraries.Magic3, 1590 + ((int)p.EffectType * 10), 8, 1200, ob, true, (int)p.EffectType, 0));
+                        break;
                 }
                 return;
             }
@@ -3370,6 +3388,15 @@ namespace Client.MirScenes
                 if (p.Enabled && p.ElementType > 0)
                     ((PlayerObject)ob).Effects.Add(new ElementsEffect(Libraries.Magic3, 1630 + ((elementType - 1) * 10), 10, 10 * 100, ob, true, 1 + (elementType - 1), maxExp));
             }
+        }
+
+        private void RemoveDelayedExplosion(S.RemoveDelayedExplosion p)//ArcherSpells - DelaydeExplosion
+        {
+            //if (p.ObjectID == User.ObjectID) return;
+
+            int effectid = DelayedExplosionEffect.GetOwnerEffectID(p.ObjectID);
+            if (effectid >= 0)
+                DelayedExplosionEffect.effectlist[effectid].Remove();
         }
 
         private void NPCConsign()
@@ -6727,6 +6754,7 @@ namespace Client.MirScenes
                 case Spell.StraightShot:
                 case Spell.DoubleShot:
                 case Spell.ElementalShot:
+                case Spell.DelayedExplosion:
                     if (!User.HasClassWeapon)
                     {
                         GameScene.Scene.OutputMessage("You must be wearing a bow to perform this skill.");

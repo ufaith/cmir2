@@ -2493,16 +2493,19 @@ namespace ServerPackets
 
         public uint ObjectID;
         public SpellEffect Effect;
-        
+        public uint EffectType;
+
         protected override void ReadPacket(BinaryReader reader)
         {
             ObjectID = reader.ReadUInt32();
             Effect = (SpellEffect) reader.ReadByte();
+            EffectType = reader.ReadUInt32();
         }
         protected override void WritePacket(BinaryWriter writer)
         {
             writer.Write(ObjectID);
             writer.Write((byte) Effect);
+            writer.Write(EffectType);
         }
     }
     public sealed class RangeAttack : Packet //ArcherTest
@@ -2912,7 +2915,7 @@ namespace ServerPackets
         public Point Location;
         public Spell Spell;
         public MirDirection Direction;
-
+        public bool Param;
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -2920,6 +2923,7 @@ namespace ServerPackets
             Location = new Point(reader.ReadInt32(), reader.ReadInt32());
             Spell = (Spell) reader.ReadByte();
             Direction = (MirDirection) reader.ReadByte();
+            Param = reader.ReadBoolean();
         }
 
         protected override void WritePacket(BinaryWriter writer)
@@ -2929,6 +2933,7 @@ namespace ServerPackets
             writer.Write(Location.Y);
             writer.Write((byte) Spell);
             writer.Write((byte)Direction);
+            writer.Write(Param);
         }
     }
     public sealed class UserDash : Packet
@@ -3033,6 +3038,22 @@ namespace ServerPackets
             writer.Write((byte)Direction);
         }
     }
+    public sealed class RemoveDelayedExplosion : Packet//ArcherSpells - DelayedExplosion
+    {
+        public override short Index { get { return (short)ServerPacketIds.RemoveDelayedExplosion; } }
+
+        public uint ObjectID;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+        }
+    }
+
     public sealed class NPCConsign : Packet
     {
         public override short Index { get { return (short)ServerPacketIds.NPCConsign; } }

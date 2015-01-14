@@ -212,6 +212,8 @@ namespace Server.MirObjects
 
         private int _runCounter, _fishCounter;
 
+        public MapObject[] ArcherTrapObjectsArray = new MapObject[4];
+
         public NPCObject DefaultNPC
         {
             get
@@ -413,6 +415,14 @@ namespace Server.MirObjects
                 ElementalBarrierLv = 0;
                 ElementalBarrierTime = 0;
                 CurrentMap.Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.ElementBarrierDown }, CurrentLocation);
+            }
+
+            for (int i = 0; i <= 3; i++)//ArcherSpells - Explosive Trap     Self destruct when out of range (in this case 15 squares)
+            {
+                if (ArcherTrapObjectsArray[i] == null) continue;
+                if (FindObject(ArcherTrapObjectsArray[i].ObjectID, 15) != null) continue;
+                if (((SpellObject)ArcherTrapObjectsArray[i]).DetonatedTrap) continue;
+                ((SpellObject)ArcherTrapObjectsArray[i]).DetonateTrapNow();
             }
 
             if (FlamingSword && Envir.Time >= FlamingSwordTime * 2)
@@ -725,6 +735,19 @@ namespace Server.MirObjects
                         if (Dead) break;
                         RegenTime = Envir.Time + RegenDelay;
                     }
+
+                    if (poison.PType == PoisonType.DelayedExplosion)//ArcherSpells - DelayedExplosion
+                    {
+                        if (Envir.Time > ExplosionInflictedTime) ExplosionInflictedStage++;
+
+                        if (!ProcessDelayedExplosion(poison))
+                        {
+                            ExplosionInflictedStage = 0;
+                            ExplosionInflictedTime = 0;
+                            PoisonList.RemoveAt(i);
+                            continue;
+                        }
+                    }
                 }
 
                 switch (poison.PType)
@@ -749,6 +772,45 @@ namespace Server.MirObjects
             CurrentPoison = type;
         }
 
+        private bool ProcessDelayedExplosion(Poison poison)//ArcherSpells - DelayedExplosion
+        {
+            if (Dead) return false;
+
+            if (ExplosionInflictedStage == 0)
+            {
+                Enqueue(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 0 });
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 0 });
+                return true;
+            }
+            if (ExplosionInflictedStage == 1)
+            {
+                if (Envir.Time > ExplosionInflictedTime)
+                    ExplosionInflictedTime = poison.TickTime + 3000;
+                Enqueue(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 1 });
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 1 });
+                return true;
+            }
+            if (ExplosionInflictedStage == 2)
+            {
+                Enqueue(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 2 });
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 2 });
+                if (poison.Owner != null)
+                {
+                    switch (poison.Owner.Race)
+                    {
+                        case ObjectType.Player:
+                            Attacked((PlayerObject)poison.Owner, poison.Value, DefenceType.MAC, false);
+                            break;
+                        case ObjectType.Monster://this is in place so it could be used by mobs if one day someone chooses to
+                            Attacked((MonsterObject)poison.Owner, poison.Value, DefenceType.MAC);
+                            break;
+                    }
+                    LastHitter = poison.Owner;
+                }
+                return false;
+            }
+            return false;
+        }
 
         public override void Process(DelayedAction action)
         {
@@ -4300,6 +4362,12 @@ namespace Server.MirObjects
                 case Spell.BackStep://ArcherSpells - Backstep
                     BackStep(magic);
                     return;
+                case Spell.ExplosiveTrap://ArcherSpells - Explosive Trap
+                    ExplosiveTrap(magic, Front);
+                    break;
+                case Spell.DelayedExplosion://Archerspells - DelayedExplosion
+                    if (!DelayedExplosion(target, magic)) targetID = 0;
+                    break;
                 case Spell.Concentration://ArcherSpells - Elemental system
                     Concentration(magic);
                     break;
@@ -4644,6 +4712,45 @@ namespace Server.MirObjects
             return 0;
         }
         //Elemental system END
+
+        private bool DelayedExplosion(MapObject target, UserMagic magic)//ArcherSpells - DelayedExplosion
+        {
+            if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return false;
+
+            int power = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+            int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, magic, power, target);
+            ActionList.Add(action);
+            return true;
+        }
+
+        private void ExplosiveTrap(UserMagic magic, Point location)//ArcherSpells - Explosive Trap
+        {
+            int trapCount = 0;
+            for (int i = 0; i <= 3; i++)
+                if (ArcherTrapObjectsArray[i] != null) trapCount++;
+            if (trapCount >= magic.Level + 1) return;//max 4 traps
+
+            int freeTrapSpot = -1;
+            for (int i = 0; i <= 3; i++)
+                if (ArcherTrapObjectsArray[i] == null)
+                {
+                    freeTrapSpot = i;
+                    break;
+                }
+            if (freeTrapSpot == -1) return;
+
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, freeTrapSpot);
+            CurrentMap.ActionList.Add(action);
+        }
+        public void ExplosiveTrapDetonated(int obIDX)//ArcherSpells - Explosive Trap
+        {
+            if (ArcherTrapObjectsArray[obIDX] == null) return;
+            ArcherTrapObjectsArray[obIDX] = null;
+        }
+
 
         private bool Fireball(MapObject target, UserMagic magic)
         {
@@ -5769,8 +5876,15 @@ namespace Server.MirObjects
                     if (target == null || !target.IsFriendlyTarget(this) || target.CurrentMap != CurrentMap || target.Node == null) return;
                     if (Envir.Random.Next(4) > magic.Level || target.PoisonList.Count == 0) return;
 
+                    target.ExplosionInflictedTime = 0;//ArcherSpells - DelayedExplosion
+                    target.ExplosionInflictedStage = 0;//ArcherSpells - DelayedExplosion
+
                     target.PoisonList.Clear();
                     target.OperateTime = 0;
+
+                    if(target.ObjectID == ObjectID)
+                        Enqueue(new S.RemoveDelayedExplosion { ObjectID = target.ObjectID });//ArcherSpells - DelayedExplosion
+                    target.Broadcast(new S.RemoveDelayedExplosion { ObjectID = target.ObjectID });//ArcherSpells - DelayedExplosion
 
                     LevelMagic(magic);
                     break;
@@ -5896,6 +6010,30 @@ namespace Server.MirObjects
                     break;
 
                 #endregion
+
+                #region DelayedExplosion            ArcherSpells - DelayedExplosion
+
+                case Spell.DelayedExplosion:
+                    value = (int)data[1];
+                    target = (MapObject)data[2];
+
+                    if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null) return;
+                    if (target.Attacked(this, value, DefenceType.MAC, false) > 0) LevelMagic(magic);
+
+                    target.ApplyPoison(new Poison
+                    {
+                        Duration = (value * 2) + (magic.Level + 1) * 7,
+                        Owner = this,
+                        PType = PoisonType.DelayedExplosion,
+                        TickSpeed = 2000,
+                        Value = value
+                    }, this);
+
+                    target.OperateTime = 0;
+                    break;
+
+                #endregion
+
 
             }
 
@@ -6563,11 +6701,22 @@ namespace Server.MirObjects
                 if (PoisonList[i].PType != p.PType) continue;
                 if ((PoisonList[i].PType == PoisonType.Green) && (PoisonList[i].Value > p.Value)) return;//cant cast weak poison to cancel out strong poison
                 if ((PoisonList[i].PType != PoisonType.Green) && ((PoisonList[i].Duration - PoisonList[i].Time) > p.Duration)) return;//cant cast 1 second poison to make a 1minute poison go away!
+                if (p.PType == PoisonType.DelayedExplosion) return;
                 ReceiveChat("You have been poisoned.", ChatType.System);
                 PoisonList[i] = p;
                 return;
             }
-            ReceiveChat("You have been poisoned.", ChatType.System);
+
+            if (p.PType == PoisonType.DelayedExplosion)//ArcherSpells - DelayedExplosion
+            {
+                ExplosionInflictedTime = Envir.Time + 4000;
+                Enqueue(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion });
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion });
+                ReceiveChat("You are a walking explosive.", ChatType.System);
+            }
+            else
+                ReceiveChat("You have been poisoned.", ChatType.System);
+
             PoisonList.Add(p);
         }
         public override void AddBuff(Buff b)

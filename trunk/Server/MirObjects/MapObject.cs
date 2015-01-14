@@ -20,7 +20,10 @@ namespace Server.MirObjects
         public abstract ObjectType Race { get; }
 
         public abstract string Name { get; set; }
-        
+
+        public long ExplosionInflictedTime;//ArcherSpells - DelayedExplosion
+        public int ExplosionInflictedStage;//ArcherSpells - DelayedExplosion
+
         //Position
         private Map _currentMap;
         public Map CurrentMap
