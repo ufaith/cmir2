@@ -433,7 +433,8 @@ public enum PoisonType : byte
     Slow,
     Frozen,
     Stun,
-    Paralysis
+    Paralysis,
+    DelayedExplosion
 }
 [Flags]
 [Obfuscation(Feature = "renaming", Exclude = true)]
@@ -667,6 +668,7 @@ public enum SpellEffect : byte
     ElementBarrierDown,
     FuryUp,
     FuryDown,
+    DelayedExplosion,
 }
 
 public enum BuffType : byte
@@ -876,6 +878,7 @@ public enum ServerPacketIds : short
     SetObjectConcentration,//ArcherSpells - Elemental system
     SetElemental,//ArcherSpells - Elemental system
     SetObjectElemental,//ArcherSpells - Elemental system
+    RemoveDelayedExplosion,
 }
 
 public enum ClientPacketIds : short
@@ -3151,6 +3154,8 @@ public abstract class Packet
                 return new S.SetElemental();
             case (short)ServerPacketIds.SetObjectElemental://ArcherSpells - Elemental system
                 return new S.SetObjectElemental();
+            case (short)ServerPacketIds.RemoveDelayedExplosion://ArcherSpells - DelayedExplosion
+                return new S.RemoveDelayedExplosion();
             default:
                 throw new NotImplementedException();
         }

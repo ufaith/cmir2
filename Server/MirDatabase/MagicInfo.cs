@@ -377,6 +377,10 @@ namespace Server.MirDatabase
                     return 7;
                 case Spell.DoubleShot:
                     return 4;
+                case Spell.ExplosiveTrap://ArcherSpells - Explosive Trap
+                    return 30;
+                case Spell.DelayedExplosion://ArcherSpells - DelayedExplosion
+                    return 30;
                 case Spell.ElementalShot://ArcherSpells - Elemental system
                     return 6;
 
@@ -432,6 +436,10 @@ namespace Server.MirDatabase
                     return 3;
                 case Spell.DoubleShot:
                     return 2;
+                case Spell.ExplosiveTrap://ArcherSpells - Explosive Trap
+                    return 15;
+                case Spell.DelayedExplosion://ArcherSpells - DelayedExplosion
+                    return 15;
                 case Spell.ElementalShot://ArcherSpells - Elemental system
                     return 3;
                 case Spell.ElementalBarrier://ArcherSpells - Elemental system

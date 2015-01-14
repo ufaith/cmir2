@@ -852,6 +852,19 @@ namespace Server.MirObjects
                         if (Dead) break;
                         RegenTime = Envir.Time + RegenDelay;
                     }
+
+                    if (poison.PType == PoisonType.DelayedExplosion)//ArcherSpells - DelayedExplosion
+                    {
+                        if (Envir.Time > ExplosionInflictedTime) ExplosionInflictedStage++;
+
+                        if (!ProcessDelayedExplosion(poison))
+                        {
+                            ExplosionInflictedStage = 0;
+                            ExplosionInflictedTime = 0;
+                            PoisonList.RemoveAt(i);
+                            continue;
+                        }
+                    }
                 }
 
                 switch (poison.PType)
@@ -882,6 +895,44 @@ namespace Server.MirObjects
             CurrentPoison = type;
             Broadcast(new S.ObjectPoisoned { ObjectID = ObjectID, Poison = type });
         }
+
+        private bool ProcessDelayedExplosion(Poison poison)//ArcherSpells - DelayedExplosion
+        {
+            if (Dead) return false;
+
+            if (ExplosionInflictedStage == 0)
+            {
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 0 });
+                return true;
+            }
+            if (ExplosionInflictedStage == 1)
+            {
+                if (Envir.Time > ExplosionInflictedTime)
+                    ExplosionInflictedTime = poison.TickTime + 3000;
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 1 });
+                return true;
+            }
+            if (ExplosionInflictedStage == 2)
+            {
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion, EffectType = 2 });
+                if (poison.Owner != null)
+                {
+                    switch (poison.Owner.Race)
+                    {
+                        case ObjectType.Player:
+                            Attacked((PlayerObject)poison.Owner, poison.Value, DefenceType.MAC, false);
+                            break;
+                        case ObjectType.Monster://this is in place so it could be used by mobs if one day someone chooses to
+                            Attacked((MonsterObject)poison.Owner, poison.Value, DefenceType.MAC);
+                            break;
+                    }
+                    LastHitter = poison.Owner;
+                }
+                return false;
+            }
+            return false;
+        }
+
 
         private void ProcessBuffs()
         {
@@ -1682,8 +1733,15 @@ namespace Server.MirObjects
                 if (PoisonList[i].PType != p.PType) continue;
                 if ((PoisonList[i].PType == PoisonType.Green) && (PoisonList[i].Value > p.Value)) return;//cant cast weak poison to cancel out strong poison
                 if ((PoisonList[i].PType != PoisonType.Green) && ((PoisonList[i].Duration - PoisonList[i].Time) > p.Duration)) return;//cant cast 1 second poison to make a 1minute poison go away!
+                if (p.PType == PoisonType.DelayedExplosion) return;
                 PoisonList[i] = p;
                 return;
+            }
+
+            if (p.PType == PoisonType.DelayedExplosion)//ArcherSpells - DelayedExplosion
+            {
+                ExplosionInflictedTime = Envir.Time + 4000;
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.DelayedExplosion });
             }
 
             PoisonList.Add(p);

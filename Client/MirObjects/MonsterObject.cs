@@ -478,6 +478,9 @@ namespace Client.MirObjects
                 case PoisonType.Paralysis:
                     DrawColour = Color.Gray;
                     break;
+                case PoisonType.DelayedExplosion://ArcherSpells - DelayedExplosion
+                    DrawColour = Color.Orange;
+                    break;
             }
 
 

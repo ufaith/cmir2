@@ -1460,6 +1460,51 @@ namespace Server.MirEnvir
 
                 #endregion
 
+                #region ExplosiveTrap           ArcherSpells - Explosive Trap
+
+                case Spell.ExplosiveTrap:
+                    value = (int)data[2];
+                    front = (Point)data[3];
+                    int trapID = (int)data[4];
+
+                    if (ValidPoint(front))
+                    {
+                        cell = GetCell(front);
+
+                        bool cast = true;
+                        if (cell.Objects != null)
+                            for (int o = 0; o < cell.Objects.Count; o++)
+                            {
+                                MapObject target = cell.Objects[o];
+                                if (target.Race != ObjectType.Spell || (((SpellObject)target).Spell != Spell.FireWall && ((SpellObject)target).Spell != Spell.ExplosiveTrap)) continue;
+
+                                cast = false;
+                                break;
+                            }
+
+                        if (cast)
+                        {
+                            player.LevelMagic(magic);
+                            SpellObject ob = new SpellObject
+                            {
+                                Spell = Spell.ExplosiveTrap,
+                                Value = value,
+                                ExpireTime = Envir.Time + (10 + value / 2) * 1000,
+                                TickSpeed = 500,
+                                Caster = player,
+                                CurrentLocation = front,
+                                CurrentMap = this,
+                                ExplosiveTrapID = trapID
+                            };
+                            AddObject(ob);
+                            ob.Spawned();
+                            player.ArcherTrapObjectsArray[trapID] = ob;
+                        }
+                    }
+                    break;
+
+                #endregion
+
                 #region Plague
 
                 case Spell.Plague:

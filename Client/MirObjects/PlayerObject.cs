@@ -669,6 +669,9 @@ namespace Client.MirObjects
                 case PoisonType.Paralysis:
                     DrawColour = Color.Gray;
                     break;
+                case PoisonType.DelayedExplosion://ArcherSpells - DelayedExplosion
+                    DrawColour = Color.Orange;
+                    break;
             }
 
 
@@ -845,7 +848,7 @@ namespace Client.MirObjects
                 }
 
 
-
+                bool ArcherLayTrap = false;
                 switch (CurrentAction)
                 {
                     case MirAction.Pushed:
@@ -920,6 +923,28 @@ namespace Client.MirObjects
                                     GameScene.SpellTime = CMain.Time + 500; //Spell Delay
                                 }
                                 break;
+                            case Spell.ExplosiveTrap://ArcherSpells - Explosive Trap
+                                Frames.Frames.TryGetValue(MirAction.Harvest, out Frame);
+                                CurrentAction = MirAction.Harvest;
+                                ArcherLayTrap = true;
+                                if (this == User)
+                                {
+                                    uint targetID = (uint)action.Params[1];
+                                    Point location = (Point)action.Params[2];
+                                    Network.Enqueue(new C.Magic { Spell = Spell, Direction = Direction, TargetID = targetID, Location = location });
+                                    MapControl.NextAction = CMain.Time + 1000;
+                                    GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
+                                }
+                                break;
+                            case Spell.DelayedExplosion://ArcherSpells - DelayedExplosion
+                                Frames.Frames.TryGetValue(MirAction.AttackRange2, out Frame);
+                                CurrentAction = MirAction.AttackRange2;
+                                if (this == User)
+                                {
+                                    MapControl.NextAction = CMain.Time + 1000;
+                                    GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
+                                }
+                                break;
                             case Spell.BackStep://ArcherSpells - Backstep
                                 int sLevel = (byte)action.Params[3];
                                 GetBackStepDistance(sLevel);
@@ -947,6 +972,7 @@ namespace Client.MirObjects
                                 else Frames.Frames.TryGetValue(CurrentAction, out Frame);
                                 if (ElementCasted) ElementCasted = false;
                                 break;
+
                             default:
                                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
                                 break;
@@ -1130,8 +1156,16 @@ namespace Client.MirObjects
                             MapControl.NextAction = CMain.Time + 2500;
                             break;
                         case MirAction.Harvest:
-                            Network.Enqueue(new C.Harvest { Direction = Direction });
-                            MapControl.NextAction = CMain.Time + 2500;
+                            if (ArcherLayTrap)//ArcherSpells - Explosive Trap
+                            {
+                                ArcherLayTrap = false;
+                                SoundManager.PlaySound(20000 + 124 * 10);
+                            }
+                            else
+                            {
+                                Network.Enqueue(new C.Harvest { Direction = Direction });
+                                MapControl.NextAction = CMain.Time + 2500;
+                            }
                             break;
 
                     }
@@ -2185,6 +2219,24 @@ namespace Client.MirObjects
                                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 0);//sound M128-0
                                                 break;
                                         }
+                                    break;
+
+                                case Spell.DelayedExplosion://ArcherSpells - DelayedExplosion
+                                    switch (FrameIndex)
+                                    {
+                                        case 5:
+                                            missile = CreateProjectile(1030, Libraries.Magic3, true, 5, 30, 5);//normal arrow
+                                            StanceTime = CMain.Time + StanceDelay;
+                                            SoundManager.PlaySound(20000 + 121 * 10);
+                                            if (missile.Target != null)
+                                            {
+                                                missile.Complete += (o, e) =>
+                                                {
+                                                    SoundManager.PlaySound(20000 + 121 * 10 + 2);
+                                                };
+                                            }
+                                            break;
+                                    }
                                     break;
                             }
                         }
