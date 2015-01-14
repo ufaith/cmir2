@@ -6092,15 +6092,15 @@ namespace Server.MirObjects
 
                 CurrentMap.RemoveObject(this);
                 Broadcast(new S.ObjectRemove { ObjectID = ObjectID });
-
-                ActionList.Add(new DelayedAction(DelayedType.MapMovement, Envir.Time + 500, temp, info.Destination, CurrentMap, CurrentLocation));
-
+                //ActionList.Add(new DelayedAction(DelayedType.MapMovement, Envir.Time + 500, temp, info.Destination, CurrentMap, CurrentLocation));
+                CompleteMapMovement(temp, info.Destination, CurrentMap, CurrentLocation);
                 return true;
             }
 
             return false;
         }
-        private void CompleteMapMovement(IList<object> data)
+        private void CompleteMapMovement(params object[] data)
+        //private void CompleteMapMovement(IList<object> data)
         {
             if (this == null) return;
             Map temp = (Map)data[0];
