@@ -1321,7 +1321,6 @@ namespace Client.MirScenes
         {
             if (MapControl != null && !MapControl.IsDisposed)
                 MapControl.Dispose();
-
             MapControl = new MapControl { FileName = Path.Combine(Settings.MapPath, p.FileName + ".map"), Title = p.Title, MiniMap = p.MiniMap, BigMap = p.BigMap, Lights = p.Lights, Lightning = p.Lightning, Fire = p.Fire, MapDarkLight = p.MapDarkLight };
             MapControl.LoadMap();
             InsertControl(0, MapControl);
@@ -2479,7 +2478,6 @@ namespace Client.MirScenes
             MapControl.Lights = p.Lights;
             MapControl.MapDarkLight = p.MapDarkLight;
             MapControl.LoadMap();
-
             MapControl.NextAction = 0;
 
             User.CurrentLocation = p.Location;
@@ -5954,7 +5952,7 @@ namespace Client.MirScenes
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x <= 0) continue;
+                    if (x < 0) continue;
                     if (x >= Width) break;
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X; //Moving OffSet
 
@@ -5978,7 +5976,7 @@ namespace Client.MirScenes
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x <= 0) continue;
+                    if (x < 0) continue;
                     if (x >= Width) break;
                     drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X; //Moving OffSet
 
@@ -6009,7 +6007,7 @@ namespace Client.MirScenes
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x <= 0) continue;
+                    if (x < 0) continue;
                     if (x >= Width) break;
                     int drawX = (x - User.Movement.X + OffSetX) * CellWidth - OffSetX + User.OffSetMove.X;
                     int index;
@@ -6099,7 +6097,7 @@ namespace Client.MirScenes
 
                 for (int x = User.Movement.X - ViewRangeX; x <= User.Movement.X + ViewRangeX; x++)
                 {
-                    if (x <= 0) continue;
+                    if (x < 0) continue;
                     if (x >= Width) break;
                     M2CellInfo[x, y].DrawObjects();
                 }
