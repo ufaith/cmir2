@@ -122,6 +122,15 @@ namespace Server.MirEnvir
             LinkedListNode<MapObject> current = null;
 
             StartEnvir();
+            if (StartPoints.Count == 0)
+            {
+                SMain.Enqueue("Cannot start server without start points");
+                StopEnvir();
+                _thread = null;
+                Stop();                
+                return;
+            }
+
             StartNetwork();
 
             try
