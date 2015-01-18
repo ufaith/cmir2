@@ -122,7 +122,7 @@ namespace Client.MirScenes
         public List<OutPutMessage> OutputMessages = new List<OutPutMessage>();
 
         public List<MirImageControl> BuffList = new List<MirImageControl>();
-        public static long PoisonCloudTime, SlashingBurstTime, FuryCoolTime;
+        public static long PoisonCloudTime, SlashingBurstTime, FuryCoolTime, TrapCoolTime, SwiftFeetTime;
 
         public GameScene()
         {
@@ -532,6 +532,8 @@ namespace Client.MirScenes
             {
                 case Spell.Fencing:
                 case Spell.FatalSword:
+                case Spell.MPEater:
+                case Spell.Hemorrhage:
                 case Spell.SpiritSword:
                 case Spell.Slaying:
                 case Spell.Focus:
@@ -1172,6 +1174,9 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.RemoveDelayedExplosion://ArcherSpells - DelayedExplosion
                     RemoveDelayedExplosion((S.RemoveDelayedExplosion)p);
                     break;
+                case (short)ServerPacketIds.ObjectDeco:
+                    ObjectDeco((S.ObjectDeco)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1274,6 +1279,8 @@ namespace Client.MirScenes
                     return 884;
                 case BuffType.Haste:
                     return 880;
+                case BuffType.SwiftFeet:
+                    return 881;
                 case BuffType.Fury:
                     return 868;
                 case BuffType.LightBody:
@@ -1291,6 +1298,8 @@ namespace Client.MirScenes
                 case BuffType.Curse:
                     return 892;
                 case BuffType.MoonLight:
+                    return 884;
+                case BuffType.DarkBody:
                     return 884;
                 case BuffType.General:
                     return 903;
@@ -2322,15 +2331,20 @@ namespace Client.MirScenes
                 MapObject ob = MapControl.Objects[i];
                 if (ob.ObjectID != p.ObjectID) continue;
 
-                if (p.Type == 0)
+                switch(p.Type)
                 {
-                    ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Die, Direction = p.Direction, Location = p.Location });
-                    ob.Dead = true;
-                }
-                else
-                {
-                    MapControl.Effects.Add(new Effect(Libraries.Magic2, 690, 10, 1000, ob.CurrentLocation));
-                    ob.Remove();
+                    default:
+                        ob.ActionFeed.Add(new QueuedAction { Action = MirAction.Die, Direction = p.Direction, Location = p.Location });
+                        ob.Dead = true;
+                        break;
+                    case 1:
+                        MapControl.Effects.Add(new Effect(Libraries.Magic2, 690, 10, 1000, ob.CurrentLocation));
+                        ob.Remove();
+                        break;
+                    case 2:
+                        MapControl.Effects.Add(new Effect(Libraries.Magic2, 2600, 10, 1000, ob.CurrentLocation));
+                        ob.Remove();
+                        break;
                 }
                 return;
             }
@@ -2738,6 +2752,12 @@ namespace Client.MirScenes
                 case Spell.Fury:
                     FuryCoolTime = CMain.Time + 600000 - p.Level * 120000;
                     break;
+                case Spell.Trap:
+                    TrapCoolTime = CMain.Time + 60000 - p.Level * 15000;
+                    break;
+                case Spell.SwiftFeet:
+                    SwiftFeetTime = CMain.Time + 210000 - p.Level * 40000;
+                    break;
             }
         }
 
@@ -2789,6 +2809,15 @@ namespace Client.MirScenes
                         break;
                     case SpellEffect.TwinDrakeBlade:
                         ob.Effects.Add(new Effect(Libraries.Magic2, 380, 6, 800, ob));
+                        break;
+                    case SpellEffect.MPEater:
+                        User.Effects.Add(new Effect(Libraries.Magic2, 2411, 19, 1900, User));
+                        ob.Effects.Add(new Effect(Libraries.Magic2, 2400, 9, 900, ob));
+                        SoundManager.PlaySound(20000 + (ushort)Spell.FatalSword * 10);
+                        break;
+                    case SpellEffect.Hemorrhage:
+                        ob.Effects.Add(new Effect(Libraries.Magic3, 60, 3, 400, ob));
+                        SoundManager.PlaySound(20000 + (ushort)Spell.Hemorrhage * 10);
                         break;
                     case SpellEffect.MagicShieldUp:
                         if (ob.Race != ObjectType.Player) return;
@@ -3115,6 +3144,13 @@ namespace Client.MirScenes
             {
                 if (Buffs[i].Type != p.Type || User.ObjectID != p.ObjectID) continue;
 
+                switch (Buffs[i].Type)
+                {
+                    case BuffType.SwiftFeet:
+                        User.Sprint = false;
+                        break;
+                }
+
                 Buffs.RemoveAt(i);
                 BuffList[i].Dispose();
                 BuffList.RemoveAt(i);
@@ -3182,6 +3218,12 @@ namespace Client.MirScenes
             SpellObject ob = new SpellObject(p.ObjectID);
             ob.Load(p);
         }
+        private void ObjectDeco(S.ObjectDeco p)
+        {
+            DecoObject ob = new DecoObject(p.ObjectID);
+            ob.Load(p);
+        }
+
         private void UserDash(S.UserDash p)
         {
             if (User.Direction == p.Direction && User.CurrentLocation == p.Location)
@@ -6521,7 +6563,13 @@ namespace Client.MirScenes
                 {
                     if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow)
                     {
-                        User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount ? 3 : 2) };
+                        if(User.Sprint)
+                        {
+                            var tt = 0;
+                            tt++;
+                        }
+
+                        User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount || User.Sprint ? 3 : 2) };
                         return;
                     }
                     if (CanWalk(direction))
@@ -6659,7 +6707,7 @@ namespace Client.MirScenes
                         }
                         if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow)
                         {
-                            User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount ? 3 : 2) };
+                            User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount || User.Sprint ? 3 : 2) };
                             return;
                         }
                         if (CanWalk(direction))
@@ -6864,6 +6912,40 @@ namespace Client.MirScenes
                             target = User.NextMagicObject;
                     }
                     break;
+                case Spell.Trap:
+                    if (CMain.Time < GameScene.TrapCoolTime)
+                    {
+                        if (CMain.Time >= OutputDelay)
+                        {
+                            OutputDelay = CMain.Time + 1000;
+                            GameScene.Scene.OutputMessage(string.Format("You cannot cast Trap for another {0} seconds.", (GameScene.TrapCoolTime - CMain.Time - 1) / 1000 + 1));
+                        }
+
+                        User.ClearMagic();
+                        return;
+                    }
+                    else
+                    {
+                        if (User.NextMagicObject != null)
+                        {
+                            if (!User.NextMagicObject.Dead && User.NextMagicObject.Race != ObjectType.Item && User.NextMagicObject.Race != ObjectType.Merchant)
+                                target = User.NextMagicObject;
+                        }
+                    }
+                    break;
+                case Spell.SwiftFeet:
+                    if (CMain.Time < GameScene.SwiftFeetTime)
+                    {
+                        if (CMain.Time >= OutputDelay)
+                        {
+                            OutputDelay = CMain.Time + 1000;
+                            GameScene.Scene.OutputMessage(string.Format("You cannot cast SwiftFeet for another {0} seconds.", (GameScene.SwiftFeetTime - CMain.Time - 1) / 1000 + 1));
+                        }
+
+                        User.ClearMagic();
+                        return;
+                    }
+                    break;
                 default:
                     isTargetSpell = false;
                         break;
@@ -6977,7 +7059,7 @@ namespace Client.MirScenes
 
             if (CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 2)))
             {
-                if (User.RidingMount)
+                if (User.RidingMount || User.Sprint)
                 {
                     return EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 3));
                 }
@@ -15800,6 +15882,9 @@ namespace Client.MirScenes
                 case BuffType.Haste:
                     text = string.Format("Haste\nIncreases Attack Speed by: {0}.\n", Value);
                     break;
+                case BuffType.SwiftFeet:
+                    text = string.Format("Swift Feet\nIncreases Move Speed by: {0}.\n", Value);
+                    break;
                 case BuffType.Fury:
                     text = string.Format("Fury\nIncreases Attack Speed by: {0}.\n", Value);
                     break;
@@ -15826,6 +15911,9 @@ namespace Client.MirScenes
                     break;
                 case BuffType.MoonLight:
                     text = "Moon Light\nInvisible to many monsters and able to move.\n";
+                    break;
+                case BuffType.DarkBody:
+                    text = "Dark Body\nInvisible to many monsters and able to move.\n";
                     break;
                 case BuffType.General:
                     text = string.Format("Mirian Advantage\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);

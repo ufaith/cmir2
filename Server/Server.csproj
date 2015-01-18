@@ -163,6 +163,7 @@
       <DependentUpon>VForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MirNetwork\MirConnection.cs" />
+    <Compile Include="MirObjects\DecoObject.cs" />
     <Compile Include="MirObjects\DelayedAction.cs" />
     <Compile Include="MirObjects\GuildObject.cs" />
     <Compile Include="MirObjects\ItemObject.cs" />
@@ -177,6 +178,7 @@
     <Compile Include="MirObjects\Monsters\BoneLord.cs" />
     <Compile Include="MirObjects\Monsters\BombSpider.cs" />
     <Compile Include="MirObjects\Monsters\BlackFoxman.cs" />
+    <Compile Include="MirObjects\Monsters\HumanAssassin.cs" />
     <Compile Include="MirObjects\Monsters\HumanWizard.cs" />
     <Compile Include="MirObjects\Monsters\DragonStatue.cs" />
     <Compile Include="MirObjects\Monsters\EvilMirBody.cs" />

@@ -394,6 +394,9 @@ namespace Client.MirObjects
                 case PoisonType.Red:
                     DrawColour = Color.Red;
                     break;
+                case PoisonType.Bleeding:
+                    DrawColour = Color.DarkRed;
+                    break;
                 case PoisonType.Slow:
                     DrawColour = Color.Purple;
                     break;

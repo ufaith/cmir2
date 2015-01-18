@@ -355,9 +355,10 @@ namespace Server.MirObjects
             {
                 case BuffType.MoonLight:
                 case BuffType.Hiding:
+                case BuffType.DarkBody:
                     Hidden = true;
 
-                    if (b.Type == BuffType.MoonLight) Observer = true;
+                    if (b.Type == BuffType.MoonLight || b.Type == BuffType.DarkBody) Observer = true;
 
                     for (int y = CurrentLocation.Y - Globals.DataRange; y <= CurrentLocation.Y + Globals.DataRange; y++)
                     {

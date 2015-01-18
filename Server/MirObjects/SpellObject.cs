@@ -52,9 +52,10 @@ namespace Server.MirObjects
         {
             if (Caster != null && Caster.Node == null) Caster = null;
 
-            if (Envir.Time > ExpireTime || ((Spell == Spell.FireWall || Spell == Spell.ExplosiveTrap) && Caster == null) || (Spell == Spell.TrapHexagon && Target != null))
+            if (Envir.Time > ExpireTime || ((Spell == Spell.FireWall || Spell == Spell.ExplosiveTrap) && Caster == null) || (Spell == Spell.TrapHexagon && Target != null) || (Spell == Spell.Trap && Target != null))
             {
-                if (Spell == Spell.TrapHexagon && Target != null)
+                if (Spell == Spell.TrapHexagon && Target != null ||
+                    Spell == Spell.Trap && Target != null)
                 {
                     MonsterObject ob = (MonsterObject)Target;
 

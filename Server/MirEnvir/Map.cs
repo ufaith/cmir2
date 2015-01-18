@@ -533,7 +533,7 @@ namespace Server.MirEnvir
             PlayerObject player = (PlayerObject)data[0];
             UserMagic magic = (UserMagic)data[1];
 
-            int value, value2, value3;
+            int value, value2;
             Point location;
             Cell cell;
             MirDirection dir;
@@ -1580,7 +1580,56 @@ namespace Server.MirEnvir
 
                 #endregion
 
+                #region Trap
 
+                case Spell.Trap:
+                    value = (int)data[2];
+                    location = (Point)data[3];
+                    MonsterObject selectTarget = null;
+
+                    if (!ValidPoint(location)) break;
+
+                    cell = GetCell(location);
+
+                    if (!cell.Valid || cell.Objects == null) break;
+
+                    for (int i = 0; i < cell.Objects.Count; i++)
+                    {
+                        MapObject target = cell.Objects[i];
+                        if (target.Race == ObjectType.Monster)
+                        {
+                            selectTarget = (MonsterObject)target;
+
+                            if (selectTarget == null || !selectTarget.IsAttackTarget(player) || selectTarget.Node == null || selectTarget.Level >= player.Level + 2) continue;
+                            selectTarget.ShockTime = Envir.Time + value;
+                            selectTarget.Target = null;
+                            break;
+                        }
+                    }
+
+                    if (selectTarget == null) return;
+
+                    if (location.X <= 0 || location.X > selectTarget.CurrentMap.Width) break;
+                    if (location.Y <= 0 || location.Y > selectTarget.CurrentMap.Height) break;
+                    SpellObject spellOb = new SpellObject
+                    {
+                        Spell = Spell.Trap,
+                        ExpireTime = Envir.Time + value,
+                        TickSpeed = 100,
+                        Caster = player,
+                        CurrentLocation = location,
+                        CastLocation = location,
+                        CurrentMap = selectTarget.CurrentMap,
+                        Target = selectTarget,
+                    };
+
+                    selectTarget.CurrentMap.AddObject(spellOb);
+                    spellOb.Spawned();
+
+                    train = true;
+                    break;
+
+                #endregion
             }
 
             if (train)

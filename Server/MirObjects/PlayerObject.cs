@@ -237,9 +237,10 @@ namespace Server.MirObjects
         public List<ItemSets> ItemSets = new List<ItemSets>();
         public List<EquipmentSlot> MirSet = new List<EquipmentSlot>();
 
-        public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword;
-        public long FlamingSwordTime, PoisonCloudTime, SlashingBurstTime, FuryTime;
-        public bool ActiveBlizzard, ActiveReincarnation, ReincarnationReady;
+        public bool FatalSword, Slaying, TwinDrakeBlade, FlamingSword, MPEater, Hemorrhage;
+        public int MPEaterCount, HemorrhageAttackCount;
+        public long FlamingSwordTime, PoisonCloudTime, SlashingBurstTime, FuryTime, TrapTime, SwiftFeetTime;
+        public bool ActiveBlizzard, ActiveReincarnation, ActiveSwiftFeet, ReincarnationReady;
         public PlayerObject ReincarnationTarget;
         public long ReincarnationExpireTime;
         public byte Reflect;
@@ -542,14 +543,30 @@ namespace Server.MirObjects
                 {
                     case BuffType.MoonLight:
                     case BuffType.Hiding:
+                    case BuffType.DarkBody:
                         Hidden = false;
                         Observer = false;
+                        for (int j = 0; j < Buffs.Count; j++)
+                        {
+                            switch (Buffs[j].Type)
+                            {
+                                case BuffType.Hiding:
+                                case BuffType.MoonLight:
+                                case BuffType.DarkBody:
+                                    if (Buffs[j].Type != buff.Type)
+                                        Buffs[j].ExpireTime = 0;
+                                    break;
+                            }
+                        }
                         break;
                     case BuffType.Concentration://ArcherSpells - Elemental system
                         ConcentrateInterrupted = false;
                         ConcentrateInterruptTime = 0;
                         Concentrating = false;
                         UpdateConcentration();//Update & send to client
+                        break;
+                    case BuffType.SwiftFeet:
+                        ActiveSwiftFeet = false;
                         break;
                 }
 
@@ -727,7 +744,7 @@ namespace Server.MirObjects
                     if (poison.Time >= poison.Duration)
                         PoisonList.RemoveAt(i);
 
-                    if (poison.PType == PoisonType.Green)
+                    if (poison.PType == PoisonType.Green || poison.PType == PoisonType.Bleeding)
                     {
                         LastHitter = poison.Owner;
                         LastHitTime = Envir.Time + 10000;
@@ -1671,6 +1688,12 @@ namespace Server.MirObjects
                         MapObject ob = cell.Objects[i];
                         if (ob == this) continue;
 
+                        if(ob.Race == ObjectType.Deco)
+                        {
+                            var tt = 0;
+
+                            tt++;
+                        }
                         //if (ob.Race == ObjectType.Player && ob.Observer) continue;
 
                         Enqueue(ob.GetInfo());
@@ -2298,6 +2321,9 @@ namespace Server.MirObjects
                     case BuffType.Haste:
                     case BuffType.Fury:
                         ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + buff.Value)));
+                        break;
+                    case BuffType.SwiftFeet:
+                        ActiveSwiftFeet = true;
                         break;
                     case BuffType.LightBody:
                         Agility = (byte)Math.Min(byte.MaxValue, Agility + buff.Value);
@@ -3215,6 +3241,28 @@ namespace Server.MirObjects
                         }
                         break;
 
+                    case "DECO":
+                        if (!IsGM) return;
+                        if (parts.Length < 2) return;
+
+                        ushort tempShort = 0;
+
+                        ushort.TryParse(parts[1], out tempShort);
+
+                        DecoObject decoOb = new DecoObject
+                        {
+                            Image = tempShort,
+                            CurrentMap = CurrentMap,
+                            CurrentLocation = CurrentLocation,
+                        };
+
+                        CurrentMap.AddObject(decoOb);
+                        decoOb.Spawned();
+
+                        Enqueue(decoOb.GetInfo());
+                        break;
+
+
                     default:
                         foreach (string command in Envir.CustomCommands)
                         {
@@ -3370,14 +3418,14 @@ namespace Server.MirObjects
 
             if (Hidden && !HasClearRing)
             {
-                //Hidden = false;
                 for (int i = 0; i < Buffs.Count; i++)
                 {
-                    if (Buffs[i].Type != BuffType.Hiding) continue;
-
-                    //Hidden = false;
-                    Buffs[i].ExpireTime = 0;
-                    break;
+                    switch (Buffs[i].Type)
+                    {
+                        case BuffType.Hiding:
+                            Buffs[i].ExpireTime = 0;
+                            break;
+                    }
                 }
             }
 
@@ -3477,7 +3525,7 @@ namespace Server.MirObjects
                     return;
                 }
 
-            if (RidingMount)
+            if (RidingMount || ActiveSwiftFeet)
             {
                 steps = 3;
                 location = Functions.PointMove(CurrentLocation, dir, steps);
@@ -3523,6 +3571,7 @@ namespace Server.MirObjects
                     {
                         case BuffType.Hiding:
                         case BuffType.MoonLight:
+                        case BuffType.DarkBody:
                             Buffs[i].ExpireTime = 0;
                             break;
                     }
@@ -3712,6 +3761,7 @@ namespace Server.MirObjects
         {
             bool Mined = false;
             bool MoonLightAttack = false;
+            bool DarkBodyAttack = false;
 
             if (!CanAttack)
             {
@@ -3733,8 +3783,10 @@ namespace Server.MirObjects
                     switch(Buffs[i].Type)
                     {
                         case BuffType.Hiding:
-                        case BuffType.MoonLight:                           
+                        case BuffType.MoonLight: 
+                        case BuffType.DarkBody:
                             MoonLightAttack = true;
+                            DarkBodyAttack = true;
                             Buffs[i].ExpireTime = 0;
                             break;
                     }
@@ -3829,9 +3881,9 @@ namespace Server.MirObjects
 
             int damage = GetAttackPower(MinDC, MaxDC);
 
-            if (MoonLightAttack)
+            if (MoonLightAttack || DarkBodyAttack)
             {
-                magic = GetMagic(Spell.MoonLight);
+                magic = MoonLightAttack ? GetMagic(Spell.MoonLight) : GetMagic(Spell.DarkBody);
 
                 if(magic != null)
                 {
@@ -3879,9 +3931,11 @@ namespace Server.MirObjects
                 if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) continue;
                 if (!ob.IsAttackTarget(this)) continue;
 
-                //Only targets
+                //Only undead targets
                 if (ob.Undead)
                     damage = Math.Min(int.MaxValue, damage + Holy);
+
+                #region FatalSword
                 magic = GetMagic(Spell.FatalSword);
 
                 DefenceType defence = DefenceType.ACAgility;
@@ -3903,6 +3957,72 @@ namespace Server.MirObjects
                     if (!FatalSword && Envir.Random.Next(10) == 0)
                         FatalSword = true;
                 }
+                #endregion
+
+                #region MPEater
+                magic = GetMagic(Spell.MPEater);
+
+                if (magic != null)
+                {
+                    int baseCount = 1 + Accuracy / 2;
+                    int maxCount = baseCount + magic.Level * 5;
+                    MPEaterCount += Envir.Random.Next(baseCount, maxCount);
+                    if (MPEater)
+                    {
+                        defence = DefenceType.ACAgility;
+
+                        S.ObjectEffect p = new S.ObjectEffect { ObjectID = ob.ObjectID, Effect = SpellEffect.MPEater };
+                        CurrentMap.Broadcast(p, ob.CurrentLocation);
+
+                        int addMp = 5 * (magic.Level + Accuracy / 4);
+
+                        if (ob.Race == ObjectType.Player)
+                        {
+                            ((PlayerObject)ob).ChangeMP(-addMp);
+                        }
+
+                        ChangeMP(addMp);
+                        MPEaterCount = 0;
+                        MPEater = false;
+                    }
+                    else if (!MPEater && 100 <= MPEaterCount) MPEater = true;
+                }
+                #endregion
+
+                #region Hemorrhage
+                magic = GetMagic(Spell.Hemorrhage);
+
+                if (magic != null)
+                {
+                    HemorrhageAttackCount += Envir.Random.Next(1, 1 + magic.Level * 2);
+                    if (Hemorrhage)
+                    {
+                        damage += damage * 10 / 2; //20%
+                        LevelMagic(magic);
+                        S.ObjectEffect ef = new S.ObjectEffect { ObjectID = ob.ObjectID, Effect = SpellEffect.Hemorrhage };
+
+                        CurrentMap.Broadcast(ef, ob.CurrentLocation);
+
+                        if (ob == null || ob.Node == null) continue;
+
+                        long calcDuration = magic.Level * 2 + Luck / 6;
+
+                        ob.ApplyPoison(new Poison
+                        {
+                            Duration = (calcDuration <= 0) ? 1 : calcDuration,
+                            Owner = this,
+                            PType = PoisonType.Bleeding,
+                            TickSpeed = 1000,
+                            Value = MaxDC + 1
+                        }, this);
+
+                        ob.OperateTime = 0;
+                        HemorrhageAttackCount = 0;
+                        Hemorrhage = false;
+                    }
+                    else if (!Hemorrhage && 55 <= HemorrhageAttackCount) Hemorrhage = true;
+                }
+                #endregion
 
                 DelayedAction action;
                 switch (spell)
@@ -4356,9 +4476,26 @@ namespace Server.MirObjects
                 case Spell.DoubleShot:
                     if (!DoubleShot(target, magic)) targetID = 0;
                     break;
+
+                case Spell.SwiftFeet:
+                    SwiftFeet(magic, out cast);
+                    break;
                 case Spell.MoonLight:
                     MoonLight(magic);
                     break;
+                case Spell.Trap:
+                    Trap(magic, target, out cast);
+                    break;
+                case Spell.PoisonSword:
+                    PoisonSword(magic);
+                    break;
+                case Spell.DarkBody:
+                    DarkBody(magic);
+                    break;
+                case Spell.CrescentSlash:
+                    CrescentSlash(magic);
+                    break;
+
                 case Spell.BackStep://ArcherSpells - Backstep
                     BackStep(magic);
                     return;
@@ -5191,21 +5328,54 @@ namespace Server.MirObjects
 
             ActionList.Add(action);
         }
+
         private void BladeAvalanche(UserMagic magic)
         {
-            int damage = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
+            int criticalDamage = Envir.Random.Next(0, 100) <= (1 + Luck) ? MaxDC * 2 : MinDC * 2;
+            int nearDamage = (12 + 3 * (magic.Level + Level / 20)) * criticalDamage / 30 + MinDC;
+            int farDamage = (8 + 2 * (magic.Level + Level / 20)) * criticalDamage / 30 + MinDC;
 
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction, 3);
-            CurrentMap.ActionList.Add(action);
+            int col = 3;
+            int row = 3;
 
-            Point location = Functions.PointMove(CurrentLocation, MirDirection.Right, 1);
-            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, Direction, 3);
-            CurrentMap.ActionList.Add(action);
+            Point[] loc = new Point[col]; //0 = left 1 = center 2 = right
+            loc[0] = Functions.PointMove(CurrentLocation, Functions.PreviousDir(Direction), 1);
+            loc[1] = Functions.PointMove(CurrentLocation, Direction, 1);
+            loc[2] = Functions.PointMove(CurrentLocation, Functions.NextDir(Direction), 1);
 
-            location = Functions.PointMove(CurrentLocation, MirDirection.Left, 1);
-            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, Direction, 3);
-            CurrentMap.ActionList.Add(action);
+            for (int i = 0; i < col; i++)
+            {
+                Point startPoint = loc[i];
+                for (int j = 0; j < row; j++)
+                {
+                    Point hitPoint = Functions.PointMove(startPoint, Direction, j);
+
+                    if (!CurrentMap.ValidPoint(hitPoint)) continue;
+
+                    Cell cell = CurrentMap.GetCell(hitPoint);
+
+                    if (cell.Objects == null) continue;
+
+                    for (int k = 0; k < cell.Objects.Count; k++)
+                    {
+                        MapObject target = cell.Objects[k];
+                        switch (target.Race)
+                        {
+                            case ObjectType.Monster:
+                            case ObjectType.Player:
+                                //Only targets
+                                if (target.IsAttackTarget(this))
+                                {
+                                    if (target.Attacked(this, j <= 1 ? nearDamage : farDamage, DefenceType.MAC, false) > 0)
+                                        LevelMagic(magic);
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
         }
+
         private void SlashingBurst(UserMagic magic, out bool cast)
         {
             cast = false;
@@ -5557,10 +5727,152 @@ namespace Server.MirObjects
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction);
             CurrentMap.ActionList.Add(action);
         }
+        private void SwiftFeet(UserMagic magic, out bool cast)
+        {
+            cast = false;
+
+            // delayTime
+            if (Envir.Time < SwiftFeetTime) return;
+            cast = true;
+            SwiftFeetTime = 210000 - magic.Level * 40000;
+            ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic));
+        }
         private void MoonLight(UserMagic magic)
         {
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, GetAttackPower(MinAC, MaxAC) + (magic.Level + 1) * 5);
             ActionList.Add(action);
+        }
+        private void Trap(UserMagic magic, MapObject target, out bool cast)
+        {
+            cast = false;
+            // delayTime
+            if (Envir.Time < TrapTime) return;
+            if (target == null || !target.IsAttackTarget(this) || !(target is MonsterObject)) return;
+            if (target.Level >= Level + 2) return;
+
+            TrapTime = 60000 - magic.Level * 15000;
+
+            Point location = target.CurrentLocation;
+
+            LevelMagic(magic);
+            uint duration = 60000;
+            int value = (int)duration;
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, value, location);
+            CurrentMap.ActionList.Add(action);
+            cast = true;
+        }
+        private bool PoisonSword(UserMagic magic)
+        {
+            UserItem item = GetPoison(1);
+            if (item == null) return false;
+
+            int power = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
+
+            Point hitPoint = Functions.PointMove(CurrentLocation, Direction, 1);
+
+            if (!CurrentMap.ValidPoint(hitPoint)) return false;
+
+            Cell cell = CurrentMap.GetCell(hitPoint);
+
+            if (cell.Objects == null) return false;
+
+            for (int o = 0; o < cell.Objects.Count; o++)
+            {
+                MapObject target = cell.Objects[o];
+                if (target.Race != ObjectType.Player && target.Race != ObjectType.Monster) continue;
+
+                if (target == null || !target.IsAttackTarget(this) || target.Node == null) continue;
+
+                target.ApplyPoison(new Poison
+                {
+                    Duration = power / 10 + magic.Level * 3,
+                    Owner = this,
+                    PType = PoisonType.Green,
+                    TickSpeed = 1000,
+                    Value = power / 10 + magic.Level + 1 + Envir.Random.Next(PoisonAttack)
+                }, this);
+
+                target.OperateTime = 0;
+                break;
+            }
+
+            LevelMagic(magic);
+            ConsumeItem(item, 1);
+            return true;
+        }
+        private void DarkBody(UserMagic magic)
+        {
+            MonsterObject monster;
+            for (int i = 0; i < Pets.Count; i++)
+            {
+                monster = Pets[i];
+                if ((monster.Info.Name != Settings.AssassinCloneName) || monster.Dead) continue;
+                if (monster.Node == null) continue;
+                monster.Die();
+                return;
+            }
+
+            MonsterInfo info = Envir.GetMonsterInfo(Settings.AssassinCloneName);
+            if (info == null) return;
+
+
+            LevelMagic(magic);
+
+            monster = MonsterObject.GetMonster(info);
+            monster.Master = this;
+            monster.Direction = Direction;
+            monster.ActionTime = Envir.Time + 500;
+            monster.RefreshNameColour(false);
+            Pets.Add(monster);
+
+            monster.Spawn(CurrentMap, CurrentLocation);
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, GetAttackPower(MinAC, MaxAC) + (magic.Level + 1) * 5);
+            ActionList.Add(action);
+        }
+        private void CrescentSlash(UserMagic magic)
+        {
+            int criticalDamage = Envir.Random.Next(0, 100) <= Accuracy ? MaxDC * 2 : MinDC * 2;
+            int damage = (MinDC / 5 + 4 * (magic.Level + Level / 20)) * criticalDamage / 20 + MaxDC;
+
+            MirDirection backDir = Functions.ReverseDirection(Direction);
+            MirDirection preBackDir = Functions.PreviousDir(backDir);
+            MirDirection nextBackDir = Functions.NextDir(backDir);
+
+            for (int i = 0; i < 8; i++)
+            {
+                MirDirection dir = (MirDirection)i;
+                Point hitPoint = Functions.PointMove(CurrentLocation, dir, 1);
+
+                if (dir != backDir && dir != preBackDir && dir != nextBackDir)
+                {
+
+                    if (!CurrentMap.ValidPoint(hitPoint)) continue;
+
+                    Cell cell = CurrentMap.GetCell(hitPoint);
+
+                    if (cell.Objects == null) continue;
+
+
+                    for (int j = 0; j < cell.Objects.Count; j++)
+                    {
+                        MapObject target = cell.Objects[j];
+                        switch (target.Race)
+                        {
+                            case ObjectType.Monster:
+                            case ObjectType.Player:
+                                //Only targets
+                                if (target.IsAttackTarget(this))
+                                {
+                                    if (target.Attacked(this, damage, DefenceType.AC, false) > 0)
+                                        LevelMagic(magic);
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
         }
 
         private bool DoubleShot(MapObject target, UserMagic magic)
@@ -5956,6 +6268,15 @@ namespace Server.MirObjects
 
                 #endregion
 
+                #region SwiftFeet
+
+                case Spell.SwiftFeet:
+                    AddBuff(new Buff { Type = BuffType.SwiftFeet, Caster = this, ExpireTime = Envir.Time + 25000 + magic.Level * 5000, Value = 1, Visible = true });
+                    LevelMagic(magic);
+                    break;
+
+                #endregion
+
                 #region MoonLight
 
                 case Spell.MoonLight:
@@ -5965,6 +6286,20 @@ namespace Server.MirObjects
 
                     value = (int)data[1];
                     AddBuff(new Buff { Type = BuffType.MoonLight, Caster = this, ExpireTime = Envir.Time + value * 500 });
+                    LevelMagic(magic);
+                    break;
+
+                #endregion
+
+                #region DarkBody
+
+                case Spell.DarkBody:
+
+                    for (int i = 0; i < Buffs.Count; i++)
+                        if (Buffs[i].Type == BuffType.DarkBody) return;
+
+                    value = (int)data[1];
+                    AddBuff(new Buff { Type = BuffType.DarkBody, Caster = this, ExpireTime = Envir.Time + value * 500 });
                     LevelMagic(magic);
                     break;
 
@@ -6502,6 +6837,7 @@ namespace Server.MirObjects
                     {
                         case BuffType.Hiding:
                         case BuffType.MoonLight:
+                        case BuffType.DarkBody:
                             Buffs[i].ExpireTime = 0;
                             break;
                     }
@@ -6623,6 +6959,7 @@ namespace Server.MirObjects
                     {
                         case BuffType.Hiding:
                         case BuffType.MoonLight:
+                        case BuffType.DarkBody:
                             Buffs[i].ExpireTime = 0;
                             break;
                     }
