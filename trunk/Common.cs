@@ -301,7 +301,8 @@ public enum ObjectType : byte
     Item = 2,
     Merchant = 3,
     Spell = 4,
-    Monster = 5
+    Monster = 5,
+    Deco = 6
 }
 public enum ChatType : byte
 {
@@ -434,7 +435,8 @@ public enum PoisonType : byte
     Frozen,
     Stun,
     Paralysis,
-    DelayedExplosion
+    DelayedExplosion,
+    Bleeding
 }
 [Flags]
 [Obfuscation(Feature = "renaming", Exclude = true)]
@@ -528,7 +530,6 @@ public enum ItemSet : byte
 }
 
 [Obfuscation(Feature = "renaming", Exclude = true)]
-
 public enum Spell : byte
 {
     None = 0,
@@ -669,6 +670,8 @@ public enum SpellEffect : byte
     FuryUp,
     FuryDown,
     DelayedExplosion,
+    MPEater,
+    Hemorrhage
 }
 
 public enum BuffType : byte
@@ -677,6 +680,7 @@ public enum BuffType : byte
     Teleport,
     Hiding,
     Haste,
+    SwiftFeet,
     Fury,
     SoulShield,
     BlessedArmour,
@@ -686,6 +690,7 @@ public enum BuffType : byte
     Rage,
     Curse,
     MoonLight,
+    DarkBody,
     General,
     Exp,
     Drop,
@@ -879,6 +884,8 @@ public enum ServerPacketIds : short
     SetElemental,//ArcherSpells - Elemental system
     SetObjectElemental,//ArcherSpells - Elemental system
     RemoveDelayedExplosion,
+
+    ObjectDeco
 }
 
 public enum ClientPacketIds : short
@@ -3156,6 +3163,8 @@ public abstract class Packet
                 return new S.SetObjectElemental();
             case (short)ServerPacketIds.RemoveDelayedExplosion://ArcherSpells - DelayedExplosion
                 return new S.RemoveDelayedExplosion();
+            case (short)ServerPacketIds.ObjectDeco:
+                return new S.ObjectDeco();
             default:
                 throw new NotImplementedException();
         }

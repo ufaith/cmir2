@@ -4045,4 +4045,31 @@ namespace ServerPackets
             writer.Write(ExpLast);
         }
     }
+
+    public sealed class ObjectDeco : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ServerPacketIds.ObjectDeco; }
+        }
+
+        public uint ObjectID;
+        public Point Location;
+        public ushort Image;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Location = new Point(reader.ReadInt32(), reader.ReadInt32());
+            Image = reader.ReadUInt16();
+        }
+
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Location.X);
+            writer.Write(Location.Y);
+            writer.Write(Image);
+        }
+    }
 }

@@ -104,6 +104,13 @@ namespace Client.MirObjects
                 case BuffType.Fury:
                     Effects.Add(new Effect(Libraries.Magic3, 190, 7, 1400, this) { Repeat = true, LinkedToBuff = type });
                     break;
+                case BuffType.SwiftFeet:
+                    if (Race == ObjectType.Player)
+                    {
+                        PlayerObject ob = (PlayerObject)this;
+                        ob.Sprint = true;
+                    }
+                    break;
             }
         }
         public void RemoveBuffEffect(BuffType type)
@@ -114,6 +121,17 @@ namespace Client.MirObjects
 
                 if (Effects[s].LinkedToBuff == type)
                     Effects[s].Repeat = false;
+
+                switch (type)
+                {
+                    case BuffType.SwiftFeet:
+                        if (Race == ObjectType.Player)
+                        {
+                            PlayerObject ob = (PlayerObject)this;
+                            ob.Sprint = false;
+                        }
+                        break;
+                }
             }
         }
 

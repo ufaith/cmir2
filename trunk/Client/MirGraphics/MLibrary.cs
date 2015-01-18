@@ -41,6 +41,9 @@ namespace Client.MirGraphics
             StateItems = new MLibrary(Settings.DataPath + "StateItem"),
             FloorItems = new MLibrary(Settings.DataPath + "DNItems");
 
+        //Deco
+        public static readonly MLibrary
+            Deco = new MLibrary(Settings.DataPath + "Deco");
 
         public static readonly MLibrary[] CArmours = new MLibrary[42],
                                           CWeapons = new MLibrary[55],

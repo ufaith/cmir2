@@ -1417,7 +1417,6 @@ namespace Server.MirObjects
                 NPCChecks check = CheckList[i];
                 List<string> param = check.Params.Select(t => FindVariable(player, t)).ToList();
 
-                MonsterInfo monInfo;
                 byte tempByte;
                 uint tempUint;
                 int tempInt;
@@ -1764,9 +1763,8 @@ namespace Server.MirObjects
                 int tempInt;
                 byte tempByte;
                 long tempLong;
-                float tempFloat;
                 bool tempBool;
-                decimal tempDecimal;
+
                 ItemInfo info;
                 MonsterInfo monInfo;
 

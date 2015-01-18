@@ -131,6 +131,8 @@ namespace Server.MirObjects
                     return new TownArcher(info);
                 case 58:
                     return new Guard(info);
+                case 59:
+                    return new HumanAssassin(info);
                 default:
                     return new MonsterObject(info);
             }
@@ -310,7 +312,7 @@ namespace Server.MirObjects
             ActionTime = Envir.Time + 2000;
         }
 
-        private void RefreshBase()
+        protected virtual void RefreshBase()
         {
             MaxHP = Info.HP;
             MinAC = Info.MinAC;
@@ -352,7 +354,7 @@ namespace Server.MirObjects
 
             RefreshBuffs();
         }
-        private void RefreshBuffs()
+        protected virtual void RefreshBuffs()
         {
             for (int i = 0; i < Buffs.Count; i++)
             {
@@ -362,6 +364,9 @@ namespace Server.MirObjects
                 {
                     case BuffType.Haste:
                         ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + buff.Value)));
+                        break;
+                    case BuffType.SwiftFeet:
+                        MoveSpeed = (ushort)Math.Max(ushort.MinValue, MoveSpeed + 100 * buff.Value);
                         break;
                     case BuffType.LightBody:
                         Agility = (byte)Math.Min(byte.MaxValue, Agility + buff.Value);
@@ -838,7 +843,7 @@ namespace Server.MirObjects
                     if (poison.Time >= poison.Duration)
                         PoisonList.RemoveAt(i);
 
-                    if (poison.PType == PoisonType.Green)
+                    if (poison.PType == PoisonType.Green || poison.PType == PoisonType.Bleeding)
                     {
                         if (EXPOwner == null || EXPOwner.Dead)
                         {
@@ -949,6 +954,7 @@ namespace Server.MirObjects
                 {
                     case BuffType.MoonLight:
                     case BuffType.Hiding:
+                    case BuffType.DarkBody:
                         Hidden = false;
                         break;
                 }

@@ -131,6 +131,13 @@ namespace Client.MirObjects
                     //Light = 1;
                     Blend = true;
                     break;
+                case Spell.Trap:
+                    BodyLibrary = Libraries.Magic2;
+                    DrawFrame = 2360;
+                    FrameInterval = 100;
+                    FrameCount = 8;
+                    Blend = true;
+                    break;
             }
 
 

@@ -91,7 +91,8 @@ namespace Server
                              AngelName = "Holy Deva",
                              BombSpiderName = "Bomb Spider",
                              CloneName = "Clone",
-                             FishMonster = "Giant Keratoid";
+                             FishMonster = "Giant Keratoid",
+                             AssassinCloneName = "AssassinClone";
 
         public static string HealRing = "Healing",
                              FireRing = "FireBall",
@@ -191,6 +192,7 @@ namespace Server
             BombSpiderName = Reader.ReadString("Game", "BombSpiderName", BombSpiderName);
             CloneName = Reader.ReadString("Game", "CloneName", CloneName);
             FishMonster = Reader.ReadString("Game", "FishMonster", FishMonster);
+            AssassinCloneName = Reader.ReadString("Game", "AssassinCloneName", AssassinCloneName);
 
             //Items
             HealRing = Reader.ReadString("Items", "HealRing", HealRing);
@@ -350,6 +352,7 @@ namespace Server
             Reader.Write("Game", "BombSpiderName", BombSpiderName);
             Reader.Write("Game", "CloneName", CloneName);
             Reader.Write("Game", "FishMonster", FishMonster);
+            Reader.Write("Game", "AssassinCloneName", AssassinCloneName);
 
             Reader.Write("Items", "HealRing", HealRing);
             Reader.Write("Items", "FireRing", FireRing);

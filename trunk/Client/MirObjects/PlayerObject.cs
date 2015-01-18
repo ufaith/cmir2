@@ -100,6 +100,8 @@ namespace Client.MirObjects
         public long MountTime;
         public bool RidingMount;
 
+        public bool Sprint;
+
         public long FishingTime;
         public bool Fishing;
         public Point FishingPoint;
@@ -365,6 +367,7 @@ namespace Client.MirObjects
                             case MirAction.Attack3:
                             case MirAction.Attack4:
                             case MirAction.Sneek:
+                            case MirAction.Spell:
                                 AltAnim = true;
                                 break;
                         }
@@ -570,7 +573,8 @@ namespace Client.MirObjects
 
                     var i = 0;
                     if (CurrentAction == MirAction.MountRunning) i = 3;
-                    else if (CurrentAction == MirAction.Running) i = 2;
+                    else if (CurrentAction == MirAction.Running) 
+                        i = (Sprint ? 3 : 2);
                     else i = 1;
 
                     if (CurrentAction == MirAction.Jump) i = -JumpDistance;//ArcherSpells - Backstep
@@ -656,6 +660,9 @@ namespace Client.MirObjects
                     break;
                 case PoisonType.Red:
                     DrawColour = Color.Red;
+                    break;
+                case PoisonType.Bleeding:
+                    DrawColour = Color.DarkRed;
                     break;
                 case PoisonType.Slow:
                     DrawColour = Color.Purple;
@@ -824,7 +831,7 @@ namespace Client.MirObjects
                     case MirAction.Sneek:
                         var steps = 0;
                         if (CurrentAction == MirAction.MountRunning) steps = 3;
-                        else if (CurrentAction == MirAction.Running) steps = 2;
+                        else if (CurrentAction == MirAction.Running) steps = (Sprint ? 3 : 2);
                         else steps = 1;
 
                         temp = Functions.PointMove(CurrentLocation, Direction, CurrentAction == MirAction.Pushed ? 0 : -steps);
@@ -868,6 +875,26 @@ namespace Client.MirObjects
                     case MirAction.Jump://ArcherSpells - Backstep
                         Frames.Frames.TryGetValue(MirAction.Jump, out Frame);
                         break;
+                    case MirAction.Attack1:
+                        switch (Class)
+                        {
+                            case MirClass.Archer:
+                                Frames.Frames.TryGetValue(CurrentAction, out Frame);
+                                break;
+                            case MirClass.Assassin:
+                                if (CMain.Shift)
+                                    Frames.Frames.TryGetValue(CMain.Random.Next(100) >= 20 ? (CMain.Random.Next(100) > 40 ? MirAction.Attack1 : MirAction.Attack4) : (CMain.Random.Next(100) > 10 ? MirAction.Attack2 : MirAction.Attack3), out Frame);
+                                else
+                                    Frames.Frames.TryGetValue(CMain.Random.Next(100) >= 40 ? MirAction.Attack1 : MirAction.Attack4, out Frame);
+                                break;
+                            default:
+                                if (CMain.Shift)
+                                    Frames.Frames.TryGetValue(CMain.Random.Next(100) >= 20 ? MirAction.Attack1 : MirAction.Attack3, out Frame);
+                                else
+                                    Frames.Frames.TryGetValue(CurrentAction, out Frame);
+                                break;
+                        }
+                        break;
                     case MirAction.Attack4:
                         Spell = (Spell)action.Params[0];
                         Frames.Frames.TryGetValue(Spell == Spell.TwinDrakeBlade || Spell == Spell.FlamingSword ? MirAction.Attack1 : CurrentAction, out Frame);
@@ -905,6 +932,31 @@ namespace Client.MirObjects
                                     GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
                                 }
                                 break;
+                            case Spell.PoisonSword:
+                                Frames.Frames.TryGetValue(MirAction.Attack1, out Frame);
+                                if (this == User)
+                                {
+                                    MapControl.NextAction = CMain.Time + 2000; // 80%
+                                    GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
+                                }
+                                break;
+                            case Spell.HeavenlySword:
+                                Frames.Frames.TryGetValue(MirAction.Attack2, out Frame);
+                                if (this == User)
+                                {
+                                    MapControl.NextAction = CMain.Time + 1200;
+                                    GameScene.SpellTime = CMain.Time + 1200; //Spell Delay
+                                }
+                                break;
+                            case Spell.CrescentSlash:
+                                Frames.Frames.TryGetValue(MirAction.Attack3, out Frame);
+                                if (this == User)
+                                {
+                                    MapControl.NextAction = CMain.Time + 2500;
+                                    GameScene.SpellTime = CMain.Time + 1500; //Spell Delay
+                                }
+                                break;
+
                             case Spell.StraightShot:
                                 Frames.Frames.TryGetValue(MirAction.AttackRange2, out Frame);
                                 CurrentAction = MirAction.AttackRange2;
@@ -1041,7 +1093,7 @@ namespace Client.MirObjects
                         case MirAction.MountRunning:
                             Network.Enqueue(new C.Run { Direction = Direction });
                             GameScene.Scene.MapControl.FloorValid = false;
-                            MapControl.NextAction = CMain.Time + 2500;
+                            MapControl.NextAction = CMain.Time + (Sprint ? 1000 : 2500);
                             break;
                         case MirAction.Pushed:
                             GameScene.Scene.MapControl.FloorValid = false;
@@ -1523,19 +1575,10 @@ namespace Client.MirObjects
 
                             #endregion
 
-                            #region HeavenlySword
-
-                            case Spell.HeavenlySword:
-                                Effects.Add(new Effect(Libraries.Magic2, 2230 + ((int)Direction * 10), 8, 800, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
-                                break;
-
-                            #endregion
-
                             #region Trap
 
                             case Spell.Trap:
-                                Effects.Add(new Effect(Libraries.Magic2, 2230 + ((int)Direction * 10), 6, Frame.Count * FrameInterval, this));
+                                Effects.Add(new Effect(Libraries.Magic2, 2340, 11, 11 * FrameInterval, this));
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
@@ -1553,7 +1596,7 @@ namespace Client.MirObjects
                             #region SwiftFeet
 
                             case Spell.SwiftFeet:
-                                Effects.Add(new Effect(Libraries.Magic2, 2230, 15, 1000, this));
+                                Effects.Add(new Effect(Libraries.Magic2, 2440, 16, 16 * EffectFrameInterval, this));
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
@@ -1568,10 +1611,20 @@ namespace Client.MirObjects
 
                             #endregion
 
+
                             #region PoisonSword
 
                             case Spell.PoisonSword:
-                                Effects.Add(new Effect(Libraries.Magic2, 2490 + ((int)Direction * 10), 10, Frame.Count * FrameInterval, this));
+                                Effects.Add(new Effect(Libraries.Magic2, 2490 + ((int)Direction * 10), 10, Frame.Count * FrameInterval + 500, this));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
+
+                            #endregion
+
+                            #region DarkBody
+
+                            case Spell.DarkBody:
+                                Effects.Add(new Effect(Libraries.Magic2, 2580, 10, 10 * FrameInterval, this));
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
@@ -1694,6 +1747,16 @@ namespace Client.MirObjects
 
                             #endregion
 
+                            #region CrescentSlash
+
+                            case Spell.CrescentSlash:
+                                Effects.Add(new Effect(Libraries.Magic2, 2620 + (int)Direction * 20, 20, 20 * FrameInterval, this));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
+
+                            #endregion
+
+
                             #region Mirroring
 
                             case Spell.Mirroring:
@@ -1727,6 +1790,13 @@ namespace Client.MirObjects
                                 ReincarnationStopTime = CMain.Time + 6000;
                                 break;
 
+                            #endregion
+
+                            #region HeavenlySword
+                            case Spell.HeavenlySword:
+                                Effects.Add(new Effect(Libraries.Magic2, 2230 + ((int)Direction * 10), 8, 800, this));
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                break;
                             #endregion
 
                             #region ElementalBarrier ArcherSpells - Elemental system
@@ -2751,6 +2821,16 @@ namespace Client.MirObjects
 
                                     #endregion
 
+                                    #region Trap
+
+                                    case Spell.Trap:
+                                        if (ob != null)
+                                            SoundManager.PlaySound(20000 + (ushort)Spell.Trap * 10 + 1);
+                                        break;
+
+                                    #endregion
+
+                                    
                                 }
 
 
