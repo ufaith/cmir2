@@ -1050,8 +1050,8 @@ namespace Client.MirObjects
                     }
                 }
 
-                //Assassin Moonlight sneekyness
-                if (Hidden && Class == MirClass.Assassin && CurrentAction == MirAction.Walking)
+                //Assassin sneekyness
+                if (Sneaking && Class == MirClass.Assassin && CurrentAction == MirAction.Walking)
                 {
                     Frames.Frames.TryGetValue(MirAction.Sneek, out Frame);
                 }
@@ -1751,7 +1751,9 @@ namespace Client.MirObjects
 
                             case Spell.CrescentSlash:
                                 Effects.Add(new Effect(Libraries.Magic2, 2620 + (int)Direction * 20, 20, 20 * FrameInterval, this));
-                                SoundManager.PlaySound(20000 + (ushort)Spell * 10);
+                                SoundManager.PlaySound(20000 + (ushort)Spell * 10 + (Gender == MirGender.Male ? 0 : 1));
+
+                               
                                 break;
 
                             #endregion
@@ -2830,7 +2832,13 @@ namespace Client.MirObjects
 
                                     #endregion
 
-                                    
+                                    #region CrescentSlash
+
+                                    case Spell.CrescentSlash:
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 2);
+                                        break;
+
+                                    #endregion
                                 }
 
 
@@ -3244,6 +3252,8 @@ namespace Client.MirObjects
 
         public override void Draw()
         {
+            if (SneakingActive) return;
+
             float oldOpacity = DXManager.Opacity;
             if (Hidden && !DXManager.Blending) DXManager.SetOpacity(0.5F);
 

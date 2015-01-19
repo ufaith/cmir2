@@ -24,7 +24,7 @@ namespace Client.MirObjects
         public string Name = string.Empty;
         public Point CurrentLocation, MapLocation;
         public MirDirection Direction;
-        public bool Dead, Hidden, SitDown;
+        public bool Dead, Hidden, SitDown, Sneaking, SneakingActive;
         public PoisonType Poison;
         public long DeadTime;
         public byte AI;
@@ -99,39 +99,59 @@ namespace Client.MirObjects
         {
             if (Effects.Any(b => b.LinkedToBuff == type)) return;
 
+            PlayerObject ob = null;
+
+            if (Race == ObjectType.Player)
+            {
+                ob = (PlayerObject)this;
+            }
+
             switch (type)
             {
                 case BuffType.Fury:
                     Effects.Add(new Effect(Libraries.Magic3, 190, 7, 1400, this) { Repeat = true, LinkedToBuff = type });
                     break;
                 case BuffType.SwiftFeet:
-                    if (Race == ObjectType.Player)
+                    if (ob != null)
                     {
-                        PlayerObject ob = (PlayerObject)this;
                         ob.Sprint = true;
+                    }
+                    break;
+                case BuffType.MoonLight:
+                case BuffType.DarkBody:
+                    if (ob != null)
+                    {
+                        ob.Sneaking = true;
                     }
                     break;
             }
         }
         public void RemoveBuffEffect(BuffType type)
         {
+            PlayerObject ob = null;
+
+            if (Race == ObjectType.Player)
+            {
+                ob = (PlayerObject)this;
+            }
+
             for (int s = 0; s < Effects.Count; s++)
             {
                 if (Effects[s].LinkedToBuff == BuffType.None) continue;
 
                 if (Effects[s].LinkedToBuff == type)
                     Effects[s].Repeat = false;
+            }
 
-                switch (type)
-                {
-                    case BuffType.SwiftFeet:
-                        if (Race == ObjectType.Player)
-                        {
-                            PlayerObject ob = (PlayerObject)this;
-                            ob.Sprint = false;
-                        }
-                        break;
-                }
+            switch (type)
+            {
+                case BuffType.SwiftFeet:
+                    if (ob != null) ob.Sprint = false;
+                    break;
+                case BuffType.MoonLight:
+                case BuffType.DarkBody:
+                    if (ob != null) ob.Sneaking = false;
+                    break;
             }
         }
 

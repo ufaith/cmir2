@@ -1177,6 +1177,9 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.ObjectDeco:
                     ObjectDeco((S.ObjectDeco)p);
                     break;
+                case (short)ServerPacketIds.ObjectSneaking:
+                    ObjectSneaking((S.ObjectSneaking)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1389,7 +1392,6 @@ namespace Client.MirScenes
                 if (ob.ObjectID != p.ObjectID) continue;
                 ob.Remove();
             }
-
         }
         private void ObjectTurn(S.ObjectTurn p)
         {
@@ -2342,7 +2344,8 @@ namespace Client.MirScenes
                         ob.Remove();
                         break;
                     case 2:
-                        MapControl.Effects.Add(new Effect(Libraries.Magic2, 2600, 10, 1000, ob.CurrentLocation));
+                        SoundManager.PlaySound(20000 + (ushort)Spell.DarkBody * 10 + 1);
+                        MapControl.Effects.Add(new Effect(Libraries.Magic2, 2600, 10, 1200, ob.CurrentLocation));
                         ob.Remove();
                         break;
                 }
@@ -3182,6 +3185,17 @@ namespace Client.MirScenes
                 return;
             }
         }
+        private void ObjectSneaking(S.ObjectSneaking p)
+        {
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID) continue;
+                ob.SneakingActive = p.SneakingActive;
+                return;
+            }
+        }
+
         private void RefreshItem(S.RefreshItem p)
         {
             Bind(p.Item);
