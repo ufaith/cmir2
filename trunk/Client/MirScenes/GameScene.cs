@@ -6575,15 +6575,9 @@ namespace Client.MirScenes
                 direction = MouseDirection();
                 if (AutoRun)
                 {
-                    if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow)
+                    if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow && (!User.Sneaking || (User.Sneaking && User.Sprint)))
                     {
-                        if(User.Sprint)
-                        {
-                            var tt = 0;
-                            tt++;
-                        }
-
-                        User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount || User.Sprint ? 3 : 2) };
+                        User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount || User.Sprint && !User.Sneaking ? 3 : 2) };
                         return;
                     }
                     if (CanWalk(direction))
@@ -6719,9 +6713,9 @@ namespace Client.MirScenes
                             }
                             return;
                         }
-                        if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow)
+                        if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow && (!User.Sneaking || (User.Sneaking && User.Sprint)) )
                         {
-                            User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount || User.Sprint ? 3 : 2) };
+                            User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount || (User.Sprint && !User.Sneaking) ? 3 : 2) };
                             return;
                         }
                         if (CanWalk(direction))
@@ -7073,7 +7067,7 @@ namespace Client.MirScenes
 
             if (CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 2)))
             {
-                if (User.RidingMount || User.Sprint)
+                if (User.RidingMount || User.Sprint && !User.Sneaking)
                 {
                     return EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 3));
                 }

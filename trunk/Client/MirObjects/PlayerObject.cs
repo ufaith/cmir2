@@ -574,7 +574,7 @@ namespace Client.MirObjects
                     var i = 0;
                     if (CurrentAction == MirAction.MountRunning) i = 3;
                     else if (CurrentAction == MirAction.Running) 
-                        i = (Sprint ? 3 : 2);
+                        i = (Sprint && !Sneaking ? 3 : 2);
                     else i = 1;
 
                     if (CurrentAction == MirAction.Jump) i = -JumpDistance;//ArcherSpells - Backstep
@@ -831,7 +831,7 @@ namespace Client.MirObjects
                     case MirAction.Sneek:
                         var steps = 0;
                         if (CurrentAction == MirAction.MountRunning) steps = 3;
-                        else if (CurrentAction == MirAction.Running) steps = (Sprint ? 3 : 2);
+                        else if (CurrentAction == MirAction.Running) steps = (Sprint && !Sneaking ? 3 : 2);
                         else steps = 1;
 
                         temp = Functions.PointMove(CurrentLocation, Direction, CurrentAction == MirAction.Pushed ? 0 : -steps);
@@ -1051,7 +1051,7 @@ namespace Client.MirObjects
                 }
 
                 //Assassin sneekyness
-                if (Sneaking && Class == MirClass.Assassin && CurrentAction == MirAction.Walking)
+                if (Sneaking && Class == MirClass.Assassin && (CurrentAction == MirAction.Walking || CurrentAction == MirAction.Running))
                 {
                     Frames.Frames.TryGetValue(MirAction.Sneek, out Frame);
                 }
