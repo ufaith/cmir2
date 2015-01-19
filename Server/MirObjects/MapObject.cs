@@ -93,7 +93,6 @@ namespace Server.MirObjects
                 _hidden = value;
                 CurrentMap.Broadcast(new S.ObjectHidden {ObjectID = ObjectID, Hidden = value}, CurrentLocation);
             }
-
         }
 
         private bool _observer;
@@ -111,6 +110,27 @@ namespace Server.MirObjects
                 Broadcast(_observer ? new S.ObjectRemove {ObjectID = ObjectID} : GetInfo());
             }
         }
+
+        #region Sneaking
+        private bool _sneakingActive;
+        public bool SneakingActive
+        {
+            get { return _sneakingActive; }
+            set
+            {
+                if (_sneakingActive == value) return;
+                _sneakingActive = value;
+                CurrentMap.Broadcast(new S.ObjectSneaking { ObjectID = ObjectID, SneakingActive = value }, CurrentLocation);
+            }
+        }
+
+        private bool _sneaking;
+        public bool Sneaking
+        {
+            get { return _sneaking; }
+            set { _sneaking = value; SneakingActive = value; }
+        }
+        #endregion
 
         public MapObject _target;
         public virtual MapObject Target
@@ -358,7 +378,7 @@ namespace Server.MirObjects
                 case BuffType.DarkBody:
                     Hidden = true;
 
-                    if (b.Type == BuffType.MoonLight || b.Type == BuffType.DarkBody) Observer = true;
+                    if (b.Type == BuffType.MoonLight || b.Type == BuffType.DarkBody) Sneaking = true;
 
                     for (int y = CurrentLocation.Y - Globals.DataRange; y <= CurrentLocation.Y + Globals.DataRange; y++)
                     {

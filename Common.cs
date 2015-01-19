@@ -885,7 +885,8 @@ public enum ServerPacketIds : short
     SetObjectElemental,//ArcherSpells - Elemental system
     RemoveDelayedExplosion,
 
-    ObjectDeco
+    ObjectDeco,
+    ObjectSneaking
 }
 
 public enum ClientPacketIds : short
@@ -3165,6 +3166,8 @@ public abstract class Packet
                 return new S.RemoveDelayedExplosion();
             case (short)ServerPacketIds.ObjectDeco:
                 return new S.ObjectDeco();
+            case (short)ServerPacketIds.ObjectSneaking:
+                return new S.ObjectSneaking();
             default:
                 throw new NotImplementedException();
         }

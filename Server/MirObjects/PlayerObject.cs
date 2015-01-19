@@ -210,6 +210,8 @@ namespace Server.MirObjects
         public long ElementalBarrierTime;
         //Elemental system end
 
+        
+
         private int _runCounter, _fishCounter;
 
         public MapObject[] ArcherTrapObjectsArray = new MapObject[4];
@@ -426,6 +428,8 @@ namespace Server.MirObjects
                 ((SpellObject)ArcherTrapObjectsArray[i]).DetonateTrapNow();
             }
 
+            if (Sneaking) CheckSneakRadius();
+
             if (FlamingSword && Envir.Time >= FlamingSwordTime * 2)
             {
                 FlamingSword = false;
@@ -545,7 +549,7 @@ namespace Server.MirObjects
                     case BuffType.Hiding:
                     case BuffType.DarkBody:
                         Hidden = false;
-                        Observer = false;
+                        Sneaking = false;
                         for (int j = 0; j < Buffs.Count; j++)
                         {
                             switch (Buffs[j].Type)
@@ -5735,12 +5739,17 @@ namespace Server.MirObjects
             if (Envir.Time < SwiftFeetTime) return;
             cast = true;
             SwiftFeetTime = 210000 - magic.Level * 40000;
-            ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic));
+
+            AddBuff(new Buff { Type = BuffType.SwiftFeet, Caster = this, ExpireTime = Envir.Time + 25000 + magic.Level * 5000, Value = 1, Visible = true });
+            LevelMagic(magic);
         }
         private void MoonLight(UserMagic magic)
         {
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, GetAttackPower(MinAC, MaxAC) + (magic.Level + 1) * 5);
-            ActionList.Add(action);
+            for (int i = 0; i < Buffs.Count; i++)
+                if (Buffs[i].Type == BuffType.MoonLight) return;
+
+            AddBuff(new Buff { Type = BuffType.MoonLight, Caster = this, ExpireTime = Envir.Time + (GetAttackPower(MinAC, MaxAC) + (magic.Level + 1) * 5) * 500, Visible = true });
+            LevelMagic(magic);
         }
         private void Trap(UserMagic magic, MapObject target, out bool cast)
         {
@@ -5828,8 +5837,11 @@ namespace Server.MirObjects
 
             monster.Spawn(CurrentMap, CurrentLocation);
 
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, GetAttackPower(MinAC, MaxAC) + (magic.Level + 1) * 5);
-            ActionList.Add(action);
+            for (int i = 0; i < Buffs.Count; i++)
+                if (Buffs[i].Type == BuffType.DarkBody) return;
+
+            AddBuff(new Buff { Type = BuffType.DarkBody, Caster = this, ExpireTime = Envir.Time + (GetAttackPower(MinAC, MaxAC) + (magic.Level + 1) * 5) * 500, Visible = true });
+            LevelMagic(magic);
         }
         private void CrescentSlash(UserMagic magic)
         {
@@ -5961,6 +5973,37 @@ namespace Server.MirObjects
             MirDirection dir = Functions.DirectionFromPoint(CurrentLocation, target.CurrentLocation);
 
             target.Pushed(this, dir, distance);
+        }
+
+        private void CheckSneakRadius()
+        {
+            if (!Sneaking) return;
+
+            for (int y = CurrentLocation.Y - 3; y <= CurrentLocation.Y + 3; y++)
+            {
+                if (y < 0) continue;
+                if (y >= CurrentMap.Height) break;
+
+                for (int x = CurrentLocation.X - 3; x <= CurrentLocation.X + 3; x++)
+                {
+                    if (x < 0) continue;
+                    if (x >= CurrentMap.Width) break;
+
+                    Cell cell = CurrentMap.GetCell(x, y);
+                    if (!cell.Valid || cell.Objects == null) continue;
+
+                    for (int i = 0; cell.Objects != null && i < cell.Objects.Count; i++)
+                    {
+                        MapObject ob = cell.Objects[i];
+                        if ((ob.Race != ObjectType.Player) || ob == this) continue;
+
+                        SneakingActive = false;
+                        return;
+                    }
+                }
+            }
+
+            SneakingActive = true;
         }
 
         private void CompleteMagic(IList<object> data)
@@ -6264,43 +6307,6 @@ namespace Server.MirObjects
                     target.Target = null;
 
                     ConsumeItem(item, 1);
-                    break;
-
-                #endregion
-
-                #region SwiftFeet
-
-                case Spell.SwiftFeet:
-                    AddBuff(new Buff { Type = BuffType.SwiftFeet, Caster = this, ExpireTime = Envir.Time + 25000 + magic.Level * 5000, Value = 1, Visible = true });
-                    LevelMagic(magic);
-                    break;
-
-                #endregion
-
-                #region MoonLight
-
-                case Spell.MoonLight:
-
-                    for (int i = 0; i < Buffs.Count; i++)
-                        if (Buffs[i].Type == BuffType.MoonLight) return;
-
-                    value = (int)data[1];
-                    AddBuff(new Buff { Type = BuffType.MoonLight, Caster = this, ExpireTime = Envir.Time + value * 500 });
-                    LevelMagic(magic);
-                    break;
-
-                #endregion
-
-                #region DarkBody
-
-                case Spell.DarkBody:
-
-                    for (int i = 0; i < Buffs.Count; i++)
-                        if (Buffs[i].Type == BuffType.DarkBody) return;
-
-                    value = (int)data[1];
-                    AddBuff(new Buff { Type = BuffType.DarkBody, Caster = this, ExpireTime = Envir.Time + value * 500 });
-                    LevelMagic(magic);
                     break;
 
                 #endregion
@@ -9121,7 +9127,6 @@ namespace Server.MirObjects
             DelayedAction action = new DelayedAction(DelayedType.NPC, SMain.Envir.Time + 0, DefaultNPC.ObjectID, key);
             ActionList.Add(action);
 
-            //NPCJumpList.AddPage(new NPCJumpPage { NPCID = DefaultNPC.ObjectID, Page = key, TimePeriod = 0 });
             Enqueue(new S.NPCUpdate { NPCID = DefaultNPC.ObjectID });
         }
         public void CallNPC(uint objectID, string key)
