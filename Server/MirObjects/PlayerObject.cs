@@ -156,7 +156,7 @@ namespace Server.MirObjects
         }
         public bool CanRun
         {
-            get { return !Dead && Envir.Time >= ActionTime && CurrentPoison != PoisonType.Slow; }
+            get { return !Dead && Envir.Time >= ActionTime && CurrentPoison != PoisonType.Slow && (!Sneaking || ActiveSwiftFeet); }
         }
         public bool CanAttack
         {
@@ -3529,7 +3529,7 @@ namespace Server.MirObjects
                     return;
                 }
 
-            if (RidingMount || ActiveSwiftFeet)
+            if (RidingMount || ActiveSwiftFeet && !Sneaking)
             {
                 steps = 3;
                 location = Functions.PointMove(CurrentLocation, dir, steps);
@@ -3567,7 +3567,7 @@ namespace Server.MirObjects
                 }
             }
 
-            if (Hidden && !HasClearRing)
+            if (Hidden && !HasClearRing && !Sneaking)
             {
                 for (int i = 0; i < Buffs.Count; i++)
                 {
