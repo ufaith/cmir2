@@ -16,6 +16,8 @@ namespace Client.MirControls
         public virtual Point DisplayLocation { get { return Parent == null ? Location : Parent.DisplayLocation.Add(Location); } }
         public Rectangle DisplayRectangle { get { return new Rectangle(DisplayLocation, Size); } }
 
+        public bool Blending { get; set; }
+
         #region Back Colour
         private Color _backColour;
         public Color BackColour

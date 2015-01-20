@@ -548,7 +548,7 @@ namespace Server.MirObjects
                     case BuffType.MoonLight:
                     case BuffType.Hiding:
                     case BuffType.DarkBody:
-                        Hidden = false;
+                        if(!HasClearRing) Hidden = false;
                         Sneaking = false;
                         for (int j = 0; j < Buffs.Count; j++)
                         {
@@ -752,6 +752,12 @@ namespace Server.MirObjects
                     {
                         LastHitter = poison.Owner;
                         LastHitTime = Envir.Time + 10000;
+
+                        if (poison.PType == PoisonType.Bleeding)
+                        {
+                            Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Bleeding, EffectType = 0 });
+                        }
+
                         ChangeHP(-poison.Value);
                         if (Dead) break;
                         RegenTime = Envir.Time + RegenDelay;
@@ -3973,6 +3979,8 @@ namespace Server.MirObjects
                     MPEaterCount += Envir.Random.Next(baseCount, maxCount);
                     if (MPEater)
                     {
+                        LevelMagic(magic);
+
                         defence = DefenceType.ACAgility;
 
                         S.ObjectEffect p = new S.ObjectEffect { ObjectID = ob.ObjectID, Effect = SpellEffect.MPEater };
@@ -4269,6 +4277,21 @@ namespace Server.MirObjects
             {
                 Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
                 return;
+            }
+
+            if (Hidden)
+            {
+                for (int i = 0; i < Buffs.Count; i++)
+                {
+                    switch (Buffs[i].Type)
+                    {
+                        case BuffType.Hiding:
+                        case BuffType.MoonLight:
+                        case BuffType.DarkBody:
+                            Buffs[i].ExpireTime = 0;
+                            break;
+                    }
+                }
             }
 
             AttackTime = Envir.Time + MoveDelay;
@@ -5173,7 +5196,7 @@ namespace Server.MirObjects
                 monster = Pets[i];
                 if ((monster.Info.Name != Settings.SkeletonName) || monster.Dead) continue;
                 if (monster.Node == null) continue;
-                monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500));
+                monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500, magic.Level));
                 return;
             }
 
@@ -8173,7 +8196,7 @@ namespace Server.MirObjects
                     }
 
                     //check if combine will succeed
-                    bool succeeded = Envir.Random.Next(20) < (5 + (Luck / 2));
+                    bool succeeded = Envir.Random.Next(15) < (5 + (Luck / 2));
                     canUpgrade = true;
 
                     byte itemType = (byte)tempTo.Info.Type;
@@ -8254,7 +8277,7 @@ namespace Server.MirObjects
                         //upgrade has no effect
                         ReceiveChat("Upgrade has no effect.", ChatType.Hint);
 
-                        if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(10) < 3))
+                        if ((tempFrom.Info.Shape == 3) && (Envir.Random.Next(15) < 3))
                         {
                             //item destroyed
                             ReceiveChat("Item has been destroyed.", ChatType.Hint);

@@ -671,7 +671,8 @@ public enum SpellEffect : byte
     FuryDown,
     DelayedExplosion,
     MPEater,
-    Hemorrhage
+    Hemorrhage,
+    Bleeding
 }
 
 public enum BuffType : byte
