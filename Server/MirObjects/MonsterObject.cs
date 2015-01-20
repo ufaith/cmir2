@@ -853,6 +853,11 @@ namespace Server.MirObjects
                         else if (EXPOwner == poison.Owner)
                             EXPOwnerTime = Envir.Time + EXPOwnerDelay;
 
+                        if (poison.PType == PoisonType.Bleeding)
+                        {
+                            Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Bleeding, EffectType = 0 });
+                        }
+
                         ChangeHP(-poison.Value);
                         if (Dead) break;
                         RegenTime = Envir.Time + RegenDelay;

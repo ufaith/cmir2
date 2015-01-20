@@ -2696,6 +2696,15 @@ namespace Client.MirScenes
             item.MagicResist = p.Item.MagicResist;
             item.PoisonResist = p.Item.PoisonResist;
 
+            GameScene.Scene.InventoryDialog.DisplayItemGridEffect(item.UniqueID, 0);
+
+            //MirAnimatedControl anim = new MirAnimatedControl
+            //{
+            //    Animated = true,
+            //    AnimationCount = 9,
+            //    DisplayLocation = GameScene.Scene.InventoryDialog
+            //};
+
             if (HoverItem == item)
             {
                 DisposeItemLabel();
@@ -2818,9 +2827,14 @@ namespace Client.MirScenes
                         ob.Effects.Add(new Effect(Libraries.Magic2, 2400, 9, 900, ob));
                         SoundManager.PlaySound(20000 + (ushort)Spell.FatalSword * 10);
                         break;
-                    case SpellEffect.Hemorrhage:
+                    case SpellEffect.Bleeding:
                         ob.Effects.Add(new Effect(Libraries.Magic3, 60, 3, 400, ob));
+                        break;
+                    case SpellEffect.Hemorrhage:
                         SoundManager.PlaySound(20000 + (ushort)Spell.Hemorrhage * 10);
+                        ob.Effects.Add(new Effect(Libraries.Magic3, 0, 4, 400, ob));
+                        ob.Effects.Add(new Effect(Libraries.Magic3, 28, 6, 600, ob));
+                        ob.Effects.Add(new Effect(Libraries.Magic3, 46, 8, 800, ob));
                         break;
                     case SpellEffect.MagicShieldUp:
                         if (ob.Race != ObjectType.Player) return;
@@ -8462,7 +8476,7 @@ namespace Client.MirScenes
 
 
             Grid = new MirItemCell[8 * 5];
-
+            
             for (int x = 0; x < 8; x++)
             {
                 for (int y = 0; y < 5; y++)
@@ -8590,6 +8604,37 @@ namespace Client.MirScenes
         public MirItemCell GetQuestCell(ulong id)
         {
             return QuestGrid.FirstOrDefault(t => t.Item != null && t.Item.UniqueID == id);
+        }
+
+        public void DisplayItemGridEffect(ulong id, int type = 0)
+        {
+            MirItemCell cell = GetCell(id);
+
+            if (cell.Item == null) return;
+
+            MirAnimatedControl animEffect = null;
+
+            switch(type)
+            {
+                case 0:
+                    animEffect = new MirAnimatedControl
+                    {
+                        Animated = true,
+                        AnimationCount = 9,
+                        AnimationDelay = 150,
+                        Index = 410,
+                        Library = Libraries.Prguse,
+                        Location = cell.Location,
+                        Parent = this,
+                        Loop = false,
+                        NotControl = true,
+                        UseOffSet = true,
+                        Blending = true,
+                        //Sound = 20000 + (ushort)Spell.MagicShield * 10
+                    };
+                    animEffect.AfterAnimation += (o, e) => animEffect.Dispose();
+                    break;
+            }
         }
     }
     public sealed class BeltDialog : MirImageControl

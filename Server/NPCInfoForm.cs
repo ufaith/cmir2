@@ -305,7 +305,13 @@ namespace Server
             var npcs = data.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var m in npcs)
-                NPCInfo.FromText(m);
+            {
+                try
+                {
+                    NPCInfo.FromText(m);
+                }
+                catch { }
+            }
 
             UpdateInterface();
             MessageBox.Show("NPC Import complete");

@@ -155,7 +155,10 @@ namespace Client.MirControls
             base.DrawControl();
 
             if (DrawImage && Library != null)
-                Library.Draw(Index, DisplayLocation, ForeColour, false, Opacity);
+            {
+                if (Blending) Library.DrawBlend(Index, DisplayLocation, ForeColour, false, 1F);
+                else Library.Draw(Index, DisplayLocation, ForeColour, false, Opacity);
+            }
         }
 
         public override bool IsMouseOver(Point p)
