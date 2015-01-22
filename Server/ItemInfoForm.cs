@@ -37,6 +37,7 @@ namespace Server
             InitializeComponent();
 
             ITypeComboBox.Items.AddRange(Enum.GetValues(typeof (ItemType)).Cast<object>().ToArray());
+            IGradeComboBox.Items.AddRange(Enum.GetValues(typeof(ItemGrade)).Cast<object>().ToArray());
             RTypeComboBox.Items.AddRange(Enum.GetValues(typeof (RequiredType)).Cast<object>().ToArray());
             RClassComboBox.Items.AddRange(Enum.GetValues(typeof (RequiredClass)).Cast<object>().ToArray());
             RGenderComboBox.Items.AddRange(Enum.GetValues(typeof (RequiredGender)).Cast<object>().ToArray());
@@ -77,6 +78,7 @@ namespace Server
                 ImageTextBox.Text = string.Empty;
                 DuraTextBox.Text = string.Empty;
                 ITypeComboBox.SelectedItem = null;
+                IGradeComboBox.SelectedItem = null;
                 ISetComboBox.SelectedItem = null;
                 ShapeTextBox.Text = string.Empty;
                 SSizeTextBox.Text = string.Empty;
@@ -158,6 +160,7 @@ namespace Server
                 NoDuraLosscheckBox.Checked = false;
                 RandomStatstextBox.Text = string.Empty;
                 PickaxecheckBox.Checked = false;
+                FastRunCheckBox.Checked = false;
                 return;
             }
 
@@ -171,6 +174,7 @@ namespace Server
             ImageTextBox.Text = info.Image.ToString();
             DuraTextBox.Text = info.Durability.ToString();
             ITypeComboBox.SelectedItem = info.Type;
+            IGradeComboBox.SelectedItem = info.Grade;
             ISetComboBox.SelectedItem = info.Set;
             ShapeTextBox.Text = info.Shape.ToString();
             SSizeTextBox.Text = info.StackSize.ToString();
@@ -256,6 +260,7 @@ namespace Server
             NoDuraLosscheckBox.Checked = info.Unique.HasFlag(SpecialItemMode.NoDuraLoss);
             RandomStatstextBox.Text = info.RandomStatsId.ToString();
             PickaxecheckBox.Checked = info.CanMine;
+            FastRunCheckBox.Checked = info.CanFastRun;
 
             for (int i = 1; i < _selectedItemInfos.Count; i++)
             {
@@ -268,6 +273,7 @@ namespace Server
                 if (ImageTextBox.Text != info.Image.ToString()) ImageTextBox.Text = string.Empty;
                 if (DuraTextBox.Text != info.Durability.ToString()) DuraTextBox.Text = string.Empty;
                 if (ITypeComboBox.SelectedItem == null || (ItemType)ITypeComboBox.SelectedItem != info.Type) ITypeComboBox.SelectedItem = null;
+                if (IGradeComboBox.SelectedItem == null || (ItemGrade)IGradeComboBox.SelectedItem != info.Grade) IGradeComboBox.SelectedItem = null;
                 if (ISetComboBox.SelectedItem == null || (ItemSet)ISetComboBox.SelectedItem != info.Set) ISetComboBox.SelectedItem = null;
                 if (ShapeTextBox.Text != info.Shape.ToString()) ShapeTextBox.Text = string.Empty;
                 if (SSizeTextBox.Text != info.StackSize.ToString()) SSizeTextBox.Text = string.Empty;
@@ -348,6 +354,7 @@ namespace Server
                 if (NoDuraLosscheckBox.Checked != info.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLosscheckBox.CheckState = CheckState.Indeterminate;
                 if (RandomStatstextBox.Text != info.RandomStatsId.ToString()) RandomStatstextBox.Text = string.Empty;
                 if (PickaxecheckBox.Checked != info.CanMine) PickaxecheckBox.CheckState = CheckState.Indeterminate;
+                if (FastRunCheckBox.Checked != info.CanFastRun) FastRunCheckBox.CheckState = CheckState.Indeterminate;
             }
         }
 
@@ -1597,6 +1604,22 @@ namespace Server
 
             for (int i = 0; i < _selectedItemInfos.Count; i++)
                 _selectedItemInfos[i].CanMine = PickaxecheckBox.Checked;
+        }
+
+        private void IGradeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].Grade = (ItemGrade)IGradeComboBox.SelectedItem;
+        }
+
+        private void FastRunCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].CanFastRun = FastRunCheckBox.Checked;
         }
     }
 }

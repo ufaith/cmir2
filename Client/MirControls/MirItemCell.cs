@@ -34,6 +34,7 @@ namespace Client.MirControls
                 else if (ItemArray != null && _itemSlot >= 0 && _itemSlot < ItemArray.Length)
                     ItemArray[_itemSlot] = value;
 
+                SetEffect();
                 Redraw();
             }
         }
@@ -156,6 +157,11 @@ namespace Client.MirControls
             DrawControlTexture = true;
             Library = Libraries.Items;
 
+        }
+
+        public void SetEffect()
+        {
+            //put effect stuff here??
         }
 
 
@@ -1475,15 +1481,6 @@ namespace Client.MirControls
 
                     Point offSet = new Point((Size.Width - imgSize.Width) / 2, (Size.Height - imgSize.Height) / 2);
 
-                    //if (GridType == MirGridType.Equipment)
-                    //{
-                    //    if (Item.Info.Type == ItemType.Mount)
-                    //    {
-                    //        offSet.Y += 1;
-                    //    }
-                    //}
-
-
                     Library.Draw(Item.Info.Image, DisplayLocation.Add(offSet), ForeColour, UseOffSet, 1F);
                 }
 
@@ -1491,6 +1488,29 @@ namespace Client.MirControls
             else
                 DisposeCountLabel();
         }
+
+        //private ushort GetCorrectImage()
+        //{
+        //    ushort image = Item.Info.Image;
+
+        //    switch(Item.Info.Type)
+        //    {
+        //       case ItemType.Amulet:
+        //            if (Item.Info.Shape == 1 && Item.Info.StackSize > 0 && Item.Info.Image == 3673)
+        //            {
+        //                if (Item.Count > 200) return (ushort)(image + 2);
+        //                if (Item.Count > 100) return (ushort)(image + 1);
+        //            }
+        //            else if (Item.Info.Shape == 2 && Item.Info.StackSize > 0 && Item.Info.Image == 3670)
+        //            {
+        //                if (Item.Count > 200) return (ushort)(image + 2);
+        //                if (Item.Count > 100) return (ushort)(image + 1);
+        //            }
+        //            return image;
+        //        default:
+        //            return image;
+        //    }
+        //}
 
         protected override void OnMouseEnter()
         {

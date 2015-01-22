@@ -727,10 +727,6 @@ namespace Client.MirObjects
                         break;
                     case MirAction.AttackRange2:
                         //PlayRangeSound();
-                        switch (BaseImage)
-                        {
-                            //Empty
-                        }
                         TargetID = (uint)action.Params[0];
                         break;
                     case MirAction.Struck:

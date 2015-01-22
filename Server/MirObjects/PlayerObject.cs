@@ -156,7 +156,7 @@ namespace Server.MirObjects
         }
         public bool CanRun
         {
-            get { return !Dead && Envir.Time >= ActionTime && CurrentPoison != PoisonType.Slow && (!Sneaking || ActiveSwiftFeet); }
+            get { return !Dead && Envir.Time >= ActionTime && (_stepCounter > 0 || FastRun) && CurrentPoison != PoisonType.Slow && (!Sneaking || ActiveSwiftFeet); }
         }
         public bool CanAttack
         {
@@ -212,7 +212,7 @@ namespace Server.MirObjects
 
         
 
-        private int _runCounter, _fishCounter;
+        private int _stepCounter, _runCounter, _fishCounter;
 
         public MapObject[] ArcherTrapObjectsArray = new MapObject[4];
 
@@ -247,6 +247,7 @@ namespace Server.MirObjects
         public long ReincarnationExpireTime;
         public byte Reflect;
         public bool UnlockCurse = false;
+        public bool FastRun = false;
 
         public bool CanCreateGuild = false;
         public GuildObject MyGuild = null;
@@ -452,6 +453,11 @@ namespace Server.MirObjects
                 RunTime = Envir.Time + 1500;
                 _runCounter--;
             }
+
+            //if (Envir.Time > ActionTime && _stepCounter > 0)
+            //{
+            //    _stepCounter = 0;
+            //}
 
             if (Envir.Time > IncreaseLoyaltyTime && Mount.HasMount)
             {
@@ -1857,6 +1863,7 @@ namespace Server.MirObjects
             HasProbeNecklace = false;
             HasSkillNecklace = false;
             NoDuraLoss = false;
+            FastRun = false;
 
             var skillsToAdd = new List<string>();
             var skillsToRemove = new List<string> { Settings.HealRing, Settings.FireRing };
@@ -1941,6 +1948,11 @@ namespace Server.MirObjects
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Probe)) HasProbeNecklace = true;
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Skill)) HasSkillNecklace = true;
                     if (RealItem.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLoss = true;
+                }
+
+                if(RealItem.CanFastRun)
+                {
+                    FastRun = true;
                 }
 
                 if (RealItem.Type == ItemType.Armour)
@@ -3296,6 +3308,8 @@ namespace Server.MirObjects
 
         public void Turn(MirDirection dir)
         {
+            _stepCounter = 0;
+
             if (CanMove)
             {
                 ActionTime = Envir.Time + TurnDelay;
@@ -3385,7 +3399,6 @@ namespace Server.MirObjects
             if (send)
                 ReceiveChat("You do not own any nearby carcasses.", ChatType.System);
         }
-
         public void Walk(MirDirection dir)
         {
 
@@ -3449,7 +3462,7 @@ namespace Server.MirObjects
             CurrentMap.GetCell(CurrentLocation).Add(this);
             AddObjects(dir, 1);
 
-
+            _stepCounter++;
 
             SafeZoneInfo szi = CurrentMap.GetSafeZone(CurrentLocation);
 
@@ -3766,7 +3779,6 @@ namespace Server.MirObjects
 
             return;
         }
-
         public void Attack(MirDirection dir, Spell spell)
         {
             bool Mined = false;
@@ -4551,171 +4563,6 @@ namespace Server.MirObjects
         }
 
 
-        private void ShoulderDash(UserMagic magic)
-        {
-            ActionTime = Envir.Time; //allow an immediate next action
-
-            if (InTrapRock) return;
-            if (!CanWalk) return;
-
-            int dist = Envir.Random.Next(2) + magic.Level + 2;
-            int travel = 0;
-            bool wall = true;
-            Point location = CurrentLocation;
-            MapObject target = null;
-            for (int i = 0; i < dist; i++)
-            {
-                location = Functions.PointMove(location, Direction, 1);
-
-                if (!CurrentMap.ValidPoint(location)) break;
-
-
-                Cell cell = CurrentMap.GetCell(location);
-
-                bool blocking = false;
-                if (cell.Objects != null)
-                {
-                    for (int c = cell.Objects.Count - 1; c >= 0; c--)
-                    {
-                        MapObject ob = cell.Objects[c];
-                        if (!ob.Blocking) continue;
-                        wall = false;
-                        if (ob.Race != ObjectType.Monster && ob.Race != ObjectType.Player)
-                        {
-                            blocking = true;
-                            break;
-                        }
-
-                        if (target == null && ob.Race == ObjectType.Player)
-                            target = ob;
-
-                        if (Envir.Random.Next(20) >= 6 + magic.Level * 3 + Level - ob.Level || !ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
-                        {
-                            if (target == ob)
-                                target = null;
-                            blocking = true;
-                            break;
-                        }
-
-                        if (cell.Objects == null) break;
-
-                    }
-                }
-
-                if (blocking)
-                {
-                    if (magic.Level != 3) break;
-
-                    Point location2 = Functions.PointMove(location, Direction, 1);
-
-                    if (!CurrentMap.ValidPoint(location2)) break;
-
-                    cell = CurrentMap.GetCell(location2);
-
-                    blocking = false;
-                    if (cell.Objects != null)
-                    {
-                        for (int c = cell.Objects.Count - 1; c >= 0; c--)
-                        {
-                            MapObject ob = cell.Objects[c];
-                            if (!ob.Blocking) continue;
-                            if (ob.Race != ObjectType.Monster && ob.Race != ObjectType.Player)
-                            {
-                                blocking = true;
-                                break;
-                            }
-
-                            if (!ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
-                            {
-                                blocking = true;
-                                break;
-                            }
-
-                            if (cell.Objects == null) break;
-                        }
-                    }
-
-                    if (blocking) break;
-
-                    cell = CurrentMap.GetCell(location);
-
-                    if (cell.Objects != null)
-                    {
-                        for (int c = cell.Objects.Count - 1; c >= 0; c--)
-                        {
-                            MapObject ob = cell.Objects[c];
-                            if (!ob.Blocking) continue;
-                            if (ob.Race != ObjectType.Monster && ob.Race != ObjectType.Player)
-                            {
-                                blocking = true;
-                                break;
-                            }
-
-                            if (Envir.Random.Next(20) >= 6 + magic.Level * 3 + Level - ob.Level || !ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
-                            {
-                                blocking = true;
-                                break;
-                            }
-
-                            if (cell.Objects == null) break;
-                        }
-                    }
-
-                    if (blocking) break;
-                }
-
-                travel++;
-                CurrentMap.GetCell(CurrentLocation).Remove(this);
-                RemoveObjects(Direction, 1);
-
-                CurrentLocation = location;
-
-                Enqueue(new S.UserDash { Direction = Direction, Location = location });
-                Broadcast(new S.ObjectDash { ObjectID = ObjectID, Direction = Direction, Location = location });
-
-                CurrentMap.GetCell(CurrentLocation).Add(this);
-                AddObjects(Direction, 1);
-            }
-
-            if (travel > 0 && !wall)
-            {
-                if (target != null) target.Attacked(this, magic.Level + 1, DefenceType.None, false);
-                LevelMagic(magic);
-            }
-
-            if (travel > 0)
-            {
-
-                Cell cell = CurrentMap.GetCell(CurrentLocation);
-                for (int i = 0; i < cell.Objects.Count; i++)
-                {
-                    if (cell.Objects[i].Race != ObjectType.Spell) continue;
-                    SpellObject ob = (SpellObject)cell.Objects[i];
-
-                    if (ob.Spell != Spell.FireWall || !IsAttackTarget(ob.Caster)) continue;
-                    Attacked(ob.Caster, ob.Value, DefenceType.MAC, false);
-                    break;
-                }
-            }
-
-            if (travel == 0 || wall && dist != travel)
-            {
-                if (travel > 0)
-                {
-                    Enqueue(new S.UserDash { Direction = Direction, Location = Front });
-                    Broadcast(new S.ObjectDash { ObjectID = ObjectID, Direction = Direction, Location = Front });
-                }
-                else
-                    Broadcast(new S.ObjectDash { ObjectID = ObjectID, Direction = Direction, Location = Front });
-
-                Enqueue(new S.UserDashFail { Direction = Direction, Location = CurrentLocation });
-                Broadcast(new S.ObjectDashFail { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
-                ReceiveChat("Not enough pushing Power.", ChatType.System);
-            }
-
-            CellTime = Envir.Time + 500;
-        }
-
         //ArcherSpells - Elemental system
         private void Concentration(UserMagic magic)
         {
@@ -4761,13 +4608,7 @@ namespace Server.MirObjects
             }
             return true;
         }
-        //public int HasSpell(Spell spell)
-        //{
-        //    UserMagic magic = GetMagic(spell);
-        //    if (magic != null)
-        //        return (int)magic.Level;
-        //    else return -1;
-        //}
+
         public void GatherElement()
         {
             UserMagic magic = GetMagic(Spell.Meditation);
@@ -4877,45 +4718,7 @@ namespace Server.MirObjects
         }
         //Elemental system END
 
-        private bool DelayedExplosion(MapObject target, UserMagic magic)//ArcherSpells - DelayedExplosion
-        {
-            if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return false;
-
-            int power = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
-            int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
-
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, magic, power, target);
-            ActionList.Add(action);
-            return true;
-        }
-
-        private void ExplosiveTrap(UserMagic magic, Point location)//ArcherSpells - Explosive Trap
-        {
-            int trapCount = 0;
-            for (int i = 0; i <= 3; i++)
-                if (ArcherTrapObjectsArray[i] != null) trapCount++;
-            if (trapCount >= magic.Level + 1) return;//max 4 traps
-
-            int freeTrapSpot = -1;
-            for (int i = 0; i <= 3; i++)
-                if (ArcherTrapObjectsArray[i] == null)
-                {
-                    freeTrapSpot = i;
-                    break;
-                }
-            if (freeTrapSpot == -1) return;
-
-            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, freeTrapSpot);
-            CurrentMap.ActionList.Add(action);
-        }
-        public void ExplosiveTrapDetonated(int obIDX)//ArcherSpells - Explosive Trap
-        {
-            if (ArcherTrapObjectsArray[obIDX] == null) return;
-            ArcherTrapObjectsArray[obIDX] = null;
-        }
-
-
+        #region Wizard Skills
         private bool Fireball(MapObject target, UserMagic magic)
         {
             if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return false;
@@ -5143,7 +4946,63 @@ namespace Server.MirObjects
             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation);
             CurrentMap.ActionList.Add(action);
         }
+        private void Mirroring(UserMagic magic)
+        {
+            MonsterObject monster;
+            DelayedAction action;
+            for (int i = 0; i < Pets.Count; i++)
+            {
+                monster = Pets[i];
+                if ((monster.Info.Name != Settings.CloneName) || monster.Dead) continue;
+                if (monster.Node == null) continue;
+                action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, monster, Front, true);
+                CurrentMap.ActionList.Add(action);
+                return;
+            }
 
+            MonsterInfo info = Envir.GetMonsterInfo(Settings.CloneName);
+            if (info == null) return;
+
+
+            LevelMagic(magic);
+
+            monster = MonsterObject.GetMonster(info);
+            monster.Master = this;
+            monster.ActionTime = Envir.Time + 1000;
+            monster.RefreshNameColour(false);
+
+            Pets.Add(monster);
+
+            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, monster, Front, false);
+            CurrentMap.ActionList.Add(action);
+        }
+        private void Blizzard(UserMagic magic, Point location, out bool cast)
+        {
+            cast = false;
+
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location);
+
+            ActiveBlizzard = true;
+            CurrentMap.ActionList.Add(action);
+            cast = true;
+        }
+        private void MeteorStrike(UserMagic magic, Point location, out bool cast)
+        {
+            cast = false;
+
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location);
+
+            ActiveBlizzard = true;
+            CurrentMap.ActionList.Add(action);
+            cast = true;
+        }
+        #endregion
+
+        #region Taoist Skills
         private void Healing(MapObject target, UserMagic magic)
         {
             if (target == null || !target.IsFriendlyTarget(this)) return;
@@ -5196,7 +5055,7 @@ namespace Server.MirObjects
                 monster = Pets[i];
                 if ((monster.Info.Name != Settings.SkeletonName) || monster.Dead) continue;
                 if (monster.Node == null) continue;
-                monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500, magic.Level));
+                monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500));
                 return;
             }
 
@@ -5213,7 +5072,7 @@ namespace Server.MirObjects
             monster = MonsterObject.GetMonster(info);
             monster.PetLevel = magic.Level;
             monster.Master = this;
-            monster.MaxPetLevel = (byte)(1 + magic.Level * 2);
+            monster.MaxPetLevel = (byte)(4 + magic.Level);
             monster.ActionTime = Envir.Time + 1000;
             monster.RefreshNameColour(false);
 
@@ -5319,7 +5178,6 @@ namespace Server.MirObjects
 
             ActionList.Add(action);
         }
-
         private void PoisonCloud(UserMagic magic, Point location, out bool cast)
         {
             cast = false;
@@ -5342,203 +5200,6 @@ namespace Server.MirObjects
 
             PoisonCloudTime = Envir.Time + (18 - magic.Level * 2) * 1000;
 
-            CurrentMap.ActionList.Add(action);
-            cast = true;
-        }
-        private void Entrapment(MapObject target, UserMagic magic)
-        {
-            if (target == null || !target.IsAttackTarget(this)) return;
-
-            int damage = 0;
-
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, damage, target);
-
-            ActionList.Add(action);
-        }
-
-        private void BladeAvalanche(UserMagic magic)
-        {
-            int criticalDamage = Envir.Random.Next(0, 100) <= (1 + Luck) ? MaxDC * 2 : MinDC * 2;
-            int nearDamage = (12 + 3 * (magic.Level + Level / 20)) * criticalDamage / 30 + MinDC;
-            int farDamage = (8 + 2 * (magic.Level + Level / 20)) * criticalDamage / 30 + MinDC;
-
-            int col = 3;
-            int row = 3;
-
-            Point[] loc = new Point[col]; //0 = left 1 = center 2 = right
-            loc[0] = Functions.PointMove(CurrentLocation, Functions.PreviousDir(Direction), 1);
-            loc[1] = Functions.PointMove(CurrentLocation, Direction, 1);
-            loc[2] = Functions.PointMove(CurrentLocation, Functions.NextDir(Direction), 1);
-
-            for (int i = 0; i < col; i++)
-            {
-                Point startPoint = loc[i];
-                for (int j = 0; j < row; j++)
-                {
-                    Point hitPoint = Functions.PointMove(startPoint, Direction, j);
-
-                    if (!CurrentMap.ValidPoint(hitPoint)) continue;
-
-                    Cell cell = CurrentMap.GetCell(hitPoint);
-
-                    if (cell.Objects == null) continue;
-
-                    for (int k = 0; k < cell.Objects.Count; k++)
-                    {
-                        MapObject target = cell.Objects[k];
-                        switch (target.Race)
-                        {
-                            case ObjectType.Monster:
-                            case ObjectType.Player:
-                                //Only targets
-                                if (target.IsAttackTarget(this))
-                                {
-                                    if (target.Attacked(this, j <= 1 ? nearDamage : farDamage, DefenceType.MAC, false) > 0)
-                                        LevelMagic(magic);
-                                }
-                                break;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void SlashingBurst(UserMagic magic, out bool cast)
-        {
-            cast = false;
-
-            // delayTime
-            if (Envir.Time < SlashingBurstTime) return;
-
-            SlashingBurstTime = Envir.Time + (14 - magic.Level * 4) * 1000;
-            cast = true;
-
-            // damage
-            int damage = GetAttackPower(MaxDC, MaxDC) * magic.GetPower();
-
-            // objects = this, magic, damage, currentlocation, direction, attackRange
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction, 1);
-            CurrentMap.ActionList.Add(action);
-
-            // telpo location
-            Point location = Functions.PointMove(CurrentLocation, Direction, 2);
-
-            if (!CurrentMap.ValidPoint(location)) return;
-
-            Cell cInfo = CurrentMap.GetCell(location);
-
-            bool blocked = false;
-            if (cInfo.Objects != null)
-            {
-                for (int c = 0; c < cInfo.Objects.Count; c++)
-                {
-                    MapObject ob = cInfo.Objects[c];
-                    if (!ob.Blocking) continue;
-                    blocked = true;
-                    if ((cInfo.Objects == null) || blocked) break;
-                }
-            }
-
-            // blocked telpo cancel
-            if (blocked) return;
-
-            // move character
-            CurrentMap.GetCell(CurrentLocation).Remove(this);
-            RemoveObjects(Direction, 1);
-
-            CurrentLocation = location;
-
-            CurrentMap.GetCell(CurrentLocation).Add(this);
-            AddObjects(Direction, 1);
-
-            Enqueue(new S.UserAttackMove { Direction = Direction, Location = location });
-        }
-        private void FurySpell(UserMagic magic, out bool cast)
-        {
-            cast = false;
-
-            // delayTime
-            if (Envir.Time < FuryTime) return;
-            cast = true;
-            FuryTime = 600000 - magic.Level * 120000;
-            ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic));
-        }
-
-        private void ProtectionField(UserMagic magic)
-        {
-            int count = Buffs.Where(x => x.Type == BuffType.ProtectionField).ToList().Count();
-            if (count > 0) return;
-
-            int duration = 45 + (15 * magic.Level);
-            int value = (int)Math.Round(MaxAC * (0.2 + (0.03 * magic.Level)));
-
-            AddBuff(new Buff { Type = BuffType.ProtectionField, Caster = this, ExpireTime = Envir.Time + duration * 1000, Value = value });
-            OperateTime = 0;
-            LevelMagic(magic);
-        }
-        private void Rage(UserMagic magic)
-        {
-            int count = Buffs.Where(x => x.Type == BuffType.Rage).ToList().Count();
-            if (count > 0) return;
-
-            int duration = 48 + (6 * magic.Level);
-            int value = (int)Math.Round(MaxDC * (0.12 + (0.03 * magic.Level)));
-
-            AddBuff(new Buff { Type = BuffType.Rage, Caster = this, ExpireTime = Envir.Time + duration * 1000, Value = value });
-            OperateTime = 0;
-            LevelMagic(magic);
-        }
-        private void Mirroring(UserMagic magic)
-        {
-            MonsterObject monster;
-            DelayedAction action;
-            for (int i = 0; i < Pets.Count; i++)
-            {
-                monster = Pets[i];
-                if ((monster.Info.Name != Settings.CloneName) || monster.Dead) continue;
-                if (monster.Node == null) continue;
-                action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, monster, Front, true);
-                CurrentMap.ActionList.Add(action);
-                return;
-            }
-
-            MonsterInfo info = Envir.GetMonsterInfo(Settings.CloneName);
-            if (info == null) return;
-
-
-            LevelMagic(magic);
-
-            monster = MonsterObject.GetMonster(info);
-            monster.Master = this;
-            monster.ActionTime = Envir.Time + 1000;
-            monster.RefreshNameColour(false);
-
-            Pets.Add(monster);
-
-            action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, monster, Front, false);
-            CurrentMap.ActionList.Add(action);
-        }
-        private void Blizzard(UserMagic magic, Point location, out bool cast)
-        {
-            cast = false;
-
-            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
-
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location);
-
-            ActiveBlizzard = true;
-            CurrentMap.ActionList.Add(action);
-            cast = true;
-        }
-        private void MeteorStrike(UserMagic magic, Point location, out bool cast)
-        {
-            cast = false;
-
-            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
-
-            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location);
-
-            ActiveBlizzard = true;
             CurrentMap.ActionList.Add(action);
             cast = true;
         }
@@ -5712,7 +5373,7 @@ namespace Server.MirObjects
 
             UserItem itemp = GetPoison(1, 1);
 
-            if (itemp != null) 
+            if (itemp != null)
                 pType = PoisonType.Green;
             else
             {
@@ -5745,8 +5406,317 @@ namespace Server.MirObjects
             CurrentMap.ActionList.Add(action);
 
         }
+        #endregion
+
+        #region Warrior Skills
+        private void Entrapment(MapObject target, UserMagic magic)
+        {
+            if (target == null || !target.IsAttackTarget(this)) return;
+
+            int damage = 0;
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, damage, target);
+
+            ActionList.Add(action);
+        }
+        private void BladeAvalanche(UserMagic magic)
+        {
+            int criticalDamage = Envir.Random.Next(0, 100) <= (1 + Luck) ? MaxDC * 2 : MinDC * 2;
+            int nearDamage = (12 + 3 * (magic.Level + Level / 20)) * criticalDamage / 30 + MinDC;
+            int farDamage = (8 + 2 * (magic.Level + Level / 20)) * criticalDamage / 30 + MinDC;
+
+            int col = 3;
+            int row = 3;
+
+            Point[] loc = new Point[col]; //0 = left 1 = center 2 = right
+            loc[0] = Functions.PointMove(CurrentLocation, Functions.PreviousDir(Direction), 1);
+            loc[1] = Functions.PointMove(CurrentLocation, Direction, 1);
+            loc[2] = Functions.PointMove(CurrentLocation, Functions.NextDir(Direction), 1);
+
+            for (int i = 0; i < col; i++)
+            {
+                Point startPoint = loc[i];
+                for (int j = 0; j < row; j++)
+                {
+                    Point hitPoint = Functions.PointMove(startPoint, Direction, j);
+
+                    if (!CurrentMap.ValidPoint(hitPoint)) continue;
+
+                    Cell cell = CurrentMap.GetCell(hitPoint);
+
+                    if (cell.Objects == null) continue;
+
+                    for (int k = 0; k < cell.Objects.Count; k++)
+                    {
+                        MapObject target = cell.Objects[k];
+                        switch (target.Race)
+                        {
+                            case ObjectType.Monster:
+                            case ObjectType.Player:
+                                //Only targets
+                                if (target.IsAttackTarget(this))
+                                {
+                                    if (target.Attacked(this, j <= 1 ? nearDamage : farDamage, DefenceType.MAC, false) > 0)
+                                        LevelMagic(magic);
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        private void ProtectionField(UserMagic magic)
+        {
+            int count = Buffs.Where(x => x.Type == BuffType.ProtectionField).ToList().Count();
+            if (count > 0) return;
+
+            int duration = 45 + (15 * magic.Level);
+            int value = (int)Math.Round(MaxAC * (0.2 + (0.03 * magic.Level)));
+
+            AddBuff(new Buff { Type = BuffType.ProtectionField, Caster = this, ExpireTime = Envir.Time + duration * 1000, Value = value });
+            OperateTime = 0;
+            LevelMagic(magic);
+        }
+        private void Rage(UserMagic magic)
+        {
+            int count = Buffs.Where(x => x.Type == BuffType.Rage).ToList().Count();
+            if (count > 0) return;
+
+            int duration = 48 + (6 * magic.Level);
+            int value = (int)Math.Round(MaxDC * (0.12 + (0.03 * magic.Level)));
+
+            AddBuff(new Buff { Type = BuffType.Rage, Caster = this, ExpireTime = Envir.Time + duration * 1000, Value = value });
+            OperateTime = 0;
+            LevelMagic(magic);
+        }
+        private void ShoulderDash(UserMagic magic)
+        {
+            ActionTime = Envir.Time; //allow an immediate next action
+
+            if (InTrapRock) return;
+            if (!CanWalk) return;
+
+            int dist = Envir.Random.Next(2) + magic.Level + 2;
+            int travel = 0;
+            bool wall = true;
+            Point location = CurrentLocation;
+            MapObject target = null;
+            for (int i = 0; i < dist; i++)
+            {
+                location = Functions.PointMove(location, Direction, 1);
+
+                if (!CurrentMap.ValidPoint(location)) break;
 
 
+                Cell cell = CurrentMap.GetCell(location);
+
+                bool blocking = false;
+                if (cell.Objects != null)
+                {
+                    for (int c = cell.Objects.Count - 1; c >= 0; c--)
+                    {
+                        MapObject ob = cell.Objects[c];
+                        if (!ob.Blocking) continue;
+                        wall = false;
+                        if (ob.Race != ObjectType.Monster && ob.Race != ObjectType.Player)
+                        {
+                            blocking = true;
+                            break;
+                        }
+
+                        if (target == null && ob.Race == ObjectType.Player)
+                            target = ob;
+
+                        if (Envir.Random.Next(20) >= 6 + magic.Level * 3 + Level - ob.Level || !ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
+                        {
+                            if (target == ob)
+                                target = null;
+                            blocking = true;
+                            break;
+                        }
+
+                        if (cell.Objects == null) break;
+
+                    }
+                }
+
+                if (blocking)
+                {
+                    if (magic.Level != 3) break;
+
+                    Point location2 = Functions.PointMove(location, Direction, 1);
+
+                    if (!CurrentMap.ValidPoint(location2)) break;
+
+                    cell = CurrentMap.GetCell(location2);
+
+                    blocking = false;
+                    if (cell.Objects != null)
+                    {
+                        for (int c = cell.Objects.Count - 1; c >= 0; c--)
+                        {
+                            MapObject ob = cell.Objects[c];
+                            if (!ob.Blocking) continue;
+                            if (ob.Race != ObjectType.Monster && ob.Race != ObjectType.Player)
+                            {
+                                blocking = true;
+                                break;
+                            }
+
+                            if (!ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
+                            {
+                                blocking = true;
+                                break;
+                            }
+
+                            if (cell.Objects == null) break;
+                        }
+                    }
+
+                    if (blocking) break;
+
+                    cell = CurrentMap.GetCell(location);
+
+                    if (cell.Objects != null)
+                    {
+                        for (int c = cell.Objects.Count - 1; c >= 0; c--)
+                        {
+                            MapObject ob = cell.Objects[c];
+                            if (!ob.Blocking) continue;
+                            if (ob.Race != ObjectType.Monster && ob.Race != ObjectType.Player)
+                            {
+                                blocking = true;
+                                break;
+                            }
+
+                            if (Envir.Random.Next(20) >= 6 + magic.Level * 3 + Level - ob.Level || !ob.IsAttackTarget(this) || ob.Level >= Level || ob.Pushed(this, Direction, 1) == 0)
+                            {
+                                blocking = true;
+                                break;
+                            }
+
+                            if (cell.Objects == null) break;
+                        }
+                    }
+
+                    if (blocking) break;
+                }
+
+                travel++;
+                CurrentMap.GetCell(CurrentLocation).Remove(this);
+                RemoveObjects(Direction, 1);
+
+                CurrentLocation = location;
+
+                Enqueue(new S.UserDash { Direction = Direction, Location = location });
+                Broadcast(new S.ObjectDash { ObjectID = ObjectID, Direction = Direction, Location = location });
+
+                CurrentMap.GetCell(CurrentLocation).Add(this);
+                AddObjects(Direction, 1);
+            }
+
+            if (travel > 0 && !wall)
+            {
+                if (target != null) target.Attacked(this, magic.Level + 1, DefenceType.None, false);
+                LevelMagic(magic);
+            }
+
+            if (travel > 0)
+            {
+
+                Cell cell = CurrentMap.GetCell(CurrentLocation);
+                for (int i = 0; i < cell.Objects.Count; i++)
+                {
+                    if (cell.Objects[i].Race != ObjectType.Spell) continue;
+                    SpellObject ob = (SpellObject)cell.Objects[i];
+
+                    if (ob.Spell != Spell.FireWall || !IsAttackTarget(ob.Caster)) continue;
+                    Attacked(ob.Caster, ob.Value, DefenceType.MAC, false);
+                    break;
+                }
+            }
+
+            if (travel == 0 || wall && dist != travel)
+            {
+                if (travel > 0)
+                {
+                    Enqueue(new S.UserDash { Direction = Direction, Location = Front });
+                    Broadcast(new S.ObjectDash { ObjectID = ObjectID, Direction = Direction, Location = Front });
+                }
+                else
+                    Broadcast(new S.ObjectDash { ObjectID = ObjectID, Direction = Direction, Location = Front });
+
+                Enqueue(new S.UserDashFail { Direction = Direction, Location = CurrentLocation });
+                Broadcast(new S.ObjectDashFail { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
+                ReceiveChat("Not enough pushing Power.", ChatType.System);
+            }
+
+            CellTime = Envir.Time + 500;
+        }
+
+        #endregion
+
+        #region Assassin Skills
+        private void SlashingBurst(UserMagic magic, out bool cast)
+        {
+            cast = false;
+
+            // delayTime
+            if (Envir.Time < SlashingBurstTime) return;
+
+            SlashingBurstTime = Envir.Time + (14 - magic.Level * 4) * 1000;
+            cast = true;
+
+            // damage
+            int damage = GetAttackPower(MaxDC, MaxDC) * magic.GetPower();
+
+            // objects = this, magic, damage, currentlocation, direction, attackRange
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation, Direction, 1);
+            CurrentMap.ActionList.Add(action);
+
+            // telpo location
+            Point location = Functions.PointMove(CurrentLocation, Direction, 2);
+
+            if (!CurrentMap.ValidPoint(location)) return;
+
+            Cell cInfo = CurrentMap.GetCell(location);
+
+            bool blocked = false;
+            if (cInfo.Objects != null)
+            {
+                for (int c = 0; c < cInfo.Objects.Count; c++)
+                {
+                    MapObject ob = cInfo.Objects[c];
+                    if (!ob.Blocking) continue;
+                    blocked = true;
+                    if ((cInfo.Objects == null) || blocked) break;
+                }
+            }
+
+            // blocked telpo cancel
+            if (blocked) return;
+
+            // move character
+            CurrentMap.GetCell(CurrentLocation).Remove(this);
+            RemoveObjects(Direction, 1);
+
+            CurrentLocation = location;
+
+            CurrentMap.GetCell(CurrentLocation).Add(this);
+            AddObjects(Direction, 1);
+
+            Enqueue(new S.UserAttackMove { Direction = Direction, Location = location });
+        }
+        private void FurySpell(UserMagic magic, out bool cast)
+        {
+            cast = false;
+
+            // delayTime
+            if (Envir.Time < FuryTime) return;
+            cast = true;
+            FuryTime = 600000 - magic.Level * 120000;
+            ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic));
+        }
         private void HeavenlySword(UserMagic magic)
         {
             int damage = GetAttackPower(MinDC, MaxDC) + magic.GetPower();
@@ -5909,7 +5879,9 @@ namespace Server.MirObjects
                 }
             }
         }
+        #endregion
 
+        #region Archer Skills
         private bool DoubleShot(MapObject target, UserMagic magic)
         {
             if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return false;
@@ -5981,6 +5953,44 @@ namespace Server.MirObjects
             CellTime = Envir.Time + 500;
         }
 
+        private bool DelayedExplosion(MapObject target, UserMagic magic)//ArcherSpells - DelayedExplosion
+        {
+            if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return false;
+
+            int power = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+            int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, magic, power, target);
+            ActionList.Add(action);
+            return true;
+        }
+
+        private void ExplosiveTrap(UserMagic magic, Point location)//ArcherSpells - Explosive Trap
+        {
+            int trapCount = 0;
+            for (int i = 0; i <= 3; i++)
+                if (ArcherTrapObjectsArray[i] != null) trapCount++;
+            if (trapCount >= magic.Level + 1) return;//max 4 traps
+
+            int freeTrapSpot = -1;
+            for (int i = 0; i <= 3; i++)
+                if (ArcherTrapObjectsArray[i] == null)
+                {
+                    freeTrapSpot = i;
+                    break;
+                }
+            if (freeTrapSpot == -1) return;
+
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, location, freeTrapSpot);
+            CurrentMap.ActionList.Add(action);
+        }
+        public void ExplosiveTrapDetonated(int obIDX)//ArcherSpells - Explosive Trap
+        {
+            if (ArcherTrapObjectsArray[obIDX] == null) return;
+            ArcherTrapObjectsArray[obIDX] = null;
+        }
+
         public void DoKnockback(MapObject target, UserMagic magic)//ElementalShot - knockback
         {
             Cell cell = CurrentMap.GetCell(target.CurrentLocation);
@@ -5997,6 +6007,7 @@ namespace Server.MirObjects
 
             target.Pushed(this, dir, distance);
         }
+        #endregion
 
         private void CheckSneakRadius()
         {
@@ -8196,7 +8207,7 @@ namespace Server.MirObjects
                     }
 
                     //check if combine will succeed
-                    bool succeeded = Envir.Random.Next(15) < (5 + (Luck / 2));
+                    bool succeeded = Envir.Random.Next(10) < (5 + (Luck / 2));
                     canUpgrade = true;
 
                     byte itemType = (byte)tempTo.Info.Type;

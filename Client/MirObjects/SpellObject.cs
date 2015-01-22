@@ -23,7 +23,7 @@ namespace Client.MirObjects
 
         public Spell Spell;
         public int FrameCount, FrameInterval, FrameIndex;
-        public bool Blend, Repeat;
+        public bool Repeat;
         
 
         public SpellObject(uint objectID) : base(objectID)
