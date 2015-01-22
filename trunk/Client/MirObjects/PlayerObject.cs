@@ -101,6 +101,7 @@ namespace Client.MirObjects
         public bool RidingMount;
 
         public bool Sprint;
+        public bool FastRun;
 
         public long FishingTime;
         public bool Fishing;
@@ -1080,6 +1081,7 @@ namespace Client.MirObjects
                         case MirAction.MountStanding:
                             Network.Enqueue(new C.Turn { Direction = Direction });
                             MapControl.NextAction = CMain.Time + 2500;
+                            GameScene.CanRun = false;
                             break;
                         case MirAction.Walking:
                         case MirAction.MountWalking:
@@ -1741,7 +1743,7 @@ namespace Client.MirObjects
                             #region SlashingBurst
 
                             case Spell.SlashingBurst:
-                                Effects.Add(new Effect(Libraries.Magic2, 1700 + (int)Direction * 10, 10, 10 * FrameInterval, this));
+                                Effects.Add(new Effect(Libraries.Magic2, 1700 + (int)Direction * 10, 9, 9 * FrameInterval, this));
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 

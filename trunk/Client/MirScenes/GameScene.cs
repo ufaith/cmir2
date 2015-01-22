@@ -4004,11 +4004,11 @@ namespace Client.MirScenes
             MirLabel nameLabel = new MirLabel
             {
                 AutoSize = true,
-                ForeColour = Color.Yellow,
+                ForeColour = GradeNameColor(HoverItem.Info.Grade),
                 Location = new Point(4, 4),
                 OutLine = false,
                 Parent = ItemLabel,
-                Text = HoverItem.Info.Name
+                Text = HoverItem.Info.Name + " (" + HoverItem.Info.Grade.ToString() + ")"
             };
             ItemLabel.Size = new Size(nameLabel.DisplayRectangle.Right + 4, nameLabel.DisplayRectangle.Bottom);
 
@@ -5589,6 +5589,23 @@ namespace Client.MirScenes
 
         }
 
+        private Color GradeNameColor(ItemGrade grade)
+        {
+            switch (grade)
+            {
+                case ItemGrade.Common:
+                    return Color.White;
+                case ItemGrade.Rare:
+                    return Color.DeepSkyBlue;
+                case ItemGrade.Legendary:
+                    return Color.DarkOrange;
+                case ItemGrade.Mythical:
+                    return Color.Plum;
+                default:
+                    return Color.White;
+            }
+        }
+
         public class OutPutMessage
         {
             public string Message;
@@ -6727,6 +6744,9 @@ namespace Client.MirScenes
                             }
                             return;
                         }
+
+                        GameScene.CanRun = User.FastRun ? true : GameScene.CanRun;
+
                         if (GameScene.CanRun && CanRun(direction) && CMain.Time > GameScene.NextRunTime && User.HP >= 10 && User.Poison != PoisonType.Slow && (!User.Sneaking || (User.Sneaking && User.Sprint)) )
                         {
                             User.QueuedAction = new QueuedAction { Action = MirAction.Running, Direction = direction, Location = Functions.PointMove(User.CurrentLocation, direction, User.RidingMount || (User.Sprint && !User.Sneaking) ? 3 : 2) };
@@ -8630,11 +8650,12 @@ namespace Client.MirScenes
                         NotControl = true,
                         UseOffSet = true,
                         Blending = true,
-                        //Sound = 20000 + (ushort)Spell.MagicShield * 10
                     };
                     animEffect.AfterAnimation += (o, e) => animEffect.Dispose();
                     break;
             }
+
+            SoundManager.PlaySound(20000 + (ushort)Spell.MagicShield * 10);
         }
     }
     public sealed class BeltDialog : MirImageControl

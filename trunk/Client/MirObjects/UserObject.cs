@@ -235,6 +235,7 @@ namespace Client.MirObjects
             HasProbeNecklace = false;
             HasSkillNecklace = false;
             NoDuraLoss = false;
+            FastRun = false;
             short Macrate = 0, Acrate = 0, HPrate = 0, MPrate = 0;
 
             ItemSets.Clear();
@@ -310,6 +311,12 @@ namespace Client.MirObjects
                     if (RealItem.Unique.HasFlag(SpecialItemMode.Skill)) HasSkillNecklace = true;
                     if (RealItem.Unique.HasFlag(SpecialItemMode.NoDuraLoss)) NoDuraLoss = true;
                 }
+
+                if (RealItem.CanFastRun)
+                {
+                    FastRun = true;
+                }
+
                 if (RealItem.Type == ItemType.Armour)
                 {
                     Armour = RealItem.Shape;
