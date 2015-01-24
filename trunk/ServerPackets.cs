@@ -4092,4 +4092,35 @@ namespace ServerPackets
             writer.Write(SneakingActive);
         }
     }
+
+    public sealed class LevelEffects : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.LevelEffects; } }
+
+        public bool ShowLevelEffect1;
+        public bool ShowLevelEffect2;
+        public bool ShowLevelEffect3;
+        public byte LevelEffect1;
+        public byte LevelEffect2;
+        public byte LevelEffect3;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ShowLevelEffect1 = reader.ReadBoolean();
+            ShowLevelEffect2 = reader.ReadBoolean();
+            ShowLevelEffect3 = reader.ReadBoolean();
+            LevelEffect1 = reader.ReadByte();
+            LevelEffect2 = reader.ReadByte();
+            LevelEffect3 = reader.ReadByte();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ShowLevelEffect1);
+            writer.Write(ShowLevelEffect2);
+            writer.Write(ShowLevelEffect3);
+            writer.Write(LevelEffect1);
+            writer.Write(LevelEffect2);
+            writer.Write(LevelEffect3);
+        }
+    }
 }

@@ -560,9 +560,12 @@ namespace Client.MirObjects
             }
 
             //Effects when certain levels
-            if (Level >= 70) Effects.Add(new SpecialEffect(Libraries.Effect, 1210, 20, 2200, this, true, true, 1) { Repeat = true });
-            else if (Level >= 60) Effects.Add(new SpecialEffect(Libraries.Effect, 990, 20, 2200, this, true, true, 1) { Repeat = true });
-            else if (Level >= 50) Effects.Add(new SpecialEffect(Libraries.Effect, 296, 32, 3600, this, true, false, 1) { Repeat = true });
+            if (GameScene.Scene.ShowLevelEffect3 && Level >= GameScene.Scene.LevelEffect3) 
+                Effects.Add(new SpecialEffect(Libraries.Effect, 1210, 20, 2200, this, true, true, 1) { Repeat = true });
+            else if (GameScene.Scene.ShowLevelEffect2 && Level >= GameScene.Scene.LevelEffect2) 
+                Effects.Add(new SpecialEffect(Libraries.Effect, 990, 20, 2200, this, true, true, 1) { Repeat = true });
+            else if (GameScene.Scene.ShowLevelEffect1 && Level >= GameScene.Scene.LevelEffect1) 
+                Effects.Add(new SpecialEffect(Libraries.Effect, 296, 32, 3600, this, true, false, 1) { Repeat = true });
         }
 
         public override void Process()
@@ -3291,7 +3294,7 @@ namespace Client.MirObjects
             float oldOpacity = DXManager.Opacity;
             if (Hidden && !DXManager.Blending) DXManager.SetOpacity(0.5F);
 
-            if(Settings.Effect) DrawBehindEffects();
+            if (Settings.Effect) DrawBehindEffects();
 
             if (RidingMount)
             {
@@ -3325,10 +3328,9 @@ namespace Client.MirObjects
                     DrawWeapon2();
             }
 
-            if (Settings.Effect) DrawEffects();
+           // if (this != User && Settings.Effect) DrawEffects();
 
             DXManager.SetOpacity(oldOpacity);
-
         }
 
         public override void DrawBehindEffects()

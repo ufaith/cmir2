@@ -55,7 +55,14 @@ namespace Server
         //Optional
         public static bool SafeZoneBorder = false,
                            SafeZoneHealing = false,
-                           GatherOrbsPerLevel = true;
+                           GatherOrbsPerLevel = true,
+                           ShowLevelEffect1 = true,
+                           ShowLevelEffect2 = true,
+                           ShowLevelEffect3 = true;
+
+        public static byte LevelEffect1 = 50,
+                           LevelEffect2 = 60,
+                           LevelEffect3 = 70;
 
         //Database
         public static int SaveDelay = 5;
@@ -164,6 +171,12 @@ namespace Server
             SafeZoneBorder = Reader.ReadBoolean("Optional", "SafeZoneBorder", SafeZoneBorder);
             SafeZoneHealing = Reader.ReadBoolean("Optional", "SafeZoneHealing", SafeZoneHealing);
             GatherOrbsPerLevel = Reader.ReadBoolean("Optional", "GatherOrbsPerLevel", GatherOrbsPerLevel);
+            ShowLevelEffect1 = Reader.ReadBoolean("Optional", "ShowLevelEffect1", ShowLevelEffect1);
+            LevelEffect1 = Reader.ReadByte("Optional", "LevelEffect1", LevelEffect1);
+            ShowLevelEffect2 = Reader.ReadBoolean("Optional", "ShowLevelEffect2", ShowLevelEffect2);
+            LevelEffect2 = Reader.ReadByte("Optional", "LevelEffect2", LevelEffect2);
+            ShowLevelEffect3 = Reader.ReadBoolean("Optional", "ShowLevelEffect3", ShowLevelEffect3);
+            LevelEffect3 = Reader.ReadByte("Optional", "LevelEffect3", LevelEffect3);
 
             //Database
             SaveDelay = Reader.ReadInt32("Database", "SaveDelay", SaveDelay);
@@ -321,6 +334,12 @@ namespace Server
             Reader.Write("Optional", "SafeZoneBorder", SafeZoneBorder);
             Reader.Write("Optional", "SafeZoneHealing", SafeZoneHealing);
             Reader.Write("Optional", "GatherOrbsPerLevel", GatherOrbsPerLevel);
+            Reader.Write("Optional", "ShowLevelEffect1", ShowLevelEffect1);
+            Reader.Write("Optional", "LevelEffect1", LevelEffect1);
+            Reader.Write("Optional", "ShowLevelEffect2", ShowLevelEffect2);
+            Reader.Write("Optional", "LevelEffect2", LevelEffect2);
+            Reader.Write("Optional", "ShowLevelEffect3", ShowLevelEffect3);
+            Reader.Write("Optional", "LevelEffect3", LevelEffect3);
 
             //Database
             Reader.Write("Database", "SaveDelay", SaveDelay);

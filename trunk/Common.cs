@@ -894,7 +894,9 @@ public enum ServerPacketIds : short
     RemoveDelayedExplosion,
 
     ObjectDeco,
-    ObjectSneaking
+    ObjectSneaking,
+
+    LevelEffects
 }
 
 public enum ClientPacketIds : short
@@ -3185,6 +3187,8 @@ public abstract class Packet
                 return new S.ObjectDeco();
             case (short)ServerPacketIds.ObjectSneaking:
                 return new S.ObjectSneaking();
+            case (short)ServerPacketIds.LevelEffects:
+                return new S.LevelEffects();
             default:
                 throw new NotImplementedException();
         }

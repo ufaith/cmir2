@@ -115,7 +115,7 @@ namespace Client.MirObjects
             switch (type)
             {
                 case BuffType.Fury:
-                    Effects.Add(new BuffEffect(Libraries.Magic3, 190, 7, 1400, this, false, type) { Repeat = true });
+                    Effects.Add(new BuffEffect(Libraries.Magic3, 190, 7, 1400, this, true, type) { Repeat = true });
                     break;
                 case BuffType.SwiftFeet:
                     if (ob != null) ob.Sprint = true;
@@ -138,7 +138,7 @@ namespace Client.MirObjects
             for (int i = 0; i < Effects.Count; i++)
             {
                 if (!(Effects[i] is BuffEffect)) continue;
-                if (((BuffEffect)(Effects[i])).BuffType == type) continue;
+                if (((BuffEffect)(Effects[i])).BuffType != type) continue;
                 Effects[i].Repeat = false;
             }
 

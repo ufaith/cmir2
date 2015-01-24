@@ -1851,6 +1851,15 @@ namespace Client.MirObjects
                             break;
                     }
                     break;
+                case Monster.Shinsu1:
+                    switch (CurrentAction)
+                    {
+                        case MirAction.Attack1:
+                            if (FrameIndex >= 1)
+                                Libraries.Monsters[(ushort)Monster.Shinsu1].DrawBlend(224 + ((int)Direction * 6) + FrameIndex, DrawLocation, Color.White, true);
+                            break;
+                    }
+                    break;
             }
             
 
