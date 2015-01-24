@@ -370,7 +370,6 @@ namespace Client.MirScenes
                     BigMapDialog.Visible = false;
                     break;
                 case Keys.O:
-                    break;
                 case Keys.F12:
                     if (!OptionDialog.Visible) OptionDialog.Show();
                     else OptionDialog.Hide();
@@ -474,6 +473,8 @@ namespace Client.MirScenes
                                 return;
                         }
                     }
+                    if (!HelpDialog.Visible) HelpDialog.Show();
+                    else HelpDialog.Hide();
                     break;
                 case Keys.D:
                     MapControl.AutoRun = !MapControl.AutoRun;
@@ -4008,7 +4009,7 @@ namespace Client.MirScenes
                 Location = new Point(4, 4),
                 OutLine = false,
                 Parent = ItemLabel,
-                Text = HoverItem.Info.Name + " (" + HoverItem.Info.Grade.ToString() + ")"
+                Text = HoverItem.Info.Name + " (" + HoverItem.Info.Grade.ToString() + ")",
             };
             ItemLabel.Size = new Size(nameLabel.DisplayRectangle.Right + 4, nameLabel.DisplayRectangle.Bottom);
 
@@ -5773,6 +5774,7 @@ namespace Client.MirScenes
         public static bool AutoHit;
 
         public int AnimationCount;
+        
         public static List<Effect> Effects = new List<Effect>();
 
         public MapControl()
@@ -6190,9 +6192,11 @@ namespace Client.MirScenes
                 }
             }
 
+
+
             DXManager.Sprite.Flush();
             float oldOpacity = DXManager.Opacity;
-            DXManager.SetOpacity(0.4F); //ArcherTest
+            DXManager.SetOpacity(0.4F);
 
             MapObject.User.DrawBody();
             MapObject.User.DrawHead();
@@ -7286,6 +7290,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 1905,
                 Sound = SoundList.ButtonA,
+                Hint = "Inventory (I)"
             };
             InventoryButton.Click += (o, e) =>
             {
@@ -7304,6 +7309,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 1902,
                 Sound = SoundList.ButtonA,
+                Hint = "Character (C)"
             };
             CharacterButton.Click += (o, e) =>
             {
@@ -7325,6 +7331,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 1908,
                 Sound = SoundList.ButtonA,
+                Hint = "Skills (S)"
             };
             SkillButton.Click += (o, e) =>
             {
@@ -7346,6 +7353,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 1911,
                 Sound = SoundList.ButtonA,
+                Hint = "Quests (Q)"
             };
             QuestButton.Click += (o, e) =>
             {
@@ -7363,6 +7371,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 1914,
                 Sound = SoundList.ButtonA,
+                Hint = "Options (O)"
             };
             OptionButton.Click += (o, e) =>
             {
@@ -7380,6 +7389,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 1962,
                 Sound = SoundList.ButtonC,
+                Hint = "Menu"
             };
             MenuButton.Click += (o, e) =>
             {
@@ -7846,9 +7856,16 @@ namespace Client.MirScenes
                     e.Handled = true;
                     if (!string.IsNullOrEmpty(ChatTextBox.Text))
                     {
+                        string msg = ChatTextBox.Text;
+
+                        if (msg.ToUpper() == "@LEVELEFFECT")
+                        {
+                            Settings.LevelEffect = !Settings.LevelEffect;
+                        }
+
                         Network.Enqueue(new C.Chat
                         {
-                            Message = ChatTextBox.Text,
+                            Message = msg,
                         });
 
                         if (ChatTextBox.Text[0] == '/')
@@ -8652,10 +8669,10 @@ namespace Client.MirScenes
                         Blending = true,
                     };
                     animEffect.AfterAnimation += (o, e) => animEffect.Dispose();
+                    SoundManager.PlaySound(20000 + (ushort)Spell.MagicShield * 10);
                     break;
             }
 
-            SoundManager.PlaySound(20000 + (ushort)Spell.MagicShield * 10);
         }
     }
     public sealed class BeltDialog : MirImageControl
@@ -9704,7 +9721,7 @@ namespace Client.MirScenes
             if (viewRect.X < 0) viewRect.X = 0;
             if (viewRect.Y < 0) viewRect.Y = 0;
 
-            Libraries.MiniMap.Draw(map.MiniMap, viewRect, drawLocation, Color.FromArgb(255, 255, 255), false);
+            Libraries.MiniMap.Draw(map.MiniMap, viewRect, drawLocation, Color.FromArgb(255, 255, 255), _fade);
 
 
             int startPointX = (int)(viewRect.X / scaleX);
@@ -9805,6 +9822,12 @@ namespace Client.MirScenes
                 SetBigMode();
                 _fade = 1F;
             }
+            //else if(_fade == 1F)
+            //{
+            //    _bigMode = true;
+            //    SetBigMode();
+            //    _fade = 0.8F;
+            //}
             else
             {
                 _bigMode = false;
@@ -10560,7 +10583,8 @@ namespace Client.MirScenes
                 Parent = this,
                 Library = Libraries.Prguse,
                 Location = new Point(3, 12),
-                PressedIndex = 1966
+                PressedIndex = 1966,
+                Hint = "Exit"
             };
             ExitButton.Click += (o, e) => GameScene.Scene.QuitGame();
 
@@ -10571,7 +10595,8 @@ namespace Client.MirScenes
                 Parent = this,
                 Library = Libraries.Prguse,
                 Location = new Point(3, 31),
-                PressedIndex = 1969
+                PressedIndex = 1969,
+                Hint = "Log Out"
             };
             LogOutButton.Click += (o, e) => GameScene.Scene.LogOut();
 
@@ -10583,7 +10608,8 @@ namespace Client.MirScenes
                 PressedIndex = 1972,
                 Parent = this,
                 Library = Libraries.Prguse,
-                Location = new Point(3, 50)
+                Location = new Point(3, 50),
+                Hint = "Help (H)"
             };
             HelpButton.Click += (o, e) =>
             {
@@ -10650,6 +10676,7 @@ namespace Client.MirScenes
                 Parent = this,
                 Library = Libraries.Prguse,
                 Location = new Point(3, 145),
+                Hint = "Mount (J)"
             };
             RideButton.Click += (o, e) =>
             {
@@ -10666,6 +10693,7 @@ namespace Client.MirScenes
                 Parent = this,
                 Library = Libraries.Prguse,
                 Location = new Point(3, 164),
+                Hint = "Fishing (N)"
             };
             FishingButton.Click += (o, e) =>
             {
@@ -10734,6 +10762,7 @@ namespace Client.MirScenes
                 Parent = this,
                 Library = Libraries.Prguse,
                 Location = new Point(3, 240),
+                Hint = "Groups (P)"
             };
             GroupButton.Click += (o, e) =>
             {
@@ -10750,6 +10779,7 @@ namespace Client.MirScenes
                 Parent = this,
                 Library = Libraries.Prguse,
                 Location = new Point(3, 259),
+                Hint = "Guild (G)"
             };
             GuildButton.Click += (o, e) =>
             {

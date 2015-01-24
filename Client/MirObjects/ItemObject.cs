@@ -104,6 +104,10 @@ namespace Client.MirObjects
             NameLabel.Draw();
         }
 
+        public override void DrawBehindEffects()
+        {
+        }
+
         public override void DrawEffects()
         {
             

@@ -775,8 +775,11 @@ namespace Server.MirObjects
 
                         if (!ProcessDelayedExplosion(poison))
                         {
+                            if (Dead) break;
+
                             ExplosionInflictedStage = 0;
                             ExplosionInflictedTime = 0;
+                            
                             PoisonList.RemoveAt(i);
                             continue;
                         }
@@ -4300,6 +4303,7 @@ namespace Server.MirObjects
                         case BuffType.Hiding:
                         case BuffType.MoonLight:
                         case BuffType.DarkBody:
+                            if (spell == Spell.SwiftFeet) continue;
                             Buffs[i].ExpireTime = 0;
                             break;
                     }
@@ -5059,6 +5063,8 @@ namespace Server.MirObjects
                 return;
             }
 
+            if (Pets.Count > 1) return;
+
             UserItem item = GetAmulet(1);
             if (item == null) return;
 
@@ -5095,11 +5101,13 @@ namespace Server.MirObjects
             for (int i = 0; i < Pets.Count; i++)
             {
                 monster = Pets[i];
-                if ((monster.Info.Name != Settings.AngelName && monster.Info.Name != Settings.ShinsuName) || monster.Dead) continue;
+                if ((monster.Info.Name != Settings.ShinsuName) || monster.Dead) continue;
                 if (monster.Node == null) continue;
                 monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500));
                 return;
             }
+
+            if (Pets.Count > 1) return;
 
             UserItem item = GetAmulet(5);
             if (item == null) return;
@@ -5292,11 +5300,13 @@ namespace Server.MirObjects
             for (int i = 0; i < Pets.Count; i++)
             {
                 monster = Pets[i];
-                if ((monster.Info.Name != Settings.ShinsuName && monster.Info.Name != Settings.AngelName) || monster.Dead) continue;
+                if ((monster.Info.Name != Settings.AngelName) || monster.Dead) continue;
                 if (monster.Node == null) continue;
                 monster.ActionList.Add(new DelayedAction(DelayedType.Recall, Envir.Time + 500));
                 return;
             }
+
+            if (Pets.Count > 1) return;
 
             UserItem item = GetAmulet(2);
             if (item == null) return;
@@ -6748,6 +6758,7 @@ namespace Server.MirObjects
                 GuildRankName = CurrentMap.Info.NoNames ? "?????" : MyGuildRank != null ? MyGuildRank.Name : "",
                 Class = Class,
                 Gender = Gender,
+                Level = Level,
                 Location = CurrentLocation,
                 Direction = Direction,
                 Hair = Hair,

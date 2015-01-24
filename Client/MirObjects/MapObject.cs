@@ -42,7 +42,9 @@ namespace Client.MirObjects
         {
             get { return ActionFeed.Count > 0 ? ActionFeed[0] : null; }
         }
+
         public List<Effect> Effects = new List<Effect>();
+
         public MLibrary BodyLibrary;
         public Color DrawColour = Color.White, NameColour = Color.White;
         public MirLabel NameLabel, ChatLabel;
@@ -97,7 +99,11 @@ namespace Client.MirObjects
 
         public void AddBuffEffect(BuffType type)
         {
-            if (Effects.Any(b => b.LinkedToBuff == type)) return;
+            for (int i = 0; i < Effects.Count; i++)
+            {
+                if (!(Effects[i] is BuffEffect)) continue;
+                if (((BuffEffect)(Effects[i])).BuffType == type) return;
+            }
 
             PlayerObject ob = null;
 
@@ -109,20 +115,14 @@ namespace Client.MirObjects
             switch (type)
             {
                 case BuffType.Fury:
-                    Effects.Add(new Effect(Libraries.Magic3, 190, 7, 1400, this) { Repeat = true, LinkedToBuff = type });
+                    Effects.Add(new BuffEffect(Libraries.Magic3, 190, 7, 1400, this, false, type) { Repeat = true });
                     break;
                 case BuffType.SwiftFeet:
-                    if (ob != null)
-                    {
-                        ob.Sprint = true;
-                    }
+                    if (ob != null) ob.Sprint = true;
                     break;
                 case BuffType.MoonLight:
                 case BuffType.DarkBody:
-                    if (ob != null)
-                    {
-                        ob.Sneaking = true;
-                    }
+                    if (ob != null) ob.Sneaking = true;
                     break;
             }
         }
@@ -135,12 +135,11 @@ namespace Client.MirObjects
                 ob = (PlayerObject)this;
             }
 
-            for (int s = 0; s < Effects.Count; s++)
+            for (int i = 0; i < Effects.Count; i++)
             {
-                if (Effects[s].LinkedToBuff == BuffType.None) continue;
-
-                if (Effects[s].LinkedToBuff == type)
-                    Effects[s].Repeat = false;
+                if (!(Effects[i] is BuffEffect)) continue;
+                if (((BuffEffect)(Effects[i])).BuffType == type) continue;
+                Effects[i].Repeat = false;
             }
 
             switch (type)
@@ -284,6 +283,9 @@ namespace Client.MirObjects
             Libraries.Prguse2.Draw(index, new Rectangle(0, 0, (int)(32 * PercentHealth / 100F), 4), new Point(DisplayRectangle.X + 8, DisplayRectangle.Y - 64), Color.White, false);
         }
 
+        public abstract void DrawBehindEffects();
+
         public abstract void DrawEffects();
+
     }
 }

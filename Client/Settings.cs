@@ -75,6 +75,7 @@ namespace Client
             SkillBar = true,
             SkillSet = true,
             Effect = true,
+            LevelEffect = true,
             DropView = true,
             NameView = true,
             HPView = true;
@@ -127,6 +128,7 @@ namespace Client
             SkillBar = Reader.ReadBoolean("Game", "SkillBar", SkillBar);
             SkillSet = Reader.ReadBoolean("Game", "SkillSet", SkillSet);
             Effect = Reader.ReadBoolean("Game", "Effect", Effect);
+            LevelEffect = Reader.ReadBoolean("Game", "LevelEffect", Effect);
             DropView = Reader.ReadBoolean("Game", "DropView", DropView);
             NameView = Reader.ReadBoolean("Game", "NameView", NameView);
             HPView = Reader.ReadBoolean("Game", "HPMPView", HPView);
@@ -159,6 +161,7 @@ namespace Client
             Reader.Write("Game", "SkillBar", SkillBar);
             Reader.Write("Game", "SkillSet", SkillSet);
             Reader.Write("Game", "Effect", Effect);
+            Reader.Write("Game", "LevelEffect", LevelEffect);
             Reader.Write("Game", "DropView", DropView);
             Reader.Write("Game", "NameView", NameView);
             Reader.Write("Game", "HPMPView", HPView);

@@ -27,6 +27,7 @@ namespace Client.MirObjects
         public MirGender Gender;
         public MirClass Class;
         public byte Hair;
+        public byte Level;
 
         public MLibrary WeaponLibrary1, WeaponLibrary2, HairLibrary, WingLibrary, MountLibrary;
         public int Armour, Weapon, ArmourOffSet, HairOffSet, WeaponOffSet, WingOffset, MountOffset;
@@ -124,6 +125,7 @@ namespace Client.MirObjects
             GuildRankName = info.GuildRankName;
             Class = info.Class;
             Gender = info.Gender;
+            Level = info.Level;
 
             CurrentLocation = info.Location;
             MapLocation = info.Location;
@@ -163,6 +165,8 @@ namespace Client.MirObjects
             ProcessBuffs();
 
             SetAction();
+
+            SetEffects();
         }
         public void Update(S.PlayerUpdate info)
         {
@@ -171,6 +175,7 @@ namespace Client.MirObjects
             Light = info.Light;
             WingEffect = info.WingEffect;
             SetLibraries();
+            SetEffects();
         }
 
         public void ProcessBuffs()
@@ -195,6 +200,7 @@ namespace Client.MirObjects
                 GameScene.Scene.MountDialog.Hide();
 
             SetLibraries();
+            SetEffects();
 
             PlayMountSound();
         }
@@ -221,6 +227,7 @@ namespace Client.MirObjects
 
                 Fishing = p.Fishing;
                 SetLibraries();
+                SetEffects();
             }
 
             if (!HasFishingRod)
@@ -329,7 +336,7 @@ namespace Client.MirObjects
                     #endregion
 
                     #region WingEffects
-                    if (WingEffect > 0)
+                    if (WingEffect > 0 && WingEffect < 100)
                     {
                         if (AltAnim)
                             WingLibrary = (WingEffect - 1) < Libraries.ARHumEffect.Length ? Libraries.ARHumEffect[WingEffect - 1] : null;
@@ -443,7 +450,7 @@ namespace Client.MirObjects
                     #endregion
 
                     #region WingEffects
-                    if (WingEffect > 0)
+                    if (WingEffect > 0 && WingEffect < 100)
                     {
                         if(AltAnim)
                             WingLibrary = (WingEffect - 1) < Libraries.AHumEffect.Length ? Libraries.AHumEffect[WingEffect - 1] : null;
@@ -484,7 +491,7 @@ namespace Client.MirObjects
                     #endregion
 
                     #region WingEffects
-                    if (WingEffect > 0)
+                    if (WingEffect > 0 && WingEffect < 100)
                     {
                         WingLibrary = (WingEffect - 1) < Libraries.CHumEffect.Length ? Libraries.CHumEffect[WingEffect - 1] : null;
                     }
@@ -531,6 +538,31 @@ namespace Client.MirObjects
             DieSound = Gender == MirGender.Male ? SoundList.MaleDie : SoundList.FemaleDie;
             FlinchSound = Gender == MirGender.Male ? SoundList.MaleFlinch : SoundList.FemaleFlinch;
             #endregion
+        }
+
+        public virtual void SetEffects()
+        {
+            for (int i = Effects.Count - 1; i >= 0; i--)
+            {
+                if (Effects[i] is SpecialEffect) Effects[i].Remove();
+            }
+
+            if (RidingMount) return;
+
+            if (WingEffect >= 100)
+            {
+                switch(WingEffect)
+                {
+                    case 100: //Oma King Robe effect
+                        Effects.Add(new SpecialEffect(Libraries.Effect, 352, 33, 3600, this, true, false, 0) { Repeat = true });
+                        break;
+                }
+            }
+
+            //Effects when certain levels
+            if (Level >= 70) Effects.Add(new SpecialEffect(Libraries.Effect, 1210, 20, 2200, this, true, true, 1) { Repeat = true });
+            else if (Level >= 60) Effects.Add(new SpecialEffect(Libraries.Effect, 990, 20, 2200, this, true, true, 1) { Repeat = true });
+            else if (Level >= 50) Effects.Add(new SpecialEffect(Libraries.Effect, 296, 32, 3600, this, true, false, 1) { Repeat = true });
         }
 
         public override void Process()
@@ -3259,6 +3291,8 @@ namespace Client.MirObjects
             float oldOpacity = DXManager.Opacity;
             if (Hidden && !DXManager.Blending) DXManager.SetOpacity(0.5F);
 
+            if(Settings.Effect) DrawBehindEffects();
+
             if (RidingMount)
             {
                 DrawMount();
@@ -3291,14 +3325,40 @@ namespace Client.MirObjects
                     DrawWeapon2();
             }
 
+            if (Settings.Effect) DrawEffects();
+
             DXManager.SetOpacity(oldOpacity);
 
+        }
+
+        public override void DrawBehindEffects()
+        {
+            for (int i = 0; i < Effects.Count; i++)
+            {
+                if (!Effects[i].DrawBehind) continue;
+
+                if (Effects[i] is SpecialEffect)
+                {
+                    if(((SpecialEffect)Effects[i]).EffectType == 1 && !Settings.LevelEffect) continue;
+                }
+
+                Effects[i].Draw();
+            }
         }
 
         public override void DrawEffects()
         {
             for (int i = 0; i < Effects.Count; i++)
+            {
+                if (Effects[i].DrawBehind) continue;
+
+                if (Effects[i] is SpecialEffect)
+                {
+                    if (((SpecialEffect)Effects[i]).EffectType == 1 && !Settings.LevelEffect) continue;
+                }
+
                 Effects[i].Draw();
+            }
 
             switch (CurrentAction)
             {
@@ -3417,7 +3477,7 @@ namespace Client.MirObjects
         }
         public void DrawWings()
         {
-            if (WingEffect <= 0) return;
+            if (WingEffect <= 0 || WingEffect >= 100) return;
 
             if (WingLibrary != null)
                 WingLibrary.DrawBlend(DrawWingFrame + WingOffset, DrawLocation, DrawColour, true);
@@ -3426,6 +3486,8 @@ namespace Client.MirObjects
 
         public void DrawMount()
         {
+            if (MountType < 0 || !RidingMount) return;
+
             MountLibrary.Draw(DrawFrame - 416 + MountOffset, DrawLocation, DrawColour, true);
         }
 
