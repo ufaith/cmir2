@@ -174,6 +174,10 @@ namespace Client.MirObjects
             return false;
         }
 
+        public override void DrawBehindEffects()
+        {
+        }
+
         public override void DrawEffects()
         { 
         }

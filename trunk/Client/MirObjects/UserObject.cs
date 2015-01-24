@@ -11,7 +11,6 @@ namespace Client.MirObjects
     public class UserObject : PlayerObject
     {
         public uint Id;
-        public byte Level;
 
         public ushort HP, MaxHP, MP, MaxMP;
 
@@ -117,6 +116,11 @@ namespace Client.MirObjects
             base.SetLibraries();
         }
 
+        public override void SetEffects()
+        {
+            base.SetEffects();
+        }
+
         public void RefreshStats()
         {
             RefreshLevelStats();
@@ -130,6 +134,7 @@ namespace Client.MirObjects
             RefreshFishingStats();
 
             SetLibraries();
+            SetEffects();
             
             if (this == User && Light < 3) Light = 3;
             AttackSpeed = 1400 - ((ASpeed * 60) + Math.Min(370, (Level * 5)));

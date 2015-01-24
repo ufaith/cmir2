@@ -613,6 +613,7 @@ namespace ServerPackets
         public Color NameColour;
         public MirClass Class;
         public MirGender Gender;
+        public byte Level;
         public Point Location;
         public MirDirection Direction;
         public byte Hair;
@@ -644,6 +645,7 @@ namespace ServerPackets
             NameColour = Color.FromArgb(reader.ReadInt32());
             Class = (MirClass) reader.ReadByte();
             Gender = (MirGender) reader.ReadByte();
+            Level = reader.ReadByte();
             Location = new Point(reader.ReadInt32(), reader.ReadInt32());
             Direction = (MirDirection) reader.ReadByte();
             Hair = reader.ReadByte();
@@ -681,6 +683,7 @@ namespace ServerPackets
             writer.Write(NameColour.ToArgb());
             writer.Write((byte) Class);
             writer.Write((byte) Gender);
+            writer.Write(Level);
             writer.Write(Location.X);
             writer.Write(Location.Y);
             writer.Write((byte) Direction);

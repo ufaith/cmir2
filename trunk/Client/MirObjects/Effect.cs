@@ -29,11 +29,13 @@ namespace Client.MirObjects
         public bool Repeat;
         public long RepeatUntil;
 
-        public BuffType LinkedToBuff;
+        public bool DrawBehind = false;
+
+        //public BuffType LinkedToBuff;
         
         public event EventHandler Complete;
 
-        public Effect(MLibrary library, int baseIndex, int count, int duration, MapObject owner, long starttime = 0)
+        public Effect(MLibrary library, int baseIndex, int count, int duration, MapObject owner, long starttime = 0, bool drawBehind = false)
         {
             Library = library;
             BaseIndex = baseIndex;
@@ -44,8 +46,10 @@ namespace Client.MirObjects
             NextFrame = Start + (Duration / Count) * (CurrentFrame + 1);
             Owner = owner;
             Source = Owner.CurrentLocation;
+
+            DrawBehind = drawBehind;
         }
-        public Effect(MLibrary library, int baseIndex, int count, int duration, Point source, long starttime = 0)
+        public Effect(MLibrary library, int baseIndex, int count, int duration, Point source, long starttime = 0, bool drawBehind = false)
         {
             Library = library;
             BaseIndex = baseIndex;
@@ -55,6 +59,8 @@ namespace Client.MirObjects
 
             NextFrame = Start + (Duration / Count) * (CurrentFrame + 1);
             Source = source;
+
+            DrawBehind = drawBehind;
         }
 
         public void SetStart(long start)
@@ -350,6 +356,45 @@ namespace Client.MirObjects
                 return i;
             }
             return -1;
+        }
+    }
+
+
+    public class SpecialEffect : Effect
+    {
+        public uint EffectType = 0;
+
+        public SpecialEffect(MLibrary library, int baseIndex, int count, int duration, MapObject owner, bool blend, bool drawBehind, uint type)
+            : base(library, baseIndex, count, duration, owner, 0, drawBehind)
+        {
+            Blend = blend;
+            DrawBehind = drawBehind;
+            EffectType = type;
+            Light = -1;
+        }
+
+        public override void Process()
+        {
+            base.Process();
+        }
+    }
+
+    public class BuffEffect : Effect
+    {
+        public BuffType BuffType;
+
+        public BuffEffect(MLibrary library, int baseIndex, int count, int duration, MapObject owner, bool blend, BuffType buffType)
+            : base(library, baseIndex, count, duration, owner, 0)
+        {
+            Repeat = true;
+            Blend = blend;
+            BuffType = buffType;
+            Light = -1;
+        }
+
+        public override void Process()
+        {
+            base.Process();
         }
     }
 }
