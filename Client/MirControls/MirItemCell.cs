@@ -638,11 +638,17 @@ namespace Client.MirControls
                                 {
                                     if (CMain.Ctrl)
                                     {
-                                        //Combine
-                                        Network.Enqueue(new C.CombineItem { IDFrom = GameScene.SelectedCell.Item.UniqueID, IDTo = Item.UniqueID });
-                                        Locked = true;
-                                        GameScene.SelectedCell.Locked = true;
-                                        GameScene.SelectedCell = null;
+                                        MirMessageBox messageBox = new MirMessageBox("Do you want to try and combine these items?", MirMessageBoxButtons.YesNo);
+                                        messageBox.YesButton.Click += (o, e) =>
+                                        {
+                                            //Combine
+                                            Network.Enqueue(new C.CombineItem { IDFrom = GameScene.SelectedCell.Item.UniqueID, IDTo = Item.UniqueID });
+                                            Locked = true;
+                                            GameScene.SelectedCell.Locked = true;
+                                            GameScene.SelectedCell = null;
+                                        };
+
+                                        messageBox.Show();
                                         return;
                                     }
 

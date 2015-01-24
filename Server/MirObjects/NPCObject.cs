@@ -1980,6 +1980,7 @@ namespace Server.MirObjects
                         break;
 
                     case ActionType.ChangeGender:
+
                         switch (player.Info.Gender)
                         {
                             case MirGender.Male:

@@ -47,6 +47,8 @@
             this.IPAddressTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.AllowArcherCheckBox = new System.Windows.Forms.CheckBox();
+            this.AllowAssassinCheckBox = new System.Windows.Forms.CheckBox();
             this.StartGameCheckBox = new System.Windows.Forms.CheckBox();
             this.DCharacterCheckBox = new System.Windows.Forms.CheckBox();
             this.NCharacterCheckBox = new System.Windows.Forms.CheckBox();
@@ -60,8 +62,12 @@
             this.SafeZoneHealingCheckBox = new System.Windows.Forms.CheckBox();
             this.SafeZoneBorderCheckBox = new System.Windows.Forms.CheckBox();
             this.VPathDialog = new System.Windows.Forms.OpenFileDialog();
-            this.AllowAssassinCheckBox = new System.Windows.Forms.CheckBox();
-            this.AllowArcherCheckBox = new System.Windows.Forms.CheckBox();
+            this.LevelEffect1CheckBox = new System.Windows.Forms.CheckBox();
+            this.LevelEffect2CheckBox = new System.Windows.Forms.CheckBox();
+            this.LevelEffect3CheckBox = new System.Windows.Forms.CheckBox();
+            this.LevelEffect1TextBox = new System.Windows.Forms.TextBox();
+            this.LevelEffect2TextBox = new System.Windows.Forms.TextBox();
+            this.LevelEffect3TextBox = new System.Windows.Forms.TextBox();
             this.configTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -273,6 +279,26 @@
             this.tabPage3.Text = "Permissions";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // AllowArcherCheckBox
+            // 
+            this.AllowArcherCheckBox.AutoSize = true;
+            this.AllowArcherCheckBox.Location = new System.Drawing.Point(24, 197);
+            this.AllowArcherCheckBox.Name = "AllowArcherCheckBox";
+            this.AllowArcherCheckBox.Size = new System.Drawing.Size(119, 17);
+            this.AllowArcherCheckBox.TabIndex = 13;
+            this.AllowArcherCheckBox.Text = "Allow Create Archer";
+            this.AllowArcherCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // AllowAssassinCheckBox
+            // 
+            this.AllowAssassinCheckBox.AutoSize = true;
+            this.AllowAssassinCheckBox.Location = new System.Drawing.Point(24, 173);
+            this.AllowAssassinCheckBox.Name = "AllowAssassinCheckBox";
+            this.AllowAssassinCheckBox.Size = new System.Drawing.Size(129, 17);
+            this.AllowAssassinCheckBox.TabIndex = 12;
+            this.AllowAssassinCheckBox.Text = "Allow Create Assassin";
+            this.AllowAssassinCheckBox.UseVisualStyleBackColor = true;
+            // 
             // StartGameCheckBox
             // 
             this.StartGameCheckBox.AutoSize = true;
@@ -365,6 +391,12 @@
             // 
             // tabPage5
             // 
+            this.tabPage5.Controls.Add(this.LevelEffect3TextBox);
+            this.tabPage5.Controls.Add(this.LevelEffect2TextBox);
+            this.tabPage5.Controls.Add(this.LevelEffect1TextBox);
+            this.tabPage5.Controls.Add(this.LevelEffect3CheckBox);
+            this.tabPage5.Controls.Add(this.LevelEffect2CheckBox);
+            this.tabPage5.Controls.Add(this.LevelEffect1CheckBox);
             this.tabPage5.Controls.Add(this.SafeZoneHealingCheckBox);
             this.tabPage5.Controls.Add(this.SafeZoneBorderCheckBox);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
@@ -400,25 +432,56 @@
             this.VPathDialog.FileName = "Mir2.Exe";
             this.VPathDialog.Filter = "Executable Files (*.exe)|*.exe";
             // 
-            // AllowAssassinCheckBox
+            // LevelEffect1CheckBox
             // 
-            this.AllowAssassinCheckBox.AutoSize = true;
-            this.AllowAssassinCheckBox.Location = new System.Drawing.Point(24, 173);
-            this.AllowAssassinCheckBox.Name = "AllowAssassinCheckBox";
-            this.AllowAssassinCheckBox.Size = new System.Drawing.Size(129, 17);
-            this.AllowAssassinCheckBox.TabIndex = 12;
-            this.AllowAssassinCheckBox.Text = "Allow Create Assassin";
-            this.AllowAssassinCheckBox.UseVisualStyleBackColor = true;
+            this.LevelEffect1CheckBox.AutoSize = true;
+            this.LevelEffect1CheckBox.Location = new System.Drawing.Point(24, 83);
+            this.LevelEffect1CheckBox.Name = "LevelEffect1CheckBox";
+            this.LevelEffect1CheckBox.Size = new System.Drawing.Size(92, 17);
+            this.LevelEffect1CheckBox.TabIndex = 2;
+            this.LevelEffect1CheckBox.Text = "Level Effect 1";
+            this.LevelEffect1CheckBox.UseVisualStyleBackColor = true;
             // 
-            // AllowArcherCheckBox
+            // LevelEffect2CheckBox
             // 
-            this.AllowArcherCheckBox.AutoSize = true;
-            this.AllowArcherCheckBox.Location = new System.Drawing.Point(24, 197);
-            this.AllowArcherCheckBox.Name = "AllowArcherCheckBox";
-            this.AllowArcherCheckBox.Size = new System.Drawing.Size(119, 17);
-            this.AllowArcherCheckBox.TabIndex = 13;
-            this.AllowArcherCheckBox.Text = "Allow Create Archer";
-            this.AllowArcherCheckBox.UseVisualStyleBackColor = true;
+            this.LevelEffect2CheckBox.AutoSize = true;
+            this.LevelEffect2CheckBox.Location = new System.Drawing.Point(24, 107);
+            this.LevelEffect2CheckBox.Name = "LevelEffect2CheckBox";
+            this.LevelEffect2CheckBox.Size = new System.Drawing.Size(92, 17);
+            this.LevelEffect2CheckBox.TabIndex = 3;
+            this.LevelEffect2CheckBox.Text = "Level Effect 2";
+            this.LevelEffect2CheckBox.UseVisualStyleBackColor = true;
+            // 
+            // LevelEffect3CheckBox
+            // 
+            this.LevelEffect3CheckBox.AutoSize = true;
+            this.LevelEffect3CheckBox.Location = new System.Drawing.Point(24, 131);
+            this.LevelEffect3CheckBox.Name = "LevelEffect3CheckBox";
+            this.LevelEffect3CheckBox.Size = new System.Drawing.Size(92, 17);
+            this.LevelEffect3CheckBox.TabIndex = 4;
+            this.LevelEffect3CheckBox.Text = "Level Effect 3";
+            this.LevelEffect3CheckBox.UseVisualStyleBackColor = true;
+            // 
+            // LevelEffect1TextBox
+            // 
+            this.LevelEffect1TextBox.Location = new System.Drawing.Point(131, 80);
+            this.LevelEffect1TextBox.Name = "LevelEffect1TextBox";
+            this.LevelEffect1TextBox.Size = new System.Drawing.Size(34, 20);
+            this.LevelEffect1TextBox.TabIndex = 5;
+            // 
+            // LevelEffect2TextBox
+            // 
+            this.LevelEffect2TextBox.Location = new System.Drawing.Point(131, 104);
+            this.LevelEffect2TextBox.Name = "LevelEffect2TextBox";
+            this.LevelEffect2TextBox.Size = new System.Drawing.Size(34, 20);
+            this.LevelEffect2TextBox.TabIndex = 6;
+            // 
+            // LevelEffect3TextBox
+            // 
+            this.LevelEffect3TextBox.Location = new System.Drawing.Point(131, 128);
+            this.LevelEffect3TextBox.Name = "LevelEffect3TextBox";
+            this.LevelEffect3TextBox.Size = new System.Drawing.Size(34, 20);
+            this.LevelEffect3TextBox.TabIndex = 7;
             // 
             // ConfigForm
             // 
@@ -481,5 +544,11 @@
         private System.Windows.Forms.CheckBox SafeZoneHealingCheckBox;
         private System.Windows.Forms.CheckBox AllowArcherCheckBox;
         private System.Windows.Forms.CheckBox AllowAssassinCheckBox;
+        private System.Windows.Forms.TextBox LevelEffect3TextBox;
+        private System.Windows.Forms.TextBox LevelEffect2TextBox;
+        private System.Windows.Forms.TextBox LevelEffect1TextBox;
+        private System.Windows.Forms.CheckBox LevelEffect3CheckBox;
+        private System.Windows.Forms.CheckBox LevelEffect2CheckBox;
+        private System.Windows.Forms.CheckBox LevelEffect1CheckBox;
     }
 }

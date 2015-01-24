@@ -31,6 +31,12 @@ namespace Server
 
             SafeZoneBorderCheckBox.Checked = Settings.SafeZoneBorder;
             SafeZoneHealingCheckBox.Checked = Settings.SafeZoneHealing;
+            LevelEffect1CheckBox.Checked = Settings.ShowLevelEffect1;
+            LevelEffect1TextBox.Text = Settings.LevelEffect1.ToString();
+            LevelEffect2CheckBox.Checked = Settings.ShowLevelEffect2;
+            LevelEffect2TextBox.Text = Settings.LevelEffect2.ToString();
+            LevelEffect3CheckBox.Checked = Settings.ShowLevelEffect3;
+            LevelEffect3TextBox.Text = Settings.LevelEffect3.ToString();
 
             SaveDelayTextBox.Text = Settings.SaveDelay.ToString();
         }
@@ -81,9 +87,21 @@ namespace Server
             Settings.AllowCreateAssassin = AllowAssassinCheckBox.Checked;
             Settings.AllowCreateArcher = AllowArcherCheckBox.Checked;
 
-
             Settings.SafeZoneBorder = SafeZoneBorderCheckBox.Checked;
             Settings.SafeZoneHealing = SafeZoneHealingCheckBox.Checked;
+            Settings.ShowLevelEffect1 = LevelEffect1CheckBox.Checked;
+            Settings.ShowLevelEffect2 = LevelEffect2CheckBox.Checked;
+            Settings.ShowLevelEffect3 = LevelEffect3CheckBox.Checked;
+
+            byte tempbyte;
+            if (byte.TryParse(LevelEffect1TextBox.Text, out tempbyte))
+                Settings.LevelEffect1 = tempbyte;
+
+            if (byte.TryParse(LevelEffect2TextBox.Text, out tempbyte))
+                Settings.LevelEffect2 = tempbyte;
+
+            if (byte.TryParse(LevelEffect3TextBox.Text, out tempbyte))
+                Settings.LevelEffect3 = tempbyte;
         }
 
         private void IPAddressCheck(object sender, EventArgs e)
