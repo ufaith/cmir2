@@ -560,11 +560,17 @@ namespace Client.MirObjects
             }
 
             //Effects when certain levels
-            if (GameScene.Scene.ShowLevelEffect3 && Level >= GameScene.Scene.LevelEffect3) 
-                Effects.Add(new SpecialEffect(Libraries.Effect, 1210, 20, 2200, this, true, true, 1) { Repeat = true });
-            else if (GameScene.Scene.ShowLevelEffect2 && Level >= GameScene.Scene.LevelEffect2) 
-                Effects.Add(new SpecialEffect(Libraries.Effect, 990, 20, 2200, this, true, true, 1) { Repeat = true });
-            else if (GameScene.Scene.ShowLevelEffect1 && Level >= GameScene.Scene.LevelEffect1) 
+            if (GameScene.Scene.ShowLevelEffect3)
+            {
+                Effects.Add(new SpecialEffect(Libraries.Effect, 1210, 20, 3200, this, true, true, 1) { Repeat = true });
+                Effects.Add(new SpecialEffect(Libraries.Effect, 1240, 32, 4200, this, true, false, 1) { Repeat = true, Delay = 5000 });
+            }
+            else if (GameScene.Scene.ShowLevelEffect2)
+            {
+                Effects.Add(new SpecialEffect(Libraries.Effect, 990, 20, 3200, this, true, true, 1) { Repeat = true });
+                Effects.Add(new SpecialEffect(Libraries.Effect, 1020, 32, 4200, this, true, false, 1) { Repeat = true, Delay = 5000 });
+            }
+            else if (GameScene.Scene.ShowLevelEffect1)
                 Effects.Add(new SpecialEffect(Libraries.Effect, 296, 32, 3600, this, true, false, 1) { Repeat = true });
         }
 

@@ -125,7 +125,6 @@ namespace Client.MirScenes
         public static long PoisonCloudTime, SlashingBurstTime, FuryCoolTime, TrapCoolTime, SwiftFeetTime;
 
         public bool ShowLevelEffect1, ShowLevelEffect2, ShowLevelEffect3;
-        public byte LevelEffect1, LevelEffect2, LevelEffect3;
 
         public GameScene()
         {
@@ -3222,10 +3221,6 @@ namespace Client.MirScenes
             ShowLevelEffect1 = p.ShowLevelEffect1;
             ShowLevelEffect2 = p.ShowLevelEffect2;
             ShowLevelEffect3 = p.ShowLevelEffect3;
-
-            LevelEffect1 = p.LevelEffect1;
-            LevelEffect2 = p.LevelEffect2;
-            LevelEffect3 = p.LevelEffect3;
         }
 
         private void RefreshItem(S.RefreshItem p)

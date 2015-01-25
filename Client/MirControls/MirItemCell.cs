@@ -567,7 +567,12 @@ namespace Client.MirControls
         }
         public void RemoveItem()
         {
-            if (Item == null || !CanRemoveItem(Item)) return;
+            int count = 0;
+
+            for (int i = 0; i < GameScene.Scene.InventoryDialog.Grid.Length; i++)
+                if (GameScene.Scene.InventoryDialog.Grid[i].Item != null) count++;
+
+            if (Item == null || count < 1 || (MapObject.User.RidingMount && Item.Info.Type != ItemType.Torch)) return;
 
             if (Item.Info.StackSize > 1)
             {
@@ -1146,6 +1151,7 @@ namespace Client.MirControls
                     break;
             }
         }
+
         private int FreeSpace()
         {
             int count = 0;
