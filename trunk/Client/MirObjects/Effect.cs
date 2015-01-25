@@ -31,6 +31,9 @@ namespace Client.MirObjects
 
         public bool DrawBehind = false;
 
+        public long CurrentDelay;
+        public long Delay;
+
         //public BuffType LinkedToBuff;
         
         public event EventHandler Complete;
@@ -81,7 +84,7 @@ namespace Client.MirObjects
                 if (Repeat && (RepeatUntil == 0 || CMain.Time < RepeatUntil))
                 {
                     CurrentFrame = 0;
-                    Start = CMain.Time;
+                    Start = CMain.Time + Delay;
                     NextFrame = Start + (Duration / Count) * (CurrentFrame + 1);
                 }
                 else

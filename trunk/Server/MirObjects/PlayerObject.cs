@@ -1456,14 +1456,10 @@ namespace Server.MirObjects
 
             Enqueue(new S.LevelEffects
             {
-                ShowLevelEffect1 = Settings.ShowLevelEffect1,
-                ShowLevelEffect2 = Settings.ShowLevelEffect2,
-                ShowLevelEffect3 = Settings.ShowLevelEffect3,
-                LevelEffect1 = Settings.LevelEffect1,
-                LevelEffect2 = Settings.LevelEffect2,
-                LevelEffect3 = Settings.LevelEffect3
+                ShowLevelEffect1 = Info.Flags[990],
+                ShowLevelEffect2 = Info.Flags[991],
+                ShowLevelEffect3 = Info.Flags[992],
             });
-
 
             GetItemInfo();
             GetMapInfo();
