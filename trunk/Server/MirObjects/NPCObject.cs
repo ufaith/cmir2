@@ -981,6 +981,10 @@ namespace Server.MirObjects
                     if (parts.Length < 4) return;
                     CheckList.Add(new NPCChecks(CheckType.CheckCalc, parts[1], parts[2], parts[3]));
                     break;
+
+                case "INGUILD":
+                    CheckList.Add(new NPCChecks(CheckType.InGuild));
+                    break;
             }
 
         }
@@ -1274,6 +1278,11 @@ namespace Server.MirObjects
                 case "GIVEBUFF":
                     if (parts.Length < 5) return;
                     acts.Add(new NPCActions(ActionType.GiveBuff, parts[1], parts[2], parts[3], parts[4]));
+                    break;
+
+                case "ADDTOGUILD":
+                    if (parts.Length < 2) return;
+                    acts.Add(new NPCActions(ActionType.AddToGuild, parts[1]));
                     break;
             }
 
@@ -1738,6 +1747,9 @@ namespace Server.MirObjects
                             SMain.Enqueue(string.Format("Incorrect operator: {0}, Page: {1}", param[1], Key));
                             return true;
                         }
+                        break;
+                    case CheckType.InGuild:
+                        failed = player.MyGuild == null;
                         break;
                 }
 
@@ -2241,6 +2253,17 @@ namespace Server.MirObjects
 
                         player.AddBuff(buff);
                         break;
+
+                    case ActionType.AddToGuild:
+                        if (player.MyGuild != null) return;
+
+                        GuildObject guild = SMain.Envir.GetGuild(param[0]);
+
+                        if (guild == null) return;
+
+                        player.PendingGuildInvite = guild;
+                        player.GuildInvite(true);
+                        break;
                 }
             }
         }
@@ -2354,7 +2377,8 @@ namespace Server.MirObjects
         DelayGoto,
         Mov,
         Calc,
-        GiveBuff
+        GiveBuff,
+        AddToGuild
     }
     public enum CheckType
     {
@@ -2380,59 +2404,6 @@ namespace Server.MirObjects
         PetLevel,
         PetCount,
         CheckCalc,
-    }
-
-    public class NPCJumpList
-    {
-        public List<NPCJumpPage> JumpPages = new List<NPCJumpPage>();
-
-        public NPCJumpPage NextPage
-        {
-            get { return JumpPages.Count > 0 ? JumpPages.First() : null; }
-        }
-
-        public NPCJumpList() { }
-
-        public void AddPage(NPCJumpPage item)
-        {
-            JumpPages.Add(item);
-            JumpPages = JumpPages.OrderByDescending(r => r.Active).ThenBy(r => r.TimePeriod).ToList();
-        }
-
-        public void RemovePage()
-        {
-            if (JumpPages.Count() > 0) JumpPages.Remove(JumpPages.First());
-        }
-    }
-
-    public class NPCJumpPage
-    {
-        public uint NPCID;
-        public string Page;
-
-        public Map PlayerMap;
-        public Point PlayerCoords;
-
-        public bool Active;
-        private long _timePeriod;
-        public long TimePeriod
-        {
-            get
-            {
-                return _timePeriod;
-            }
-            set
-            {
-                _timePeriod = SMain.Envir.Time + (value * 1000);
-            }
-        }
-    }
-
-    public class NPCListener
-    {
-        public uint NPCID;
-        public string NPCGotoPage;
-        public bool Active;
-        public string NPCVariable;
+        InGuild
     }
 }

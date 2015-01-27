@@ -1066,7 +1066,15 @@ namespace Client.MirObjects
                                 else Frames.Frames.TryGetValue(CurrentAction, out Frame);
                                 if (ElementCasted) ElementCasted = false;
                                 break;
-
+                            case Spell.BindingShot://ArcherSpells - BindingShot
+                                Frames.Frames.TryGetValue(MirAction.AttackRange2, out Frame);
+                                CurrentAction = MirAction.AttackRange2;
+                                if (this == User)
+                                {
+                                    MapControl.NextAction = CMain.Time + 1000;
+                                    GameScene.SpellTime = CMain.Time + 1000; //Spell Delay
+                                }
+                                break;
                             default:
                                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
                                 break;
@@ -2335,7 +2343,23 @@ namespace Client.MirObjects
                                                 break;
                                         }
                                     break;
-
+                                case Spell.BindingShot://ArcherSpells - BindingShot
+                                    switch (FrameIndex)
+                                    {
+                                        case 7:
+                                            SoundManager.PlaySound(20000 + 121 * 10);
+                                            missile = CreateProjectile(2750, Libraries.Magic3, true, 5, 10, 5);
+                                            StanceTime = CMain.Time + StanceDelay;
+                                            if (missile.Target != null)
+                                            {
+                                                missile.Complete += (o, e) =>
+                                                {
+                                                    SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 7);//sound M130-7
+                                                };
+                                            }
+                                            break;
+                                    }
+                                    break;
                                 case Spell.DelayedExplosion://ArcherSpells - DelayedExplosion
                                     switch (FrameIndex)
                                     {

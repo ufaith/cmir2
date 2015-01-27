@@ -102,16 +102,21 @@ namespace Client.MirScenes.Dialogs
             };
             CloseButton.Click += (o, e) => Hide();
 
-            LoadPages();
+            LoadImagePages();
 
             DisplayPage();
         }
 
-        private void LoadPages()
+        private void LoadImagePages()
         {
             Point location = new Point(12, 35);
 
-            List<HelpPage> pages = new List<HelpPage> { 
+            Dictionary<string, string> keybinds = new Dictionary<string, string>();
+
+            List<HelpPage> imagePages = new List<HelpPage> { 
+                new HelpPage("Shortcut Information", -1, new ShortcutPage1 { Parent = this } ) { Parent = this, Location = location, Visible = false }, 
+                new HelpPage("Shortcut Information", -1, new ShortcutPage2 { Parent = this } ) { Parent = this, Location = location, Visible = false }, 
+                new HelpPage("Chat Shortcuts", -1, new ShortcutPage3 { Parent = this } ) { Parent = this, Location = location, Visible = false }, 
                 new HelpPage("Movements", 0, null) { Parent = this, Location = location, Visible = false }, 
                 new HelpPage("Attacking", 1, null) { Parent = this, Location = location, Visible = false }, 
                 new HelpPage("Collecting Items", 2, null) { Parent = this, Location = location, Visible = false },
@@ -143,8 +148,9 @@ namespace Client.MirScenes.Dialogs
                 new HelpPage("Gems and Orbs", 28, null) { Parent = this, Location = location, Visible = false },
             };
 
-            Pages.AddRange(pages);
+            Pages.AddRange(imagePages);
         }
+
 
         public void DisplayPage(string pageName)
         {
@@ -167,14 +173,20 @@ namespace Client.MirScenes.Dialogs
             if (id < 0) id = 0;
 
             if (CurrentPage != null)
+            {
                 CurrentPage.Visible = false;
+                if (CurrentPage.Page != null) CurrentPage.Page.Visible = false;
+            }
 
             CurrentPage = Pages[id];
 
             if (CurrentPage == null) return;
 
             CurrentPage.Visible = true;
+            if (CurrentPage.Page != null) CurrentPage.Page.Visible = true;
             CurrentPageNumber = id;
+
+            CurrentPage.PageTitleLabel.Text = id + 1 + ". " + CurrentPage.Title;
 
             PageLabel.Text = string.Format("{0} / {1}", id + 1, Pages.Count);
 
@@ -199,6 +211,151 @@ namespace Client.MirScenes.Dialogs
                 Show();
             else
                 Hide();
+        }
+    }
+
+    public class ShortcutPage1 : ShortcutInfoPage
+    {
+        public ShortcutPage1()
+        {
+            Shortcuts = new List<ShortcutInfo>();
+            Shortcuts.Add(new ShortcutInfo("Alt + Q", "Exit the game"));
+            Shortcuts.Add(new ShortcutInfo("Alt + X", "Log out"));
+            Shortcuts.Add(new ShortcutInfo("F1 - F8", "Skill buttons"));
+            Shortcuts.Add(new ShortcutInfo("F9 , I", "Inventory window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("F10 , C", "Status window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("F11 , S", "Skill window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("W", "Friend window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("P", "Group window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("T", "Trade window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("V", "Minimap window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("G", "Guild window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("Y", "Gameshop window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("K", "Rental window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("M", "Message window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("L", "Engagement window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("Z", "Belt window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("O", "Option window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("H", "Help window (open / close)"));
+
+            LoadKeyBinds();
+        }
+    }
+    public class ShortcutPage2 : ShortcutInfoPage
+    {
+        public ShortcutPage2()
+        {
+            Shortcuts = new List<ShortcutInfo>();
+            Shortcuts.Add(new ShortcutInfo("Ctrl + A", "Tooggle pet attack pet"));
+            Shortcuts.Add(new ShortcutInfo("Ctrl + F", "Change the font in the chat box"));
+            Shortcuts.Add(new ShortcutInfo("Ctrl + H", "Toggle player attack mode"));
+            Shortcuts.Add(new ShortcutInfo("", "Peace Mode - Attack monsters only"));
+            Shortcuts.Add(new ShortcutInfo("", "Group Mode - Attack all subjects except your group members"));
+            Shortcuts.Add(new ShortcutInfo("", "Guild Mode - Attack all subjects except your guild members"));
+            Shortcuts.Add(new ShortcutInfo("", "Good/Evil Mode - Attack PK players and monsters only"));
+            Shortcuts.Add(new ShortcutInfo("", "All Attack Mode - Attack all subjects"));
+            Shortcuts.Add(new ShortcutInfo("B", "Show the field map"));
+            Shortcuts.Add(new ShortcutInfo("¬ / Ctrl", "Change the skill bar"));
+            Shortcuts.Add(new ShortcutInfo("R", "Show the skill bar"));
+            Shortcuts.Add(new ShortcutInfo("D", "Auto run on / off"));
+            Shortcuts.Add(new ShortcutInfo("Insert", "Show / Hide interface"));
+            Shortcuts.Add(new ShortcutInfo("Tab", "Highlight / Pickup Items"));
+            Shortcuts.Add(new ShortcutInfo("Ctrl + Right Click", "Show other players kits"));
+            Shortcuts.Add(new ShortcutInfo("F12", "Chat macros"));
+            Shortcuts.Add(new ShortcutInfo("Prnt Scrn", "Screen Capture"));
+            Shortcuts.Add(new ShortcutInfo("N", "Open / Close fishing window"));
+
+            LoadKeyBinds();
+        }
+    }
+    public class ShortcutPage3 : ShortcutInfoPage
+    {
+        public ShortcutPage3()
+        {
+            Shortcuts = new List<ShortcutInfo>();
+            Shortcuts.Add(new ShortcutInfo("/(username)", "Command to whisper to others"));
+            Shortcuts.Add(new ShortcutInfo("!(text)", "Command to shout to others nearby"));
+            Shortcuts.Add(new ShortcutInfo("!~(text)", "Command to guild chat"));
+
+            LoadKeyBinds();
+        }
+    }
+
+    public class ShortcutInfo
+    {
+        public string Shortcut { get; set; }
+        public string Information { get; set; }
+
+        public ShortcutInfo(string shortcut, string info)
+        {
+            Shortcut = shortcut;
+            Information = info;
+        }
+    }
+
+    public class ShortcutInfoPage : MirControl
+    {
+        protected List<ShortcutInfo> Shortcuts = new List<ShortcutInfo>();
+
+        public ShortcutInfoPage()
+        {
+            Visible = false;
+
+            MirLabel shortcutTitleLabel = new MirLabel
+            {
+                Text = "Shortcuts",
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                ForeColour = Color.White,
+                Font = new Font(Settings.FontName, 10F),
+                Parent = this,
+                AutoSize = true,
+                Location = new Point(13, 75),
+                Size = new Size(100, 30)
+            };
+
+            MirLabel infoTitleLabel = new MirLabel
+            {
+                Text = "Information",
+                DrawFormat = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter,
+                ForeColour = Color.White,
+                Font = new Font(Settings.FontName, 10F),
+                Parent = this,
+                AutoSize = true,
+                Location = new Point(114, 75),
+                Size = new Size(405, 30)
+            };
+        }
+
+        public void LoadKeyBinds()
+        {
+            if (Shortcuts == null) return;
+
+            for (int i = 0; i < Shortcuts.Count; i++)
+            {
+                MirLabel shortcutLabel = new MirLabel
+                {
+                    Text = Shortcuts[i].Shortcut,
+                    ForeColour = Color.Yellow,
+                    DrawFormat = TextFormatFlags.VerticalCenter,
+                    Font = new Font(Settings.FontName, 9F),
+                    Parent = this,
+                    AutoSize = true,
+                    Location = new Point(18, 107 + (20 * i)),
+                    Size = new Size(95, 23),
+                };
+
+                MirLabel informationLabel = new MirLabel
+                {
+                    Text = Shortcuts[i].Information,
+                    DrawFormat = TextFormatFlags.VerticalCenter,
+                    ForeColour = Color.White,
+                    Font = new Font(Settings.FontName, 9F),
+                    Parent = this,
+                    AutoSize = true,
+                    Location = new Point(119, 107 + (20 * i)),
+                    Size = new Size(400, 23),
+                };
+            }  
         }
     }
 

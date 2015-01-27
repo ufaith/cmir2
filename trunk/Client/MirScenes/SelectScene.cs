@@ -442,19 +442,19 @@ namespace Client.MirScenes
                 switch ((MirClass)Characters[_selected].Class)
                 {
                     case MirClass.Warrior:
-                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 220 : 500;
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 20 : 300; //220 : 500;
                         break;
                     case MirClass.Wizard:
-                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 240 : 520;
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 40 : 320; //240 : 520;
                         break;
                     case MirClass.Taoist:
-                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 260 : 540;
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 60 : 340; //260 : 540;
                         break;
                     case MirClass.Assassin:
-                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 280 : 560;
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 80 : 360; //280 : 560;
                         break;
                     case MirClass.Archer:
-                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 160 : 180;
+                        CharacterDisplay.Index = (byte)Characters[_selected].Gender == 0 ? 100 : 140; //160 : 180;
                         break;
                 }
 
@@ -604,7 +604,7 @@ namespace Client.MirScenes
                         Animated = true,
                         AnimationCount = 16,
                         AnimationDelay = 250,
-                        Index = 220,
+                        Index = 20,
                         Library = Libraries.ChrSel,
                         Location = new Point(120, 250),
                         Parent = this,
@@ -612,7 +612,7 @@ namespace Client.MirScenes
                     };
                 CharacterDisplay.AfterDraw += (o, e) =>
                     {
-                       // if (_class == MirClass.Wizard)
+                        if (_class == MirClass.Wizard)
                             Libraries.ChrSel.DrawBlend(CharacterDisplay.Index + 560, CharacterDisplay.DisplayLocationWithoutOffSet, Color.White, true);
                     };
 
@@ -810,27 +810,27 @@ namespace Client.MirScenes
                     case MirClass.Warrior:
                         WarriorButton.Index = 2427;
                         Description.Text = WarriorDescription;
-                        CharacterDisplay.Index = (byte)_gender == 0 ? 220 : 500;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 20 : 300; //220 : 500;
                         break;
                     case MirClass.Wizard:
                         WizardButton.Index = 2430;
                         Description.Text = WizardDescription;
-                        CharacterDisplay.Index = (byte)_gender == 0 ? 240 : 520;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 40 : 320; //240 : 520;
                         break;
                     case MirClass.Taoist:
                         TaoistButton.Index = 2433;
                         Description.Text = TaoistDescription;
-                        CharacterDisplay.Index = (byte)_gender == 0 ? 260 : 540;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 60 : 340; //260 : 540;
                         break;
                     case MirClass.Assassin:
                         AssassinButton.Index = 2436;
                         Description.Text = AssassinDescription;
-                        CharacterDisplay.Index = (byte)_gender == 0 ? 280 : 560;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 80 : 360; //280 : 560;
                         break;
                     case MirClass.Archer:
                         ArcherButton.Index = 2439;
                         Description.Text = ArcherDescription;
-                        CharacterDisplay.Index = (byte)_gender == 0 ? 160 : 180;
+                        CharacterDisplay.Index = (byte)_gender == 0 ? 100 : 140; //160 : 180;
                         break;
                 }
 
