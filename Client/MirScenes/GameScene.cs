@@ -27,11 +27,6 @@ namespace Client.MirScenes
         Consign
     }
 
-    public enum OutputType
-    {
-        Normal, Quest
-    }
-
     public sealed class GameScene : MirScene
     {
         public static GameScene Scene;
@@ -199,7 +194,7 @@ namespace Client.MirScenes
 
         }
 
-        public void OutputMessage(string message, OutputType type = OutputType.Normal)
+        public void OutputMessage(string message, OutputMessageType type = OutputMessageType.Normal)
         {
             OutputMessages.Add(new OutPutMessage { Message = message, ExpireTime = CMain.Time + 5000, Type = type });
             if (OutputMessages.Count > 10)
@@ -221,7 +216,7 @@ namespace Client.MirScenes
                     Color color;
                     switch (OutputMessages[i].Type)
                     {
-                        case OutputType.Quest:
+                        case OutputMessageType.Quest:
                             color = Color.Gold;
                             break;
                         default:
@@ -634,7 +629,7 @@ namespace Client.MirScenes
 
             if (PickedUpGold || (SelectedCell != null && SelectedCell.Item != null))
             {
-                int image = PickedUpGold ? 116 : SelectedCell.Item.Info.Image;
+                int image = PickedUpGold ? 116 : SelectedCell.Item.GetRealItemImage();
                 Size imgSize = Libraries.Items.GetTrueSize(image);
                 Point p = CMain.MPoint.Add(-imgSize.Width / 2, -imgSize.Height / 2);
 
@@ -1186,6 +1181,12 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.LevelEffects:
                     LevelEffects((S.LevelEffects)p);
                     break;
+                case (short)ServerPacketIds.SetBindingShot://ArcherSpells - BindingShot
+                    SetBindingShot((S.SetBindingShot)p);
+                    break;
+                case (short)ServerPacketIds.SendOutputMessage://ArcherSpells - BindingShot
+                    SendOutputMessage((S.SendOutputMessage)p);
+                    break;
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -1275,7 +1276,14 @@ namespace Client.MirScenes
 
                 double timeRemaining = Math.Round((buff.Expire - CMain.Time) / 1000D);
 
-                ((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : timeRemaining.ToString();   
+                if (timeRemaining <= 5)
+                {
+                    double time = (buff.Expire - CMain.Time) / 100D;
+
+                    if (Math.Round(time) % 10 < 5) image.Index = -1;
+                }
+
+                //((MirLabel)image.Controls[0]).Text = buff.Infinite ? "" : timeRemaining.ToString();   
             }
         }
         public int BuffImage(BuffType type)
@@ -2092,7 +2100,7 @@ namespace Client.MirScenes
             Bind(p.Item);
             AddQuestItem(p.Item);
 
-            OutputMessage(string.Format("You found {0}.", p.Item.Name), OutputType.Quest);
+            //OutputMessage(string.Format("You found {0}.", p.Item.Name), OutputMessageType.Quest);
         }
 
         private void GainedGold(S.GainedGold p)
@@ -3478,6 +3486,46 @@ namespace Client.MirScenes
             int effectid = DelayedExplosionEffect.GetOwnerEffectID(p.ObjectID);
             if (effectid >= 0)
                 DelayedExplosionEffect.effectlist[effectid].Remove();
+        }
+
+        private void SetBindingShot(S.SetBindingShot p)
+        {
+            if (p.ObjectID == User.ObjectID) return;
+
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID) continue;
+                if (ob.Race != ObjectType.Monster) continue;
+
+                TrackableEffect NetCast = new TrackableEffect(new Effect(Libraries.MagicC, 0, 8, 700, ob));
+                NetCast.EffectName = "BindingShotDrop";
+
+                //TrackableEffect NetDropped = new TrackableEffect(new Effect(Libraries.ArcherMagic, 7, 1, 1000, ob, CMain.Time + 600) { Repeat = true, RepeatUntil = CMain.Time + (p.Value - 1500) });
+                TrackableEffect NetDropped = new TrackableEffect(new Effect(Libraries.MagicC, 7, 1, 1000, ob) { Repeat = true, RepeatUntil = CMain.Time + (p.Value - 1500) });
+                NetDropped.EffectName = "BindingShotDown";
+
+                TrackableEffect NetFall = new TrackableEffect(new Effect(Libraries.MagicC, 8, 8, 700, ob));
+                NetFall.EffectName = "BindingShotFall";
+
+                NetDropped.Complete += (o1, e1) =>
+                {
+                    SoundManager.PlaySound(20000 + 130 * 10 + 6);//sound M130-6
+                    ob.Effects.Add(NetFall);
+                };
+                NetCast.Complete += (o, e) =>
+                {
+                    SoundManager.PlaySound(20000 + 130 * 10 + 5);//sound M130-5
+                    ob.Effects.Add(NetDropped);
+                };
+                ob.Effects.Add(NetCast);
+                break;
+            }
+        }
+
+        private void SendOutputMessage(S.SendOutputMessage p)
+        {
+            OutputMessage(p.Message, p.Type);
         }
 
         private void NPCConsign()
@@ -5623,7 +5671,7 @@ namespace Client.MirScenes
         {
             public string Message;
             public long ExpireTime;
-            public OutputType Type;
+            public OutputMessageType Type;
         }
 
         #region Disposable
@@ -6859,6 +6907,7 @@ namespace Client.MirScenes
                 case Spell.DoubleShot:
                 case Spell.ElementalShot:
                 case Spell.DelayedExplosion:
+                case Spell.BindingShot:
                     if (!User.HasClassWeapon)
                     {
                         GameScene.Scene.OutputMessage("You must be wearing a bow to perform this skill.");
@@ -7418,6 +7467,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 828,
                 Sound = SoundList.ButtonC,
+                Hint = "Game Shop"
             };
             GameShopButton.Click += (o, e) =>
             {
@@ -9642,6 +9692,7 @@ namespace Client.MirScenes
                 Location = new Point(4, 131),
                 Library = Libraries.Prguse,
                 Sound = SoundList.ButtonA,
+                Hint = "Mail"
             };
 
             BigMapButton = new MirButton
@@ -9653,6 +9704,7 @@ namespace Client.MirScenes
                 Location = new Point(25, 131),
                 Library = Libraries.Prguse,
                 Sound = SoundList.ButtonA,
+                Hint = "Big Map"
             };
             BigMapButton.Click += (o, e) => GameScene.Scene.BigMapDialog.Toggle();
 
@@ -10596,7 +10648,7 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Location = new Point(3, 12),
                 PressedIndex = 1966,
-                Hint = "Exit"
+                Hint = "Exit (Alt + Q)"
             };
             ExitButton.Click += (o, e) => GameScene.Scene.QuitGame();
 
@@ -10608,7 +10660,7 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Location = new Point(3, 31),
                 PressedIndex = 1969,
-                Hint = "Log Out"
+                Hint = "Log Out (Alt + X)"
             };
             LogOutButton.Click += (o, e) => GameScene.Scene.LogOut();
 
@@ -11340,7 +11392,7 @@ namespace Client.MirScenes
             {
                 if (SelectedItem.Price > GameScene.Gold)
                 {
-                    GameScene.Scene.ChatDialog.ReceiveChat("You do no have enough Gold.", ChatType.System);
+                    GameScene.Scene.ChatDialog.ReceiveChat("You do not have enough Gold.", ChatType.System);
                     return;
                 }
 
@@ -11591,7 +11643,7 @@ namespace Client.MirScenes
                         GameScene.Scene.ChatDialog.ReceiveChat("Cannot store this item.", ChatType.System);
                         return;
                     }
-                    MirAmountBox box = new MirAmountBox("Consignment Price:", TargetItem.Info.Image, Globals.MaxConsignment, Globals.MinConsignment)
+                    MirAmountBox box = new MirAmountBox("Consignment Price:", TargetItem.GetRealItemImage(), Globals.MaxConsignment, Globals.MinConsignment)
                     {
                         InputTextBox = { Text = string.Empty },
                         Amount = 0
@@ -11627,7 +11679,7 @@ namespace Client.MirScenes
 
             if (GameScene.SelectedCell.Item != null && (GameScene.SelectedCell.Item.Info.StackSize > 1 && GameScene.SelectedCell.Item.Count > 1))
             {
-                MirAmountBox amountBox = new MirAmountBox("Sell Amount:", GameScene.SelectedCell.Item.Info.Image, GameScene.SelectedCell.Item.Count);
+                MirAmountBox amountBox = new MirAmountBox("Sell Amount:", GameScene.SelectedCell.Item.GetRealItemImage(), GameScene.SelectedCell.Item.Count);
 
                 amountBox.OKButton.Click += (o, a) =>
                 {
@@ -15410,7 +15462,8 @@ namespace Client.MirScenes
                 Location = new Point(20, 0),
                 HoverIndex = 2111,
                 PressedIndex = 2112,
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+                Hint = "Dura Panel"
             };
             Character.Click += (o, e) =>
             {

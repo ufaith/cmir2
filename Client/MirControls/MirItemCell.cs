@@ -197,7 +197,7 @@ namespace Client.MirControls
 
                                 if (Item.Count > 1)
                                 {
-                                    MirAmountBox amountBox = new MirAmountBox("Split Amount:", Item.Info.Image, Item.Count - 1);
+                                    MirAmountBox amountBox = new MirAmountBox("Split Amount:", Item.GetRealItemImage(), Item.Count - 1);
 
                                     amountBox.OKButton.Click += (o, a) =>
                                     {
@@ -237,7 +237,7 @@ namespace Client.MirControls
             MirAmountBox amountBox;
             if (Item.Count > 1)
             {
-                amountBox = new MirAmountBox("Purchase Amount:", Item.Info.Image, Item.Count);
+                amountBox = new MirAmountBox("Purchase Amount:", Item.GetRealItemImage(), Item.Count);
 
                 amountBox.OKButton.Click += (o, e) =>
                 {
@@ -247,7 +247,7 @@ namespace Client.MirControls
             }
             else
             {
-                amountBox = new MirAmountBox("Purchase", Item.Info.Image, string.Format("Value: {0:#,##0} Gold", Item.Price()));
+                amountBox = new MirAmountBox("Purchase", Item.GetRealItemImage(), string.Format("Value: {0:#,##0} Gold", Item.Price()));
 
                 amountBox.OKButton.Click += (o, e) =>
                 {
@@ -347,7 +347,7 @@ namespace Client.MirControls
                     }
                     break;
                 case ItemType.Amulet:
-                    if (Item.Info.Shape == 0) return;
+                    //if (Item.Info.Shape == 0) return;
 
                     if (dialog.Grid[(int)EquipmentSlot.Amulet].Item != null && Item.Info.Type == ItemType.Amulet)
                     {
@@ -356,8 +356,6 @@ namespace Client.MirControls
                             Network.Enqueue(new C.MergeItem { GridFrom = GridType, GridTo = MirGridType.Equipment, IDFrom = Item.UniqueID, IDTo = dialog.Grid[(int)EquipmentSlot.Amulet].Item.UniqueID });
 
                             Locked = true;
-                            GameScene.SelectedCell.Locked = true;
-                            GameScene.SelectedCell = null;
                             return;
                         }
                     }
@@ -1197,7 +1195,7 @@ namespace Client.MirControls
                 case EquipmentSlot.RingR:
                     return type == ItemType.Ring;
                 case EquipmentSlot.Amulet:
-                    return type == ItemType.Amulet && i.Info.Shape > 0;
+                    return type == ItemType.Amulet;// && i.Info.Shape > 0;
                 case EquipmentSlot.Boots:
                     return type == ItemType.Boots;
                 case EquipmentSlot.Belt:
@@ -1479,7 +1477,9 @@ namespace Client.MirControls
         protected internal override void DrawControl()
         {
             if (GameScene.SelectedCell == this || Locked)
+            {
                 base.DrawControl();
+            }
 
             if (Locked) return;
 
@@ -1489,40 +1489,18 @@ namespace Client.MirControls
 
                 if (Library != null)
                 {
-                    Size imgSize = Library.GetTrueSize(Item.Info.Image);
+                    ushort image = Item.GetRealItemImage();
+
+                    Size imgSize = Library.GetTrueSize(image);
 
                     Point offSet = new Point((Size.Width - imgSize.Width) / 2, (Size.Height - imgSize.Height) / 2);
 
-                    Library.Draw(Item.Info.Image, DisplayLocation.Add(offSet), ForeColour, UseOffSet, 1F);
+                    Library.Draw(image, DisplayLocation.Add(offSet), ForeColour, UseOffSet, 1F);
                 }
-
             }
             else
                 DisposeCountLabel();
         }
-
-        //private ushort GetCorrectImage()
-        //{
-        //    ushort image = Item.Info.Image;
-
-        //    switch(Item.Info.Type)
-        //    {
-        //       case ItemType.Amulet:
-        //            if (Item.Info.Shape == 1 && Item.Info.StackSize > 0 && Item.Info.Image == 3673)
-        //            {
-        //                if (Item.Count > 200) return (ushort)(image + 2);
-        //                if (Item.Count > 100) return (ushort)(image + 1);
-        //            }
-        //            else if (Item.Info.Shape == 2 && Item.Info.StackSize > 0 && Item.Info.Image == 3670)
-        //            {
-        //                if (Item.Count > 200) return (ushort)(image + 2);
-        //                if (Item.Count > 100) return (ushort)(image + 1);
-        //            }
-        //            return image;
-        //        default:
-        //            return image;
-        //    }
-        //}
 
         protected override void OnMouseEnter()
         {

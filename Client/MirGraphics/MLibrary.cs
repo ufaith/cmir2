@@ -26,6 +26,8 @@ namespace Client.MirGraphics
             Magic2 = new MLibrary(Settings.DataPath + "Magic2"),
             Magic3 = new MLibrary(Settings.DataPath + "Magic3"),
             Effect = new MLibrary(Settings.DataPath + "Effect"),
+            MagicC = new MLibrary(Settings.DataPath + "MagicC"),
+
             CustomEffects = new MLibrary(Settings.DataPath + "CustomEffects");
         
 
@@ -221,6 +223,8 @@ namespace Client.MirGraphics
             Magic2.Initialize();
             Progress++;
             Magic3.Initialize();
+            Progress++;
+            MagicC.Initialize();
             Progress++;
             Effect.Initialize();
             Progress++;

@@ -6,12 +6,19 @@ using System.Reflection;
 using C = ClientPackets;
 using S = ServerPackets;
 
-public enum ItemGrade
+
+public enum OutputMessageType : byte
+{
+    Normal, 
+    Quest
+}
+
+public enum ItemGrade : byte
 {
     Common = 0,
-    Rare,
-    Legendary,
-    Mythical,
+    Rare = 1,
+    Legendary = 2,
+    Mythical = 3,
 }
 
 public enum QuestType : byte
@@ -646,7 +653,8 @@ public enum Spell : byte
     SummonSnakes = 137,
     NapalmShot = 138,
     OneWithNature = 139,
-
+    BindingShot = 140,
+    
 
     //Map Events
     DigOutZombie = 200,
@@ -870,33 +878,29 @@ public enum ServerPacketIds : short
     MountUpdate,
     EquipSlotItem,
     FishingUpdate,
-
     ChangeQuest,
     CompleteQuest,
     ShareQuest,
     NewQuestInfo,
     GainedQuestItem,
     DeleteQuestItem,
-
     CancelReincarnation,
     RequestReincarnation,
-
     UserBackStep,//ArcherSpells - Backstep
     ObjectBackStep,//ArcherSpells - Backstep
     UserAttackMove,
     CombineItem,
     ItemUpgraded,
-
     SetConcentration,//ArcherSpells - Elemental system
     SetObjectConcentration,//ArcherSpells - Elemental system
     SetElemental,//ArcherSpells - Elemental system
     SetObjectElemental,//ArcherSpells - Elemental system
     RemoveDelayedExplosion,
-
     ObjectDeco,
     ObjectSneaking,
-
-    LevelEffects
+    LevelEffects,
+    SetBindingShot,
+    SendOutputMessage
 }
 
 public enum ClientPacketIds : short
@@ -1894,6 +1898,8 @@ public class ItemInfo
         if (version >= 40) CanFastRun = reader.ReadBoolean();
     }
 
+
+
     public void Save(BinaryWriter writer)
     {
         writer.Write(Index);
@@ -2294,6 +2300,41 @@ public class UserItem
 
         Array.Resize(ref Slots, amount);
     }
+
+    public ushort GetRealItemImage()
+    {
+        switch (Info.Type)
+        {
+            #region Amulet and Poison Stack Image changes
+            case ItemType.Amulet:
+                if (Info.StackSize > 0)
+                {
+                    switch(Info.Shape)
+                    {
+                        case 0: //Amulet
+                            if (Count >= 300) return 3662;
+                            if (Count >= 200) return 3661;
+                            if (Count >= 100) return 3660;
+                            return 3660;
+                        case 1: //Grey Poison
+                            if (Count >= 150) return 3675;
+                            if (Count >= 100) return 2960;
+                            if (Count >= 50) return 3674;
+                            return 3673;
+                        case 2: //Yellow Poison
+                            if (Count >= 150) return 3672;
+                            if (Count >= 100) return 2961;
+                            if (Count >= 50) return 3671;
+                            return 3670;
+                    }
+                }
+                break;
+            #endregion
+        }
+
+        return Info.Image;
+    }
+
 
     public UserItem Clone()
     {
@@ -3189,6 +3230,10 @@ public abstract class Packet
                 return new S.ObjectSneaking();
             case (short)ServerPacketIds.LevelEffects:
                 return new S.LevelEffects();
+            case (short)ServerPacketIds.SetBindingShot://ArcherSpells - BindingShot
+                return new S.SetBindingShot();
+            case (short)ServerPacketIds.SendOutputMessage:
+                return new S.SendOutputMessage();
             default:
                 throw new NotImplementedException();
         }

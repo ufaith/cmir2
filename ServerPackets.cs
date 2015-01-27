@@ -1602,7 +1602,8 @@ namespace ServerPackets
         public PoisonType Poison;
         public bool Hidden, Extra;
         public byte ExtraByte;
-
+        public long ShockTime;//ArcherSpells - BindingShot
+        public bool BindingShotCenter;////ArcherSpells - BindingShot
 
         protected override void ReadPacket(BinaryReader reader)
         {
@@ -1619,6 +1620,8 @@ namespace ServerPackets
             Skeleton = reader.ReadBoolean();
             Poison = (PoisonType)reader.ReadByte();
             Hidden = reader.ReadBoolean();
+            ShockTime = reader.ReadInt64();//ArcherSpells - BindingShot
+            BindingShotCenter = reader.ReadBoolean();//ArcherSpells - BindingShot
             Extra = reader.ReadBoolean();
             ExtraByte = reader.ReadByte();
         }
@@ -1639,6 +1642,8 @@ namespace ServerPackets
             writer.Write(Skeleton);
             writer.Write((byte)Poison);
             writer.Write(Hidden);
+            writer.Write(ShockTime);//ArcherSpells - BindingShot
+            writer.Write(BindingShotCenter);//ArcherSpells - BindingShot
             writer.Write(Extra);
             writer.Write((byte)ExtraByte);
         }
@@ -4112,6 +4117,47 @@ namespace ServerPackets
             writer.Write(ShowLevelEffect1);
             writer.Write(ShowLevelEffect2);
             writer.Write(ShowLevelEffect3);
+        }
+    }
+
+    public sealed class SetBindingShot : Packet//ArcherSpells - BindingShot
+    {
+        public override short Index { get { return (short)ServerPacketIds.SetBindingShot; } }
+
+        public uint ObjectID;
+        public bool Enabled;
+        public long Value;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            ObjectID = reader.ReadUInt32();
+            Enabled = reader.ReadBoolean();
+            Value = reader.ReadInt64();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(ObjectID);
+            writer.Write(Enabled);
+            writer.Write(Value);
+        }
+    }
+
+    public sealed class SendOutputMessage : Packet//ArcherSpells - BindingShot
+    {
+        public override short Index { get { return (short)ServerPacketIds.SendOutputMessage; } }
+
+        public string Message;
+        public OutputMessageType Type;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Message = reader.ReadString();
+            Type = (OutputMessageType)reader.ReadByte();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Message);
+            writer.Write((byte)Type);
         }
     }
 }

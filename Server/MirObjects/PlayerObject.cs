@@ -4301,22 +4301,6 @@ namespace Server.MirObjects
                 return;
             }
 
-            if (Hidden)
-            {
-                for (int i = 0; i < Buffs.Count; i++)
-                {
-                    switch (Buffs[i].Type)
-                    {
-                        case BuffType.Hiding:
-                        case BuffType.MoonLight:
-                        case BuffType.DarkBody:
-                            if (spell == Spell.SwiftFeet) continue;
-                            Buffs[i].ExpireTime = 0;
-                            break;
-                    }
-                }
-            }
-
             AttackTime = Envir.Time + MoveDelay;
             SpellTime = Envir.Time + 1800; //Spell Delay
             ActionTime = Envir.Time + MoveDelay;
@@ -4563,6 +4547,9 @@ namespace Server.MirObjects
                     break;
                 case Spell.ElementalBarrier://ArcherSpells - Elemental system
                     ActionList.Add(new DelayedAction(DelayedType.Magic, Envir.Time + 500, magic, magic.GetPower(GetAttackPower(MinMC, MaxMC) + 20)));
+                    break;
+                case Spell.BindingShot://ArcherSpells - BindingShot
+                    BindingShot(magic, target, out cast);
                     break;
                 default:
                     cast = false;
@@ -6024,6 +6011,25 @@ namespace Server.MirObjects
 
             target.Pushed(this, dir, distance);
         }
+
+        public void BindingShot(UserMagic magic, MapObject target, out bool cast)//ArcherSpells - BindingShot
+        {
+            cast = false;
+
+            if (target == null || !target.IsAttackTarget(this) || !(target is MonsterObject) || !CanFly(target.CurrentLocation)) return;
+            if (target.Level > Level + 2) return;
+            if (((MonsterObject)target).ShockTime >= Envir.Time) return;//Already shocked
+
+
+            uint duration = (uint)((magic.Level * 5 + 10) * 1000);
+            int value = (int)duration;
+            int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, magic, value, target);
+            ActionList.Add(action);
+
+            cast = true;
+        }
         #endregion
 
         private void CheckSneakRadius()
@@ -6425,6 +6431,68 @@ namespace Server.MirObjects
                     break;
 
                 #endregion
+                #region BindingShot                                 ArcherSpells - BindingShot
+
+                case Spell.BindingShot:
+                    value = (int)data[1];
+                    target = (MapObject)data[2];
+
+                    if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null) return;
+                    if (((MonsterObject)target).ShockTime >= Envir.Time) return;//Already shocked
+
+                    Point place = target.CurrentLocation;
+                    MonsterObject centerTarget = null;
+
+                    for (int y = place.Y - 1; y <= place.Y + 1; y++)
+                    {
+                        if (y < 0) continue;
+                        if (y >= CurrentMap.Height) break;
+
+                        for (int x = place.X - 1; x <= place.X + 1; x++)
+                        {
+                            if (x < 0) continue;
+                            if (x >= CurrentMap.Width) break;
+
+                            Cell cell = CurrentMap.GetCell(x, y);
+
+                            if (!cell.Valid || cell.Objects == null) continue;
+
+                            for (int i = 0; i < cell.Objects.Count; i++)
+                            {
+                                MapObject targetob = cell.Objects[i];
+
+                                if (y == place.Y && x == place.X && targetob.Race == ObjectType.Monster)
+                                {
+                                    centerTarget = (MonsterObject)targetob;
+                                }
+
+                                switch (targetob.Race)
+                                {
+                                    case ObjectType.Monster:
+                                        if (targetob == null || !targetob.IsAttackTarget(this) || targetob.Node == null || targetob.Level > this.Level + 2) continue;
+
+                                        MonsterObject mobTarget = (MonsterObject)targetob;
+
+                                        if (centerTarget == null) centerTarget = mobTarget;
+
+                                        mobTarget.ShockTime = Envir.Time + value;
+                                        mobTarget.Target = null;
+                                        break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (centerTarget == null) return;
+
+                    //only the centertarget holds the effect
+                    centerTarget.BindingShotCenter = true;
+                    centerTarget.Broadcast(new S.SetBindingShot { ObjectID = centerTarget.ObjectID, Enabled = true, Value = value });
+
+                    LevelMagic(magic);
+                    break;
+
+                #endregion
 
 
             }
@@ -6486,18 +6554,25 @@ namespace Server.MirObjects
 
         private UserItem GetAmulet(int count, int shape = 0)
         {
-            for (int i = 0; i < Info.Inventory.Length; i++)
-            {
-                UserItem item = Info.Inventory[i];
-                if (item != null && item.Info.Type == ItemType.Amulet && item.Info.Shape == shape && item.Count >= count)
-                    return item;
-            }
+            UserItem item = Info.Equipment[(int)EquipmentSlot.Amulet];
+            if (item == null || item.Info.Type != ItemType.Amulet || item.Count < count) return null;
+
+            if (item.Info.Shape == shape)
+                return item;
 
             return null;
+
+            //for (int i = 0; i < Info.Inventory.Length; i++)
+            //{
+            //    UserItem item = Info.Inventory[i];
+            //    if (item != null && item.Info.Type == ItemType.Amulet && item.Info.Shape == shape && item.Count >= count)
+            //        return item;
+            //}
+
+            //return null;
         }
         private UserItem GetPoison(int count, byte shape = 0)
         {
-
             UserItem item = Info.Equipment[(int)EquipmentSlot.Amulet];
             if (item == null || item.Info.Type != ItemType.Amulet || item.Count < count) return null;
 
@@ -8844,7 +8919,7 @@ namespace Server.MirObjects
                         return false;
                     break;
                 case EquipmentSlot.Amulet:
-                    if (item.Info.Type != ItemType.Amulet || item.Info.Shape == 0)
+                    if (item.Info.Type != ItemType.Amulet)// || item.Info.Shape == 0
                         return false;
                     break;
                 case EquipmentSlot.Boots:
@@ -10898,7 +10973,7 @@ namespace Server.MirObjects
             if (!CanCreateGuild) return;
             if ((Name.Length < 3) || (Name.Length > 20))
             {
-                ReceiveChat("Guild name to long.", ChatType.System);
+                ReceiveChat("Guild name too long.", ChatType.System);
                 CanCreateGuild = false;
                 return;
             }
@@ -11784,7 +11859,7 @@ namespace Server.MirObjects
             }
         }
 
-        public void CheckNeedQuestKill(MonsterInfo mInfo)
+        public void CheckGroupQuestKill(MonsterInfo mInfo)
         {
             if (GroupMembers != null)
             {
@@ -11793,12 +11868,13 @@ namespace Server.MirObjects
                         Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) &&
                         !player.Dead))
                 {
-                    player.CheckQuestKill(mInfo);
+                    player.CheckNeedQuestKill(mInfo);
                 }
             }
             else
-                CheckQuestKill(mInfo);
+                CheckNeedQuestKill(mInfo);
         }
+
         public bool CheckNeedQuestItem(UserItem item, bool gainItem = true)
         {
             foreach (QuestProgressInfo quest in CurrentQuests.
@@ -11810,6 +11886,8 @@ namespace Server.MirObjects
                 {
                     GainQuestItem(item);
                     quest.ProcessItem(Info.QuestInventory);
+
+                    Enqueue(new S.SendOutputMessage { Message = string.Format("You found {0}.", item.Name), Type = OutputMessageType.Quest });
 
                     SendUpdateQuest(quest, QuestState.Update);
                 }
@@ -11825,20 +11903,24 @@ namespace Server.MirObjects
                 Where(e => e.NeedFlag(flagNumber)))
             {
                 quest.ProcessFlag(Info.Flags);
-                //SendQuestUpdate();
+
+                //Enqueue(new S.SendOutputMessage { Message = string.Format("Location visited."), Type = OutputMessageType.Quest });
+
                 SendUpdateQuest(quest, QuestState.Update);
                 return true;
             }
 
             return false;
         }
-        public void CheckQuestKill(MonsterInfo mInfo)
+        public void CheckNeedQuestKill(MonsterInfo mInfo)
         {
             foreach (QuestProgressInfo quest in CurrentQuests.
                     Where(e => e.KillTaskCount.Count > 0).
                     Where(quest => quest.NeedKill(mInfo)))
             {
                 quest.ProcessKill(mInfo.Index);
+
+                Enqueue(new S.SendOutputMessage { Message = string.Format("You killed {0}.", mInfo.Name), Type = OutputMessageType.Quest });
 
                 SendUpdateQuest(quest, QuestState.Update);
             }

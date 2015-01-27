@@ -50,6 +50,9 @@ namespace Client.MirObjects
         public byte Stage;
         public int BaseSound;
 
+        public long ShockTime;
+        public bool BindingShotCenter;
+
         public MirLabel TempLabel;
         public Color OldNameColor;
 
@@ -79,6 +82,9 @@ namespace Client.MirObjects
             Poison = info.Poison;
             Skeleton = info.Skeleton;
             Hidden = info.Hidden;
+            ShockTime = CMain.Time + info.ShockTime;
+            BindingShotCenter = info.BindingShotCenter;
+
             if (Stage != info.ExtraByte)
             {
                 switch (BaseImage)
@@ -348,6 +354,7 @@ namespace Client.MirObjects
             }
 
             SetAction();
+            SetCurrentEffects();
 
             if (CurrentAction == MirAction.Standing)
             {
@@ -802,6 +809,38 @@ namespace Client.MirObjects
             NextMotion = CMain.Time + FrameInterval;
 
             return true;
+        }
+
+        public void SetCurrentEffects()//ArcherSpells - BindingShot
+        {
+            //BindingShot
+            if (BindingShotCenter && ShockTime > CMain.Time)
+            {
+                int effectid = TrackableEffect.GetOwnerEffectID(ObjectID);
+                if (effectid >= 0)
+                    TrackableEffect.effectlist[effectid].RemoveNoComplete();
+
+                TrackableEffect NetDropped = new TrackableEffect(new Effect(Libraries.MagicC, 7, 1, 1000, this) { Repeat = true, RepeatUntil = (ShockTime - 1500) });
+                NetDropped.Complete += (o1, e1) =>
+                {
+                    SoundManager.PlaySound(20000 + 130 * 10 + 6);//sound M130-6
+                    Effects.Add(new TrackableEffect(new Effect(Libraries.MagicC, 8, 8, 700, this)));
+                };
+                Effects.Add(NetDropped);
+            }
+            else if (BindingShotCenter && ShockTime <= CMain.Time)
+            {
+                int effectid = TrackableEffect.GetOwnerEffectID(ObjectID);
+                if (effectid >= 0)
+                    TrackableEffect.effectlist[effectid].Remove();
+
+                //SoundManager.PlaySound(20000 + 130 * 10 + 6);//sound M130-6
+                //Effects.Add(new TrackableEffect(new Effect(Libraries.ArcherMagic, 8, 8, 700, this)));
+
+                ShockTime = 0;
+                BindingShotCenter = false;
+            }
+
         }
 
 

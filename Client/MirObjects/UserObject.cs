@@ -737,6 +737,11 @@ namespace Client.MirObjects
             uint min = 0;
             uint max = item.Count;
 
+            if (CurrentBagWeight >= MaxBagWeight)
+            {
+
+            }
+
             if (item.Info.Type == ItemType.Amulet)
             {
                 for (int i = 0; i < Inventory.Length; i++)
@@ -773,7 +778,7 @@ namespace Client.MirObjects
 
             if (CurrentBagWeight + item.Weight > MaxBagWeight)
             {
-                item.Count = (uint)((MaxBagWeight - CurrentBagWeight) / item.Info.Weight);
+                item.Count = (uint)(Math.Max((MaxBagWeight - CurrentBagWeight), uint.MinValue) / item.Info.Weight);
                 max = item.Count;
                 if (item.Count == 0)
                 {

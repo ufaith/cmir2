@@ -103,12 +103,13 @@ namespace Server.MirDatabase
                                 DoubleShot,
                                 ExplosiveTrap,
                                 DelayedExplosion,
-                                Meditation,//ArcherSpells - Elemental system
-                                BackStep,//ArcherSpells - Backstep
-                                ElementalShot,//ArcherSpells - Elemental system
-                                Concentration,//ArcherSpells - Elemental system
-                                Stonetrap,
-                                ElementalBarrier,//ArcherSpells - Elemental system
+                                Meditation,
+                                BackStep,
+                                ElementalShot,
+                                Concentration,
+                                BindingShot,
+                                //Stonetrap,
+                                ElementalBarrier,
                                 SummonVampire,
                                 VampireShot,//linked to crippleshot ?
                                 SummonToad,
@@ -224,7 +225,8 @@ namespace Server.MirDatabase
             Concentration = new MagicInfo { Spell = Spell.Concentration, Icon = 96, Level1 = 36, Level2 = 42, Level3 = 48, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 8, LevelCost = 2 };
             ElementalBarrier = new MagicInfo { Spell = Spell.ElementalBarrier, Icon = 98, Level1 = 42, Level2 = 47, Level3 = 52, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 2 };
             //
-            BackStep = new MagicInfo { Spell = Spell.BackStep, Icon = 95, Level1 = 31, Level2 = 36, Level3 = 41, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 2 };//ArcherSpell - Backstep
+            BackStep = new MagicInfo { Spell = Spell.BackStep, Icon = 95, Level1 = 31, Level2 = 36, Level3 = 41, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 2 };
+            BindingShot = new MagicInfo { Spell = Spell.BindingShot, Icon = 97, Level1 = 43, Level2 = 46, Level3 = 49, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 7, LevelCost = 3 };
             //StoneTrap Icon = 97
             //SummonVampire Icon = 99
             //VampireShot Icon = 100

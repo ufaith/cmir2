@@ -223,11 +223,11 @@ namespace Server.MirObjects
         }
         public override bool IsAttackTarget(PlayerObject attacker)
         {
-            return false;
+            throw new NotSupportedException();
         }
         public override bool IsAttackTarget(MonsterObject attacker)
         {
-            return false;
+            throw new NotSupportedException();
         }
         public override int Attacked(PlayerObject attacker, int damage, DefenceType type = DefenceType.ACAgility, bool damageWeapon = true)
         {

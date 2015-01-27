@@ -175,6 +175,7 @@ namespace Server.MirDatabase
                 if (Info.KillTasks[i].Monster.Index != mobIndex) continue;
 
                 KillTaskCount[i]++;
+
                 return;
             }
         }

@@ -200,6 +200,7 @@ namespace Server.MirObjects
         public const int RegenDelay = 10000, EXPOwnerDelay = 5000, DeadDelay = 180000, SearchDelay = 3000, RoamDelay = 1000, HealDelay = 600, RevivalDelay = 2000;
         public long ActionTime, MoveTime, AttackTime, RegenTime, DeadTime, SearchTime, RoamTime, HealTime;
         public long ShockTime, RageTime, HallucinationTime;
+        public bool BindingShotCenter;//ArcherSpells - BindingShot
 
         public byte PetLevel;
         public uint PetExperience;
@@ -399,6 +400,7 @@ namespace Server.MirObjects
         }
         public void RefreshNameColour(bool send = true)
         {
+            if (ShockTime < Envir.Time) BindingShotCenter = false;
 
             Color colour = Color.White;
             
@@ -482,7 +484,7 @@ namespace Server.MirObjects
                 EXPOwner.WinExp(Info.Experience);
 
                 PlayerObject playerObj = (PlayerObject)EXPOwner;
-                playerObj.CheckNeedQuestKill(Info);
+                playerObj.CheckGroupQuestKill(Info);
             }
 
             if (Respawn != null)
@@ -859,7 +861,6 @@ namespace Server.MirObjects
                         }
 
                         ChangeHP(-poison.Value);
-                        if (Dead) break;
                         RegenTime = Envir.Time + RegenDelay;
                     }
 
@@ -871,6 +872,9 @@ namespace Server.MirObjects
                         {
                             ExplosionInflictedStage = 0;
                             ExplosionInflictedTime = 0;
+
+                            if (Dead) break; //temp to stop crashing
+
                             PoisonList.RemoveAt(i);
                             continue;
                         }
@@ -1304,6 +1308,8 @@ namespace Server.MirObjects
         }
         protected virtual void Attack()
         {
+            if (BindingShotCenter) ReleaseBindingShot();
+
             ShockTime = 0;
             
             if (!Target.IsAttackTarget(this))
@@ -1326,6 +1332,44 @@ namespace Server.MirObjects
             Target.Attacked(this, damage);
         }
 
+        public void ReleaseBindingShot()//ArcherSpells - BindingShot
+        {
+            if (!BindingShotCenter) return;
+
+            ShockTime = 0;
+            Broadcast(GetInfo());//update clients in range (remove effect)
+            BindingShotCenter = false;
+
+            //the centertarget is escaped so make all shocked mobs awake (3x3 from center)
+            Point place = CurrentLocation;
+            for (int y = place.Y - 1; y <= place.Y + 1; y++)
+            {
+                if (y < 0) continue;
+                if (y >= CurrentMap.Height) break;
+
+                for (int x = place.X - 1; x <= place.X + 1; x++)
+                {
+                    if (x < 0) continue;
+                    if (x >= CurrentMap.Width) break;
+
+                    Cell cell = CurrentMap.GetCell(x, y);
+                    if (!cell.Valid || cell.Objects == null) continue;
+
+                    for (int i = 0; i < cell.Objects.Count; i++)
+                    {
+                        MapObject targetob = cell.Objects[i];
+                        if (targetob == null || targetob.Node == null || targetob.Race != ObjectType.Monster) continue;
+                        if (((MonsterObject)targetob).ShockTime == 0) continue;
+
+                        //each centerTarget has its own effect which needs to be cleared when no longer shocked
+                        if (((MonsterObject)targetob).BindingShotCenter) ((MonsterObject)targetob).ReleaseBindingShot();
+                        else ((MonsterObject)targetob).ShockTime = 0;
+
+                        break;
+                    }
+                }
+            }
+        }
 
         public bool FindNearby(int distance)
         {
@@ -1617,7 +1661,7 @@ namespace Server.MirObjects
             if (Target != this && attacker.IsAttackTarget(this))
                 Target = attacker;
 
-
+            if (BindingShotCenter) ReleaseBindingShot();
             ShockTime = 0;
 
             if (Master != null && Master != attacker)
@@ -1700,7 +1744,8 @@ namespace Server.MirObjects
 
             if (Target != this && attacker.IsAttackTarget(this))
                 Target = attacker;
-            
+
+            if (BindingShotCenter) ReleaseBindingShot();
             ShockTime = 0;
 
             if (attacker.Info.AI == 6 || attacker.Info.AI == 58)
@@ -1780,6 +1825,8 @@ namespace Server.MirObjects
                     Skeleton = Harvested,
                     Poison = CurrentPoison,
                     Hidden = Hidden,
+                    ShockTime = (ShockTime > 0 ? ShockTime - Envir.Time : 0),
+                    BindingShotCenter = BindingShotCenter
                 };
         }
 
