@@ -126,17 +126,23 @@ namespace Server
                 if(QFileNameTextBox.Text != info.FileName) QFileNameTextBox.Text = string.Empty;
                 if (QNameTextBox.Text != info.Name) QNameTextBox.Text = string.Empty;
                 if (QGroupTextBox.Text != info.Group) QGroupTextBox.Text = string.Empty;
-                if ((QuestType)QTypeComboBox.SelectedItem != info.Type) QTypeComboBox.SelectedItem = null;
+
+                if (QTypeComboBox.SelectedItem != null)
+                    if ((QuestType)QTypeComboBox.SelectedItem != info.Type) QTypeComboBox.SelectedItem = null;
 
                 if (QGotoTextBox.Text != info.GotoMessage) QGotoTextBox.Text = string.Empty;
                 if (QKillTextBox.Text != info.KillMessage) QKillTextBox.Text = string.Empty;
                 if (QItemTextBox.Text != info.ItemMessage) QItemTextBox.Text = string.Empty;
                 if (QFlagTextBox.Text != info.ItemMessage) QFlagTextBox.Text = string.Empty;
 
-                RequiredMinLevelTextBox.Text = string.Empty;
-                RequiredMaxLevelTextBox.Text = byte.MaxValue.ToString();
-                RequiredQuestComboBox.SelectedItem = null;
-                RequiredClassComboBox.SelectedItem = null;
+                if (RequiredMinLevelTextBox.Text != info.RequiredMinLevel.ToString()) RequiredMinLevelTextBox.Text = string.Empty;
+                if (RequiredMaxLevelTextBox.Text != info.RequiredMaxLevel.ToString()) RequiredMaxLevelTextBox.Text = byte.MaxValue.ToString();
+
+                if (RequiredQuestComboBox.SelectedValue != null)
+                    if ((string)RequiredQuestComboBox.SelectedValue != info.RequiredQuest.ToString()) RequiredQuestComboBox.SelectedItem = null;
+
+                if (RequiredClassComboBox.SelectedItem != null)
+                    if ((RequiredClass)RequiredClassComboBox.SelectedItem != info.RequiredClass) RequiredClassComboBox.SelectedItem = null;
             }
         }
 

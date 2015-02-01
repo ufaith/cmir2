@@ -6554,35 +6554,34 @@ namespace Server.MirObjects
 
         private UserItem GetAmulet(int count, int shape = 0)
         {
-            UserItem item = Info.Equipment[(int)EquipmentSlot.Amulet];
-            if (item == null || item.Info.Type != ItemType.Amulet || item.Count < count) return null;
-
-            if (item.Info.Shape == shape)
-                return item;
+            for (int i = 0; i < Info.Equipment.Length; i++)
+            {
+                UserItem item = Info.Equipment[i];
+                if (item != null && item.Info.Type == ItemType.Amulet && item.Info.Shape == shape && item.Count >= count)
+                    return item;
+            }
 
             return null;
-
-            //for (int i = 0; i < Info.Inventory.Length; i++)
-            //{
-            //    UserItem item = Info.Inventory[i];
-            //    if (item != null && item.Info.Type == ItemType.Amulet && item.Info.Shape == shape && item.Count >= count)
-            //        return item;
-            //}
-
-            //return null;
         }
         private UserItem GetPoison(int count, byte shape = 0)
         {
-            UserItem item = Info.Equipment[(int)EquipmentSlot.Amulet];
-            if (item == null || item.Info.Type != ItemType.Amulet || item.Count < count) return null;
-
-            if (shape == 0)
+            for (int i = 0; i < Info.Equipment.Length; i++)
             {
-                if (item.Info.Shape == 1 || item.Info.Shape == 2)
-                    return item;
+                UserItem item = Info.Equipment[i];
+                if (item != null && item.Info.Type == ItemType.Amulet && item.Count >= count)
+                {
+                    if (shape == 0)
+                    {
+                        if (item.Info.Shape == 1 || item.Info.Shape == 2)
+                            return item;
+                    }
+                    else
+                    {
+                        if (item.Info.Shape == shape)
+                            return item;
+                    }
+                }
             }
-            else if (item.Info.Shape == shape)
-                return item;
 
             return null;
         }
@@ -8910,7 +8909,7 @@ namespace Server.MirObjects
                         return false;
                     break;
                 case EquipmentSlot.BraceletR:
-                    if (item.Info.Type != ItemType.Bracelet)
+                    if (item.Info.Type != ItemType.Bracelet && item.Info.Type != ItemType.Amulet)
                         return false;
                     break;
                 case EquipmentSlot.RingL:

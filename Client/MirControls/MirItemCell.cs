@@ -319,7 +319,7 @@ namespace Client.MirControls
                     }
                     break;
                 case ItemType.Bracelet:
-                    if (dialog.Grid[(int)EquipmentSlot.BraceletR].Item == null && dialog.Grid[(int)EquipmentSlot.BraceletR].CanWearItem(Item))
+                    if ((dialog.Grid[(int)EquipmentSlot.BraceletR].Item == null || dialog.Grid[(int)EquipmentSlot.BraceletR].Item.Info.Type == ItemType.Amulet) && dialog.Grid[(int)EquipmentSlot.BraceletR].CanWearItem(Item))
                     {
                         Network.Enqueue(new C.EquipItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)EquipmentSlot.BraceletR });
                         dialog.Grid[(int)EquipmentSlot.BraceletR].Locked = true;
@@ -348,6 +348,16 @@ namespace Client.MirControls
                     break;
                 case ItemType.Amulet:
                     //if (Item.Info.Shape == 0) return;
+                    //if (GridType == MirGridType.Inventory && (ItemArray[44] == Item || ItemArray[45] == Item) &&
+                    //    dialog.Grid[(int)EquipmentSlot.Amulet].Item != null &&
+                    //    dialog.Grid[(int)EquipmentSlot.BraceletR].CorrectSlot(Item) && 
+                    //    dialog.Grid[(int)EquipmentSlot.BraceletR].CanWearItem(Item))
+                    //{
+                    //    Network.Enqueue(new C.EquipItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)EquipmentSlot.BraceletR });
+                    //    dialog.Grid[(int)EquipmentSlot.BraceletR].Locked = true;
+                    //    Locked = true;
+                    //    return;
+                    //}
 
                     if (dialog.Grid[(int)EquipmentSlot.Amulet].Item != null && Item.Info.Type == ItemType.Amulet)
                     {
@@ -585,30 +595,32 @@ namespace Client.MirControls
                     item = cell.Item;
                 }
 
-                if (item != null)
+                if (item != null && ((item.Count + Item.Count) <= item.Info.StackSize))
                 {
                     //Merge.
                     Network.Enqueue(new C.MergeItem { GridFrom = MirGridType.Equipment, GridTo = MirGridType.Inventory, IDFrom = Item.UniqueID, IDTo = item.UniqueID });
 
                     Locked = true;
+
+                    PlayItemSound();
+                    return;
                 }
             }
-            else
+
+            for (int i = 0; i < GameScene.Scene.InventoryDialog.Grid.Length; i++)
             {
-                for (int i = 0; i < GameScene.Scene.InventoryDialog.Grid.Length; i++)
-                {
-                    MirItemCell itemCell = GameScene.Scene.InventoryDialog.Grid[i];
+                MirItemCell itemCell = GameScene.Scene.InventoryDialog.Grid[i];
 
-                    if (itemCell.Item != null) continue;
+                if (itemCell.Item != null) continue;
 
-                    Network.Enqueue(new C.RemoveItem { Grid = MirGridType.Inventory, UniqueID = Item.UniqueID, To = i });
+                Network.Enqueue(new C.RemoveItem { Grid = MirGridType.Inventory, UniqueID = Item.UniqueID, To = i });
 
-                    Locked = true;
-                    break;
-                }
+                Locked = true;
+
+                PlayItemSound();
+                break;
             }
 
-            PlayItemSound();
         }
 
         private void MoveItem()
@@ -1190,7 +1202,7 @@ namespace Client.MirControls
                 case EquipmentSlot.BraceletL:
                     return i.Info.Type == ItemType.Bracelet;
                 case EquipmentSlot.BraceletR:
-                    return i.Info.Type == ItemType.Bracelet;
+                    return i.Info.Type == ItemType.Bracelet || i.Info.Type == ItemType.Amulet;
                 case EquipmentSlot.RingL:
                 case EquipmentSlot.RingR:
                     return type == ItemType.Ring;
