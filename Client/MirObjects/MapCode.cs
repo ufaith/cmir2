@@ -106,6 +106,13 @@ namespace Client.MirObjects
                     }
                 return;
             }
+            //c# custom map format
+            if ((Bytes[2] == 0x43) && (Bytes[3] == 0x23))
+            {
+                LoadMapType100();
+                return;
+            }
+
             //wemade mir3 maps have no title they just start with blank bytes
             if (Bytes[0] == 0)
             {
@@ -526,5 +533,51 @@ namespace Client.MirObjects
             }
         }
 
+        private void LoadMapType100()
+        {
+            try 
+            { 
+                int offset = 4;
+                if ((Bytes[0]!= 1) || (Bytes[1] != 0)) return;//only support version 1 atm
+                Width = BitConverter.ToInt16(Bytes, offset);
+                offset += 2;
+                Height = BitConverter.ToInt16(Bytes, offset);
+                MapCells = new CellInfo[Width, Height];
+                offset = 8;
+                for (int x = 0; x < Width; x++)
+                    for (int y = 0; y < Height; y++)
+                    {
+                        MapCells[x, y] = new CellInfo();
+                        MapCells[x, y].BackIndex = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].BackImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 4;
+                        MapCells[x, y].MiddleIndex = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].MiddleImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].FrontIndex = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].FrontImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].DoorIndex = Bytes[offset++];
+                        MapCells[x, y].DoorOffset = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationFrame = Bytes[offset++];
+                        MapCells[x, y].FrontAnimationTick = Bytes[offset++];
+                        MapCells[x, y].MiddleAnimationFrame = Bytes[offset++];
+                        MapCells[x, y].MiddleAnimationTick = Bytes[offset++];
+                        MapCells[x, y].TileAnimationImage = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].TileAnimationOffset = (short)BitConverter.ToInt16(Bytes, offset);
+                        offset += 2;
+                        MapCells[x, y].TileAnimationFrames = Bytes[offset++];
+                        MapCells[x, y].Light = Bytes[offset++];
+                    }
+            }
+            catch (Exception ex)
+            {
+                if (Settings.LogErrors) CMain.SaveError(ex.ToString());
+            }
+        }
     }
 }

@@ -36,6 +36,11 @@ namespace Server.MirEnvir
 
         private byte FindType(byte[] input)
         {
+            //c# custom map format
+            if ((input[2] == 0x43) && (input[3] == 0x23))
+            {
+                return 100;
+            }
             //wemade mir3 maps have no title they just start with blank bytes
             if (input[0] == 0)
                 return 5;
@@ -278,6 +283,34 @@ namespace Server.MirEnvir
                 }
         }
 
+        private void LoadMapCellsV100(byte[] Bytes)
+        {
+            int offset = 4;
+            if ((Bytes[0] != 1) || (Bytes[1] != 0)) return;//only support version 1 atm
+            Width = BitConverter.ToInt16(Bytes, offset);
+            offset += 2;
+            Height = BitConverter.ToInt16(Bytes, offset);
+            Cells = new Cell[Width, Height];
+
+            offset = 8;
+
+            for (int x = 0; x < Width; x++)
+                for (int y = 0; y < Height; y++)
+                {
+                    offset += 2;
+                    if ((BitConverter.ToInt32(Bytes, offset) & 0x20000000) != 0)
+                        Cells[x, y] = Cell.HighWall; //Can Fire Over.
+                    offset += 10;
+                    if ((BitConverter.ToInt16(Bytes, offset) & 0x8000) != 0)
+                        Cells[x, y] = Cell.LowWall; //Can't Fire Over.
+
+                    if (Cells[x, y] == null) Cells[x, y] = new Cell { Attribute = CellAttribute.Walk };
+
+                    offset += 14;
+                }
+                
+        }
+
         public bool Load()
         {
             try
@@ -311,6 +344,9 @@ namespace Server.MirEnvir
                             break;
                         case 7:
                             LoadMapCellsv7(fileBytes);
+                            break;
+                        case 100:
+                            LoadMapCellsV100(fileBytes);
                             break;
                     }
                     
