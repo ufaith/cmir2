@@ -638,9 +638,8 @@ namespace Client.MirControls
 
         public virtual void Draw()
         {
-            if (IsDisposed || !Visible /*|| Size.Width == 0 || Size.Height == 0*/)
+            if (IsDisposed || !Visible /*|| Size.Width == 0 || Size.Height == 0*/ || Size.Width > Settings.ScreenWidth || Size.Height > Settings.ScreenHeight)
                 return;
-
 
             OnBeforeShown();
 

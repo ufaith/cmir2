@@ -427,6 +427,24 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.SetConcentration://ArcherSpells - Elemental system
                     SetConcentration((C.SetConcentration)p);
                     break;
+                case (short)ClientPacketIds.AwakeningNeedMaterials:
+                    AwakeningNeedMaterials((C.AwakeningNeedMaterials)p);
+                    break;
+                case (short)ClientPacketIds.AwakeningLockedItem:
+                    Enqueue(new S.AwakeningLockedItem { UniqueID = ((C.AwakeningLockedItem)p).UniqueID, Locked = ((C.AwakeningLockedItem)p).Locked });
+                    break;
+                case (short)ClientPacketIds.Awakening:
+                    Awakening((C.Awakening)p);
+                    break;
+                case (short)ClientPacketIds.DisassembleItem:
+                    DisassembleItem((C.DisassembleItem)p);
+                    break;
+                case (short)ClientPacketIds.DowngradeAwakening:
+                    DowngradeAwakening((C.DowngradeAwakening)p);
+                    break;
+                case (short)ClientPacketIds.ResetAddedItem:
+                    ResetAddedItem((C.ResetAddedItem)p);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1110,6 +1128,41 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.ConcentrateInterrupted = p.Interrupted;
+        }
+
+        private void Awakening(C.Awakening p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.Awakening(p.UniqueID, p.Type);
+        }
+
+        private void AwakeningNeedMaterials(C.AwakeningNeedMaterials p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.AwakeningNeedMaterials(p.UniqueID, p.Type);
+        }
+
+        private void DisassembleItem(C.DisassembleItem p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.DisassembleItem(p.UniqueID);
+        }
+
+        private void DowngradeAwakening(C.DowngradeAwakening p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.DowngradeAwakening(p.UniqueID);
+        }
+
+        private void ResetAddedItem(C.ResetAddedItem p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.ResetAddedItem(p.UniqueID);
         }
     }
 }

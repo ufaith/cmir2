@@ -556,9 +556,9 @@ namespace Client.MirScenes.Dialogs
 
             _shareButton = new MirButton
             {
-                Index = 630,
-                HoverIndex = 631,
-                PressedIndex = 632,
+                Index = 616,
+                HoverIndex = 617,
+                PressedIndex = 618,
                 Library = Libraries.Title,
                 Parent = this,
                 Location = new Point(40, 437),

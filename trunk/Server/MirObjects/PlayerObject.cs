@@ -210,7 +210,7 @@ namespace Server.MirObjects
         public long ElementalBarrierTime;
         //Elemental system end
 
-        
+        public LevelEffects LevelEffects = LevelEffects.None;
 
         private int _stepCounter, _runCounter, _fishCounter;
 
@@ -1423,10 +1423,12 @@ namespace Server.MirObjects
             temp.AddObject(this);
             CurrentMap = temp;
             Envir.Players.Add(this);
+
             StartGameSuccess();
 
             //Call Login NPC
             CallDefaultNPC(DefaultNPCType.Login);
+
         }
         private void StartGameSuccess()
         {
@@ -1454,12 +1456,7 @@ namespace Server.MirObjects
             }
             Spawned();
 
-            Enqueue(new S.LevelEffects
-            {
-                ShowLevelEffect1 = Info.Flags[990],
-                ShowLevelEffect2 = Info.Flags[991],
-                ShowLevelEffect3 = Info.Flags[992],
-            });
+            SetLevelEffects();
 
             GetItemInfo();
             GetMapInfo();
@@ -1513,6 +1510,15 @@ namespace Server.MirObjects
         {
             Enqueue(new S.StartGame { Result = 3 });
             CleanUp();
+        }
+
+        public void SetLevelEffects()
+        {
+            LevelEffects = LevelEffects.None;
+
+            if (Info.Flags[990]) LevelEffects |= LevelEffects.Mist;
+            if (Info.Flags[991]) LevelEffects |= LevelEffects.RedDragon;
+            if (Info.Flags[992]) LevelEffects |= LevelEffects.BlueDragon;
         }
 
         public void Revive(uint hp, bool effect)
@@ -1626,6 +1632,9 @@ namespace Server.MirObjects
 
                 Experience = Experience,
                 MaxExperience = MaxExperience,
+
+                LevelEffects = LevelEffects,
+
                 Inventory = new UserItem[Info.Inventory.Length],
                 Equipment = new UserItem[Info.Equipment.Length],
                 QuestInventory = new UserItem[Info.QuestInventory.Length],
@@ -1895,23 +1904,23 @@ namespace Server.MirObjects
                 if (temp.CurrentDura == 0 && temp.Info.Durability > 0) continue;
 
 
-                MinAC = (byte)Math.Min(byte.MaxValue, MinAC + RealItem.MinAC);
-                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + RealItem.MaxAC + temp.AC);
-                MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + RealItem.MinMAC);
-                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + RealItem.MaxMAC + temp.MAC);
+                MinAC = (byte)Math.Min(byte.MaxValue, MinAC + RealItem.MinAC + temp.Awake.getAC());
+                MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + RealItem.MaxAC + temp.AC + temp.Awake.getAC());
+                MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + RealItem.MinMAC + temp.Awake.getMAC());
+                MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + RealItem.MaxMAC + temp.MAC + temp.Awake.getMAC());
 
-                MinDC = (byte)Math.Min(byte.MaxValue, MinDC + RealItem.MinDC);
-                MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + RealItem.MaxDC + temp.DC);
-                MinMC = (byte)Math.Min(byte.MaxValue, MinMC + RealItem.MinMC);
-                MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + RealItem.MaxMC + temp.MC);
-                MinSC = (byte)Math.Min(byte.MaxValue, MinSC + RealItem.MinSC);
-                MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + RealItem.MaxSC + temp.SC);
+                MinDC = (byte)Math.Min(byte.MaxValue, MinDC + RealItem.MinDC + temp.Awake.getDC());
+                MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + RealItem.MaxDC + temp.DC + temp.Awake.getDC());
+                MinMC = (byte)Math.Min(byte.MaxValue, MinMC + RealItem.MinMC + temp.Awake.getMC());
+                MaxMC = (byte)Math.Min(byte.MaxValue, MaxMC + RealItem.MaxMC + temp.MC + temp.Awake.getMC());
+                MinSC = (byte)Math.Min(byte.MaxValue, MinSC + RealItem.MinSC + temp.Awake.getSC());
+                MaxSC = (byte)Math.Min(byte.MaxValue, MaxSC + RealItem.MaxSC + temp.SC + temp.Awake.getSC());
 
                 Accuracy = (byte)Math.Min(byte.MaxValue, Accuracy + RealItem.Accuracy + temp.Accuracy);
                 Agility = (byte)Math.Min(byte.MaxValue, Agility + RealItem.Agility + temp.Agility);
 
-                MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + RealItem.HP + temp.HP);
-                MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + RealItem.MP + temp.MP);
+                MaxHP = (ushort)Math.Min(ushort.MaxValue, MaxHP + RealItem.HP + temp.HP + temp.Awake.getHPMP());
+                MaxMP = (ushort)Math.Min(ushort.MaxValue, MaxMP + RealItem.MP + temp.MP + temp.Awake.getHPMP());
 
                 ASpeed = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, ASpeed + temp.AttackSpeed + RealItem.AttackSpeed)));
                 Luck = (sbyte)Math.Max(sbyte.MinValue, (Math.Min(sbyte.MaxValue, Luck + temp.Luck + RealItem.Luck)));
@@ -3294,6 +3303,86 @@ namespace Server.MirObjects
                         Enqueue(decoOb.GetInfo());
                         break;
 
+					case "AWAKENING":
+                        {
+                            if (!IsGM) return;
+                            if (parts.Length < 3) return;
+
+                            ItemType type;
+
+                            if (!Enum.TryParse(parts[1], true, out type)) return;
+
+                            AwakeType awakeType;
+
+                            if (!Enum.TryParse(parts[2], true, out awakeType)) return;
+
+                            foreach (UserItem temp in Info.Equipment)
+                            {
+                                if (temp == null) continue;
+
+                                ItemInfo realItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+
+                                if (realItem.Type == type)
+                                {
+                                    Awake awake = temp.Awake;
+                                    bool[] isHit;
+                                    int result = awake.UpgradeAwake(temp, awakeType, out isHit);
+                                    switch (result)
+                                    {
+                                        case -1:
+                                            ReceiveChat(string.Format("{0} : Condition Error.", temp.Name), ChatType.System);
+                                            break;
+                                        case 0:
+                                            ReceiveChat(string.Format("{0} : Upgrade Failed.", temp.Name), ChatType.System);
+                                            break;
+                                        case 1:
+                                            ReceiveChat(string.Format("{0} : AWAKE Level {1}, value {2}~{3}.", temp.Name, awake.getAwakeLevel(), awake.getAwakeValue(), awake.getAwakeValue()), ChatType.System);
+                                            p = new S.RefreshItem { Item = temp };
+                                            Enqueue(p);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case "REMOVEAWAKENING":
+                        {
+                            if (!IsGM) return;
+                            if (parts.Length < 2) return;
+
+                            ItemType type;
+
+                            if (!Enum.TryParse(parts[1], true, out type)) return;
+
+                            foreach (UserItem temp in Info.Equipment)
+                            {
+                                if (temp == null) continue;
+
+                                ItemInfo realItem = Functions.GetRealItem(temp.Info, Info.Level, Info.Class, Envir.ItemInfoList);
+
+                                if (realItem.Type == type)
+                                {
+                                    Awake awake = temp.Awake;
+                                    int result = awake.RemoveAwake();
+                                    switch (result)
+                                    {
+                                        case 0:
+                                            ReceiveChat(string.Format("{0} : Remove failed Level 0", temp.Name), ChatType.System);
+                                            break;
+                                        case 1:
+                                            ReceiveChat(string.Format("{0} : Remove success. Level {1}", temp.Name, temp.Awake.getAwakeLevel()), ChatType.System);
+                                            p = new S.RefreshItem { Item = temp };
+                                            Enqueue(p);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        break;
 
                     default:
                         foreach (string command in Envir.CustomCommands)
@@ -6860,7 +6949,9 @@ namespace Server.MirObjects
                 ElementOrbLvl = (uint)ElementsLevel,
                 ElementOrbMax = (uint)Settings.OrbsExpList[Settings.OrbsExpList.Count - 1],
 
-                Buffs = Buffs.Where(d => d.Visible).Select(e => e.Type).ToList()
+                Buffs = Buffs.Where(d => d.Visible).Select(e => e.Type).ToList(),
+
+                LevelEffects = LevelEffects
             };
         }
 
@@ -10483,6 +10574,351 @@ namespace Server.MirObjects
                     break;
             }
         }
+		#region Awakening
+        public void Awakening(ulong UniqueID, AwakeType type)
+        {
+            if (type == AwakeType.None) return;
+
+            for (int i = 0; i < Info.Inventory.Length; i++)
+            {
+                UserItem item = Info.Inventory[i];
+                if (item != null)
+                {
+                    if (item.UniqueID == UniqueID)
+                    {
+                        Awake awake = item.Awake;
+
+                        if (awake.IsMaxLevel())
+                        {
+                            Enqueue(new S.Awakening { result = -2, removeID = -1 });
+                            return;
+                        }
+
+                        if (hasAwakeningNeedMaterials(item, type))
+                        {
+                            if (Info.AccountInfo.Gold >= item.AwakeningPrice())
+                            {
+                                Info.AccountInfo.Gold -= item.AwakeningPrice();
+                                Enqueue(new S.LoseGold { Gold = item.AwakeningPrice() });
+
+                                bool[] isHit;
+
+                                switch (awake.UpgradeAwake(item, type, out isHit))
+                                {
+                                    case -1:
+                                        Enqueue(new S.Awakening { result = -1, removeID = -1 });
+                                        break;
+                                    case 0:
+                                        AwakeningEffect(false, isHit);
+                                        Info.Inventory[i] = null;
+                                        Enqueue(new S.Awakening { result = 0, removeID = (long)item.UniqueID });
+                                        break;
+                                    case 1:
+                                        Enqueue(new S.RefreshItem { Item = item });
+                                        AwakeningEffect(true, isHit);
+                                        Enqueue(new S.Awakening { result = 1, removeID = -1 });
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                Enqueue(new S.Awakening { result = -3, removeID = -1 });
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void DowngradeAwakening(ulong UniqueID)
+        {
+            for (int i = 0; i < Info.Inventory.Length; i++)
+            {
+                UserItem item = Info.Inventory[i];
+                if (item != null)
+                {
+                    if (item.UniqueID == UniqueID)
+                    {
+                        if (Info.AccountInfo.Gold >= item.DowngradePrice())
+                        {
+                            Info.AccountInfo.Gold -= item.DowngradePrice();
+                            Enqueue(new S.LoseGold { Gold = item.DowngradePrice() });
+
+                            Awake awake = item.Awake;
+                            int result = awake.RemoveAwake();
+                            switch (result)
+                            {
+                                case 0:
+                                    ReceiveChat(string.Format("{0} : Remove failed Level 0", item.Name), ChatType.System);
+                                    break;
+                                case 1:
+                                    ushort maxDura = (Envir.Random.Next(20) == 0) ? (ushort)(item.MaxDura - 1000) : item.MaxDura;
+                                    if (maxDura < 1000) maxDura = 1000;
+
+                                    Info.Inventory[i].CurrentDura = (Info.Inventory[i].CurrentDura >= maxDura) ? maxDura : Info.Inventory[i].CurrentDura;
+                                    Info.Inventory[i].MaxDura = maxDura;
+                                    ReceiveChat(string.Format("{0} : Remove success. Level {1}", item.Name, item.Awake.getAwakeLevel()), ChatType.System);
+                                    Enqueue(new S.RefreshItem { Item = item });
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void DisassembleItem(ulong UniqueID)
+        {
+            for (int i = 0; i < Info.Inventory.Length; i++)
+            {
+                UserItem item = Info.Inventory[i];
+                if (item == null || item.UniqueID != UniqueID) continue;
+
+                if (Info.AccountInfo.Gold >= item.DisassemblePrice())
+                {
+                    List<ItemInfo> dropList = new List<ItemInfo>();
+                    foreach (DropInfo drop in Envir.AwakeningDrops)
+                    {
+                        if (drop.Item.Grade == item.Info.Grade - 1 ||
+                            drop.Item.Grade == item.Info.Grade + 1)
+                        {
+                            if (Envir.Random.Next((drop.Chance <= 0) ? 1 : drop.Chance) == 0)
+                            {
+                                dropList.Add(drop.Item);
+                            }
+                        }
+
+                        if (drop.Item.Grade == item.Info.Grade)
+                        {
+                            dropList.Add(drop.Item);
+                        }
+                    }
+
+                    if (dropList.Count == 0) continue;
+
+                    UserItem gainItem = Envir.CreateDropItem(dropList[Envir.Random.Next(dropList.Count)]);
+                    if (gainItem == null) continue;
+                    gainItem.Count = (uint)Envir.Random.Next((int)((((int)item.Info.Grade * item.Info.RequiredAmount) / 10) + item.Quality()));
+                    if (gainItem.Count < 1) gainItem.Count = 1;
+
+                    GainItem(gainItem);
+
+                    Enqueue(new S.LoseGold { Gold = item.DisassemblePrice() });
+                    Info.AccountInfo.Gold -= item.DisassemblePrice();
+
+                    Enqueue(new S.DeleteItem { UniqueID = item.UniqueID, Count = item.Count });
+                    Info.Inventory[i] = null;
+                }
+            }
+        }
+
+        public void ResetAddedItem(ulong UniqueID)
+        {
+            for (int i = 0; i < Info.Inventory.Length; i++)
+            {
+                UserItem item = Info.Inventory[i];
+                if (item != null)
+                {
+                    if (item.UniqueID == UniqueID)
+                    {
+                        if (Info.AccountInfo.Gold >= item.ResetPrice())
+                        {
+                            Info.AccountInfo.Gold -= item.ResetPrice();
+                            Enqueue(new S.LoseGold { Gold = item.ResetPrice() });
+
+                            UserItem newItem = new UserItem(item.Info);
+
+                            ushort maxDura = (Envir.Random.Next(20) == 0) ? (ushort)(item.MaxDura - 1000) : item.MaxDura;
+                            if (maxDura < 1000) maxDura = 1000;
+
+                            newItem.UniqueID = item.UniqueID;
+                            newItem.ItemIndex = item.ItemIndex;
+                            newItem.CurrentDura = (item.CurrentDura >= maxDura) ? maxDura : item.CurrentDura;
+                            newItem.MaxDura = maxDura;
+                            newItem.Count = item.Count;
+                            newItem.Slots = item.Slots;
+                            newItem.Awake = item.Awake;
+
+                            Info.Inventory[i] = newItem;
+
+                            Enqueue(new S.RefreshItem { Item = Info.Inventory[i] });
+                        }
+                    }
+                }
+            }
+        }
+
+        public void AwakeningNeedMaterials(ulong UniqueID, AwakeType type)
+        {
+            if (type == AwakeType.None) return;
+
+            foreach (UserItem item in Info.Inventory)
+            {
+                if (item != null)
+                {
+                    if (item.UniqueID == UniqueID)
+                    {
+                        Awake awake = item.Awake;
+
+                        byte[] materialCount = new byte[2];
+                        int idx = 0;
+                        foreach (List<byte> material in Awake.AwakeMaterials[(int)type - 1])
+                        {
+                            byte materialRate = (byte)(Awake.AwakeMaterialRate[(int)item.Info.Grade - 1] * (float)awake.getAwakeLevel());
+                            materialCount[idx] = material[(int)item.Info.Grade - 1];
+                            materialCount[idx] += materialRate;
+                            idx++;
+                        }
+
+                        ItemInfo[] materials = new ItemInfo[2];
+
+                        foreach (ItemInfo info in Envir.ItemInfoList)
+                        {
+                            if (item.Info.Grade == info.Grade &&
+                                info.Type == ItemType.Awakening)
+                            {
+                                if (info.Shape == (short)type - 1)
+                                {
+                                    materials[0] = info;
+                                }
+                                else if (info.Shape == 100)
+                                {
+                                    materials[1] = info;
+                                }
+                            }
+                        }
+                       
+                        Enqueue(new S.AwakeningNeedMaterials { Materials = materials, MaterialsCount = materialCount });
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void AwakeningEffect(bool isSuccess, bool[] isHit)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                Enqueue(new S.ObjectEffect { ObjectID = ObjectID, Effect = isHit[i] ? SpellEffect.AwakeningHit :SpellEffect.AwakeningMiss, EffectType = 0, DelayTime = (uint)(i * 500) });
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = isHit[i] ? SpellEffect.AwakeningHit :SpellEffect.AwakeningMiss, EffectType = 0, DelayTime = (uint)(i * 500) });
+            }
+
+            Enqueue(new S.ObjectEffect { ObjectID = ObjectID, Effect = isSuccess ? SpellEffect.AwakeningSuccess : SpellEffect.AwakeningFail, EffectType = 0, DelayTime = 2500 });
+            Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = isSuccess ? SpellEffect.AwakeningSuccess : SpellEffect.AwakeningFail, EffectType = 0, DelayTime = 2500 });
+        }
+
+        public bool hasAwakeningNeedMaterials(UserItem item, AwakeType type)
+        {
+            Awake awake = item.Awake;
+
+            byte[] materialCount = new byte[2];
+
+            int idx = 0;
+            foreach (List<byte> material in Awake.AwakeMaterials[(int)type - 1])
+            {
+                byte materialRate = (byte)(Awake.AwakeMaterialRate[(int)item.Info.Grade - 1] * (float)awake.getAwakeLevel());
+                materialCount[idx] = material[(int)item.Info.Grade - 1];
+                materialCount[idx] += materialRate;
+                idx++;
+            }
+
+            byte[] currentCount = new byte[2]{ 0, 0 };
+
+            for (int i = 0; i < Info.Inventory.Length; i++)
+            {
+                UserItem materialItem = Info.Inventory[i];
+                if (materialItem != null)
+                {
+                    if (materialItem.Info.Grade == item.Info.Grade &&
+                        materialItem.Info.Type == ItemType.Awakening)
+                    {
+                        if (materialItem.Info.Shape == ((int)type - 1) &&
+                            materialCount[0] - currentCount[0] != 0)
+                        {
+                            if (materialItem.Count <= materialCount[0] - currentCount[0])
+                            {
+                                currentCount[0] += (byte)materialItem.Count;
+                            }
+                            else if (materialItem.Count > materialCount[0]- currentCount[0])
+                            {
+                                currentCount[0] = (byte)(materialCount[0] - currentCount[0]);
+                            }
+                        }
+                        else if (materialItem.Info.Shape == 100 &&
+                            materialCount[1] - currentCount[1] != 0)
+                        {
+                            if (materialItem.Count <= materialCount[1] - currentCount[1])
+                            {
+                                currentCount[1] += (byte)materialItem.Count;
+                            }
+                            else if (materialItem.Count > materialCount[1] - currentCount[1])
+                            {
+                                currentCount[1] = (byte)(materialCount[1] - currentCount[1]);
+                            }
+                        } 
+                    }
+                }
+            }
+
+            for (int i = 0; i < materialCount.Length; i++)
+            {
+                if (materialCount[i] != currentCount[i])
+                {
+                    Enqueue(new S.Awakening { result = -4, removeID = -1 });
+                    return false;
+                }
+            }
+
+            for (int i = 0; i < Info.Inventory.Length; i++)
+            {
+                if (Info.Inventory[i] != null)
+                {
+                    if (Info.Inventory[i].Info.Grade == item.Info.Grade &&
+                        Info.Inventory[i].Info.Type == ItemType.Awakening)
+                    {
+                        if (Info.Inventory[i].Info.Shape == ((int)type - 1) &&
+                            currentCount[0] > 0)
+                        {
+                            if (Info.Inventory[i].Count <= currentCount[0])
+                            {
+                                Enqueue(new S.DeleteItem { UniqueID = Info.Inventory[i].UniqueID, Count = Info.Inventory[i].Count });
+                                currentCount[0] -= (byte)Info.Inventory[i].Count;
+                                Info.Inventory[i] = null;
+                            }
+                            else if (Info.Inventory[i].Count > currentCount[0])
+                            {
+                                Enqueue(new S.DeleteItem { UniqueID = Info.Inventory[i].UniqueID, Count = (uint)currentCount[0] });
+                                Info.Inventory[i].Count -= currentCount[0];
+                                currentCount[0] = 0;
+                            }
+                        }
+                        else if (Info.Inventory[i].Info.Shape == 100 &&
+                            currentCount[1] > 0)
+                        {
+                            if (Info.Inventory[i].Count <= currentCount[1])
+                            {
+                                Enqueue(new S.DeleteItem { UniqueID = Info.Inventory[i].UniqueID, Count = Info.Inventory[i].Count });
+                                currentCount[1] -= (byte)Info.Inventory[i].Count;
+                                Info.Inventory[i] = null;
+                            }
+                            else if (Info.Inventory[i].Count > currentCount[1])
+                            {
+                                Enqueue(new S.DeleteItem { UniqueID = Info.Inventory[i].UniqueID, Count = (uint)currentCount[1] });
+                                Info.Inventory[i].Count -= currentCount[1];
+                                currentCount[1] = 0;
+                            }
+                        } 
+                    }
+                }
+            }
+            return true;
+        }
+        #endregion
 
 
         #region Groups

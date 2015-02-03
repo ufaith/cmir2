@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 40;
+        public const int Version = 41;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -93,6 +93,7 @@ namespace Server.MirEnvir
 
         public List<DropInfo> FishingDrops = new List<DropInfo>();
 
+        public List<DropInfo> AwakeningDrops = new List<DropInfo>();
         static Envir()
         {
             AccountIDReg =
@@ -596,6 +597,45 @@ namespace Server.MirEnvir
             });
         }
 
+        public void LoadAwakeningMaterials()
+        {
+            AwakeningDrops.Clear();
+
+            string path = Path.Combine(Settings.DropPath, Settings.AwakeningDropFilename + ".txt");
+
+            if (!File.Exists(path))
+            {
+                FileStream newfile = File.Create(path);
+                newfile.Close();
+
+            }
+
+            string[] lines = File.ReadAllLines(path);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].StartsWith(";") || string.IsNullOrWhiteSpace(lines[i])) continue;
+
+                DropInfo drop = DropInfo.FromLine(lines[i]);
+                if (drop == null)
+                {
+                    SMain.Enqueue(string.Format("Could not load Awakening drop: {0}", lines[i]));
+                    continue;
+                }
+
+                AwakeningDrops.Add(drop);
+            }
+
+            AwakeningDrops.Sort((drop1, drop2) =>
+            {
+                if (drop1.Chance > 0 && drop2.Chance == 0)
+                    return 1;
+                if (drop1.Chance == 0 && drop2.Chance > 0)
+                    return -1;
+
+                return drop1.Item.Type.CompareTo(drop2.Item.Type);
+            });
+        }
         private bool BindCharacter(AuctionInfo auction)
         {
             for (int i = 0; i < CharacterList.Count; i++)
@@ -657,6 +697,7 @@ namespace Server.MirEnvir
             DefaultNPC = new NPCObject(new NPCInfo() { Name = "DefaultNPC", FileName = Settings.DefaultNPCFilename, IsDefault = true });
 
             LoadFishingDrops();
+            LoadAwakeningMaterials();
 
             SMain.Enqueue("Envir Started.");
         }

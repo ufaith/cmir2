@@ -67,6 +67,8 @@ namespace Client.MirControls
                         return MapObject.User.Equipment[(int)EquipmentSlot.Weapon].Slots;
                     case MirGridType.QuestInventory:
                         return MapObject.User.QuestInventory;
+                    case MirGridType.AwakenItem:
+                        return NPCAwakeDialog.Items;
                     default:
                         throw new NotImplementedException();
                 }
@@ -348,16 +350,6 @@ namespace Client.MirControls
                     break;
                 case ItemType.Amulet:
                     //if (Item.Info.Shape == 0) return;
-                    //if (GridType == MirGridType.Inventory && (ItemArray[44] == Item || ItemArray[45] == Item) &&
-                    //    dialog.Grid[(int)EquipmentSlot.Amulet].Item != null &&
-                    //    dialog.Grid[(int)EquipmentSlot.BraceletR].CorrectSlot(Item) && 
-                    //    dialog.Grid[(int)EquipmentSlot.BraceletR].CanWearItem(Item))
-                    //{
-                    //    Network.Enqueue(new C.EquipItem { Grid = GridType, UniqueID = Item.UniqueID, To = (int)EquipmentSlot.BraceletR });
-                    //    dialog.Grid[(int)EquipmentSlot.BraceletR].Locked = true;
-                    //    Locked = true;
-                    //    return;
-                    //}
 
                     if (dialog.Grid[(int)EquipmentSlot.Amulet].Item != null && Item.Info.Type == ItemType.Amulet)
                     {
@@ -872,6 +864,16 @@ namespace Client.MirControls
                                     }
                                 break;
                             #endregion
+                            #region From AwakenItem
+                            case MirGridType.AwakenItem: //From AwakenItem
+                                Network.Enqueue(new C.MoveItem { Grid = GridType, From = NPCAwakeDialog.ItemsIdx[GameScene.SelectedCell.ItemSlot], To = NPCAwakeDialog.ItemsIdx[GameScene.SelectedCell.ItemSlot] });
+                                GameScene.SelectedCell.Locked = false;
+                                GameScene.SelectedCell.Item = null;
+                                if (GameScene.SelectedCell.ItemSlot == 0)
+                                    GameScene.Scene.NPCAwakeDialog.ItemCell_Click();
+                                GameScene.SelectedCell = null;
+                                break;
+                            #endregion
                         }
                         break;
                     #endregion
@@ -1118,13 +1120,145 @@ namespace Client.MirControls
                         break;
 
                     #endregion
+                    #region To Awakening
+                    case MirGridType.AwakenItem:
+                        {
+                            int errorCode = 0;
+
+                            if (GameScene.SelectedCell.GridType != MirGridType.Inventory && _itemSlot < 1) errorCode = -1;
+
+                            switch (_itemSlot)
+                            {
+                                    //baseitem
+                                case 0:
+                                    {
+                                        if ((GameScene.SelectedCell.Item.Info.Type == ItemType.Weapon ||
+                                            GameScene.SelectedCell.Item.Info.Type == ItemType.Helmet ||
+                                            GameScene.SelectedCell.Item.Info.Type == ItemType.Armour) &&
+                                            GameScene.SelectedCell.Item.Info.Grade != ItemGrade.None &&
+                                            _itemSlot == 0)
+                                        {
+                                            if (Item == null)
+                                            {
+                                                Item = GameScene.SelectedCell.Item;
+                                                GameScene.SelectedCell.Locked = true;
+                                                NPCAwakeDialog.ItemsIdx[_itemSlot] = GameScene.SelectedCell._itemSlot;
+                                            }
+                                            else
+                                            {
+                                                Network.Enqueue(new C.AwakeningLockedItem { UniqueID = Item.UniqueID, Locked = false });
+
+                                                Item = GameScene.SelectedCell.Item;
+                                                GameScene.SelectedCell.Locked = true;
+                                                NPCAwakeDialog.ItemsIdx[_itemSlot] = GameScene.SelectedCell._itemSlot;
+                                            }
+                                            GameScene.Scene.NPCAwakeDialog.ItemCell_Click();
+                                            GameScene.Scene.NPCAwakeDialog.OnAwakeTypeSelect(0);
+                                        }
+                                        else
+                                        {
+                                            errorCode = -2;
+                                        }
+                                    }
+                                    break;
+                                    //view materials
+                                case 1:
+                                case 2:
+                                    break;
+                                    //materials
+                                case 3:
+                                case 4:
+                                    {
+                                        switch (GameScene.SelectedCell.GridType)
+                                        {
+                                            case MirGridType.Inventory:
+                                                {
+                                                    if (GameScene.SelectedCell.Item.Info.Type == ItemType.Awakening &&
+                                                        GameScene.SelectedCell.Item.Info.Shape < 200)
+                                                    {
+                                                        Item = GameScene.SelectedCell.Item;
+                                                        GameScene.SelectedCell.Locked = true;
+                                                        NPCAwakeDialog.ItemsIdx[_itemSlot] = GameScene.SelectedCell._itemSlot;
+                                                    }
+                                                    else
+                                                    {
+                                                        errorCode = -2;
+                                                    }
+                                                }
+                                                break;
+                                            case MirGridType.AwakenItem:
+                                                {
+                                                    if (GameScene.SelectedCell.ItemSlot == ItemSlot || GameScene.SelectedCell.ItemSlot == 0)
+                                                    {
+                                                        Locked = false;
+                                                        GameScene.SelectedCell = null;
+                                                    }
+                                                    else
+                                                    {
+                                                        GameScene.SelectedCell.Locked = false;
+                                                        Locked = false;
+
+                                                        int beforeIdx = NPCAwakeDialog.ItemsIdx[GameScene.SelectedCell._itemSlot];
+                                                        NPCAwakeDialog.ItemsIdx[GameScene.SelectedCell._itemSlot] = NPCAwakeDialog.ItemsIdx[_itemSlot];
+                                                        NPCAwakeDialog.ItemsIdx[_itemSlot] = beforeIdx;
+
+                                                        UserItem item = GameScene.SelectedCell.Item;
+                                                        GameScene.SelectedCell.Item = Item;
+                                                        Item = item;
+                                                        GameScene.SelectedCell = null;
+                                                    }
+                                                }
+                                                break;
+                                        }
+                                        
+                                    }
+                                    break;
+                                    //SuccessRateUpItem or RandomValueUpItem or CancelDestroyedItem etc.
+                                    //AllCashItem Korea Server Not Implementation.
+                                case 5:
+                                case 6:
+                                    if (GameScene.SelectedCell.Item.Info.Type == ItemType.Awakening &&
+                                            GameScene.SelectedCell.Item.Info.Shape == 200)
+                                    {
+                                        Item = GameScene.SelectedCell.Item;
+                                        GameScene.SelectedCell.Locked = true;
+                                        NPCAwakeDialog.ItemsIdx[_itemSlot] = GameScene.SelectedCell._itemSlot;
+                                    }
+                                    else
+                                    {
+                                        errorCode = -2;
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            GameScene.SelectedCell = null;
+                            MirMessageBox messageBox;
+
+                            switch (errorCode)
+                            {
+                                case -1:
+                                    messageBox = new MirMessageBox("Item must be in your inventory.", MirMessageBoxButtons.OK);
+                                    messageBox.Show();
+                                    break;
+                                case -2:
+                                    messageBox = new MirMessageBox("Cannot awaken this item.", MirMessageBoxButtons.OK);
+                                    messageBox.Show();
+                                    break;
+                            }
+                        }
+                        return;
+                    #endregion
                 }
 
                 return;
             }
 
             if (Item != null)
+            {
                 GameScene.SelectedCell = this;
+            }
         }
         private void PlayItemSound()
         {
@@ -1488,14 +1622,15 @@ namespace Client.MirControls
 
         protected internal override void DrawControl()
         {
+            /*
             if (GameScene.SelectedCell == this || Locked)
             {
                 base.DrawControl();
             }
 
             if (Locked) return;
-
-            if (Item != null && GameScene.SelectedCell != this)
+            */
+            if (Item != null && GameScene.SelectedCell != this && Locked != true)
             {
                 CreateDisposeLabel();
 
@@ -1508,6 +1643,21 @@ namespace Client.MirControls
                     Point offSet = new Point((Size.Width - imgSize.Width) / 2, (Size.Height - imgSize.Height) / 2);
 
                     Library.Draw(image, DisplayLocation.Add(offSet), ForeColour, UseOffSet, 1F);
+                }
+            }
+            else if (Item != null && (GameScene.SelectedCell == this  || Locked))
+            {
+                CreateDisposeLabel();
+
+                if (Library != null)
+                {
+                    ushort image = Item.GetRealItemImage();
+
+                    Size imgSize = Library.GetTrueSize(image);
+
+                    Point offSet = new Point((Size.Width - imgSize.Width) / 2, (Size.Height - imgSize.Height) / 2);
+
+                    Library.Draw(image, DisplayLocation.Add(offSet), Color.DimGray, UseOffSet, 0.8F);
                 }
             }
             else

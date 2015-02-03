@@ -32,6 +32,7 @@ namespace Server
         public static string GMPassword = "C#Mir 4.0";
         public static string DefaultNPCFilename = "00Default";
         public static string FishingDropFilename = "00Fishing";
+	    public static string AwakeningDropFilename = "00Awakening";
 
         //Network
         public static string IPAddress = "127.0.0.1";
@@ -278,6 +279,7 @@ namespace Server
             LoadRandomItemStats();
             LoadMines();
             LoadGuildSettings();
+			LoadAwakeAttribute();
         }
 
         public static void LoadVersion()
@@ -403,6 +405,7 @@ namespace Server
             Reader.Write("Items", "PvpCanResistMagic", PvpCanResistMagic);
             Reader.Write("Items", "PvpCanResistPoison", PvpCanResistPoison);
             Reader.Write("Items", "PvpCanFreeze", PvpCanFreeze);
+            SaveAwakeAttribute();
         }
 
         public static void LoadEXP()
@@ -763,6 +766,104 @@ namespace Server
                         break;
                     }
                   
+            }
+        }
+
+		public static void LoadAwakeAttribute()
+        {
+            if (!File.Exists(@".\AwakeningSystem.ini"))
+            {
+                return;
+            }
+
+            InIReader reader = new InIReader(@".\AwakeningSystem.ini");
+            Awake.AwakeSuccessRate = reader.ReadByte("Attribute", "SuccessRate", Awake.AwakeSuccessRate);
+            Awake.AwakeHitRate = reader.ReadByte("Attribute", "HitRate", Awake.AwakeHitRate);
+            Awake.MaxAwakeLevel = reader.ReadInt32("Attribute", "MaxUpgradeLevel", Awake.MaxAwakeLevel);
+            Awake.Awake_WeaponRate = reader.ReadByte("IncreaseValue", "WeaponValue", Awake.Awake_WeaponRate);
+            Awake.Awake_HelmetRate = reader.ReadByte("IncreaseValue", "HelmetValue", Awake.Awake_HelmetRate);
+            Awake.Awake_ArmorRate = reader.ReadByte("IncreaseValue", "ArmorValue", Awake.Awake_ArmorRate);
+
+            for (int i = 0; i < 4; i++)
+            {
+                Awake.AwakeChanceMax[i] = reader.ReadByte("Value", "ChanceMax_" + ((ItemGrade)(i + 1)).ToString(), Awake.AwakeChanceMax[i]);
+            }
+
+            for (int i = 0; i < (int)AwakeType.HPMP; i++)
+            {
+                List<byte>[] value = new List<byte>[2];
+
+                for (int k = 0; k < 2; k++)
+                {
+                    value[k] = new List<byte>();
+                }
+
+                for (int j = 0; j < 4; j++)
+                {
+                    byte material1 = 1;
+                    material1 = reader.ReadByte("Materials_BaseValue", ((AwakeType)(i + 1)).ToString() + "_" + ((ItemGrade)(j + 1)).ToString() + "_Material1", material1);
+                    byte material2 = 1;
+                    material2 = reader.ReadByte("Materials_BaseValue", ((AwakeType)(i + 1)).ToString() + "_" + ((ItemGrade)(j + 1)).ToString() + "_Material2", material2);
+                    value[0].Add(material1);
+                    value[1].Add(material2);
+                }
+
+                Awake.AwakeMaterials.Add(value);
+            }
+
+            for (int c = 0; c < 4; c++)
+            {
+                Awake.AwakeMaterialRate[c] = reader.ReadFloat("Materials_IncreaseValue", "Materials_" + ((ItemGrade)(c + 1)).ToString(), Awake.AwakeMaterialRate[c]);
+            }
+
+        }
+        public static void SaveAwakeAttribute()
+        {
+            File.Delete(@".\AwakeningSystem.ini");
+            InIReader reader = new InIReader(@".\AwakeningSystem.ini");
+            reader.Write("Attribute", "SuccessRate", Awake.AwakeSuccessRate);
+            reader.Write("Attribute", "HitRate", Awake.AwakeHitRate);
+            reader.Write("Attribute", "MaxUpgradeLevel", Awake.MaxAwakeLevel);
+
+            reader.Write("IncreaseValue", "WeaponValue", Awake.Awake_WeaponRate);
+            reader.Write("IncreaseValue", "HelmetValue", Awake.Awake_HelmetRate);
+            reader.Write("IncreaseValue", "ArmorValue", Awake.Awake_ArmorRate);
+
+            for (int i = 0; i < 4; i++)
+            {
+                reader.Write("Value", "ChanceMax_" + ((ItemGrade)(i + 1)).ToString(), Awake.AwakeChanceMax[i]);
+            }
+
+            if (Awake.AwakeMaterials.Count == 0)
+            {
+                for (int i = 0; i < (int)AwakeType.HPMP; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        reader.Write("Materials_BaseValue", ((AwakeType)(i + 1)).ToString() + "_" + ((ItemGrade)(j + 1)).ToString() + "_Material1", 1);
+                        reader.Write("Materials_BaseValue", ((AwakeType)(i + 1)).ToString() + "_" + ((ItemGrade)(j + 1)).ToString() + "_Material2", 1);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < (int)AwakeType.HPMP; i++)
+                {
+                    List<byte>[] value = Awake.AwakeMaterials[i];
+
+                    for (int j = 0; j < value[0].Count; j++)
+                    {
+                        reader.Write("Materials_BaseValue", ((AwakeType)(i + 1)).ToString() + "_" + ((ItemGrade)(j + 1)).ToString() + "_Material1", value[0][j]);
+                        reader.Write("Materials_BaseValue", ((AwakeType)(i + 1)).ToString() + "_" + ((ItemGrade)(j + 1)).ToString() + "_Material2", value[1][j]);
+                    }
+
+                    Awake.AwakeMaterials.Add(value);
+                }
+            }
+
+            for (int c = 0; c < 4; c++)
+            {
+                reader.Write("Materials_IncreaseValue", "Materials_" + ((ItemGrade)(c + 1)).ToString(), Awake.AwakeMaterialRate[c]);
             }
         }
     }

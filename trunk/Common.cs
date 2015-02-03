@@ -3,9 +3,18 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using C = ClientPackets;
 using S = ServerPackets;
 
+[Flags]
+public enum LevelEffects : byte
+{
+    None = 0,
+    Mist = 0x0001,
+    RedDragon = 0x0002,
+    BlueDragon = 0x0004,
+}
 
 public enum OutputMessageType : byte
 {
@@ -15,10 +24,11 @@ public enum OutputMessageType : byte
 
 public enum ItemGrade : byte
 {
-    Common = 0,
-    Rare = 1,
-    Legendary = 2,
-    Mythical = 3,
+    None = 0,
+    Common = 1,
+    Rare = 2,
+    Legendary = 3,
+    Mythical = 4,
 }
 
 public enum QuestType : byte
@@ -367,7 +377,8 @@ public enum ItemType : byte
     Finder = 31,
     Reel = 32,
     Fish = 33,
-    Quest = 34
+    Quest = 34,
+	Awakening = 35,
 }
 
 public enum MirGridType : byte
@@ -385,7 +396,8 @@ public enum MirGridType : byte
     GuestTrade = 10,
     Mount = 11,
     Fishing = 12,
-    QuestInventory = 13
+    QuestInventory = 13,
+    AwakenItem = 14,
 }
 public enum EquipmentSlot : byte
 {
@@ -687,7 +699,11 @@ public enum SpellEffect : byte
     DelayedExplosion,
     MPEater,
     Hemorrhage,
-    Bleeding
+    Bleeding,
+    AwakeningSuccess,
+    AwakeningFail,
+    AwakeningMiss,
+    AwakeningHit,
 }
 
 public enum BuffType : byte
@@ -898,9 +914,16 @@ public enum ServerPacketIds : short
     RemoveDelayedExplosion,
     ObjectDeco,
     ObjectSneaking,
-    LevelEffects,
+    ObjectLevelEffects,
     SetBindingShot,
-    SendOutputMessage
+    SendOutputMessage,
+    NPCAwakening,
+    NPCDisassemble,
+    NPCDowngrade,
+    NPCReset,
+    AwakeningNeedMaterials,
+    AwakeningLockedItem,
+    Awakening,
 }
 
 public enum ClientPacketIds : short
@@ -985,6 +1008,12 @@ public enum ClientPacketIds : short
     CombineItem,
 
     SetConcentration,//ArcherSpells - Elemental system
+    AwakeningNeedMaterials,
+    AwakeningLockedItem,
+    Awakening,
+    DisassembleItem,
+    DowngradeAwakening,
+    ResetAddedItem,
 }
 
 public class InIReader
@@ -1776,6 +1805,7 @@ public class ItemInfo
     public bool LevelBased;
     public bool CanMine;
     public bool CanFastRun;
+    public bool CanAwakening;
     public byte MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, HpDrainRate;
     
     public BindMode Bind = BindMode.none;//due to lack of space in bindmodes > bindonequip and srepair are seperate bools for now, if anyone adds 2/3 more bindmodes then it'd be more suitable to upgrade bindmode to short!
@@ -1783,6 +1813,7 @@ public class ItemInfo
     public SpecialItemMode Unique = SpecialItemMode.None;
     public byte RandomStatsId;
     public RandomItemStat RandomStats;
+    public string ToolTip;
 
 
     public bool IsConsumable
@@ -1896,6 +1927,14 @@ public class ItemInfo
         }
 
         if (version >= 40) CanFastRun = reader.ReadBoolean();
+
+        if (version >= 41)
+        {
+            CanAwakening = reader.ReadBoolean();
+            bool isTooltip = reader.ReadBoolean();
+            if (isTooltip)
+                ToolTip = reader.ReadString();
+        }
     }
 
 
@@ -1977,6 +2016,10 @@ public class ItemInfo
         writer.Write((short)Unique);
         writer.Write(RandomStatsId);
         writer.Write(CanFastRun);
+		writer.Write(CanAwakening);
+        writer.Write(ToolTip != null);
+        if (ToolTip != null)
+            writer.Write(ToolTip);
     }
 
     public static ItemInfo FromText(string text)
@@ -2058,19 +2101,41 @@ public class ItemInfo
         if (!byte.TryParse(data[60], out info.RandomStatsId)) return null;
         if (!bool.TryParse(data[61], out info.CanMine)) return null;
         if (!bool.TryParse(data[62], out info.CanFastRun)) return null;
+		if (!bool.TryParse(data[63], out info.CanAwakening)) return null;
+        if (data[64] == "-")
+            info.ToolTip = "";
+        else
+        {
+            info.ToolTip = data[64];
+            info.ToolTip = info.ToolTip.Replace("&^&", "\r\n");
+        }
+            
         return info;
 
     }
 
     public string ToText()
     {
+        string TransToolTip = ToolTip;
+        int length = TransToolTip.Length;
+
+        if (TransToolTip == null || TransToolTip.Length == 0)
+        {
+            TransToolTip = "-";
+        }
+        else
+        {
+            TransToolTip = TransToolTip.Replace("\r\n", "&^&");
+        }
+
         return string.Format("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},{23},{24},{25},{26}," +
                              "{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},{50},{51}," +
-                             "{52},{53},{54},{55},{56},{57},{58},{59},{60},{61},{62}",
+                             "{52},{53},{54},{55},{56},{57},{58},{59},{60},{61},{62},{63},{64}",
             Name, (byte)Type, (byte)Grade, (byte)RequiredType, (byte)RequiredClass, (byte)RequiredGender, Shape, Weight, Light, RequiredAmount, MinAC, MaxAC, MinMAC, MaxMAC, MinDC, MaxDC,
             MinMC, MaxMC, MinSC, MaxSC, Accuracy, Agility, HP, MP, AttackSpeed, Luck, BagWeight, HandWeight, WearWeight, StartItem, Image, Durability, Price,
             StackSize, Effect, Strong, MagicResist, PoisonResist, HealthRecovery, SpellRecovery, PoisonRecovery, HPrate, MPrate, CriticalRate, CriticalDamage, NeedIdentify,
-            ShowGroupPickup, MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, ClassBased, LevelBased, (byte)Bind, BindOnEquip, Reflect, HpDrainRate, (short)Unique, BindNoSRepair, RandomStatsId, CanMine, CanFastRun);
+            ShowGroupPickup, MaxAcRate, MaxMacRate, Holy, Freezing, PoisonAttack, ClassBased, LevelBased, (byte)Bind, BindOnEquip, Reflect, HpDrainRate, (short)Unique, BindNoSRepair,
+            RandomStatsId, CanMine, CanFastRun, CanAwakening, TransToolTip);
     }
 
     
@@ -2081,6 +2146,234 @@ public class ItemInfo
     }
 
 }
+public enum AwakeType
+{
+    None = 0,
+    DC,
+    MC,
+    SC,
+    AC,
+    MAC,
+    HPMP,
+}
+public class Awake
+{
+    //Awake Option
+    public static byte AwakeSuccessRate = 70;
+    public static byte AwakeHitRate = 70;
+    public static int MaxAwakeLevel = 5;
+    public static byte Awake_WeaponRate = 1;
+    public static byte Awake_HelmetRate = 1;
+    public static byte Awake_ArmorRate = 5;
+    public static byte AwakeChanceMin = 1;
+    public static float[] AwakeMaterialRate = new float[4] {1.0F, 1.0F, 1.0F, 1.0F};
+    public static byte[] AwakeChanceMax = new byte[4] { 1, 2, 3, 4 };
+    public static List<List<byte>[]> AwakeMaterials = new List<List<byte>[]>();
+
+    public AwakeType type;
+    List<byte> listAwake = new List<byte>();
+
+    public Awake(BinaryReader reader)
+    {
+        type = (AwakeType)reader.ReadByte();
+        int count = reader.ReadInt32();
+        for (int i = 0; i < count; i++)
+        {
+            listAwake.Add(reader.ReadByte());
+        }
+    }
+
+    public void Save(BinaryWriter writer)
+    {
+        writer.Write((byte)type);
+        writer.Write(listAwake.Count);
+        foreach (byte value in listAwake)
+        {
+            writer.Write(value);
+        }
+    }
+
+    public Awake()
+    {
+        type = AwakeType.None;
+    }
+
+    public bool IsMaxLevel() { return listAwake.Count == Awake.MaxAwakeLevel; }
+
+    public int getAwakeLevel() { return listAwake.Count; }
+
+    public byte getAwakeValue()
+    {
+        byte total = 0;
+
+        foreach (byte value in listAwake)
+        {
+            total += value;
+        }
+
+        return total;
+    }
+
+    public bool CheckAwakening(UserItem item, AwakeType type)
+    {
+        if (item.Info.CanAwakening != true) return false;
+
+        if (item.Info.Grade == ItemGrade.None) return false;
+
+        if (IsMaxLevel()) return false;
+
+
+        if (this.type == AwakeType.None)
+        {
+            if (item.Info.Type == ItemType.Weapon)
+            {
+                if (type == AwakeType.DC ||
+                    type == AwakeType.MC ||
+                    type == AwakeType.SC)
+                {
+                    this.type = type;
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else if (item.Info.Type == ItemType.Helmet)
+            {
+                if (type == AwakeType.AC ||
+                    type == AwakeType.MAC)
+                {
+                    this.type = type;
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else if (item.Info.Type == ItemType.Armour)
+            {
+                if (type == AwakeType.HPMP)
+                {
+                    this.type = type;
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            if (this.type == type)
+                return true;
+            else
+                return false;
+        }
+    }
+
+    public int UpgradeAwake(UserItem item, AwakeType type, out bool[] isHit)
+    {
+        //return -1 condition error, -1 = dont upgrade, 0 = failed, 1 = Succeed,  
+        isHit = null;
+        if (CheckAwakening(item, type) != true)
+            return -1;
+
+        Random rand = new Random(DateTime.Now.Millisecond);
+
+        if (rand.Next(0, 100) <= AwakeSuccessRate)
+        {
+            isHit = Awakening(item);
+            return 1;
+        }
+        else
+        {
+            int idx;
+            isHit = makeHit(1, out idx);
+            return 0;
+        }
+    }
+
+    public int RemoveAwake()
+    {
+        if (listAwake.Count > 0)
+        {
+            listAwake.Remove(listAwake[listAwake.Count - 1]);
+
+            if (listAwake.Count == 0)
+                type = AwakeType.None;
+            
+            return 1;
+        }
+        else
+        {
+            type = AwakeType.None;
+            return 0;
+        }
+    }
+
+    public int getAwakeLevelValue(int i) { return listAwake[i]; }
+
+    public byte getDC() { return (type == AwakeType.DC ? getAwakeValue() : (byte)0); }
+    public byte getMC() { return (type == AwakeType.MC ? getAwakeValue() : (byte)0); }
+    public byte getSC() { return (type == AwakeType.SC ? getAwakeValue() : (byte)0); }
+    public byte getAC() { return (type == AwakeType.AC ? getAwakeValue() : (byte)0); }
+    public byte getMAC() { return (type == AwakeType.MAC ? getAwakeValue() : (byte)0); }
+    public byte getHPMP() { return (type == AwakeType.HPMP ? getAwakeValue() : (byte)0); }
+
+    private bool[] makeHit(int maxValue, out int makeValue)
+    {
+        float stepValue = (float)maxValue / 5.0f;
+        float totalValue = 0.0f;
+        bool[] isHit = new bool[5];
+        Random rand = new Random(DateTime.Now.Millisecond);
+
+        for (int i = 0; i < 5; i++)
+        {
+            if (rand.Next(0, 100) < AwakeHitRate)
+            {
+                totalValue += stepValue;
+                isHit[i] = true;
+            }
+            else
+            {
+                isHit[i] = false;
+            }
+        }
+
+        makeValue = totalValue <= 1.0f ? 1 : (int)totalValue;
+        return isHit;
+    }
+
+    private bool[] Awakening(UserItem item)
+    {
+        int minValue = AwakeChanceMin;
+        int maxValue = (AwakeChanceMax[(int)item.Info.Grade - 1] < AwakeChanceMin) ? AwakeChanceMin : AwakeChanceMax[(int)item.Info.Grade - 1];
+
+        int result;
+
+        bool[] returnValue = makeHit(maxValue, out result);
+
+        switch (item.Info.Type)
+        {
+            case ItemType.Weapon:
+                result *= (int)Awake_WeaponRate;
+                break;
+            case ItemType.Armour:
+                result *= (int)Awake_ArmorRate;
+                break;
+            case ItemType.Helmet:
+                result *= (int)Awake_HelmetRate;
+                break;
+            default:
+                result = 0;
+                break;
+        }
+
+        listAwake.Add((byte)result);
+
+        return returnValue;
+    }
+}
+
 public class UserItem
 {
     public ulong UniqueID;
@@ -2100,6 +2393,7 @@ public class UserItem
 
     public UserItem[] Slots = new UserItem[5];
 
+	public Awake Awake = new Awake();
     public bool IsAdded
     {
         get
@@ -2181,6 +2475,10 @@ public class UserItem
         if (version <= 38) return;
 
         GemCount = reader.ReadUInt32();
+
+        if (version <= 40) return;
+
+        Awake = new Awake(reader);
     }
 
     public void Save(BinaryWriter writer)
@@ -2232,6 +2530,7 @@ public class UserItem
         }
 
         writer.Write(GemCount);
+        Awake.Save(writer);
     }
 
 
@@ -2278,6 +2577,56 @@ public class UserItem
         return (p * Count) - Price();
     }
 
+public uint Quality()
+    {
+        uint q = (uint)(AC + MAC + DC + MC + SC + Accuracy + Agility + HP + MP + AttackSpeed + Luck + Strong + MagicResist + PoisonResist + HealthRecovery + ManaRecovery + PoisonRecovery + CriticalRate + CriticalDamage + Freezing + PoisonAttack + Awake.getAwakeLevel() + 1);
+
+        return q;
+    }
+
+    public uint AwakeningPrice()
+    {
+        if (Info == null) return 0;
+
+        uint p = 1500;
+
+        p = (uint)((p * (1 + Awake.getAwakeLevel() * 2)) * (uint)Info.Grade);
+       
+        return p;
+    }
+
+    public uint DisassemblePrice()
+    {
+        if (Info == null) return 0;
+
+        uint p = 1500 * (uint)Info.Grade;
+
+        p = (uint)(p * ((AC + MAC + DC + MC + SC + Accuracy + Agility + HP + MP + AttackSpeed + Luck + Strong + MagicResist + PoisonResist + HealthRecovery + ManaRecovery + PoisonRecovery + CriticalRate + CriticalDamage + Freezing + PoisonAttack + Awake.getAwakeLevel()) * 0.1F + 1F));
+
+        return p;
+    }
+
+    public uint DowngradePrice()
+    {
+        if (Info == null) return 0;
+
+        uint p = 3000;
+
+        p = (uint)((p * (1 + (Awake.getAwakeLevel() + 1) * 2)) * (uint)Info.Grade);
+
+        return p;
+    }
+
+    public uint ResetPrice()
+    {
+        if (Info == null) return 0;
+
+        uint p = 3000 * (uint)Info.Grade;
+
+        p = (uint)(p * ((AC + MAC + DC + MC + SC + Accuracy + Agility + HP + MP + AttackSpeed + Luck + Strong + MagicResist + PoisonResist + HealthRecovery + ManaRecovery + PoisonRecovery + CriticalRate + CriticalDamage + Freezing + PoisonAttack) * 0.2F + 1F));
+
+        return p;
+    }
     public void SetSlotSize() //set slot size in db?
     {
         int amount = 0;
@@ -2885,6 +3234,18 @@ public abstract class Packet
                 return new C.CombineItem();
             case (short)ClientPacketIds.SetConcentration://ArcherSpells - Elemental system
                 return new C.SetConcentration();
+			case (short)ClientPacketIds.AwakeningNeedMaterials:
+                return new C.AwakeningNeedMaterials();
+            case (short)ClientPacketIds.AwakeningLockedItem:
+                return new C.AwakeningLockedItem();
+            case (short)ClientPacketIds.Awakening:
+                return new C.Awakening();
+            case (short)ClientPacketIds.DisassembleItem:
+                return new C.DisassembleItem();
+            case (short)ClientPacketIds.DowngradeAwakening:
+                return new C.DowngradeAwakening();
+            case (short)ClientPacketIds.ResetAddedItem:
+                return new C.ResetAddedItem();
             default:
                 throw new NotImplementedException();
         }
@@ -3228,12 +3589,26 @@ public abstract class Packet
                 return new S.ObjectDeco();
             case (short)ServerPacketIds.ObjectSneaking:
                 return new S.ObjectSneaking();
-            case (short)ServerPacketIds.LevelEffects:
-                return new S.LevelEffects();
+            case (short)ServerPacketIds.ObjectLevelEffects:
+                return new S.ObjectLevelEffects();
             case (short)ServerPacketIds.SetBindingShot://ArcherSpells - BindingShot
                 return new S.SetBindingShot();
             case (short)ServerPacketIds.SendOutputMessage:
                 return new S.SendOutputMessage();
+			case (short)ServerPacketIds.NPCAwakening:
+                return new S.NPCAwakening();
+            case (short)ServerPacketIds.NPCDisassemble:
+                return new S.NPCDisassemble();
+            case (short)ServerPacketIds.NPCDowngrade:
+                return new S.NPCDowngrade();
+            case (short)ServerPacketIds.NPCReset:
+                return new S.NPCReset();
+            case (short)ServerPacketIds.AwakeningNeedMaterials:
+                return new S.AwakeningNeedMaterials();
+            case (short)ServerPacketIds.AwakeningLockedItem:
+                return new S.AwakeningLockedItem();
+            case (short)ServerPacketIds.Awakening:
+                return new S.Awakening(); 
             default:
                 throw new NotImplementedException();
         }

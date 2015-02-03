@@ -1317,4 +1317,111 @@ namespace ClientPackets
             writer.Write(Interrupted);
         }
     }
+public sealed class AwakeningNeedMaterials : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.AwakeningNeedMaterials; } }
+
+        public ulong UniqueID;
+        public AwakeType Type;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            UniqueID = reader.ReadUInt64();
+            Type = (AwakeType)reader.ReadByte();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(UniqueID);
+            writer.Write((byte)Type);
+        }
+    }
+
+    public sealed class AwakeningLockedItem : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.AwakeningLockedItem; } }
+
+        public ulong UniqueID;
+        public bool Locked;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            UniqueID = reader.ReadUInt64();
+            Locked = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(UniqueID);
+            writer.Write(Locked);
+        }
+    }
+
+    public sealed class Awakening : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.Awakening; } }
+
+        public ulong UniqueID;
+        public AwakeType Type;
+        public uint PositionIdx;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            UniqueID = reader.ReadUInt64();
+            Type = (AwakeType)reader.ReadByte();
+            PositionIdx = reader.ReadUInt32();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(UniqueID);
+            writer.Write((byte)Type);
+            writer.Write(PositionIdx);
+        }
+    }
+
+    public sealed class DisassembleItem : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.DisassembleItem; } }
+
+        public ulong UniqueID;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            UniqueID = reader.ReadUInt64();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(UniqueID);
+        }
+    }
+
+    public sealed class DowngradeAwakening : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.DowngradeAwakening; } }
+
+        public ulong UniqueID;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            UniqueID = reader.ReadUInt64();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(UniqueID);
+        }
+    }
+
+    public sealed class ResetAddedItem : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.ResetAddedItem; } }
+
+        public ulong UniqueID;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            UniqueID = reader.ReadUInt64();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(UniqueID);
+        }
+    }
 }

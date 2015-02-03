@@ -161,6 +161,8 @@ namespace Server
                 RandomStatstextBox.Text = string.Empty;
                 PickaxecheckBox.Checked = false;
                 FastRunCheckBox.Checked = false;
+                CanAwaken.Checked = false;
+                TooltipTextBox.Text = string.Empty;
                 return;
             }
 
@@ -261,6 +263,8 @@ namespace Server
             RandomStatstextBox.Text = info.RandomStatsId.ToString();
             PickaxecheckBox.Checked = info.CanMine;
             FastRunCheckBox.Checked = info.CanFastRun;
+            CanAwaken.Checked = info.CanAwakening;
+            TooltipTextBox.Text = info.ToolTip;
 
             for (int i = 1; i < _selectedItemInfos.Count; i++)
             {
@@ -355,6 +359,8 @@ namespace Server
                 if (RandomStatstextBox.Text != info.RandomStatsId.ToString()) RandomStatstextBox.Text = string.Empty;
                 if (PickaxecheckBox.Checked != info.CanMine) PickaxecheckBox.CheckState = CheckState.Indeterminate;
                 if (FastRunCheckBox.Checked != info.CanFastRun) FastRunCheckBox.CheckState = CheckState.Indeterminate;
+                if (CanAwaken.Checked != info.CanAwakening) CanAwaken.CheckState = CheckState.Indeterminate;
+                if (TooltipTextBox.Text != info.ToolTip) TooltipTextBox.Text = string.Empty;
             }
         }
 
@@ -1011,8 +1017,18 @@ namespace Server
 
         private void ImportButton_Click(object sender, EventArgs e)
         {
+            string Path = string.Empty;
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Text File|*.txt";
+            ofd.ShowDialog();
+
+            if (ofd.FileName == string.Empty) return;
+
+            Path = ofd.FileName;
+
             string data;
-            using (var sr = new StreamReader(ItemListPath))
+            using (var sr = new StreamReader(Path))
             {
                 data = sr.ReadToEnd();
             }
@@ -1620,6 +1636,22 @@ namespace Server
 
             for (int i = 0; i < _selectedItemInfos.Count; i++)
                 _selectedItemInfos[i].CanFastRun = FastRunCheckBox.Checked;
+        }
+
+        private void TooltipTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].ToolTip = TooltipTextBox.Text;
+        }
+
+        private void CanAwakening_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedItemInfos.Count; i++)
+                _selectedItemInfos[i].CanAwakening = CanAwaken.Checked;
         }
     }
 }
