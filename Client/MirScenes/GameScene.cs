@@ -23,8 +23,13 @@ namespace Client.MirScenes
 {
     public enum PanelType
     {
-        Sell, Repair, SpecialRepair,
-        Consign
+        Sell, 
+        Repair, 
+        SpecialRepair,
+        Consign, 
+        Disassemble, 
+        Downgrade,
+        Reset,
     }
 
     public sealed class GameScene : MirScene
@@ -55,6 +60,7 @@ namespace Client.MirScenes
         public NPCDialog NPCDialog;
         public NPCGoodsDialog NPCGoodsDialog;
         public NPCDropDialog NPCDropDialog;
+        public NPCAwakeDialog NPCAwakeDialog;
         public HelpDialog HelpDialog;
         public KeyboardLayoutDialog KeyboardLayoutDialog;
         public CraftingDialog CraftingDialog;
@@ -119,8 +125,6 @@ namespace Client.MirScenes
         public List<MirImageControl> BuffList = new List<MirImageControl>();
         public static long PoisonCloudTime, SlashingBurstTime, FuryCoolTime, TrapCoolTime, SwiftFeetTime;
 
-        public bool ShowLevelEffect1, ShowLevelEffect2, ShowLevelEffect3;
-
         public GameScene()
         {
             MapControl.AutoRun = false;
@@ -155,6 +159,8 @@ namespace Client.MirScenes
             NPCDialog = new NPCDialog { Parent = this, Visible = false };
             NPCGoodsDialog = new NPCGoodsDialog { Parent = this, Visible = false };
             NPCDropDialog = new NPCDropDialog { Parent = this, Visible = false };
+            NPCAwakeDialog = new NPCAwakeDialog { Parent = this, Visible = false };
+            NPCAwakeDialog.Hide();
             HelpDialog = new HelpDialog { Parent = this, Visible = false };
             KeyboardLayoutDialog = new KeyboardLayoutDialog { Parent = this, Visible = false };
             CraftingDialog = new CraftingDialog { Parent = this, Visible = false };
@@ -304,6 +310,11 @@ namespace Client.MirScenes
                     else FishingDialog.Hide();
                     break;
 
+                case Keys.R:
+                    if (!SkillBarDialog.Visible) SkillBarDialog.Show();
+                    else SkillBarDialog.Hide();
+                    break;
+                    
                 case Keys.M:
                 //case Keys.Space:
                     if (GameScene.Scene.MountDialog.CanRide())
@@ -364,6 +375,7 @@ namespace Client.MirScenes
                     QuestListDialog.Hide();
                     QuestDetailDialog.Hide();
                     QuestLogDialog.Hide();
+                    NPCAwakeDialog.Hide();
                     BigMapDialog.Visible = false;
                     break;
                 case Keys.O:
@@ -1178,8 +1190,8 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.ObjectSneaking:
                     ObjectSneaking((S.ObjectSneaking)p);
                     break;
-                case (short)ServerPacketIds.LevelEffects:
-                    LevelEffects((S.LevelEffects)p);
+                case (short)ServerPacketIds.ObjectLevelEffects:
+                    ObjectLevelEffects((S.ObjectLevelEffects)p);
                     break;
                 case (short)ServerPacketIds.SetBindingShot://ArcherSpells - BindingShot
                     SetBindingShot((S.SetBindingShot)p);
@@ -1187,6 +1199,27 @@ namespace Client.MirScenes
                 case (short)ServerPacketIds.SendOutputMessage://ArcherSpells - BindingShot
                     SendOutputMessage((S.SendOutputMessage)p);
                     break;
+                case (short)ServerPacketIds.NPCAwakening:
+                    NPCAwakening();
+                    break;
+                case (short)ServerPacketIds.NPCDisassemble:
+                    NPCDisassemble();
+                    break;
+                case (short)ServerPacketIds.NPCDowngrade:
+                    NPCDowngrade();
+                    break;
+                case (short)ServerPacketIds.NPCReset:
+                    NPCReset();
+                    break;
+                case (short)ServerPacketIds.AwakeningNeedMaterials:
+                    AwakeningNeedMaterials((S.AwakeningNeedMaterials)p);
+                    break;
+                case (short)ServerPacketIds.AwakeningLockedItem:
+                    AwakeningLockedItem((S.AwakeningLockedItem)p);
+                    break;
+                case (short)ServerPacketIds.Awakening:
+                    Awakening((S.Awakening)p);
+                    break;                
                 default:
                     base.ProcessPacket(p);
                     break;
@@ -2935,6 +2968,40 @@ namespace Client.MirScenes
                         //else
                         //    ob.Effects.Add(new DelayedExplosionEffect(Libraries.Magic3, 1590 + ((int)p.EffectType * 10), 8, 1200, ob, true, (int)p.EffectType, 0));
                         break;
+                    case SpellEffect.AwakeningSuccess:
+                        {
+                            Effect ef = new Effect(Libraries.Magic3, 900, 16, 1600, ob, CMain.Time + p.DelayTime);
+                            ef.Played += (o, e) => SoundManager.PlaySound(50002);
+                            ef.Complete += (o, e) => MapControl.AwakeningAction = false;
+                            ob.Effects.Add(ef);
+                            ob.Effects.Add(new Effect(Libraries.Magic3, 840, 16, 1600, ob, CMain.Time + p.DelayTime) { Blend = false });
+                        }
+                        break;
+                    case SpellEffect.AwakeningFail:
+                        {
+                            Effect ef = new Effect(Libraries.Magic3, 920, 9, 900, ob, CMain.Time + p.DelayTime);
+                            ef.Played += (o, e) => SoundManager.PlaySound(50003);
+                            ef.Complete += (o, e) => MapControl.AwakeningAction = false;
+                            ob.Effects.Add(ef);
+                            ob.Effects.Add(new Effect(Libraries.Magic3, 860, 9, 900, ob, CMain.Time + p.DelayTime) { Blend = false });
+                        }
+                        break;
+                    case SpellEffect.AwakeningHit:
+                        {
+                            Effect ef = new Effect(Libraries.Magic3, 880, 5, 500, ob, CMain.Time + p.DelayTime);
+                            ef.Played += (o, e) => SoundManager.PlaySound(50001);
+                            ob.Effects.Add(ef);
+                            ob.Effects.Add(new Effect(Libraries.Magic3, 820, 5, 500, ob, CMain.Time + p.DelayTime) { Blend = false });
+                        }
+                        break;
+                    case SpellEffect.AwakeningMiss:
+                        {
+                            Effect ef = new Effect(Libraries.Magic3, 890, 5, 500, ob, CMain.Time + p.DelayTime);
+                            ef.Played += (o, e) => SoundManager.PlaySound(50000);
+                            ob.Effects.Add(ef);
+                            ob.Effects.Add(new Effect(Libraries.Magic3, 830, 5, 500, ob, CMain.Time + p.DelayTime) { Blend = false });
+                        }
+                        break;
                 }
                 return;
             }
@@ -3224,11 +3291,20 @@ namespace Client.MirScenes
             }
         }
 
-        private void LevelEffects(S.LevelEffects p)
+        private void ObjectLevelEffects(S.ObjectLevelEffects p)
         {
-            ShowLevelEffect1 = p.ShowLevelEffect1;
-            ShowLevelEffect2 = p.ShowLevelEffect2;
-            ShowLevelEffect3 = p.ShowLevelEffect3;
+            for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
+            {
+                MapObject ob = MapControl.Objects[i];
+                if (ob.ObjectID != p.ObjectID || ob.Race != ObjectType.Player) continue;
+
+                PlayerObject temp = (PlayerObject)ob;
+
+                temp.LevelEffects = p.LevelEffects;
+
+                temp.SetEffects();
+                return;
+            }
         }
 
         private void RefreshItem(S.RefreshItem p)
@@ -3914,6 +3990,92 @@ namespace Client.MirScenes
                 messageBox.Show();
             }
         }
+        private void NPCAwakening()
+        {
+            if (NPCAwakeDialog.Visible != true)
+                NPCAwakeDialog.Show();
+            if (InventoryDialog.Visible != true)
+                InventoryDialog.Show();
+        }
+        private void NPCDisassemble()
+        {
+            if (!NPCDialog.Visible) return;
+            NPCDropDialog.PType = PanelType.Disassemble;
+            NPCDropDialog.Show();
+        }
+        private void NPCDowngrade()
+        {
+            if (!NPCDialog.Visible) return;
+            NPCDropDialog.PType = PanelType.Downgrade;
+            NPCDropDialog.Show();
+        }
+        private void NPCReset()
+        {
+            if (!NPCDialog.Visible) return;
+            NPCDropDialog.PType = PanelType.Reset;
+            NPCDropDialog.Show();
+        }
+        private void AwakeningNeedMaterials(S.AwakeningNeedMaterials p)
+        {
+            NPCAwakeDialog.setNeedItems(p.Materials, p.MaterialsCount);
+        }
+        private void AwakeningLockedItem(S.AwakeningLockedItem p)
+        {
+            MirItemCell cell = InventoryDialog.GetCell(p.UniqueID);
+            if (cell != null)
+                cell.Locked = p.Locked;
+        }
+        private void Awakening(S.Awakening p)
+        {
+            if (NPCAwakeDialog.Visible)
+                NPCAwakeDialog.Hide();
+            if (InventoryDialog.Visible)
+                InventoryDialog.Hide();
+
+            for (int i = 0; i < InventoryDialog.Grid.Length; i++)
+            {
+                if (InventoryDialog.Grid[i].Locked == true)
+                {
+                    InventoryDialog.Grid[i].Locked = false;
+
+                    if (InventoryDialog.Grid[i].Item.UniqueID == (ulong)p.removeID)
+                    {
+                        InventoryDialog.Grid[i].Item = null;
+                    }
+                }
+            }
+
+            MirMessageBox messageBox = null;
+
+            switch (p.result)
+            {
+                case -4:
+                    messageBox = new MirMessageBox("You have not supplied enough materials.", MirMessageBoxButtons.OK);
+                    MapControl.AwakeningAction = false;
+                    break;
+                case -3:
+                    messageBox = new MirMessageBox("You do not have enough gold.", MirMessageBoxButtons.OK);
+                    MapControl.AwakeningAction = false;
+                    break;
+                case -2:
+                    messageBox = new MirMessageBox("Awakening already at maximum level.", MirMessageBoxButtons.OK);
+                    MapControl.AwakeningAction = false;
+                    break;
+                case -1:
+                    messageBox = new MirMessageBox("Condition Error.", MirMessageBoxButtons.OK);
+                    MapControl.AwakeningAction = false;
+                    break;
+                case 0:
+                    //messageBox = new MirMessageBox("Upgrade Failed.", MirMessageBoxButtons.OK);
+                    break;
+                case 1:
+                    //messageBox = new MirMessageBox("Upgrade Success.", MirMessageBoxButtons.OK);
+                    break;
+
+            }
+
+            if (messageBox != null) messageBox.Show();
+        }
 
         public void AddQuestItem(UserItem item)
         {
@@ -4034,117 +4196,1220 @@ namespace Client.MirScenes
             ItemLabel = null;
         }
 
-        public void CreateItemLabel(UserItem item, bool Inspect = false)
+        public MirControl NameInfoLabel(UserItem item, bool Inspect = false)
         {
-            if (item == null)
-            {
-                DisposeItemLabel();
-                HoverItem = null;
-                return;
-            }
-
-            if (item == HoverItem && ItemLabel != null && !ItemLabel.IsDisposed) return;
             byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
             MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
             HoverItem = item;
             ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
-
-            ItemLabel = new MirControl
-            {
-                BackColour = Color.FromArgb(255, 0, 24, 48),
-                Border = true,
-                BorderColour = Color.FromArgb(144, 148, 48),
-                DrawControlTexture = true,
-                NotControl = true,
-                Parent = this,
-                Opacity = 0.7F,
-                Visible = false
-            };
-
 
             MirLabel nameLabel = new MirLabel
             {
                 AutoSize = true,
                 ForeColour = GradeNameColor(HoverItem.Info.Grade),
                 Location = new Point(4, 4),
-                OutLine = false,
+                OutLine = true,
                 Parent = ItemLabel,
-                Text = HoverItem.Info.Name + " (" + HoverItem.Info.Grade.ToString() + ")",
+                Text = HoverItem.Info.Grade != ItemGrade.None ? Regex.Replace(HoverItem.Info.Name, @"[\d-]", string.Empty) +
+                "\n" + HoverItem.Info.Grade.ToString() : Regex.Replace(HoverItem.Info.Name, @"[\d-]", string.Empty)
             };
-            ItemLabel.Size = new Size(nameLabel.DisplayRectangle.Right + 4, nameLabel.DisplayRectangle.Bottom);
 
-            if (HoverItem.Weight > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format("W: {0}", HoverItem.Weight)
-                };
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
-            }
+            ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, nameLabel.DisplayRectangle.Right + 4),
+                Math.Max(ItemLabel.Size.Height, nameLabel.DisplayRectangle.Bottom));
+
+            string text = "";
 
             if (HoverItem.Info.StackSize > 1)
             {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format("Count: {0}/{1}", HoverItem.Count, HoverItem.Info.StackSize)
-                };
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
+                text += string.Format(" Count {0}", HoverItem.Count);
             }
+
+            if (HoverItem.Info.Durability > 0)
+            {
+                switch (HoverItem.Info.Type)
+                {
+                    case ItemType.Amulet:
+                        text += string.Format(" Usage {0}/{1}", HoverItem.CurrentDura, HoverItem.MaxDura);
+                        break;
+                    case ItemType.Ore:
+                        text += string.Format(" Purity {0}", Math.Round(HoverItem.CurrentDura / 1000M));
+                        break;
+                    case ItemType.Meat:
+                        text += string.Format(" Quality {0}", Math.Round(HoverItem.CurrentDura / 1000M));
+                        break;
+                    case ItemType.Mount:
+                        text += string.Format(" Loyalty {0} / {1}", HoverItem.CurrentDura, HoverItem.MaxDura);
+                        break;
+                    case ItemType.Food:
+                        text += string.Format(" Nutrition {0}", HoverItem.CurrentDura);
+                        break;
+                    default:
+                        text += string.Format(" Durability {0}/{1}", Math.Round(HoverItem.CurrentDura / 1000M),
+                                                   Math.Round(HoverItem.MaxDura / 1000M));
+                        break;
+                }
+            }
+
+            MirLabel etcLabel = new MirLabel
+            {
+                AutoSize = true,
+                ForeColour = Color.White,
+                Location = new Point(4, nameLabel.DisplayRectangle.Bottom),
+                OutLine = true,
+                Parent = ItemLabel,
+                Text = HoverItem.Info.Type.ToString() +
+                "\n" + "W " + HoverItem.Weight + text 
+            };
+
+            ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, etcLabel.DisplayRectangle.Right + 4),
+                Math.Max(ItemLabel.Size.Height, etcLabel.DisplayRectangle.Bottom + 4));
+
+            #region OUTLINE
+            MirControl outLine = new MirControl
+            {
+                BackColour = Color.FromArgb(255, 50, 50, 50),
+                Border = true,
+                BorderColour = Color.Gray,
+                NotControl = true,
+                Parent = ItemLabel,
+                Opacity = 0.4F,
+                Location = new Point(0, 0)
+            };
+            outLine.Size = ItemLabel.Size;
+            #endregion
+
+            return outLine;
+        }
+
+        public MirControl AttackInfoLabel(UserItem item, bool Inspect = false)
+        {
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
+
+            ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+            bool fishingItem = false;
 
             switch (HoverItem.Info.Type)
             {
-                case ItemType.Potion:
-                case ItemType.Scroll:
-                    PotionItemInfo();
+                case ItemType.Hook:
+                case ItemType.Float:
+                case ItemType.Bait:
+                case ItemType.Finder:
+                case ItemType.Reel:
+                    fishingItem = true;
                     break;
-                case ItemType.Gem:
-                    GemItemInfo(realItem);
+                case ItemType.Weapon:
+                    if (HoverItem.Info.Shape == 49 || HoverItem.Info.Shape == 50)
+                        fishingItem = true;
                     break;
                 default:
-                    EquipmentItemInfo(realItem);
+                    fishingItem = false;
                     break;
             }
 
-            if (HoverItem.Info.RequiredGender != RequiredGender.None)
+            int count = 0;
+            int minValue = 0;
+            int maxValue = 0;
+            int addValue = 0;
+
+            #region DC
+    
+            minValue = realItem.MinDC;
+            maxValue = realItem.MaxDC;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.DC : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
             {
-                Color colour = Color.White;
-                switch (MapObject.User.Gender)
+                count++;
+                MirLabel DCLabel = new MirLabel
                 {
-                    case MirGender.Male:
-                        if (!realItem.RequiredGender.HasFlag(RequiredGender.Male))
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("DC + {0}~{1}", minValue, maxValue + addValue)
+                    Text = string.Format(addValue > 0 ? "DC + {0}~{1} (+{2})" : "DC + {0}~{1}", minValue, maxValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DCLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DCLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MC
+
+            minValue = realItem.MinMC;
+            maxValue = realItem.MaxMC;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MC : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MCLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("MC + {0}~{1}", minValue, maxValue + addValue)
+                    Text = string.Format(addValue > 0 ? "MC + {0}~{1} (+{2})" : "MC + {0}~{1}", minValue, maxValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MCLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MCLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region SC
+
+            minValue = realItem.MinSC;
+            maxValue = realItem.MaxSC;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.SC : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel SCLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("SC + {0}~{1}", minValue, maxValue + addValue)
+                    Text = string.Format(addValue > 0 ? "SC + {0}~{1} (+{2})" : "SC + {0}~{1}", minValue, maxValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, SCLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, SCLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region LUCK / SUCCESS
+
+            minValue = realItem.Luck;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Luck : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel LUCKLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format(minValue + addValue > 0 ? "Luck + {0} " : "Curse + {0}", minValue + addValue)
+                };
+
+                if(fishingItem)
+                {
+                    LUCKLabel.Text = string.Format(minValue + addValue > 0 ? "Success: {0}% " : "Failure: {0}%", minValue + addValue);
+                }
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, LUCKLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, LUCKLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region ACC
+
+            minValue = realItem.Accuracy;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Accuracy : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel ACCLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Accuracy + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Accuracy: + {0} (+{1})" : "Accuracy: + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, ACCLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, ACCLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region HOLY
+
+            minValue = realItem.Holy;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel HOLYLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Holy + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Holy: + {0} (+{1})" : "Holy: + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, HOLYLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, HOLYLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region ASPEED
+
+            minValue = realItem.AttackSpeed;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AttackSpeed : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel ASPEEDLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("A.Speed + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "A.Speed: + {0} (+{1})" : "A.Speed: + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, ASPEEDLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, ASPEEDLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region FREEZING
+
+            minValue = realItem.Freezing;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Freezing : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel FREEZINGLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Freezing + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Freezing: + {0} (+{1})" : "Freezing: + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, FREEZINGLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, FREEZINGLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region POISON
+
+            minValue = realItem.PoisonAttack;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonAttack : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel POISONLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Poison + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Poison: + {0} (+{1})" : "Poison: + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, POISONLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, POISONLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region CRITICALRATE / FLEXIBILITY
+
+            minValue = realItem.CriticalRate;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.CriticalRate : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel CRITICALRATELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Critical Chance + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Critical Chance: + {0} (+{1})" : "Critical Chance: + {0}", minValue + addValue, addValue)
+                };
+
+                if(fishingItem)
+                {
+                    CRITICALRATELabel.Text = string.Format(addValue > 0 ? "Flexibility: + {0} (+{1})" : "Flexibility: + {0}", minValue + addValue, addValue);
+                }
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, CRITICALRATELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, CRITICALRATELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region CRITICALDAMAGE
+
+            minValue = realItem.CriticalDamage;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.CriticalDamage : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel CRITICALDAMAGELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Critical Damage + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Critical Damage: + {0} (+{1})" : "Critical Damage: + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, CRITICALDAMAGELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, CRITICALDAMAGELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            if (count > 0)
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+                #region OUTLINE
+                MirControl outLine = new MirControl
+                {
+                    BackColour = Color.FromArgb(255, 50, 50, 50),
+                    Border = true,
+                    BorderColour = Color.Gray,
+                    NotControl = true,
+                    Parent = ItemLabel,
+                    Opacity = 0.4F,
+                    Location = new Point(0, 0)
+                };
+                outLine.Size = ItemLabel.Size;
+                #endregion
+
+                return outLine;
+            }
+            else
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height - 4);
+            }
+            return null;
+        }
+
+        public MirControl DefenseInfoLabel(UserItem item, bool Inspect = false)
+        {
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
+
+            ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+            int count = 0;
+            int minValue = 0;
+            int maxValue = 0;
+            int addValue = 0;
+
+            #region AC
+
+            minValue = realItem.MinAC;
+            maxValue = realItem.MaxAC;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AC : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel ACLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("AC + {0}~{1}", minValue, maxValue + addValue)
+                    Text = string.Format(addValue > 0 ? "AC + {0}~{1} (+{2})" : "AC + {0}~{1}", minValue, maxValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, ACLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, ACLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MAC
+
+            minValue = realItem.MinMAC;
+            maxValue = realItem.MaxMAC;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MAC : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MACLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("MAC + {0}~{1}", minValue, maxValue + addValue)
+                    Text = string.Format(addValue > 0 ? "MAC + {0}~{1} (+{2})" : "MAC + {0}~{1}", minValue, maxValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MACLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MACLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MAXHP
+
+            minValue = realItem.HP;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.HP : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MAXHPLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format(realItem.Type == ItemType.Potion ? "HP + {0} Recovery" : "MAXHP + {0}", minValue + addValue)
+                    Text = realItem.Type == ItemType.Potion ? 
+                    string.Format(addValue > 0 ? "HP + {0} Recovery (+{1})" : "HP + {0} Recovery", minValue + addValue, addValue)
+                    : string.Format(addValue > 0 ? "Max HP + {0} (+{1})" : "Max HP + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MAXHPLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MAXHPLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MAXMP
+
+            minValue = realItem.MP;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MP : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MAXMPLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format(realItem.Type == ItemType.Potion ? "MP + {0} Recovery" : "MAXMP + {0}", minValue + addValue)
+                    Text = realItem.Type == ItemType.Potion ? 
+                    string.Format(addValue > 0 ? "MP + {0} Recovery (+{1})" : "MP + {0} Recovery", minValue + addValue, addValue)
+                    : string.Format(addValue > 0 ? "Max MP + {0} (+{1})" : "Max MP + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MAXMPLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MAXMPLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MAXHPRATE
+
+            minValue = realItem.HPrate;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MAXHPRATELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Max HP + {0}%", minValue + addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MAXHPRATELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MAXHPRATELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MAXMPRATE
+
+            minValue = realItem.MPrate;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MAXMPRATELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Max MP + {0}%", minValue + addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MAXMPRATELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MAXMPRATELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MAXACRATE
+
+            minValue = realItem.MaxAcRate;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MAXACRATE = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Max AC + {0}%", minValue + addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MAXACRATE.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MAXACRATE.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MAXMACRATE
+
+            minValue = realItem.MaxMacRate;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MAXMACRATELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Max MAC + {0}%", minValue + addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MAXMACRATELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MAXMACRATELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region HEALTH_RECOVERY
+
+            minValue = realItem.HealthRecovery;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.HealthRecovery : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel HEALTH_RECOVERYLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("HealthRecovery + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Health Recovery + {0} (+{1})" : "Health Recovery + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, HEALTH_RECOVERYLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, HEALTH_RECOVERYLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MANA_RECOVERY
+
+            minValue = realItem.SpellRecovery;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.ManaRecovery : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MANA_RECOVERYLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("ManaRecovery + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Mana Recovery + {0} (+{1})" : "Mana Recovery + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MANA_RECOVERYLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MANA_RECOVERYLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region POISON_RECOVERY
+
+            minValue = realItem.PoisonRecovery;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonRecovery : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel POISON_RECOVERYabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Poison Recovery + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Poison Recovery + {0} (+{1})" : "Poison Recovery + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, POISON_RECOVERYabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, POISON_RECOVERYabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region AGILITY
+
+            minValue = realItem.Agility;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Agility : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel AGILITYLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Agility + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Agility + {0} (+{1})" : "Agility + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, AGILITYLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, AGILITYLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region STRONG
+
+            minValue = realItem.Strong;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Strong : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel STRONGLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Strong + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Strong + {0} (+{1})" : "Strong + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, STRONGLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, STRONGLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region POISON_RESIST
+
+            minValue = realItem.PoisonResist;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonResist : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel POISON_RESISTLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Poison Resist + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Poison Resist + {0} (+{1})" : "Poison Resist + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, POISON_RESISTLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, POISON_RESISTLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region MAGIC_RESIST
+
+            minValue = realItem.MagicResist;
+            maxValue = 0;
+            addValue = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MagicResist : 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel MAGIC_RESISTLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Magic Resist + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Magic Resist + {0} (+{1})" : "Magic Resist + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, MAGIC_RESISTLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, MAGIC_RESISTLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            if (count > 0)
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+                
+                #region OUTLINE
+                MirControl outLine = new MirControl
+                {
+                    BackColour = Color.FromArgb(255, 50, 50, 50),
+                    Border = true,
+                    BorderColour = Color.Gray,
+                    NotControl = true,
+                    Parent = ItemLabel,
+                    Opacity = 0.4F,
+                    Location = new Point(0, 0)
+                };
+                outLine.Size = ItemLabel.Size;
+                #endregion
+
+                return outLine;
+            }
+            else
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height - 4);
+            }
+            return null;
+        }
+
+        public MirControl WeightInfoLabel(UserItem item, bool Inspect = false)
+        {
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
+
+            ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+            
+            int count = 0;
+            int minValue = 0;
+            int maxValue = 0;
+            int addValue = 0;
+            
+            #region HANDWEIGHT
+
+            minValue = realItem.HandWeight;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel HANDWEIGHTLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Hand Weight + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Hand Weight + {0} (+{1})" : "Hand Weight + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, HANDWEIGHTLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, HANDWEIGHTLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region WEARWEIGHT
+
+            minValue = realItem.WearWeight;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel WEARWEIGHTLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Wear Weight + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Wear Weight + {0} (+{1})" : "Wear Weight + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, WEARWEIGHTLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, WEARWEIGHTLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region BAGWEIGHT
+
+            minValue = realItem.BagWeight;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel BAGWEIGHTLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    //Text = string.Format("Bag Weight + {0}", minValue + addValue)
+                    Text = string.Format(addValue > 0 ? "Bag Weight + {0} (+{1})" : "Bag Weight + {0}", minValue + addValue, addValue)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, BAGWEIGHTLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, BAGWEIGHTLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region FASTRUN
+            minValue = realItem.CanFastRun==true?1:0;
+            maxValue = 0;
+            addValue = 0;
+
+            if (minValue > 0 || maxValue > 0 || addValue > 0)
+            {
+                count++;
+                MirLabel BAGWEIGHTLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Instant Run")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, BAGWEIGHTLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, BAGWEIGHTLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region TIME & RANGE
+            minValue = 0;
+            maxValue = 0;
+            addValue = 0;
+
+            if (HoverItem.Info.Type == ItemType.Potion && HoverItem.Info.Durability > 0)
+            {
+                count++;
+                MirLabel TNRLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = addValue > 0 ? Color.Cyan : Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format(HoverItem.Info.Shape == 3 ? "Time : {0}s" : "Range : {0}", HoverItem.Info.Durability)
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, TNRLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, TNRLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            if (count > 0)
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+                #region OUTLINE
+                MirControl outLine = new MirControl
+                {
+                    BackColour = Color.FromArgb(255, 50, 50, 50),
+                    Border = true,
+                    BorderColour = Color.Gray,
+                    NotControl = true,
+                    Parent = ItemLabel,
+                    Opacity = 0.4F,
+                    Location = new Point(0, 0)
+                };
+                outLine.Size = ItemLabel.Size;
+                #endregion
+
+                return outLine;
+            }
+            else
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height - 4);
+            }
+            return null;
+        }
+
+        public MirControl AwakeInfoLabel(UserItem item, bool Inspect = false)
+        {
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
+
+            ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+            int count = 0;
+
+            #region AWAKENAME
+            if (HoverItem.Awake.getAwakeLevel() > 0)
+            {
+                count++;
+                MirLabel AWAKENAMELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = GradeNameColor(HoverItem.Info.Grade),
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("{0} Awakening({1})", HoverItem.Awake.type.ToString(), HoverItem.Awake.getAwakeLevel())
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, AWAKENAMELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, AWAKENAMELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region AWAKE_TOTAL_VALUE
+            if (HoverItem.Awake.getAwakeValue() > 0)
+            {
+                count++;
+                MirLabel AWAKE_TOTAL_VALUELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format(realItem.Type != ItemType.Armour ? "{0} + {1}~{2}" : "MAX {0} + {1}", HoverItem.Awake.type.ToString(), HoverItem.Awake.getAwakeValue(), HoverItem.Awake.getAwakeValue())
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, AWAKE_TOTAL_VALUELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, AWAKE_TOTAL_VALUELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region AWAKE_LEVEL_VALUE
+            if (HoverItem.Awake.getAwakeLevel() > 0)
+            {
+                count++;
+                for (int i = 0; i < HoverItem.Awake.getAwakeLevel(); i++)
+                {
+                    MirLabel AWAKE_LEVEL_VALUELabel = new MirLabel
+                    {
+                        AutoSize = true,
+                        ForeColour = Color.White,
+                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                        OutLine = true,
+                        Parent = ItemLabel,
+                        Text = string.Format(realItem.Type != ItemType.Armour ? "Level {0} : {1} + {2}~{3}" : "Level {0} : MAX {1} + {2}~{3}", i + 1, HoverItem.Awake.type.ToString(), HoverItem.Awake.getAwakeLevelValue(i), HoverItem.Awake.getAwakeLevelValue(i))
+                    };
+
+                    ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, AWAKE_LEVEL_VALUELabel.DisplayRectangle.Right + 4),
+                        Math.Max(ItemLabel.Size.Height, AWAKE_LEVEL_VALUELabel.DisplayRectangle.Bottom));
+                }
+            }
+
+            #endregion
+
+            if (count > 0)
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+                #region OUTLINE
+                MirControl outLine = new MirControl
+                {
+                    BackColour = Color.FromArgb(255, 50, 50, 50),
+                    Border = true,
+                    BorderColour = Color.Gray,
+                    NotControl = true,
+                    Parent = ItemLabel,
+                    Opacity = 0.4F,
+                    Location = new Point(0, 0)
+                };
+                outLine.Size = ItemLabel.Size;
+                #endregion
+
+                return outLine;
+            }
+            else
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height - 4);
+            }
+            return null;
+        }
+
+        public MirControl NeedInfoLabel(UserItem item, bool Inspect = false)
+        {
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
+
+            ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+            int count = 0;
+
+            #region LEVEL
+            if (realItem.RequiredAmount > 0)
+            {
+                count++;
+                string text;
+                Color colour = Color.White;
+                switch (realItem.RequiredType)
+                {
+                    case RequiredType.Level:
+                        text = string.Format("Required Level : {0}", realItem.RequiredAmount);
+                        if (MapObject.User.Level < realItem.RequiredAmount)
                             colour = Color.Red;
                         break;
-                    case MirGender.Female:
-                        if (!realItem.RequiredGender.HasFlag(RequiredGender.Female))
+                    case RequiredType.AC:
+                        text = string.Format("Required AC : {0}", realItem.RequiredAmount);
+                        if (MapObject.User.MaxAC < realItem.RequiredAmount)
                             colour = Color.Red;
+                        break;
+                    case RequiredType.MAC:
+                        text = string.Format("Required MAC : {0}", realItem.RequiredAmount);
+                        if (MapObject.User.MaxMAC < realItem.RequiredAmount)
+                            colour = Color.Red;
+                        break;
+                    case RequiredType.DC:
+                        text = string.Format("Required DC : {0}", realItem.RequiredAmount);
+                        if (MapObject.User.MaxDC < realItem.RequiredAmount)
+                            colour = Color.Red;
+                        break;
+                    case RequiredType.MC:
+                        text = string.Format("Required MC : {0}", realItem.RequiredAmount);
+                        if (MapObject.User.MaxMC < realItem.RequiredAmount)
+                            colour = Color.Red;
+                        break;
+                    case RequiredType.SC:
+                        text = string.Format("Required SC : {0}", realItem.RequiredAmount);
+                        if (MapObject.User.MaxSC < realItem.RequiredAmount)
+                            colour = Color.Red;
+                        break;
+                    default:
+                        text = "Unknown Type Required";
                         break;
                 }
 
-                MirLabel label = new MirLabel
+                MirLabel LEVELLabel = new MirLabel
                 {
                     AutoSize = true,
                     ForeColour = colour,
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
+                    OutLine = true,
                     Parent = ItemLabel,
-                    Text = string.Format("Gender Required: {0}", HoverItem.Info.RequiredGender),
+                    Text = text
                 };
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, LEVELLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, LEVELLabel.DisplayRectangle.Bottom));
             }
+
+            #endregion
+
+            #region CLASS
             if (realItem.RequiredClass != RequiredClass.None)
             {
+                count++;
                 Color colour = Color.White;
 
                 switch (MapObject.User.Class)
@@ -4170,1484 +5435,567 @@ namespace Client.MirScenes
                             colour = Color.Red;
                         break;
                 }
-                MirLabel label = new MirLabel
+
+                MirLabel CLASSLabel = new MirLabel
                 {
                     AutoSize = true,
                     ForeColour = colour,
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
+                    OutLine = true,
                     Parent = ItemLabel,
-                    Text = string.Format("Class Required: {0}", realItem.RequiredClass),
+                    Text = string.Format("Class Required : {0}", realItem.RequiredClass)
                 };
 
-                if (realItem.RequiredClass == RequiredClass.WarWizTao)
-                    label.Text = string.Format("Class Required: {0}, {1}, {2}", RequiredClass.Warrior, RequiredClass.Wizard, RequiredClass.Taoist);
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-
-            if (realItem.RequiredAmount > 0)
-            {
-                string text;
-                Color colour = Color.White;
-                switch (realItem.RequiredType)
-                {
-                    case RequiredType.Level:
-                        text = string.Format("Required Level: {0}", realItem.RequiredAmount);
-                        if (MapObject.User.Level < realItem.RequiredAmount)
-                            colour = Color.Red;
-                        break;
-                    case RequiredType.AC:
-                        text = string.Format("Required AC: {0}", realItem.RequiredAmount);
-                        if (MapObject.User.MaxAC < realItem.RequiredAmount)
-                            colour = Color.Red;
-                        break;
-                    case RequiredType.MAC:
-                        text = string.Format("Required MAC: {0}", realItem.RequiredAmount);
-                        if (MapObject.User.MaxMAC < realItem.RequiredAmount)
-                            colour = Color.Red;
-                        break;
-                    case RequiredType.DC:
-                        text = string.Format("Required DC: {0}", realItem.RequiredAmount);
-                        if (MapObject.User.MaxDC < realItem.RequiredAmount)
-                            colour = Color.Red;
-                        break;
-                    case RequiredType.MC:
-                        text = string.Format("Required MC: {0}", realItem.RequiredAmount);
-                        if (MapObject.User.MaxMC < realItem.RequiredAmount)
-                            colour = Color.Red;
-                        break;
-                    case RequiredType.SC:
-                        text = string.Format("Required SC: {0}", realItem.RequiredAmount);
-                        if (MapObject.User.MaxSC < realItem.RequiredAmount)
-                            colour = Color.Red;
-                        break;
-                    default:
-                        text = "Unknown Type Required";
-                        break;
-                }
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = colour,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = text
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            #region BindModes
-            if (HoverItem.Info.Bind != BindMode.none)
-            {
-                byte count = 0;
-                string text = "";
-                if (HoverItem.Info.Bind.HasFlag(BindMode.DontDeathdrop))
-                {
-                    MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = "Can't drop on death"
-                    };
-                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                }
-
-                if (HoverItem.Info.Bind.HasFlag(BindMode.DontDrop))
-                {
-                    text = "Can't drop";
-                    count = 1;
-                }
-
-                if (HoverItem.Info.Bind.HasFlag(BindMode.DontUpgrade))
-                {
-                    text += (text == "") ? "Can't upgrade" : ", can't upgrade";
-                    count += 1;
-                }
-                if (count > 2)
-                {
-                    MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = text
-                    };
-                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                    count = 0;
-                    text = "";
-                }
-
-                if (HoverItem.Info.Bind.HasFlag(BindMode.DontSell))
-                {
-                    text += (text == "") ? "Can't sell" : ", can't sell";
-                    count += 1;
-                }
-                if (count > 2)
-                {
-                    MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = text
-                    };
-                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                    count = 0;
-                    text = "";
-                }
-
-                if (HoverItem.Info.Bind.HasFlag(BindMode.DontTrade))
-                {
-                    text += (text == "") ? "Can't trade" : ", can't trade";
-                    count += 1;
-                }
-                if (count > 2)
-                {
-                    MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = text
-                    };
-                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                    count = 0;
-                    text = "";
-                }
-
-                if (HoverItem.Info.Bind.HasFlag(BindMode.DontStore))
-                {
-                    text += (text == "") ? "Can't store" : ", can't store";
-                    count += 1;
-                }
-                if (count > 1)
-                {
-                    MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = text
-                    };
-                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                    count = 0;
-                    text = "";
-                }
-
-                if (HoverItem.Info.Bind.HasFlag(BindMode.DontRepair))
-                {
-                    text += (text == "") ? "Can't repair" : ", can't repair";
-                    count += 1;
-                }
-                if (count > 1)
-                {
-                    MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = text
-                    };
-                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                    count = 0;
-                    text = "";
-                }
-                if (HoverItem.Info.BindNoSRepair)
-                {
-                    text += (text == "") ? "Can't special repair" : ", can't special repair";
-                    count += 1;
-                }
-                if (count > 1)
-                {
-                    MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = text
-                    };
-                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                    count = 0;
-                    text = "";
-                }
-                if (HoverItem.Info.Bind.HasFlag(BindMode.DestroyOnDrop))
-                {
-                    MirLabel label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = "Destroyed when dropped"
-                    };
-                    ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                }
-
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, CLASSLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, CLASSLabel.DisplayRectangle.Bottom));
             }
 
             #endregion
 
+            if (count > 0)
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+                #region OUTLINE
+                MirControl outLine = new MirControl
+                {
+                    BackColour = Color.FromArgb(255, 50, 50, 50),
+                    Border = true,
+                    BorderColour = Color.Gray,
+                    NotControl = true,
+                    Parent = ItemLabel,
+                    Opacity = 0.4F,
+                    Location = new Point(0, 0)
+                };
+                outLine.Size = ItemLabel.Size;
+                #endregion
+
+                return outLine;
+            }
+            else
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height - 4);
+            }
+            return null;
+        }
+
+        public MirControl BindInfoLabel(UserItem item, bool Inspect = false)
+        {
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
+
+            ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+            int count = 0;
+
+            #region DONT_DEATH_DROP
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.Bind.HasFlag(BindMode.DontDeathdrop))
+            {
+                count++;
+                MirLabel DONT_DEATH_DROPLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Can't drop on death")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_DEATH_DROPLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_DEATH_DROPLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region DONT_DROP
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.Bind.HasFlag(BindMode.DontDrop))
+            {
+                count++;
+                MirLabel DONT_DROPLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Can't drop")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_DROPLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_DROPLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region DONT_UPGRADE
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.Bind.HasFlag(BindMode.DontUpgrade))
+            {
+                count++;
+                MirLabel DONT_UPGRADELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Can't upgrade")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_UPGRADELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_UPGRADELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region DONT_SELL
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.Bind.HasFlag(BindMode.DontSell))
+            {
+                count++;
+                MirLabel DONT_SELLLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Can't sell")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_SELLLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_SELLLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region DONT_TRADE
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.Bind.HasFlag(BindMode.DontTrade))
+            {
+                count++;
+                MirLabel DONT_TRADELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Can't trade")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_TRADELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_TRADELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region DONT_STORE
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.Bind.HasFlag(BindMode.DontStore))
+            {
+                count++;
+                MirLabel DONT_STORELabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Can't store")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_STORELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_STORELabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region DONT_REPAIR
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.Bind.HasFlag(BindMode.DontRepair))
+            {
+                count++;
+                MirLabel DONT_REPAIRLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Can't repair")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_REPAIRLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_REPAIRLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region DONT_SUERREPAIR
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.BindNoSRepair)
+            {
+                count++;
+                MirLabel DONT_SUERREPAIRLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Can't special repair")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_SUERREPAIRLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_SUERREPAIRLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region DONT_DESTROY_ON_DROP
+
+            if (HoverItem.Info.Bind != BindMode.none && HoverItem.Info.Bind.HasFlag(BindMode.DestroyOnDrop))
+            {
+                count++;
+                MirLabel DONT_DODLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
+                    Parent = ItemLabel,
+                    Text = string.Format("Destroyed when dropped")
+                };
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, DONT_DODLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, DONT_DODLabel.DisplayRectangle.Bottom));
+            }
+
+            #endregion
+
+            #region BIND_ON_EQUIP
+
             if ((HoverItem.Info.BindOnEquip) & HoverItem.SoulBoundId == -1)
             {
-                MirLabel label = new MirLabel
+                count++;
+                MirLabel BOELabel = new MirLabel
                 {
                     AutoSize = true,
-                    ForeColour = Color.White,
+                    ForeColour = Color.Yellow,
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
+                    OutLine = true,
                     Parent = ItemLabel,
-                    Text = "Soulbinds on equip"
+                    Text = string.Format("Soulbinds on equip")
                 };
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, BOELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, BOELabel.DisplayRectangle.Bottom));
             }
-            if (HoverItem.SoulBoundId != -1)
+            else if (HoverItem.SoulBoundId != -1)
             {
-                MirLabel label = new MirLabel
+                count++;
+                MirLabel BOELabel = new MirLabel
                 {
                     AutoSize = true,
-                    ForeColour = Color.White,
+                    ForeColour = Color.Yellow,
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
+                    OutLine = true,
                     Parent = ItemLabel,
                     Text = "Soulbound to: " + GetUserName((uint)HoverItem.SoulBoundId)
                 };
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, BOELabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, BOELabel.DisplayRectangle.Bottom));
             }
+
+            #endregion
+
+            #region CURSED
+
             if ((!HoverItem.Info.NeedIdentify || HoverItem.Identified) && HoverItem.Cursed)
             {
-                MirLabel label = new MirLabel
+                count++;
+                MirLabel CURSEDLabel = new MirLabel
                 {
                     AutoSize = true,
-                    ForeColour = Color.Red,
+                    ForeColour = Color.Yellow,
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
+                    OutLine = true,
                     Parent = ItemLabel,
-                    Text = "Cursed"
+                    Text = string.Format("Cursed")
                 };
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, CURSEDLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, CURSEDLabel.DisplayRectangle.Bottom));
             }
-            ItemLabel.Size = ItemLabel.Size.Add(0, 4);
 
-            ItemLabel.Visible = true;
-        }
+            #endregion
 
-        private void GemItemInfo(ItemInfo realItem)
-        {
-            if (HoverItem.Info.Durability > 0)
+            #region CANTAWAKEN
+
+            if (HoverItem.Info.CanAwakening != true)
             {
-                MirLabel label = new MirLabel
+                count++;
+                MirLabel CANTAWAKENINGLabel = new MirLabel
                 {
                     AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
-                    OutLine = false,
+                    ForeColour = Color.Yellow,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
                     Parent = ItemLabel,
-                    Text = string.Format("Durability: {0}/{1}", Math.Round(HoverItem.CurrentDura / 1000M),
-                                                   Math.Round(HoverItem.MaxDura / 1000M))
+                    Text = string.Format("Can't awaken")
                 };
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, CANTAWAKENINGLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, CANTAWAKENINGLabel.DisplayRectangle.Bottom));
             }
 
-            switch (HoverItem.Info.Shape)
+            #endregion
+
+            if (count > 0)
             {
-                case 1:
-                    {
-                        MirLabel label = new MirLabel
-                        {
-                            AutoSize = true,
-                            ForeColour = Color.White,
-                            Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                            OutLine = false,
-                            Parent = ItemLabel,
-                            Text = "Hold CTRL and left click to repair weapons."
-                        };
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
 
-                        ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                  label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                    }
-                    break;
-                case 2:
-                    {
-                        MirLabel label = new MirLabel
-                        {
-                            AutoSize = true,
-                            ForeColour = Color.White,
-                            Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                            OutLine = false,
-                            Parent = ItemLabel,
-                            Text = "Hold CTRL and left click to repair armour\nand accessory items."
-                        };
+                #region OUTLINE
+                MirControl outLine = new MirControl
+                {
+                    BackColour = Color.FromArgb(255, 50, 50, 50),
+                    Border = true,
+                    BorderColour = Color.Gray,
+                    NotControl = true,
+                    Parent = ItemLabel,
+                    Opacity = 0.4F,
+                    Location = new Point(0, 0)
+                };
+                outLine.Size = ItemLabel.Size;
+                #endregion
 
-                        ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                  label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                    }
-                    break;
-                case 3:
-                case 4:
-                    {
-                        MirLabel label = new MirLabel
-                        {
-                            AutoSize = true,
-                            ForeColour = Color.White,
-                            Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                            OutLine = false,
-                            Parent = ItemLabel,
-                            Text = "Hold CTRL and left click to combine with an item."
-                        };
-
-                        ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                  label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-
-                        int value1 = realItem.MinAC;
-                        int value2 = realItem.MaxAC;
-                        int addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AC : 0;
-
-
-                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "AC: {0}-{1} (+{2})" : "AC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.MinMAC;
-                        value2 = realItem.MaxMAC;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MAC : 0;
-
-
-                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "MAC: {0}-{1} (+{2})" : "MAC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.MinDC;
-                        value2 = realItem.MaxDC;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.DC : 0;
-
-
-                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "DC: {0}-{1} (+{2})" : "DC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.MinMC;
-                        value2 = realItem.MaxMC;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MC : 0;
-
-
-                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "MC: {0}-{1} (+{2})" : "MC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.MinSC;
-                        value2 = realItem.MaxSC;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.SC : 0;
-
-
-                        if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "SC: {0}-{1} (+{2})" : "SC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.Accuracy;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Accuracy : 0;
-
-
-                        if (value1 > 0 || addedValue1 > 0)
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "Accuracy: +{0} (+{1})" : "Accuracy: +{0}", value1 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.Agility;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Agility : 0;
-
-
-                        if (value1 > 0 || addedValue1 > 0)
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "Agility: +{0} (+{1})" : "Agility: +{0}", value1 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.AttackSpeed;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AttackSpeed : 0;
-
-
-                        if (value1 > 0 || addedValue1 > 0 || (addedValue1 + value1 < 0))
-                        {
-                            string plus = (addedValue1 + value1 < 0) ? "" : "+";
-
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "A.Speed: " + plus + "{0} (+{1})" : "A.Speed: " + plus + "{0}", value1 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.Freezing;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Freezing : 0;
-
-                        if ((value1 > 0) || (addedValue1 > 0))
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "Freezing: +{0} (+{1})" : "Freezing: +{0}", value1 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.PoisonAttack;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonAttack : 0;
-
-                        if ((value1 > 0) || (addedValue1 > 0))
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "Poison: +{0} (+{1})" : "Poison: +{0}", value1 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.MagicResist;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MagicResist : 0;
-
-                        if ((value1 > 0) || (addedValue1 > 0))
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "Magic Resist: +{0} (+{1})" : "Magic Resist: +{0}", value1 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value1 = realItem.PoisonResist;
-                        addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonResist : 0;
-
-                        if ((value1 > 0) || (addedValue1 > 0))
-                        {
-                            label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue1 > 0 ? "Poison Resist: +{0} (+{1})" : "Poison Resist: +{0}", value1 + addedValue1, addedValue1)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-                    }
-                    break;
-                default:
-                    break;
+                return outLine;
             }
+            else
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height - 4);
+            }
+            return null;
         }
 
-        private void PotionItemInfo()
+        public MirControl OverlapInfoLabel(UserItem item, bool Inspect = false)
         {
-            if (HoverItem.Info.Durability > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(HoverItem.Info.Shape == 3 ? "Time: {0} (s)" : "Range: {0}", HoverItem.Info.Durability)
-                };
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
-            }
-            int value = 0;
-            int addedValue = 0;
+            ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
 
-            //  int x = 4;
-            //   int y = ItemLabel.DisplayRectangle.Bottom;
+            int count = 0;
 
-            switch(HoverItem.Info.Shape)
-            {
-                case 3:
-                    #region Impact/Magic/Taoist/Storm/HealthAid/ManaAid
-                    {
-                        
-                        value = HoverItem.Info.MaxDC;
-                        addedValue = HoverItem.DC;
 
-                        if (value > 0 || addedValue > 0)
-                        {
-                            MirLabel label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Damage Increase: +{0} (+{1})" : "Damage Increase: +{0}", value + addedValue, addedValue)
-                            };
+            #region GEM
 
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value = HoverItem.Info.MaxMC;
-                        addedValue = HoverItem.MC;
-
-                        if (value > 0 || addedValue > 0)
-                        {
-                            MirLabel label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Magic Increase: +{0} (+{1})" : "Magic Increase: +{0}", value + addedValue, addedValue)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value = HoverItem.Info.MaxSC;
-                        addedValue = HoverItem.SC;
-
-                        if (value > 0 || addedValue > 0)
-                        {
-                            MirLabel label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Spirit Increase: +{0} (+{1})" : "Spirit Increase: +{0}", value + addedValue, addedValue)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value = HoverItem.Info.AttackSpeed;
-                        addedValue = HoverItem.AttackSpeed;
-
-                        if (value > 0 || addedValue > 0)
-                        {
-                            MirLabel label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "A.Speed Increase: +{0} (+{1})" : "A.Speed Increase: +{0}", value + addedValue, addedValue)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value = HoverItem.Info.HP;
-                        addedValue = HoverItem.HP;
-
-                        if (value > 0 || addedValue > 0)
-                        {
-                            MirLabel label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Health Increase: +{0}HP (+{1})" : "Health Increase: +{0}HP", value + addedValue, addedValue)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value = HoverItem.Info.MP;
-                        addedValue = HoverItem.MP;
-
-                        if (value > 0 || addedValue > 0)
-                        {
-                            MirLabel label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Mana Increase: +{0}MP (+{1})" : "Mana Increase: +{0}MP", value + addedValue, addedValue)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-                    }
-                    break;
-                    #endregion
-                default:
-                    {
-                        value = HoverItem.Info.HP;
-                        addedValue = HoverItem.HP;
-
-                        if (value > 0 || addedValue > 0)
-                        {
-                            MirLabel label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Health Restoration: +{0}HP (+{1})" : "Health Restoration: +{0}HP", value + addedValue, addedValue)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-
-                        value = HoverItem.Info.MP;
-                        addedValue = HoverItem.MP;
-
-                        if (value > 0 || addedValue > 0)
-                        {
-                            MirLabel label = new MirLabel
-                            {
-                                AutoSize = true,
-                                ForeColour = addedValue > 0 ? Color.Cyan : Color.White,
-                                Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                                OutLine = false,
-                                Parent = ItemLabel,
-                                Text = string.Format(addedValue > 0 ? "Mana Restoration: +{0}MP (+{1})" : "Mana Restoration: +{0}MP", value + addedValue, addedValue)
-                            };
-
-                            ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                                      label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-                        }
-                    }
-                    break;
-            }
-
-        }
-
-        private void EquipmentItemInfo(ItemInfo realItem)
-        {
-            bool mountItem = false;
-            bool fishingItem = false;
-
-            switch (HoverItem.Info.Type)
-            {
-                case ItemType.Reins:
-                case ItemType.Bells:
-                case ItemType.Saddle:
-                case ItemType.Ribbon:
-                case ItemType.Mask:
-                case ItemType.Food:
-                    mountItem = true;
-                    break;
-                case ItemType.Hook:
-                case ItemType.Float:
-                case ItemType.Bait:
-                case ItemType.Finder:
-                case ItemType.Reel:
-                    fishingItem = true;
-                    break;
-                case ItemType.Weapon:
-                    if(HoverItem.Info.Shape == 49 ||HoverItem.Info.Shape == 50)
-                        fishingItem = true;
-                    break;
-            }
-
-            if (mountItem || fishingItem)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.Orange,
-                    Location = new Point(ItemLabel.DisplayRectangle.Right - 8, 4),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format("({0} Item)", mountItem ? "Mount" : "Fishing"),
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            if (HoverItem.Info.Durability > 0)
+            if (realItem.Type == ItemType.Gem)
             {
                 string text = "";
-                switch (HoverItem.Info.Type)
+
+                switch (realItem.Shape)
                 {
-                    case ItemType.Amulet:
-                        text = string.Format("Usage: {0}/{1}", HoverItem.CurrentDura, HoverItem.MaxDura);
+                    case 1:
+                        text = "Hold CTRL and left click to repair weapons.";
                         break;
-                    case ItemType.Ore:
-                        text = string.Format("Purity: {0}", Math.Round(HoverItem.CurrentDura / 1000M));
+                    case 2:
+                        text = "Hold CTRL and left click to repair armour\nand accessory items.";
                         break;
-                    case ItemType.Meat:
-                        text = string.Format("Quality: {0}", Math.Round(HoverItem.CurrentDura / 1000M));
-                        break;       
-                    case ItemType.Mount:
-                        text = string.Format("Loyalty: {0} / {1}", HoverItem.CurrentDura, HoverItem.MaxDura);
-                        break;
-                    case ItemType.Food:
-                        text = string.Format("Nutrition: {0}", HoverItem.CurrentDura);
-                        break;
-                    default:
-                        text = string.Format("Durability: {0}/{1}", Math.Round(HoverItem.CurrentDura / 1000M),
-                                                   Math.Round(HoverItem.MaxDura / 1000M));
+                    case 3:
+                    case 4:
+                        text = "Hold CTRL and left click to combine with an item.";
                         break;
                 }
-
-                MirLabel label = new MirLabel
+                count++;
+                MirLabel GEMLabel = new MirLabel
                 {
                     AutoSize = true,
-                    ForeColour = HoverItem.CurrentDura == 0 ? Color.Red : Color.White,
-                    Location = new Point(ItemLabel.DisplayRectangle.Right, 4),
-                    OutLine = false,
+                    ForeColour = Color.White,
+                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
+                    OutLine = true,
                     Parent = ItemLabel,
                     Text = text
                 };
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4, ItemLabel.Size.Height);
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, GEMLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, GEMLabel.DisplayRectangle.Bottom));
             }
 
-            int value1 = realItem.MinAC;
-            int value2 = realItem.MaxAC;
-            int addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AC : 0;
+            #endregion
 
+            #region SPLITUP
 
-            if (value1 > 0 || addedValue1 > 0 || value2 > 0)
+            if (realItem.StackSize > 1 && realItem.Type != ItemType.Gem)
             {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "AC: {0}-{1} (+{2})" : "AC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.MinMAC;
-            value2 = realItem.MaxMAC;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MAC : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "MAC: {0}-{1} (+{2})" : "MAC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.MinDC;
-            value2 = realItem.MaxDC;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.DC : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "DC: {0}-{1} (+{2})" : "DC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.MinMC;
-            value2 = realItem.MaxMC;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MC : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "MC: {0}-{1} (+{2})" : "MC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.MinSC;
-            value2 = realItem.MaxSC;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.SC : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0 || value2 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "SC: {0}-{1} (+{2})" : "SC: {0}-{1}", value1, value2 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.HP;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.HP : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Health: +{0} (+{1})" : "Health: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.MP;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MP : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Mana: +{0} (+{1})" : "Mana: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.Accuracy;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Accuracy : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Accuracy: +{0} (+{1})" : "Accuracy: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.Agility;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Agility : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Agility: +{0} (+{1})" : "Agility: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.AttackSpeed;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.AttackSpeed : 0;
-
-
-            if (value1 > 0 || addedValue1 > 0 || (addedValue1 + value1 < 0))
-            {
-                string plus = (addedValue1 + value1 < 0) ? "" : "+";
-
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = addedValue1 > 0 ? Color.Cyan : Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "A.Speed: " + plus + "{0} (+{1})" : "A.Speed: " + plus + "{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.BagWeight;
-
-            if (value1 > 0)
-            {
-                MirLabel label = new MirLabel
+                count++;
+                MirLabel SPLITUPLabel = new MirLabel
                 {
                     AutoSize = true,
                     ForeColour = Color.White,
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
+                    OutLine = true,
                     Parent = ItemLabel,
-                    Text = string.Format("Bag Weight: +{0}", value1)
+                    Text = string.Format("Max Combine Count : {0}\nShift + Left click to split the stack", realItem.StackSize)
                 };
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, SPLITUPLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, SPLITUPLabel.DisplayRectangle.Bottom));
             }
 
-            value1 = realItem.HandWeight;
+            #endregion
 
-            if (value1 > 0)
+            if (count > 0)
             {
-                MirLabel label = new MirLabel
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+                #region OUTLINE
+                MirControl outLine = new MirControl
+                {
+                    BackColour = Color.FromArgb(255, 50, 50, 50),
+                    Border = true,
+                    BorderColour = Color.Gray,
+                    NotControl = true,
+                    Parent = ItemLabel,
+                    Opacity = 0.4F,
+                    Location = new Point(0, 0)
+                };
+                outLine.Size = ItemLabel.Size;
+                #endregion
+
+                return outLine;
+            }
+            else
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height - 4);
+            }
+            return null;
+        }
+
+        public MirControl StoryInfoLabel(UserItem item, bool Inspect = false)
+        {
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
+
+            ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+            int count = 0;
+
+            #region TOOLTIP
+
+            if (!string.IsNullOrEmpty(HoverItem.Info.ToolTip))
+            {
+                count++;
+                MirLabel TOOLTIPLabel = new MirLabel
                 {
                     AutoSize = true,
-                    ForeColour = Color.White,
+                    ForeColour = Color.Goldenrod,
                     Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
+                    OutLine = true,
                     Parent = ItemLabel,
-                    Text = string.Format("Hand Weight: +{0}", value1)
+                    Text = HoverItem.Info.ToolTip
                 };
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, TOOLTIPLabel.DisplayRectangle.Right + 4),
+                    Math.Max(ItemLabel.Size.Height, TOOLTIPLabel.DisplayRectangle.Bottom));
             }
 
-            value1 = realItem.WearWeight;
-
-            if (value1 > 0)
+            #endregion
+     
+            if (count > 0)
             {
-                MirLabel label = new MirLabel
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height + 4);
+
+                #region OUTLINE
+                MirControl outLine = new MirControl
                 {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
+                    BackColour = Color.FromArgb(255, 50, 50, 50),
+                    Border = true,
+                    BorderColour = Color.Gray,
+                    NotControl = true,
                     Parent = ItemLabel,
-                    Text = string.Format("Wear Weight: +{0}", value1)
+                    Opacity = 0.4F,
+                    Location = new Point(0, 0)
                 };
+                outLine.Size = ItemLabel.Size;
+                #endregion
 
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
+                return outLine;
+            }
+            else
+            {
+                ItemLabel.Size = new Size(ItemLabel.Size.Width, ItemLabel.Size.Height - 4);
+            }
+            return null;
+        }
+
+        public void CreateItemLabel(UserItem item, bool Inspect = false)
+        {
+            if (item == null)
+            {
+                DisposeItemLabel();
+                HoverItem = null;
+                return;
             }
 
-            value1 = realItem.Luck;
-            addedValue1 = HoverItem.Luck;
+            if (item == HoverItem && ItemLabel != null && !ItemLabel.IsDisposed) return;
+            byte level = Inspect ? InspectDialog.Level : MapObject.User.Level;
+            MirClass job = Inspect ? InspectDialog.Class : MapObject.User.Class;
+            HoverItem = item;
+            ItemInfo realItem = Functions.GetRealItem(item.Info, level, job, ItemInfoList);
 
-
-            if (value1 + addedValue1 != 0)
+            ItemLabel = new MirControl
             {
-                MirLabel label = null;
+                BackColour = Color.FromArgb(255, 50, 50, 50),
+                Border = true,
+                BorderColour = Color.Gray,
+                DrawControlTexture = true,
+                NotControl = true,
+                Parent = this,
+                Opacity = 0.7F,
+              //  Visible = false
+            };
 
-                if (fishingItem)
+            //Name Info Label
+            MirControl[] outlines = new MirControl[9];
+            outlines[0] = NameInfoLabel(item, Inspect);
+            //Attribute Info1 Label - Attack Info
+            outlines[1] = AttackInfoLabel(item, Inspect);
+            //Attribute Info2 Label - Defense Info
+            outlines[2] = DefenseInfoLabel(item, Inspect);
+            //Attribute Info3 Label - Weight Info
+            outlines[3] = WeightInfoLabel(item, Inspect);
+            //Awake Info Label
+            outlines[4] = AwakeInfoLabel(item, Inspect);
+            //need Info Label
+            outlines[5] = NeedInfoLabel(item, Inspect);
+            //Bind Info Label
+            outlines[6] = BindInfoLabel(item, Inspect);
+            //Overlap Info Label
+            outlines[7] = OverlapInfoLabel(item, Inspect);
+            //Story Label
+            outlines[8] = StoryInfoLabel(item, Inspect);
+
+            foreach (var outline in outlines)
+            {
+                if (outline != null)
                 {
-                    label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = value1 + addedValue1 > 0 ? Color.Yellow : Color.Red,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(value1 + addedValue1 > 0 ? "Success: {0}% " : "Failure: {0}%", value1 + addedValue1)
-                    };
+                    outline.Size = new Size(ItemLabel.Size.Width, outline.Size.Height);
                 }
-                else
-                {
-                    label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = value1 + addedValue1 > 0 ? Color.Yellow : Color.Red,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(value1 + addedValue1 > 0 ? "Luck: +{0} " : "Curse: +{0}", value1 + addedValue1)
-                    };
-                }
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
             }
 
-            value1 = realItem.MagicResist;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.MagicResist : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Magic Resist: +{0} (+{1})" : "Magic Resist: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.PoisonResist;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonResist : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Poison Resist: +{0} (+{1})" : "Poison Resist: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.HealthRecovery;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.HealthRecovery : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "HealthRecovery: +{0} (+{1})" : "HealthRecovery: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.SpellRecovery;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.ManaRecovery : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "ManaRecovery: +{0} (+{1})" : "ManaRecovery: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.PoisonRecovery;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonRecovery : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "PoisonRecovery: +{0} (+{1})" : "PoisonRecovery: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.HPrate;
-
-            if (value1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format("Max HP: +{0}%", value1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.MPrate;
-
-            if (value1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format("Max MP: +{0}%", value1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.MaxAcRate;
-
-            if (value1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format("Max AC: +{0}%", value1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.MaxMacRate;
-
-            if (value1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format("Max Mac: +{0}%", value1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.CriticalRate;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.CriticalRate : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = null;
-
-                if (fishingItem)
-                {
-                    label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "Flexibility: +{0} (+{1})" : "Flexibility: +{0}", value1 + addedValue1, addedValue1)
-                    };
-                }
-                else
-                {
-                    label = new MirLabel
-                    {
-                        AutoSize = true,
-                        ForeColour = Color.White,
-                        Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                        OutLine = false,
-                        Parent = ItemLabel,
-                        Text = string.Format(addedValue1 > 0 ? "Critical Chance: +{0} (+{1})" : "Critical Chance: +{0}", value1 + addedValue1, addedValue1)
-                    };
-                }
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.CriticalDamage;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.CriticalDamage : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Critical Damage: +{0} (+{1})" : "Critical Damage: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.Holy;
-
-            if (value1 > 0)
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format("Holy: +{0}", value1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.Freezing;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Freezing : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Freezing: +{0} (+{1})" : "Freezing: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.PoisonAttack;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.PoisonAttack : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Poison: +{0} (+{1})" : "Poison: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
-            value1 = realItem.Strong;
-            addedValue1 = (!HoverItem.Info.NeedIdentify || HoverItem.Identified) ? HoverItem.Strong : 0;
-
-            if ((value1 > 0) || (addedValue1 > 0))
-            {
-                MirLabel label = new MirLabel
-                {
-                    AutoSize = true,
-                    ForeColour = Color.White,
-                    Location = new Point(4, ItemLabel.DisplayRectangle.Bottom),
-                    OutLine = false,
-                    Parent = ItemLabel,
-                    Text = string.Format(addedValue1 > 0 ? "Reduced duraloss: +{0} (+{1})" : "Reduced duraloss: +{0}", value1 + addedValue1, addedValue1)
-                };
-
-                ItemLabel.Size = new Size(label.DisplayRectangle.Right + 4 > ItemLabel.Size.Width ? label.DisplayRectangle.Right + 4 : ItemLabel.Size.Width,
-                                          label.DisplayRectangle.Bottom > ItemLabel.Size.Height ? label.DisplayRectangle.Bottom : ItemLabel.Size.Height);
-            }
-
+            //ItemLabel.Visible = true;
         }
 
         private Color GradeNameColor(ItemGrade grade)
@@ -5655,7 +6003,7 @@ namespace Client.MirScenes
             switch (grade)
             {
                 case ItemGrade.Common:
-                    return Color.White;
+                    return Color.Yellow;
                 case ItemGrade.Rare:
                     return Color.DeepSkyBlue;
                 case ItemGrade.Legendary:
@@ -5663,7 +6011,7 @@ namespace Client.MirScenes
                 case ItemGrade.Mythical:
                     return Color.Plum;
                 default:
-                    return Color.White;
+                    return Color.Yellow;
             }
         }
 
@@ -5817,6 +6165,17 @@ namespace Client.MirScenes
         private Surface _floorSurface, _lightSurface;
 
         public long OutputDelay;
+
+        private static bool _awakeningAction;
+        public static bool AwakeningAction
+        {
+            get { return _awakeningAction; }
+            set
+            {
+                if (_awakeningAction == value) return;
+                _awakeningAction = value; 
+            }
+        }
 
         private static bool _autoRun;
         public static bool AutoRun
@@ -6476,6 +6835,7 @@ namespace Client.MirScenes
             MouseEventArgs me = e as MouseEventArgs;
             if (me == null) return;
 
+            if (AwakeningAction == true) return;
             switch (me.Button)
             {
                 case MouseButtons.Left:
@@ -6485,6 +6845,10 @@ namespace Client.MirScenes
                         NPCObject npc = MapObject.MouseObject as NPCObject;
                         if (npc != null)
                         {
+                            GameScene.Scene.NPCAwakeDialog.Hide();
+                            GameScene.Scene.NPCDropDialog.Hide();
+                            GameScene.Scene.NPCGoodsDialog.Hide();
+
                             if (CMain.Time <= GameScene.NPCTime && npc.ObjectID == GameScene.NPCID) return;
 
                             GameScene.NPCTime = CMain.Time + 5000;
@@ -6517,6 +6881,7 @@ namespace Client.MirScenes
             MapButtons |= e.Button;
             GameScene.CanRun = false;
 
+            if (AwakeningAction == true) return;
 
             if (e.Button != MouseButtons.Left) return;
 
@@ -6600,7 +6965,9 @@ namespace Client.MirScenes
         }
 
         private void CheckInput()
-        {          
+        {
+            if (AwakeningAction == true) return;
+
             if ((MouseControl == this) && (MapButtons != MouseButtons.None)) AutoHit = false;//mouse actions stop mining even when frozen!
             if (!CanRideAttack()) AutoHit = false;
             
@@ -7814,7 +8181,7 @@ namespace Client.MirScenes
                 Location = new Point(Settings.HighResolution ? 618 : 394, 1),
                 Parent = this,
                 PressedIndex = 2020,
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
             };
             HomeButton.Click += (o, e) =>
             {
@@ -7832,7 +8199,7 @@ namespace Client.MirScenes
                 Location = new Point(Settings.HighResolution ? 618 : 394, 9),
                 Parent = this,
                 PressedIndex = 2023,
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
             };
             UpButton.Click += (o, e) =>
             {
@@ -7850,7 +8217,7 @@ namespace Client.MirScenes
                 Location = new Point(Settings.HighResolution ? 618 : 394, 45),
                 Parent = this,
                 PressedIndex = 2029,
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
             };
             EndButton.Click += (o, e) =>
             {
@@ -7867,7 +8234,7 @@ namespace Client.MirScenes
                 Location = new Point(Settings.HighResolution ? 618 : 394, 39),
                 Parent = this,
                 PressedIndex = 2026,
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
             };
             DownButton.Click += (o, e) =>
             {
@@ -8302,7 +8669,8 @@ namespace Client.MirScenes
                 Parent = this,
                 Location = new Point(Settings.HighResolution ? 574 : 350, 1),
                 Visible = true,
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+				Hint = "Size"
             };
             SizeButton.Click += (o, e) =>
             {
@@ -8321,7 +8689,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(Settings.HighResolution ? 596 : 372, 1),
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+				Hint = "Chat Settings"
             };
             SettingsButton.Click += (o, e) =>
                 {
@@ -8337,7 +8706,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(12, 1),
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+                Hint = "All"
             };
             NormalButton.Click += (o, e) =>
             {
@@ -8352,7 +8722,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(34, 1),
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+                Hint = "Shout"
             };
             ShoutButton.Click += (o, e) =>
             {
@@ -8367,7 +8738,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(56, 1),
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+                Hint = "Whisper"
             };
             WhisperButton.Click += (o, e) =>
             {
@@ -8382,7 +8754,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(78, 1),
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+                Hint = "Lover"
             };
             LoverButton.Click += (o, e) =>
             {
@@ -8397,7 +8770,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(100, 1),
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+                Hint = "Mentor"
             };
             MentorButton.Click += (o, e) =>
             {
@@ -8412,7 +8786,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(122, 1),
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+                Hint = "Mentor"
             };
             GroupButton.Click += (o, e) =>
             {
@@ -8427,7 +8802,8 @@ namespace Client.MirScenes
                 Library = Libraries.Prguse,
                 Parent = this,
                 Location = new Point(144, 1),
-                Sound = SoundList.ButtonA
+                Sound = SoundList.ButtonA,
+                Hint = "Guild"
             };
             GuildButton.Click += (o, e) =>
             {
@@ -8761,6 +9137,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 1928,
                 Sound = SoundList.ButtonA,
+                Hint = "Rotate"
             };
             RotateButton.Click += (o, e) => Flip();
 
@@ -8773,6 +9150,7 @@ namespace Client.MirScenes
                 Parent = this,
                 PressedIndex = 1925,
                 Sound = SoundList.ButtonA,
+                Hint = "Close (Z)"
             };
             CloseButton.Click += (o, e) => Hide();
 
@@ -8991,6 +9369,7 @@ namespace Client.MirScenes
         public void Show()
         {
             if (Visible) return;
+            Settings.SkillBar = true;
             Visible = true;
             Update();
         }
@@ -8998,6 +9377,7 @@ namespace Client.MirScenes
         public void Hide()
         {
             if (!Visible) return;
+            Settings.SkillBar = false;
             Visible = false;
         }
     }
@@ -9704,7 +10084,7 @@ namespace Client.MirScenes
                 Location = new Point(25, 131),
                 Library = Libraries.Prguse,
                 Sound = SoundList.ButtonA,
-                Hint = "Big Map"
+                Hint = "BigMap (B)"
             };
             BigMapButton.Click += (o, e) => GameScene.Scene.BigMapDialog.Toggle();
 
@@ -9717,6 +10097,7 @@ namespace Client.MirScenes
                 Location = new Point(109, 3),
                 Library = Libraries.Prguse,
                 Sound = SoundList.ButtonA,
+                Hint = "MiniMap (V)"
             };
             ToggleButton.Click += (o, e) => Toggle();
 
@@ -11656,6 +12037,18 @@ namespace Client.MirScenes
                         TargetItem = null;
                     };
                     return;
+                case PanelType.Disassemble:
+                    Network.Enqueue(new C.DisassembleItem { UniqueID = TargetItem.UniqueID });
+                    break;
+                case PanelType.Downgrade:
+                    Network.Enqueue(new C.DowngradeAwakening { UniqueID = TargetItem.UniqueID });
+                    break;
+                case PanelType.Reset:
+                    if (TargetItem.Info.NeedIdentify == false)
+                    {
+                        Network.Enqueue(new C.ResetAddedItem { UniqueID = TargetItem.UniqueID });
+                    }
+                    break;
             }
 
 
@@ -11672,6 +12065,52 @@ namespace Client.MirScenes
                 TargetItem = null;
                 OldCell = null;
             }
+
+            if (GameScene.SelectedCell != null && PType == PanelType.Disassemble)
+            {
+                if (GameScene.SelectedCell.Item.Info.Grade != ItemGrade.None &&
+                    GameScene.SelectedCell.Item.Info.Type != ItemType.Awakening)
+                {
+                    TargetItem = GameScene.SelectedCell.Item;
+                    OldCell = GameScene.SelectedCell;
+                    OldCell.Locked = true;
+                    GameScene.SelectedCell = null;
+                    return;
+                }
+            }
+
+            if (GameScene.SelectedCell != null && PType == PanelType.Downgrade)
+            {
+                if (GameScene.SelectedCell.Item.Awake.getAwakeLevel() != 0)
+                {
+                    TargetItem = GameScene.SelectedCell.Item;
+                    OldCell = GameScene.SelectedCell;
+                    OldCell.Locked = true;
+                    GameScene.SelectedCell = null;
+                    return;
+                }
+            }
+
+            if (GameScene.SelectedCell != null && PType == PanelType.Reset)
+            {
+                if (GameScene.SelectedCell.Item.IsAdded)
+                {
+                    TargetItem = GameScene.SelectedCell.Item;
+                    OldCell = GameScene.SelectedCell;
+                    OldCell.Locked = true;
+                    GameScene.SelectedCell = null;
+                    return;
+                }
+            }
+
+            if (PType == PanelType.Disassemble || PType == PanelType.Downgrade || PType == PanelType.Reset)
+            {
+                GameScene.SelectedCell.Locked = false;
+                GameScene.SelectedCell = null;
+                return;
+            }
+
+            //////////////////////////////////////
 
             if (GameScene.SelectedCell == null || GameScene.SelectedCell.GridType != MirGridType.Inventory ||
                 (PType != PanelType.Sell && PType != PanelType.Consign && GameScene.SelectedCell.Item != null && GameScene.SelectedCell.Item.Info.Durability == 0))
@@ -11709,10 +12148,11 @@ namespace Client.MirScenes
         {
             string text;
 
+            HoldButton.Visible = true;
+            
             switch (PType)
             {
                 case PanelType.Sell:
-
                     text = "Sale: ";
                     break;
                 case PanelType.Repair:
@@ -11724,6 +12164,18 @@ namespace Client.MirScenes
                 case PanelType.Consign:
                     InfoLabel.Text = "Consignment: ";
                     return;
+                case PanelType.Disassemble:
+                    text = "Disassemble: ";
+                    HoldButton.Visible = false;
+                    break;
+                case PanelType.Downgrade:
+                    text = "Downgrade: ";
+                    HoldButton.Visible = false;
+                    break;
+                case PanelType.Reset:
+                    text = "Reset: ";
+                    HoldButton.Visible = false;
+                    break;
                 default: return;
 
             }
@@ -11741,6 +12193,15 @@ namespace Client.MirScenes
                         break;
                     case PanelType.SpecialRepair:
                         text += ((TargetItem.RepairPrice() * 3) * GameScene.NPCRate).ToString();
+                        break;
+                    case PanelType.Disassemble:
+                        text += TargetItem.DisassemblePrice().ToString();
+                        break;
+                    case PanelType.Downgrade:
+                        text += TargetItem.DowngradePrice().ToString();
+                        break;
+                    case PanelType.Reset:
+                        text += TargetItem.ResetPrice().ToString();
                         break;
                     default: return;
                 }
@@ -11765,6 +12226,379 @@ namespace Client.MirScenes
         {
             Hold = false;
             GameScene.Scene.InventoryDialog.Show();
+            Visible = true;
+        }
+    }
+    public sealed class NPCAwakeDialog : MirImageControl
+    {
+
+        public MirButton UpgradeButton, CloseButton;
+        public MirItemCell[] ItemCells = new MirItemCell[7];
+        public MirDropDownBox SelectAwakeType;
+        public AwakeType CurrentAwakeType = AwakeType.None;
+        public MirLabel GoldLabel, NeedItemLabel1, NeedItemLabel2;
+
+        public static UserItem[] Items = new UserItem[7];
+        public static int[] ItemsIdx = new int[7];
+
+        public NPCAwakeDialog()
+        {
+            Index = 710;
+            Library = Libraries.Title;
+            Location = new Point(50, 40);
+            Sort = true;
+            Movable = true;
+
+            GoldLabel = new MirLabel
+            {
+                AutoSize = true,
+                Location = new Point(135, 268),
+                Parent = this,
+                NotControl = true,
+            };
+
+            NeedItemLabel1 = new MirLabel
+            {
+                AutoSize = true,
+                Location = new Point(90, 192),
+                Parent = this,
+                NotControl = true,
+            };
+
+            NeedItemLabel2 = new MirLabel
+            {
+                AutoSize = true,
+                Location = new Point(90, 231),
+                Parent = this,
+                NotControl = true,
+            };
+
+            UpgradeButton = new MirButton
+            {
+                HoverIndex = 713,
+                Index = 712,
+                Location = new Point(80, 375),
+                Library = Libraries.Title,
+                Parent = this,
+                PressedIndex = 714,
+                Sound = SoundList.ButtonA,
+            };
+            UpgradeButton.Click += (o, e) => Awakening();
+
+            CloseButton = new MirButton
+            {
+                HoverIndex = 361,
+                Index = 360,
+                Location = new Point(211, 5),
+                Library = Libraries.Prguse2,
+                Parent = this,
+                PressedIndex = 362,
+                Sound = SoundList.ButtonA,
+            };
+            CloseButton.Click += (o, e) => Hide();
+
+            ItemCells[0] = new MirItemCell
+            {
+                BorderColour = Color.Lime,
+                GridType = MirGridType.AwakenItem,
+                Library = Libraries.Items,
+                Parent = this,
+                Location = new Point(112, 77),
+                ItemSlot = 0,
+            };
+            //ItemCells[0].AfterDraw += (o, e) => ItemCell_AfterDraw();
+            //ItemCells[0].Click += (o, e) => ItemCell_Click();
+
+            ItemCells[1] = new MirItemCell
+            {
+                BorderColour = Color.Lime,
+                GridType = MirGridType.AwakenItem,
+                Library = Libraries.Items,
+                Parent = this,
+                Location = new Point(50, 191),
+                ItemSlot = 1,
+                Enabled = false,
+                
+            };
+
+            ItemCells[2] = new MirItemCell
+            {
+                BorderColour = Color.Lime,
+                GridType = MirGridType.AwakenItem,
+                Library = Libraries.Items,
+                Parent = this,
+                Location = new Point(50, 230),
+                ItemSlot = 2,
+                Enabled = false,
+            };
+
+            ItemCells[3] = new MirItemCell
+            {
+                BorderColour = Color.Lime,
+                GridType = MirGridType.AwakenItem,
+                Library = Libraries.Items,
+                Parent = this,
+                Location = new Point(42, 322),
+                ItemSlot = 3,
+            };
+
+            ItemCells[4] = new MirItemCell
+            {
+                BorderColour = Color.Lime,
+                GridType = MirGridType.AwakenItem,
+                Library = Libraries.Items,
+                Parent = this,
+                Location = new Point(86, 322),
+                ItemSlot = 4,
+            };
+
+            ItemCells[5] = new MirItemCell
+            {
+                BorderColour = Color.Lime,
+                GridType = MirGridType.AwakenItem,
+                Library = Libraries.Items,
+                Parent = this,
+                Location = new Point(138, 322),
+                ItemSlot = 5,
+            };
+
+            ItemCells[6] = new MirItemCell
+            {
+                BorderColour = Color.Lime,
+                GridType = MirGridType.AwakenItem,
+                Library = Libraries.Items,
+                Parent = this,
+                Location = new Point(182, 322),
+                ItemSlot = 6,
+            };
+
+            SelectAwakeType = new MirDropDownBox()
+            {
+                Parent = this,
+                Location = new Point(58, 153),
+                Size = new Size(143, 24),
+                ForeColour = Color.Black,
+                BorderColour = Color.Gray,
+                BackColour = Color.White,
+                Visible = true,
+                Enabled = true,
+            };
+            SelectAwakeType.ValueChanged += (o, e) => OnAwakeTypeSelect(SelectAwakeType._WantedIndex);
+        }
+
+        public void ItemCellClear()
+        {
+            if (ItemCells[1].Item != null)
+            {
+                ItemCells[1].Item = null;
+            }
+            if (ItemCells[2].Item != null)
+            {
+                ItemCells[2].Item = null;
+            }
+
+            NeedItemLabel2.Text = "";
+            NeedItemLabel1.Text = "";
+            GoldLabel.Text = "";
+        }
+
+        public void ItemCell_Click()
+        {
+            ItemCellClear();
+            SelectAwakeType.Items.Clear();
+
+            if (Items[0] == null)
+            {
+                SelectAwakeType.Items.Add("Select Upgrade Item.");
+                SelectAwakeType.SelectedIndex = SelectAwakeType.Items.Count-1;
+                CurrentAwakeType = AwakeType.None;
+            }
+            else
+            {
+                if (Items[0].Awake.getAwakeLevel() == 0)
+                {
+                    SelectAwakeType.Items.Add("Select Upgrade Type.");
+                    if (Items[0].Info.Type == ItemType.Weapon)
+                    {
+                        SelectAwakeType.Items.Add("Bravery Glyph");
+                        SelectAwakeType.Items.Add("Magic Glyph");
+                        SelectAwakeType.Items.Add("Soul Glyph");
+                    }
+                    else if (Items[0].Info.Type == ItemType.Helmet)
+                    {
+                        SelectAwakeType.Items.Add("Protection Glyph");
+                        SelectAwakeType.Items.Add("EvilSlayer Glyph");
+                    }
+                    else
+                    {
+                        SelectAwakeType.Items.Add("Body Glyph");
+                    }
+                }
+                else
+                {
+                    SelectAwakeType.Items.Add(getAwakeTypeText(Items[0].Awake.type));
+                    if (CurrentAwakeType != Items[0].Awake.type)
+                    {
+                        CurrentAwakeType = Items[0].Awake.type;
+                        OnAwakeTypeSelect(0);
+                    }
+                }
+            }
+        }
+
+        public string getAwakeTypeText(AwakeType type)
+        {
+            string typeName = "";
+            switch (type)
+            {
+                case AwakeType.DC:
+                    typeName = "Bravery Glyph";
+                    break;
+                case AwakeType.MC:
+                    typeName = "Magic Glyph";
+                    break;
+                case AwakeType.SC:
+                    typeName = "Soul Glyph";
+                    break;
+                case AwakeType.AC:
+                    typeName = "Protection Glyph";
+                    break;
+                case AwakeType.MAC:
+                    typeName = "EvilSlayer Glyph";
+                    break;
+                case AwakeType.HPMP:
+                    typeName = "Body Glyph";
+                    break;
+                default:
+                    typeName = "Select Upgrade Item.";
+                    break;
+            }
+            return typeName;
+        }
+
+        public AwakeType getAwakeType(string typeName)
+        {
+            AwakeType type = AwakeType.None;
+            switch (typeName)
+            {
+                case "Bravery Glyph":
+                    type = AwakeType.DC;
+                    break;
+                case "Magic Glyph":
+                    type = AwakeType.MC;
+                    break;
+                case "Soul Glyph":
+                    type = AwakeType.SC;
+                    break;
+                case "Protection Glyph":
+                    type = AwakeType.AC;
+                    break;
+                case "EvilSlayer Glyph":
+                    type = AwakeType.MAC;
+                    break;
+                case "Body Glyph":
+                    type = AwakeType.HPMP;
+                    break;
+                default:
+                    type = AwakeType.None;
+                    break;
+            }
+
+            return type;
+        }
+
+        public void OnAwakeTypeSelect(int Index)
+        {
+            SelectAwakeType.SelectedIndex = Index;
+
+            AwakeType type = getAwakeType(SelectAwakeType.Items[SelectAwakeType.SelectedIndex]);
+            CurrentAwakeType = type;
+            if (type != AwakeType.None)
+            {
+                Network.Enqueue(new C.AwakeningNeedMaterials { UniqueID = Items[0].UniqueID, Type = type });
+            }
+        }
+
+        public void setNeedItems(ItemInfo[] Materials, byte[] MaterialsCount)
+        {
+            if (MaterialsCount[0] != 0)
+            {
+                ItemCells[1].Item = new UserItem(Materials[0]);
+                ItemCells[1].Item.Count = MaterialsCount[0];
+                NeedItemLabel1.Text = Regex.Replace(ItemCells[1].Item.Info.Name, @"[\d-]", string.Empty) + "\n" + MaterialsCount[0].ToString();
+            }
+            else
+            {
+                ItemCells[1].Item = null;
+                NeedItemLabel1.Text = "";
+            }
+
+            if (MaterialsCount[1] != 0)
+            {
+                ItemCells[2].Item = new UserItem(Materials[1]);
+                ItemCells[2].Item.Count = MaterialsCount[1];
+                NeedItemLabel2.Text = Regex.Replace(ItemCells[2].Item.Info.Name, @"[\d-]", string.Empty) + "\n" + MaterialsCount[1].ToString();
+            }
+            else
+            {
+                ItemCells[2].Item = null;
+                NeedItemLabel2.Text = "";
+            }
+
+            if (ItemCells[0].Item != null)
+                GoldLabel.Text = ItemCells[0].Item.AwakeningPrice().ToString();
+        }
+
+        public bool CheckNeedMaterials()
+        {
+            int maxEqual = (Items[1] == null || Items[2] == null) ? 1 : 2;
+            int equal = 0;
+            for (int i = 1; i < 3; i++)
+            {
+                if (Items[i] == null) continue;
+                for (int j = 3; j < 5; j++)
+                {
+                    if (Items[j] == null) continue;
+                    if (Items[i].Info.Name == Items[j].Info.Name &&
+                        Items[i].Count <= Items[j].Count)
+                        equal++;
+                }
+            }
+            return equal >= maxEqual;
+        }
+
+        public void Awakening()
+        {
+            if (CheckNeedMaterials())
+            {
+                AwakeType type = getAwakeType(SelectAwakeType.Items[SelectAwakeType.SelectedIndex]);
+
+                if (type != AwakeType.None)
+                {
+                    Network.Enqueue(new C.Awakening { UniqueID = Items[0].UniqueID, Type = type });
+                    MapControl.AwakeningAction = true;
+                }
+            }
+        }
+
+        public void Hide()
+        {
+            foreach (var item in ItemCells)
+            {
+                if (item.Item != null)
+                {
+                    Network.Enqueue(new C.AwakeningLockedItem { UniqueID = item.Item.UniqueID, Locked = false });
+                    item.Item = null;
+                }
+            }
+
+            ItemCellClear();
+            ItemCell_Click();
+            Visible = false;
+        }
+
+        public void Show()
+        {
             Visible = true;
         }
     }

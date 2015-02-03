@@ -35,7 +35,11 @@ namespace Server.MirObjects
             TradeKey = "[TRADE]",
             TypeKey = "[TYPES]",
             GuildCreateKey = "[@CREATEGUILD]",
-            QuestKey = "[QUESTS]";
+            QuestKey = "[QUESTS]",
+            AwakeningKey = "[@AWAKENING]",
+            DisassembleKey = "[@DISASSEMBLE]",
+            DowngradeKey = "[@DOWNGRADE]",
+            ResetKey = "[@RESET]";
 
 
         //public static Regex Regex = new Regex(@"[^\{\}]<.*?/(.*?)>");
@@ -738,6 +742,18 @@ namespace Server.MirObjects
                     else
                         player.ReceiveChat("You are already part of a guild.", ChatType.System);
                     break;
+                case AwakeningKey:
+                    player.Enqueue(new S.NPCAwakening());
+                    break;
+                case DisassembleKey:
+                    player.Enqueue(new S.NPCDisassemble());
+                    break;
+                case DowngradeKey:
+                    player.Enqueue(new S.NPCDowngrade());
+                    break;
+                case ResetKey:
+                    player.Enqueue(new S.NPCReset());
+                    break;
             }
 
         }
@@ -1283,6 +1299,9 @@ namespace Server.MirObjects
                 case "ADDTOGUILD":
                     if (parts.Length < 2) return;
                     acts.Add(new NPCActions(ActionType.AddToGuild, parts[1]));
+                    break;
+                case "REFRESHEFFECTS":
+                    acts.Add(new NPCActions(ActionType.RefreshEffects));
                     break;
             }
 
@@ -2264,6 +2283,13 @@ namespace Server.MirObjects
                         player.PendingGuildInvite = guild;
                         player.GuildInvite(true);
                         break;
+
+                    case ActionType.RefreshEffects:
+                        player.SetLevelEffects();
+                        Packet p = new S.ObjectLevelEffects { ObjectID = player.ObjectID, LevelEffects = player.LevelEffects };
+                        player.Enqueue(p);
+                        player.Broadcast(p);
+                        break;
                 }
             }
         }
@@ -2378,7 +2404,8 @@ namespace Server.MirObjects
         Mov,
         Calc,
         GiveBuff,
-        AddToGuild
+        AddToGuild,
+        RefreshEffects
     }
     public enum CheckType
     {

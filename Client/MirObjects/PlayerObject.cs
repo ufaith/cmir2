@@ -109,6 +109,8 @@ namespace Client.MirObjects
         public Point FishingPoint;
         public bool FoundFish;
 
+        public LevelEffects LevelEffects;
+
         public List<BuffType> Buffs = new List<BuffType>();
 
         public PlayerObject(uint objectID)
@@ -161,6 +163,8 @@ namespace Client.MirObjects
             ElementOrbMax = (int)info.ElementOrbMax;//ArcherSpells - Elemental system
 
             Buffs = info.Buffs;
+
+            LevelEffects = info.LevelEffects;
 
             ProcessBuffs();
 
@@ -227,7 +231,6 @@ namespace Client.MirObjects
 
                 Fishing = p.Fishing;
                 SetLibraries();
-                SetEffects();
             }
 
             if (!HasFishingRod)
@@ -559,19 +562,29 @@ namespace Client.MirObjects
                 }
             }
 
-            //Effects when certain levels
-            if (GameScene.Scene.ShowLevelEffect3)
+            long delay = 5000;
+
+            if (LevelEffects == LevelEffects.None) return;
+
+            //Effects dependant on flags
+            if (LevelEffects.HasFlag(LevelEffects.BlueDragon))
             {
                 Effects.Add(new SpecialEffect(Libraries.Effect, 1210, 20, 3200, this, true, true, 1) { Repeat = true });
-                Effects.Add(new SpecialEffect(Libraries.Effect, 1240, 32, 4200, this, true, false, 1) { Repeat = true, Delay = 5000 });
+                SpecialEffect effect = new SpecialEffect(Libraries.Effect, 1240, 32, 4200, this, true, false, 1) { Repeat = true, Delay = delay };
+                effect.SetStart(CMain.Time + delay);
+                Effects.Add(effect);
             }
-            else if (GameScene.Scene.ShowLevelEffect2)
+            if (LevelEffects.HasFlag(LevelEffects.RedDragon))
             {
                 Effects.Add(new SpecialEffect(Libraries.Effect, 990, 20, 3200, this, true, true, 1) { Repeat = true });
-                Effects.Add(new SpecialEffect(Libraries.Effect, 1020, 32, 4200, this, true, false, 1) { Repeat = true, Delay = 5000 });
+                SpecialEffect effect = new SpecialEffect(Libraries.Effect, 1020, 32, 4200, this, true, false, 1) { Repeat = true, Delay = delay };
+                effect.SetStart(CMain.Time + delay);
+                Effects.Add(effect);
             }
-            else if (GameScene.Scene.ShowLevelEffect1)
+            if (LevelEffects.HasFlag(LevelEffects.Mist))
+            {
                 Effects.Add(new SpecialEffect(Libraries.Effect, 296, 32, 3600, this, true, false, 1) { Repeat = true });
+            }
         }
 
         public override void Process()

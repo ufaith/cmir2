@@ -232,11 +232,11 @@ namespace Client.MirScenes.Dialogs
             Shortcuts.Add(new ShortcutInfo("G", "Guild window (open / close)"));
             Shortcuts.Add(new ShortcutInfo("Y", "Gameshop window (open / close)"));
             Shortcuts.Add(new ShortcutInfo("K", "Rental window (open / close)"));
-            Shortcuts.Add(new ShortcutInfo("M", "Message window (open / close)"));
             Shortcuts.Add(new ShortcutInfo("L", "Engagement window (open / close)"));
             Shortcuts.Add(new ShortcutInfo("Z", "Belt window (open / close)"));
             Shortcuts.Add(new ShortcutInfo("O", "Option window (open / close)"));
             Shortcuts.Add(new ShortcutInfo("H", "Help window (open / close)"));
+            Shortcuts.Add(new ShortcutInfo("M", "Mount / Dismount ride"));
 
             LoadKeyBinds();
         }
@@ -255,7 +255,7 @@ namespace Client.MirScenes.Dialogs
             Shortcuts.Add(new ShortcutInfo("", "Good/Evil Mode - Attack PK players and monsters only"));
             Shortcuts.Add(new ShortcutInfo("", "All Attack Mode - Attack all subjects"));
             Shortcuts.Add(new ShortcutInfo("B", "Show the field map"));
-            Shortcuts.Add(new ShortcutInfo("¬ / Ctrl", "Change the skill bar"));
+            Shortcuts.Add(new ShortcutInfo("` / Ctrl", "Change the skill bar"));
             Shortcuts.Add(new ShortcutInfo("R", "Show the skill bar"));
             Shortcuts.Add(new ShortcutInfo("D", "Auto run on / off"));
             Shortcuts.Add(new ShortcutInfo("Insert", "Show / Hide interface"));

@@ -37,6 +37,7 @@ namespace Client.MirObjects
         //public BuffType LinkedToBuff;
         
         public event EventHandler Complete;
+        public event EventHandler Played;
 
         public Effect(MLibrary library, int baseIndex, int count, int duration, MapObject owner, long starttime = 0, bool drawBehind = false)
         {
@@ -75,6 +76,11 @@ namespace Client.MirObjects
 
         public virtual void Process()
         {
+            if (CurrentFrame == 1)
+            {
+                if (Played != null)
+                    Played(this, EventArgs.Empty);
+            }
             if (CMain.Time <= NextFrame) return;
 
             if (Owner != null && Owner.SkipFrames) CurrentFrame++;
@@ -132,6 +138,7 @@ namespace Client.MirObjects
         public void Clear()
         {
             Complete = null;
+            Played = null;
         }
     }
 
