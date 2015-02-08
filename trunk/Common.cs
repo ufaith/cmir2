@@ -692,7 +692,7 @@ public enum SpellEffect : byte
     Reflect,
     Critical,
     Mine,
-    ElementBarrierUp,//ArcherSpells - Elemental system
+    ElementBarrierUp,
     ElementBarrierDown,
     FuryUp,
     FuryDown,
@@ -726,13 +726,15 @@ public enum BuffType : byte
     General,
     Exp,
     Drop,
-    Concentration, //ArcherSpells - Elemental system
+    Concentration,
     Impact,
     Magic,
     Taoist,
     Storm,
     HealthAid,
-    ManaAid
+    ManaAid,
+    VampireShot,
+    PoisonShot
 }
 
 public enum DefenceType : byte

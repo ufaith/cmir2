@@ -64,29 +64,29 @@
     <Compile Include="..\ServerPackets.cs">
       <Link>MirNetwork\ServerPackets.cs</Link>
     </Compile>
-    <Compile Include="BalanceConfigForm.cs">
+    <Compile Include="MirForms\BalanceConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BalanceConfigForm.Designer.cs">
+    <Compile Include="MirForms\BalanceConfigForm.Designer.cs">
       <DependentUpon>BalanceConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DragonInfoForm.cs">
+    <Compile Include="MirForms\Systems\DragonInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DragonInfoForm.Designer.cs">
+    <Compile Include="MirForms\Systems\DragonInfoForm.Designer.cs">
       <DependentUpon>DragonInfoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ItemInfoForm.cs">
+    <Compile Include="MirForms\Database\ItemInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ItemInfoForm.Designer.cs">
+    <Compile Include="MirForms\Database\ItemInfoForm.Designer.cs">
       <DependentUpon>ItemInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MirDatabase\AccountInfo.cs" />
-    <Compile Include="AccountInfoForm.cs">
+    <Compile Include="MirForms\Account\AccountInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AccountInfoForm.Designer.cs">
+    <Compile Include="MirForms\Account\AccountInfoForm.Designer.cs">
       <DependentUpon>AccountInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MirDatabase\AuctionInfo.cs" />
@@ -103,20 +103,20 @@
     <Compile Include="MirEnvir\Dragon.cs" />
     <Compile Include="MirEnvir\Map.cs" />
     <Compile Include="MirDatabase\MapInfo.cs" />
-    <Compile Include="ListViewNF.cs">
+    <Compile Include="MirForms\ListViewNF.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ConfigForm.cs">
+    <Compile Include="MirForms\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConfigForm.Designer.cs">
+    <Compile Include="MirForms\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MirEnvir\Envir.cs" />
-    <Compile Include="MapInfoForm.cs">
+    <Compile Include="MirForms\Database\MapInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MapInfoForm.Designer.cs">
+    <Compile Include="MirForms\Database\MapInfoForm.Designer.cs">
       <DependentUpon>MapInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MirForms\DropBuilder\DropBuilderForm.cs">
@@ -125,7 +125,25 @@
     <Compile Include="MirForms\DropBuilder\DropBuilderForm.designer.cs">
       <DependentUpon>DropBuilderForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MirForms\MapForm.cs" />
+    <Compile Include="MirForms\Database\MapForm.cs" />
+    <Compile Include="MirForms\Systems\GuildInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MirForms\Systems\GuildInfoForm.Designer.cs">
+      <DependentUpon>GuildInfoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MirForms\Systems\MiningInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MirForms\Systems\MiningInfoForm.Designer.cs">
+      <DependentUpon>MiningInfoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MirForms\Systems\SystemInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MirForms\Systems\SystemInfoForm.Designer.cs">
+      <DependentUpon>SystemInfoForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MirForms\VisualMapInfo\Class\LockBitmap.cs" />
     <Compile Include="MirForms\VisualMapInfo\Class\ReadMap.cs" />
     <Compile Include="MirForms\VisualMapInfo\Class\VisualizerGlobal.cs" />
@@ -228,53 +246,62 @@
     <Compile Include="MirObjects\NPCObject.cs" />
     <Compile Include="MirObjects\PlayerObject.cs" />
     <Compile Include="MirObjects\SpellObject.cs" />
-    <Compile Include="QuestInfoForm.cs">
+    <Compile Include="MirForms\Database\QuestInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="QuestInfoForm.Designer.cs">
+    <Compile Include="MirForms\Database\QuestInfoForm.Designer.cs">
       <DependentUpon>QuestInfoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="NPCInfoForm.cs">
+    <Compile Include="MirForms\Database\NPCInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="NPCInfoForm.Designer.cs">
+    <Compile Include="MirForms\Database\NPCInfoForm.Designer.cs">
       <DependentUpon>NPCInfoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MonsterInfoForm.cs">
+    <Compile Include="MirForms\Database\MonsterInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MonsterInfoForm.Designer.cs">
+    <Compile Include="MirForms\Database\MonsterInfoForm.Designer.cs">
       <DependentUpon>MonsterInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="SMain.cs">
+    <Compile Include="MirForms\SMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SMain.Designer.cs">
+    <Compile Include="MirForms\SMain.Designer.cs">
       <DependentUpon>SMain.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AccountInfoForm.resx">
+    <EmbeddedResource Include="MirForms\Account\AccountInfoForm.resx">
       <DependentUpon>AccountInfoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BalanceConfigForm.resx">
+    <EmbeddedResource Include="MirForms\BalanceConfigForm.resx">
       <DependentUpon>BalanceConfigForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ConfigForm.resx">
+    <EmbeddedResource Include="MirForms\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DragonInfoForm.resx">
+    <EmbeddedResource Include="MirForms\Systems\DragonInfoForm.resx">
       <DependentUpon>DragonInfoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ItemInfoForm.resx">
+    <EmbeddedResource Include="MirForms\Database\ItemInfoForm.resx">
       <DependentUpon>ItemInfoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MapInfoForm.resx">
+    <EmbeddedResource Include="MirForms\Database\MapInfoForm.resx">
       <DependentUpon>MapInfoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MirForms\DropBuilder\DropBuilderForm.resx">
       <DependentUpon>DropBuilderForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirForms\Systems\GuildInfoForm.resx">
+      <DependentUpon>GuildInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirForms\Systems\MiningInfoForm.resx">
+      <DependentUpon>MiningInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirForms\Systems\SystemInfoForm.resx">
+      <DependentUpon>SystemInfoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MirForms\VisualMapInfo\Control\Forms\MiningDetailForm.resx">
       <DependentUpon>MiningDetailForm.cs</DependentUpon>
@@ -291,16 +318,16 @@
     <EmbeddedResource Include="MirForms\VisualMapInfo\VForm.resx">
       <DependentUpon>VForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="QuestInfoForm.resx">
+    <EmbeddedResource Include="MirForms\Database\QuestInfoForm.resx">
       <DependentUpon>QuestInfoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="NPCInfoForm.resx">
+    <EmbeddedResource Include="MirForms\Database\NPCInfoForm.resx">
       <DependentUpon>NPCInfoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MonsterInfoForm.resx">
+    <EmbeddedResource Include="MirForms\Database\MonsterInfoForm.resx">
       <DependentUpon>MonsterInfoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SMain.resx">
+    <EmbeddedResource Include="MirForms\SMain.resx">
       <DependentUpon>SMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

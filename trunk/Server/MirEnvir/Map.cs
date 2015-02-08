@@ -975,6 +975,7 @@ namespace Server.MirEnvir
 
                 case Spell.ThunderStorm:
                 case Spell.FlameField:
+                case Spell.NapalmShot://ArcherSpells - NapalmShot
                     value = (int)data[2];
                     location = (Point)data[3];
 
@@ -1001,6 +1002,8 @@ namespace Server.MirEnvir
                                     case ObjectType.Player:
                                         //Only targets
                                         if (!target.IsAttackTarget(player)) break;
+
+                                        if (magic.Spell == Spell.NapalmShot) value = value * 10;//ArcherSpells - NapalmShot
 
                                         if (target.Attacked(player, magic.Spell == Spell.FlameField || target.Undead ? value : value / 10, DefenceType.MAC, false) <= 0) break;
 
@@ -1663,6 +1666,86 @@ namespace Server.MirEnvir
                     spellOb.Spawned();
 
                     train = true;
+                    break;
+
+                #endregion
+
+                #region OneWithNature           ArcherSpells - OneWithNature
+
+                case Spell.OneWithNature:
+                    value = (int)data[2];
+                    location = (Point)data[3];
+
+                    bool hasVampBuff = (player.Buffs.Where(ex => ex.Type == BuffType.VampireShot).ToList().Count() > 0);
+                    bool hasPoisonBuff = (player.Buffs.Where(ex => ex.Type == BuffType.PoisonShot).ToList().Count() > 0);
+
+                    for (int y = location.Y - 2; y <= location.Y + 2; y++)
+                    {
+                        if (y < 0) continue;
+                        if (y >= Height) break;
+
+                        for (int x = location.X - 2; x <= location.X + 2; x++)
+                        {
+                            if (x < 0) continue;
+                            if (x >= Width) break;
+
+                            cell = GetCell(x, y);
+
+                            if (!cell.Valid || cell.Objects == null) continue;
+
+                            for (int i = 0; i < cell.Objects.Count; i++)
+                            {
+                                MapObject target = cell.Objects[i];
+                                switch (target.Race)
+                                {
+                                    case ObjectType.Monster:
+                                    case ObjectType.Player:
+                                        //Only targets
+                                        if (!target.IsAttackTarget(player) || target.Dead) break;
+
+                                        //knockback
+                                        //int distance = 1 + Math.Max(0, magic.Level - 1) + Envir.Random.Next(2);
+                                        //dir = Functions.DirectionFromPoint(location, target.CurrentLocation);
+                                        //if(target.Level < player.Level)
+                                        //    target.Pushed(player, dir, distance);// <--crashes server somehow?
+
+                                        if (target.Attacked(player, value, DefenceType.MAC, false) <= 0) break;
+
+                                        if (hasVampBuff)//Vampire Effect
+                                        {
+                                            if (player.VampAmount == 0) player.VampTime = Envir.Time + 1000;
+                                            player.VampAmount += (ushort)(value * (magic.Level + 1) * 0.25F);
+                                        }
+                                        if (hasPoisonBuff)//Poison Effect
+                                        {
+                                            target.ApplyPoison(new Poison
+                                            {
+                                                Duration = (value * 2) + (magic.Level + 1) * 7,
+                                                Owner = player,
+                                                PType = PoisonType.Green,
+                                                TickSpeed = 2000,
+                                                Value = value / 15 + magic.Level + 1 + Envir.Random.Next(player.PoisonAttack)
+                                            }, player);
+                                            target.OperateTime = 0;
+                                        }
+                                        train = true;
+                                        break;
+                                }
+                            }
+
+                        }
+                    }
+
+                    if (hasVampBuff)//Vampire Effect
+                    {
+                        //cancel out buff
+                        player.AddBuff(new Buff { Type = BuffType.VampireShot, Caster = player, ExpireTime = Envir.Time + 1000, Value = value, Visible = true, ObjectID = player.ObjectID });
+                    }
+                    if (hasPoisonBuff)//Poison Effect
+                    {
+                        //cancel out buff
+                        player.AddBuff(new Buff { Type = BuffType.PoisonShot, Caster = player, ExpireTime = Envir.Time + 1000, Value = value, Visible = true, ObjectID = player.ObjectID });
+                    }
                     break;
 
                 #endregion

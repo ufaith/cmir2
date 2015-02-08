@@ -160,7 +160,7 @@ namespace Client.MirScenes
             NPCGoodsDialog = new NPCGoodsDialog { Parent = this, Visible = false };
             NPCDropDialog = new NPCDropDialog { Parent = this, Visible = false };
             NPCAwakeDialog = new NPCAwakeDialog { Parent = this, Visible = false };
-            NPCAwakeDialog.Hide();
+            //NPCAwakeDialog.Hide();
             HelpDialog = new HelpDialog { Parent = this, Visible = false };
             KeyboardLayoutDialog = new KeyboardLayoutDialog { Parent = this, Visible = false };
             CraftingDialog = new CraftingDialog { Parent = this, Visible = false };
@@ -1233,6 +1233,13 @@ namespace Client.MirScenes
 
             MLibrary buffLibrary = Libraries.Prguse;
 
+            //ArcherSpells - VampireShot,PoisonShot
+            if (buffImage >= 20000)
+            {
+                buffImage -= 20000;
+                buffLibrary = Libraries.MagIcon;
+            }
+
             if (buffImage >= 10000)
             {
                 buffImage -= 10000;
@@ -1295,6 +1302,13 @@ namespace Client.MirScenes
 
                 int buffImage = BuffImage(buff.Type);
                 MLibrary buffLibrary = Libraries.Prguse;
+
+                //ArcherSpells - VampireShot,PoisonShot
+                if (buffImage >= 20000)
+                {
+                    buffImage -= 20000;
+                    buffLibrary = Libraries.MagIcon;
+                }
 
                 if (buffImage >= 10000)
                 {
@@ -1371,6 +1385,10 @@ namespace Client.MirScenes
                     return 904;
                 case BuffType.Concentration://ArcherSpells - Elemental system
                     return 11162; //Prguse2
+                case BuffType.VampireShot://ArcherSpells - VampireShot
+                    return 200 + 20000; //MagIcon
+                case BuffType.PoisonShot://ArcherSpells - PoisonShot
+                    return 204 + 20000; //MagIcon
                 default:
                     return 0;
             }
@@ -4062,7 +4080,7 @@ namespace Client.MirScenes
                     MapControl.AwakeningAction = false;
                     break;
                 case -1:
-                    messageBox = new MirMessageBox("Condition Error.", MirMessageBoxButtons.OK);
+                    messageBox = new MirMessageBox("Cannot awaken this item.", MirMessageBoxButtons.OK);
                     MapControl.AwakeningAction = false;
                     break;
                 case 0:
@@ -7275,6 +7293,10 @@ namespace Client.MirScenes
                 case Spell.ElementalShot:
                 case Spell.DelayedExplosion:
                 case Spell.BindingShot:
+                case Spell.VampireShot://ArcherSpells - VampireShot
+                case Spell.PoisonShot://ArcherSpells - PoisonShot
+                case Spell.CrippleShot://ArcherSpells - CrippleShot
+                case Spell.NapalmShot://ArcherSpells - NapalmShot
                     if (!User.HasClassWeapon)
                     {
                         GameScene.Scene.OutputMessage("You must be wearing a bow to perform this skill.");
@@ -16927,7 +16949,7 @@ namespace Client.MirScenes
                 case BuffType.Drop:
                     text = string.Format("DropRate\nIncreased by x{0}\n", Value);
                     break;
-                case BuffType.Concentration://ArcherSpells - Elemental system
+                case BuffType.Concentration:
                     text = "Concentrating\nIncreases chance on element extraction.\n";
                     break;
 
@@ -16948,6 +16970,12 @@ namespace Client.MirScenes
                     break;
                 case BuffType.ManaAid:
                     text = string.Format("ManaAid\nIncreases MP by: {0}.\n", Value);
+                    break;
+                case BuffType.VampireShot:
+                    text = string.Format("VampireShot\nGives you a vampiric ability\nthat can be released with\ncertain skills.\n", Value);
+                    break;
+                case BuffType.PoisonShot:
+                    text = string.Format("PoisonShot\nGives you a poison ability\nthat can be released with\ncertain skills.\n", Value);
                     break;
             }
 

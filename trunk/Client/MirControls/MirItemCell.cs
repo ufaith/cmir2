@@ -1125,7 +1125,7 @@ namespace Client.MirControls
                         {
                             int errorCode = 0;
 
-                            if (GameScene.SelectedCell.GridType != MirGridType.Inventory && _itemSlot < 1) errorCode = -1;
+                            if (GameScene.SelectedCell.GridType != MirGridType.Inventory && _itemSlot < 1) return;
 
                             switch (_itemSlot)
                             {
@@ -1235,13 +1235,13 @@ namespace Client.MirControls
 
                             GameScene.SelectedCell = null;
                             MirMessageBox messageBox;
-
+                           
                             switch (errorCode)
                             {
-                                case -1:
-                                    messageBox = new MirMessageBox("Item must be in your inventory.", MirMessageBoxButtons.OK);
-                                    messageBox.Show();
-                                    break;
+                                //case -1:
+                                //    messageBox = new MirMessageBox("Item must be in your inventory.", MirMessageBoxButtons.OK);
+                                //    messageBox.Show();
+                                //    break;
                                 case -2:
                                     messageBox = new MirMessageBox("Cannot awaken this item.", MirMessageBoxButtons.OK);
                                     messageBox.Show();

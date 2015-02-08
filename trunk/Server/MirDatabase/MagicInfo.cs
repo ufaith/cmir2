@@ -227,15 +227,14 @@ namespace Server.MirDatabase
             //
             BackStep = new MagicInfo { Spell = Spell.BackStep, Icon = 95, Level1 = 31, Level2 = 36, Level3 = 41, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 2 };
             BindingShot = new MagicInfo { Spell = Spell.BindingShot, Icon = 97, Level1 = 43, Level2 = 46, Level3 = 49, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 7, LevelCost = 3 };
-            //StoneTrap Icon = 97
             //SummonVampire Icon = 99
-            //VampireShot Icon = 100
+            VampireShot = new MagicInfo { Spell = Spell.VampireShot, Icon = 100, Level1 = 45, Level2 = 48, Level3 = 51, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 3 };//ArcherSpells - VampireShot
             //SummonToad Icon = 101
-            //PoisonShot Icon = 102
-            //CrippleShot Icon = 103
+            PoisonShot = new MagicInfo { Spell = Spell.PoisonShot, Icon = 102, Level1 = 53, Level2 = 56, Level3 = 59, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 10, LevelCost = 4 };//ArcherSpells - PoisonShot
+            CrippleShot = new MagicInfo { Spell = Spell.CrippleShot, Icon = 103, Level1 = 53, Level2 = 56, Level3 = 59, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 15, LevelCost = 3 };//ArcherSpells - CrippleShot
             //SummonSnakes Icon = 104
-            //NapalmShot Icon = 105
-            //OneWithNature Icon = 106
+            NapalmShot = new MagicInfo { Spell = Spell.NapalmShot, Icon = 105, Level1 = 60, Level2 = 61, Level3 = 62, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 40, LevelCost = 10 };//ArcherSpells - NapalmShot
+            OneWithNature = new MagicInfo { Spell = Spell.OneWithNature, Icon = 106, Level1 = 64, Level2 = 66, Level3 = 68, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 80, LevelCost = 15 };//ArcherSpells - OneWithNature
         }
 
         public MagicInfo()
@@ -385,7 +384,14 @@ namespace Server.MirDatabase
                     return 30;
                 case Spell.ElementalShot://ArcherSpells - Elemental system
                     return 6;
-
+                case Spell.VampireShot://ArcherSpells - VampireShot
+                    return 5;
+                case Spell.PoisonShot://ArcherSpells - PoisonShot
+                    return 5;
+                case Spell.CrippleShot://ArcherSpells - CrippleShot
+                    return 5;
+                case Spell.NapalmShot://ArcherSpells - NapalmShot
+                    return 35;
 
                 default:
                     return 0;
@@ -446,6 +452,14 @@ namespace Server.MirDatabase
                     return 3;
                 case Spell.ElementalBarrier://ArcherSpells - Elemental system
                     return 5;
+                case Spell.VampireShot://ArcherSpells - VampireShot
+                    return 5;
+                case Spell.PoisonShot://ArcherSpells - PoisonShot
+                    return 5;
+                case Spell.CrippleShot://ArcherSpells - CrippleShot
+                    return 5;
+                case Spell.NapalmShot://ArcherSpells - NapalmShot
+                    return 20;
 
                 default:
                     return 0;

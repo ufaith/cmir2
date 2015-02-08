@@ -51,18 +51,22 @@ namespace Server
             this.stopServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.closeServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.accountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.databaseFormsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mapInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.itemInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.monsterInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nPCInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dragonInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.accountsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.configToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.balanceConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.InterfaceTimer = new System.Windows.Forms.Timer(this.components);
             this.questInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.serverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.balanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.systemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dragonSystemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.miningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.guildsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.InterfaceTimer = new System.Windows.Forms.Timer(this.components);
+            this.fishingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -192,7 +196,9 @@ namespace Server
             // 
             this.MainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.controlToolStripMenuItem,
-            this.editToolStripMenuItem});
+            this.accountToolStripMenuItem,
+            this.databaseFormsToolStripMenuItem,
+            this.configToolStripMenuItem1});
             this.MainMenu.Location = new System.Drawing.Point(0, 0);
             this.MainMenu.Name = "MainMenu";
             this.MainMenu.Size = new System.Drawing.Size(543, 24);
@@ -236,95 +242,127 @@ namespace Server
             this.closeServerToolStripMenuItem.Text = "Close Server";
             this.closeServerToolStripMenuItem.Click += new System.EventHandler(this.closeServerToolStripMenuItem_Click);
             // 
-            // editToolStripMenuItem
+            // accountToolStripMenuItem
             // 
-            this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.accountToolStripMenuItem.Name = "accountToolStripMenuItem";
+            this.accountToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
+            this.accountToolStripMenuItem.Text = "Account";
+            this.accountToolStripMenuItem.Click += new System.EventHandler(this.accountToolStripMenuItem_Click);
+            // 
+            // databaseFormsToolStripMenuItem
+            // 
+            this.databaseFormsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mapInfoToolStripMenuItem,
             this.itemInfoToolStripMenuItem,
             this.monsterInfoToolStripMenuItem,
             this.nPCInfoToolStripMenuItem,
-            this.questInfoToolStripMenuItem,
-            this.dragonInfoToolStripMenuItem,
-            this.accountsToolStripMenuItem,
-            this.toolStripMenuItem2,
-            this.configToolStripMenuItem,
-            this.balanceConfigToolStripMenuItem});
-            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
-            this.editToolStripMenuItem.Text = "Edit";
+            this.questInfoToolStripMenuItem});
+            this.databaseFormsToolStripMenuItem.Name = "databaseFormsToolStripMenuItem";
+            this.databaseFormsToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
+            this.databaseFormsToolStripMenuItem.Text = "Database";
             // 
             // mapInfoToolStripMenuItem
             // 
             this.mapInfoToolStripMenuItem.Name = "mapInfoToolStripMenuItem";
-            this.mapInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.mapInfoToolStripMenuItem.Text = "Map Info";
-            this.mapInfoToolStripMenuItem.Click += new System.EventHandler(this.gameToolStripMenuItem_Click);
+            this.mapInfoToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.mapInfoToolStripMenuItem.Text = "Map";
+            this.mapInfoToolStripMenuItem.Click += new System.EventHandler(this.mapInfoToolStripMenuItem_Click);
             // 
             // itemInfoToolStripMenuItem
             // 
             this.itemInfoToolStripMenuItem.Name = "itemInfoToolStripMenuItem";
-            this.itemInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.itemInfoToolStripMenuItem.Text = "Item Info";
+            this.itemInfoToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.itemInfoToolStripMenuItem.Text = "Item";
             this.itemInfoToolStripMenuItem.Click += new System.EventHandler(this.itemInfoToolStripMenuItem_Click);
             // 
             // monsterInfoToolStripMenuItem
             // 
             this.monsterInfoToolStripMenuItem.Name = "monsterInfoToolStripMenuItem";
-            this.monsterInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.monsterInfoToolStripMenuItem.Text = "Monster Info";
+            this.monsterInfoToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.monsterInfoToolStripMenuItem.Text = "Monster";
             this.monsterInfoToolStripMenuItem.Click += new System.EventHandler(this.monsterInfoToolStripMenuItem_Click);
             // 
             // nPCInfoToolStripMenuItem
             // 
             this.nPCInfoToolStripMenuItem.Name = "nPCInfoToolStripMenuItem";
-            this.nPCInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.nPCInfoToolStripMenuItem.Text = "NPC Info";
+            this.nPCInfoToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.nPCInfoToolStripMenuItem.Text = "NPC";
             this.nPCInfoToolStripMenuItem.Click += new System.EventHandler(this.nPCInfoToolStripMenuItem_Click);
             // 
-            // dragonInfoToolStripMenuItem
+            // questInfoToolStripMenuItem
             // 
-            this.dragonInfoToolStripMenuItem.Name = "dragonInfoToolStripMenuItem";
-            this.dragonInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.dragonInfoToolStripMenuItem.Text = "Dragon Info";
-            this.dragonInfoToolStripMenuItem.Click += new System.EventHandler(this.dragonInfoToolStripMenuItem_Click);
+            this.questInfoToolStripMenuItem.Name = "questInfoToolStripMenuItem";
+            this.questInfoToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.questInfoToolStripMenuItem.Text = "Quest";
+            this.questInfoToolStripMenuItem.Click += new System.EventHandler(this.questInfoToolStripMenuItem_Click);
             // 
-            // accountsToolStripMenuItem
+            // configToolStripMenuItem1
             // 
-            this.accountsToolStripMenuItem.Name = "accountsToolStripMenuItem";
-            this.accountsToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.accountsToolStripMenuItem.Text = "Accounts";
-            this.accountsToolStripMenuItem.Click += new System.EventHandler(this.accountsToolStripMenuItem_Click);
+            this.configToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.serverToolStripMenuItem,
+            this.balanceToolStripMenuItem,
+            this.systemToolStripMenuItem});
+            this.configToolStripMenuItem1.Name = "configToolStripMenuItem1";
+            this.configToolStripMenuItem1.Size = new System.Drawing.Size(55, 20);
+            this.configToolStripMenuItem1.Text = "Config";
             // 
-            // toolStripMenuItem2
+            // serverToolStripMenuItem
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(151, 6);
+            this.serverToolStripMenuItem.Name = "serverToolStripMenuItem";
+            this.serverToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.serverToolStripMenuItem.Text = "Server";
+            this.serverToolStripMenuItem.Click += new System.EventHandler(this.serverToolStripMenuItem_Click);
             // 
-            // configToolStripMenuItem
+            // balanceToolStripMenuItem
             // 
-            this.configToolStripMenuItem.Name = "configToolStripMenuItem";
-            this.configToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.configToolStripMenuItem.Text = "Config";
-            this.configToolStripMenuItem.Click += new System.EventHandler(this.configToolStripMenuItem_Click);
+            this.balanceToolStripMenuItem.Name = "balanceToolStripMenuItem";
+            this.balanceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.balanceToolStripMenuItem.Text = "Balance";
+            this.balanceToolStripMenuItem.Click += new System.EventHandler(this.balanceToolStripMenuItem_Click);
             // 
-            // balanceConfigToolStripMenuItem
+            // systemToolStripMenuItem
             // 
-            this.balanceConfigToolStripMenuItem.Name = "balanceConfigToolStripMenuItem";
-            this.balanceConfigToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.balanceConfigToolStripMenuItem.Text = "Balance Config";
-            this.balanceConfigToolStripMenuItem.Click += new System.EventHandler(this.balanceConfigToolStripMenuItem_Click);
+            this.systemToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dragonSystemToolStripMenuItem,
+            this.miningToolStripMenuItem,
+            this.guildsToolStripMenuItem,
+            this.fishingToolStripMenuItem});
+            this.systemToolStripMenuItem.Name = "systemToolStripMenuItem";
+            this.systemToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.systemToolStripMenuItem.Text = "System";
+            // 
+            // dragonSystemToolStripMenuItem
+            // 
+            this.dragonSystemToolStripMenuItem.Name = "dragonSystemToolStripMenuItem";
+            this.dragonSystemToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dragonSystemToolStripMenuItem.Text = "Dragon";
+            this.dragonSystemToolStripMenuItem.Click += new System.EventHandler(this.dragonSystemToolStripMenuItem_Click);
+            // 
+            // miningToolStripMenuItem
+            // 
+            this.miningToolStripMenuItem.Name = "miningToolStripMenuItem";
+            this.miningToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.miningToolStripMenuItem.Text = "Mining";
+            this.miningToolStripMenuItem.Click += new System.EventHandler(this.miningToolStripMenuItem_Click);
+            // 
+            // guildsToolStripMenuItem
+            // 
+            this.guildsToolStripMenuItem.Name = "guildsToolStripMenuItem";
+            this.guildsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.guildsToolStripMenuItem.Text = "Guilds";
+            this.guildsToolStripMenuItem.Click += new System.EventHandler(this.guildsToolStripMenuItem_Click);
             // 
             // InterfaceTimer
             // 
             this.InterfaceTimer.Enabled = true;
             this.InterfaceTimer.Tick += new System.EventHandler(this.InterfaceTimer_Tick);
             // 
-            // questInfoToolStripMenuItem
+            // fishingToolStripMenuItem
             // 
-            this.questInfoToolStripMenuItem.Name = "questInfoToolStripMenuItem";
-            this.questInfoToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
-            this.questInfoToolStripMenuItem.Text = "Quest Info";
-            this.questInfoToolStripMenuItem.Click += new System.EventHandler(this.questInfoToolStripMenuItem_Click);
+            this.fishingToolStripMenuItem.Name = "fishingToolStripMenuItem";
+            this.fishingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.fishingToolStripMenuItem.Text = "Fishing";
+            this.fishingToolStripMenuItem.Click += new System.EventHandler(this.fishingToolStripMenuItem_Click);
             // 
             // SMain
             // 
@@ -368,22 +406,26 @@ namespace Server
         private ToolStripMenuItem stopServerToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem closeServerToolStripMenuItem;
-        private ToolStripMenuItem editToolStripMenuItem;
-        private ToolStripMenuItem mapInfoToolStripMenuItem;
-        private ToolStripMenuItem accountsToolStripMenuItem;
-        private ToolStripSeparator toolStripMenuItem2;
-        private ToolStripMenuItem configToolStripMenuItem;
         private Timer InterfaceTimer;
-        private ToolStripMenuItem itemInfoToolStripMenuItem;
-        private ToolStripMenuItem monsterInfoToolStripMenuItem;
         private TabPage tabPage2;
         private TextBox DebugLogTextBox;
         private TabPage tabPage3;
         private TextBox ChatLogTextBox;
-        private ToolStripMenuItem dragonInfoToolStripMenuItem;
-        private ToolStripMenuItem balanceConfigToolStripMenuItem;
+        private ToolStripMenuItem accountToolStripMenuItem;
+        private ToolStripMenuItem databaseFormsToolStripMenuItem;
+        private ToolStripMenuItem mapInfoToolStripMenuItem;
+        private ToolStripMenuItem itemInfoToolStripMenuItem;
+        private ToolStripMenuItem monsterInfoToolStripMenuItem;
         private ToolStripMenuItem nPCInfoToolStripMenuItem;
         private ToolStripMenuItem questInfoToolStripMenuItem;
+        private ToolStripMenuItem configToolStripMenuItem1;
+        private ToolStripMenuItem serverToolStripMenuItem;
+        private ToolStripMenuItem balanceToolStripMenuItem;
+        private ToolStripMenuItem systemToolStripMenuItem;
+        private ToolStripMenuItem dragonSystemToolStripMenuItem;
+        private ToolStripMenuItem guildsToolStripMenuItem;
+        private ToolStripMenuItem miningToolStripMenuItem;
+        private ToolStripMenuItem fishingToolStripMenuItem;
     }
 }
 
