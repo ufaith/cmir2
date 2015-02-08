@@ -42,9 +42,7 @@ namespace Server
 
         private void configToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ConfigForm form = new ConfigForm();
-
-            form.ShowDialog();
+            
         }
 
         private void InterfaceTimer_Tick(object sender, EventArgs e)
@@ -103,9 +101,7 @@ namespace Server
 
         private void gameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MapInfoForm form = new MapInfoForm();
-
-            form.ShowDialog();
+            
         }
 
         private void SMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -115,9 +111,7 @@ namespace Server
 
         private void accountsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AccountInfoForm form = new AccountInfoForm();
-
-            form.ShowDialog();
+            
         }
 
         private void closeServerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -148,9 +142,7 @@ namespace Server
 
         private void dragonInfoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DragonInfoForm form = new DragonInfoForm();
-
-            form.ShowDialog();
+            
         }
 
         private void balanceConfigToolStripMenuItem_Click(object sender, EventArgs e)
@@ -163,6 +155,95 @@ namespace Server
         private void questInfoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             QuestInfoForm form = new QuestInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void serverToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ConfigForm form = new ConfigForm();
+
+            form.ShowDialog();
+        }
+
+        private void balanceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            BalanceConfigForm form = new BalanceConfigForm();
+
+            form.ShowDialog();
+        }
+
+        private void systemToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void accountToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AccountInfoForm form = new AccountInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void mapInfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MapInfoForm form = new MapInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void itemInfoToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            ItemInfoForm form = new ItemInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void monsterInfoToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            MonsterInfoForm form = new MonsterInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void nPCInfoToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            NPCInfoForm form = new NPCInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void questInfoToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            QuestInfoForm form = new QuestInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void dragonSystemToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DragonInfoForm form = new DragonInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void miningToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MiningInfoForm form = new MiningInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void guildsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GuildInfoForm form = new GuildInfoForm();
+
+            form.ShowDialog();
+        }
+
+        private void fishingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SystemInfoForm form = new SystemInfoForm(0);
 
             form.ShowDialog();
         }

@@ -11,6 +11,7 @@ namespace Server
         public const int Day = 24 * Hour, Hour = 60 * Minute, Minute = 60 * Second, Second = 1000;
 
         public const string EnvirPath = @".\Envir\",
+                            ConfigPath = @".\Configs\",
                             MapPath = @".\Maps\",
                             ExportPath = @".\Exports\",
                             GuildPath = @".\Guilds\",
@@ -22,7 +23,7 @@ namespace Server
 
 
 
-        private static readonly InIReader Reader = new InIReader(@".\Setup.ini");
+        private static readonly InIReader Reader = new InIReader(ConfigPath + @".\Setup.ini");
 
 
         //General
@@ -63,9 +64,9 @@ namespace Server
 
         //Game
         public static List<long> ExperienceList = new List<long>();
-        public static List<long> OrbsExpList = new List<long>();//ArcherSpells - Elemental system
-        public static List<long> OrbsDefList = new List<long>();//ArcherSpells - Elemental system
-        public static List<long> OrbsDmgList = new List<long>();//ArcherSpells - Elemental system
+        public static List<long> OrbsExpList = new List<long>();
+        public static List<long> OrbsDefList = new List<long>();
+        public static List<long> OrbsDmgList = new List<long>();
 
         public static float DropRate = 1F, ExpRate = 1F;
 
@@ -92,12 +93,20 @@ namespace Server
                              AngelName = "Holy Deva",
                              BombSpiderName = "Bomb Spider",
                              CloneName = "Clone",
-                             FishMonster = "Giant Keratoid",
                              AssassinCloneName = "AssassinClone";
 
         public static string HealRing = "Healing",
                              FireRing = "FireBall",
                              ParalysisRing = "Paralysis";
+
+        
+        //Fishing settings
+        public static int FishingAttempts = 30;
+        public static int FishingSuccessStart = 10;
+        public static int FishingSuccessMultiplier = 10;
+        public static long FishingDelay = 0;
+        public static int FishingMobSpawnChance = 5;
+        public static string FishingMonster = "GiantKeratoid";
                             
 
         //character settings
@@ -192,7 +201,7 @@ namespace Server
             AngelName = Reader.ReadString("Game", "AngelName", AngelName);
             BombSpiderName = Reader.ReadString("Game", "BombSpiderName", BombSpiderName);
             CloneName = Reader.ReadString("Game", "CloneName", CloneName);
-            FishMonster = Reader.ReadString("Game", "FishMonster", FishMonster);
+            FishingMonster = Reader.ReadString("Game", "FishMonster", FishingMonster);
             AssassinCloneName = Reader.ReadString("Game", "AssassinCloneName", AssassinCloneName);
 
             //Items
@@ -249,6 +258,8 @@ namespace Server
 
             if (!Directory.Exists(EnvirPath))
                 Directory.CreateDirectory(EnvirPath);
+            if (!Directory.Exists(ConfigPath))
+                Directory.CreateDirectory(ConfigPath);
 
             if (!Directory.Exists(MapPath))
                 Directory.CreateDirectory(MapPath);
@@ -280,6 +291,7 @@ namespace Server
             LoadMines();
             LoadGuildSettings();
 			LoadAwakeAttribute();
+            LoadFishing();
         }
 
         public static void LoadVersion()
@@ -353,7 +365,6 @@ namespace Server
             Reader.Write("Game", "AngelName", AngelName);
             Reader.Write("Game", "BombSpiderName", BombSpiderName);
             Reader.Write("Game", "CloneName", CloneName);
-            Reader.Write("Game", "FishMonster", FishMonster);
             Reader.Write("Game", "AssassinCloneName", AssassinCloneName);
 
             Reader.Write("Items", "HealRing", HealRing);
@@ -411,7 +422,7 @@ namespace Server
         public static void LoadEXP()
         {
             long exp = 100;
-            InIReader reader = new InIReader(@".\ExpList.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\ExpList.ini");
 
             for (int i = 1; i <= byte.MaxValue - 1; i++)
             {
@@ -420,7 +431,7 @@ namespace Server
             }
 
             //ArcherSpells - Elemental system
-            reader = new InIReader(@".\OrbsExpList.ini");
+            reader = new InIReader(ConfigPath + @".\OrbsExpList.ini");
             for (int i = 1; i <= 4; i++)
             {
                 exp = i * 50;//default exp value
@@ -434,12 +445,13 @@ namespace Server
                 OrbsDmgList.Add(exp);
             }
         }
+
         public static void LoadRandomItemStats()
         {
             //note: i could have used a flat file system for this which would be faster, 
             //BUT: it's only loaded @ server startup so speed isnt vital.
             //and i think settings should be available outside the exe for ppl to edit it easyer + lets ppl share config without forcing ppl to run it in an exe
-            if (!File.Exists(@".\RandomItemStats.ini"))
+            if (!File.Exists(ConfigPath + @".\RandomItemStats.ini"))
             {
                 RandomItemStatsList.Add(new RandomItemStat());
                 RandomItemStatsList.Add(new RandomItemStat(ItemType.Weapon));
@@ -452,7 +464,7 @@ namespace Server
                 SaveRandomItemStats();
                 return;
             }
-            InIReader reader = new InIReader(@".\RandomItemStats.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\RandomItemStats.ini");
             int i = 0;
             RandomItemStat stat;
             while (reader.ReadByte("Item" + i.ToString(),"MaxDuraChance",255) != 255)
@@ -531,8 +543,8 @@ namespace Server
         }
         public static void SaveRandomItemStats()
         {
-            File.Delete(@".\RandomItemStats.ini");
-            InIReader reader = new InIReader(@".\RandomItemStats.ini");
+            File.Delete(ConfigPath + @".\RandomItemStats.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\RandomItemStats.ini");
             RandomItemStat stat;
             for (int i = 0; i < RandomItemStatsList.Count; i++)
             {
@@ -609,14 +621,14 @@ namespace Server
 
         public static void LoadMines()
         {
-            if (!File.Exists(@".\Mines.ini"))
+            if (!File.Exists(ConfigPath + @".\Mines.ini"))
             {
                 MineSetList.Add(new MineSet(1));
                 MineSetList.Add(new MineSet(2));
                 SaveMines();
                 return;
             }
-            InIReader reader = new InIReader(@".\Mines.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\Mines.ini");
             int i = 0;
             MineSet Mine;
             while (reader.ReadByte("Mine" + i.ToString(), "SpotRegenRate", 255) != 255)
@@ -650,8 +662,8 @@ namespace Server
         }
         public static void SaveMines()
         {
-            File.Delete(@".\Mines.ini");
-            InIReader reader = new InIReader(@".\Mines.ini");
+            File.Delete(ConfigPath + @".\Mines.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\Mines.ini");
             MineSet Mine;
             for (int i = 0; i < MineSetList.Count; i++)
             {
@@ -676,15 +688,16 @@ namespace Server
                 }
             }
         }
+
         public static void LoadGuildSettings()
         {
-            if (!File.Exists(@".\GuildSettings.ini"))
+            if (!File.Exists(ConfigPath + @".\GuildSettings.ini"))
             {
                 Guild_CreationCostList.Add(new ItemVolume(){Amount = 1000000});
                 Guild_CreationCostList.Add(new ItemVolume(){ItemName = "WoomaHorn",Amount = 1});
                 return;
             }
-            InIReader reader = new InIReader(@".\GuildSettings.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\GuildSettings.ini");
             Guild_RequiredLevel = reader.ReadByte("Guilds", "MinimuLevel", Guild_RequiredLevel);
             Guild_ExpRate = reader.ReadFloat("Guilds", "ExpRate", Guild_ExpRate);
             Guild_PointPerLevel = reader.ReadByte("Guilds", "PointPerLevel", Guild_PointPerLevel);
@@ -726,8 +739,8 @@ namespace Server
         }
         public static void SaveGuildSettings()
         {
-            File.Delete(@".\GuildSettings.ini");
-            InIReader reader = new InIReader(@".\GuildSettings.ini");
+            File.Delete(ConfigPath + @".\GuildSettings.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\GuildSettings.ini");
             reader.Write("Guilds", "MinimumLevel", Guild_RequiredLevel);
             reader.Write("Guilds", "ExpRate", Guild_ExpRate);
             reader.Write("Guilds", "PointPerLevel", Guild_PointPerLevel);
@@ -771,12 +784,12 @@ namespace Server
 
 		public static void LoadAwakeAttribute()
         {
-            if (!File.Exists(@".\AwakeningSystem.ini"))
+            if (!File.Exists(ConfigPath + @".\AwakeningSystem.ini"))
             {
                 return;
             }
 
-            InIReader reader = new InIReader(@".\AwakeningSystem.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\AwakeningSystem.ini");
             Awake.AwakeSuccessRate = reader.ReadByte("Attribute", "SuccessRate", Awake.AwakeSuccessRate);
             Awake.AwakeHitRate = reader.ReadByte("Attribute", "HitRate", Awake.AwakeHitRate);
             Awake.MaxAwakeLevel = reader.ReadInt32("Attribute", "MaxUpgradeLevel", Awake.MaxAwakeLevel);
@@ -819,8 +832,8 @@ namespace Server
         }
         public static void SaveAwakeAttribute()
         {
-            File.Delete(@".\AwakeningSystem.ini");
-            InIReader reader = new InIReader(@".\AwakeningSystem.ini");
+            File.Delete(ConfigPath + @".\AwakeningSystem.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\AwakeningSystem.ini");
             reader.Write("Attribute", "SuccessRate", Awake.AwakeSuccessRate);
             reader.Write("Attribute", "HitRate", Awake.AwakeHitRate);
             reader.Write("Attribute", "MaxUpgradeLevel", Awake.MaxAwakeLevel);
@@ -865,6 +878,35 @@ namespace Server
             {
                 reader.Write("Materials_IncreaseValue", "Materials_" + ((ItemGrade)(c + 1)).ToString(), Awake.AwakeMaterialRate[c]);
             }
+        }
+
+        public static void LoadFishing()
+        {
+            if (!File.Exists(ConfigPath + @".\FishingSystem.ini"))
+            {
+                SaveFishing();
+                return;
+            }
+
+            InIReader reader = new InIReader(ConfigPath + @".\FishingSystem.ini");
+            FishingAttempts = reader.ReadInt32("Rates", "Attempts", FishingAttempts);
+            FishingSuccessStart = reader.ReadInt32("Rates", "SuccessStart", FishingSuccessStart);
+            FishingSuccessMultiplier = reader.ReadInt32("Rates", "SuccessMultiplier", FishingSuccessMultiplier);
+            FishingDelay = reader.ReadInt64("Rates", "Delay", FishingDelay);
+            FishingMobSpawnChance = reader.ReadInt32("Rates", "MonsterSpawnChance", FishingMobSpawnChance);
+            FishingMonster = reader.ReadString("Game", "Monster", FishingMonster);
+        }
+
+        public static void SaveFishing()
+        {
+            File.Delete(ConfigPath + @".\FishingSystem.ini");
+            InIReader reader = new InIReader(ConfigPath + @".\FishingSystem.ini");
+            reader.Write("Rates", "Attempts", FishingAttempts);
+            reader.Write("Rates", "SuccessStart", FishingSuccessStart);
+            reader.Write("Rates", "SuccessMultiplier", FishingSuccessMultiplier);
+            reader.Write("Rates", "Delay", FishingDelay);
+            reader.Write("Rates", "MonsterSpawnChance", FishingMobSpawnChance);
+            reader.Write("Game", "Monster", FishingMonster);
         }
     }
 }

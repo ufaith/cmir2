@@ -13,7 +13,7 @@ namespace Client.MirScenes
 {
     public class SelectScene : MirScene
     {
-        public MirImageControl Background;
+        public MirImageControl Background, Title;
         private NewCharacterDialog _character;
 
         public MirLabel ServerLabel;
@@ -40,6 +40,14 @@ namespace Client.MirScenes
                 Index = 64,
                 Library = Libraries.Prguse,
                 Parent = this,
+            };
+
+            Title = new MirImageControl
+            {
+                Index = 40,
+                Library = Libraries.Title,
+                Parent = this,
+                Location = new Point(322, 6)
             };
 
             ServerLabel = new MirLabel

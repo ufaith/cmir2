@@ -4640,6 +4640,17 @@ namespace Server.MirObjects
                 case Spell.BindingShot://ArcherSpells - BindingShot
                     BindingShot(magic, target, out cast);
                     break;
+                case Spell.VampireShot://ArcherSpells - VampireShot
+                case Spell.PoisonShot://ArcherSpells - PoisonShot
+                case Spell.CrippleShot://ArcherSpells - CrippleShot
+                    SpecialArrowShot(target, magic);
+                    break;
+                case Spell.NapalmShot://ArcherSpells - NapalmShot
+                    NapalmShot(target, magic);
+                    break;
+                case Spell.OneWithNature://ArcherSpells - OneWithNature
+                    OneWithNature(target, magic);
+                    break;
                 default:
                     cast = false;
                     break;
@@ -6119,6 +6130,36 @@ namespace Server.MirObjects
 
             cast = true;
         }
+
+        public void SpecialArrowShot(MapObject target, UserMagic magic)//ArcherSpells - VampireShot,PoisonShot,CrippleShot
+        {
+            if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return;
+
+            int damage = GetAttackPower(MinMC + (MinDC / 2), MaxMC + (MaxDC / 2)) + magic.GetPower();//DC/MC Hybrid spell
+            int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, magic, damage, target);
+            ActionList.Add(action);
+        }
+
+        public void NapalmShot(MapObject target, UserMagic magic)//ArcherSpells - NapalmShot
+        {
+            if (target == null || !target.IsAttackTarget(this) || !CanFly(target.CurrentLocation)) return;
+
+            int damage = GetAttackPower(MinMC + (MinDC / 4), MaxMC + (MaxDC / 4)) + magic.GetPower();//DC/MC Hybrid spell
+            int delay = Functions.MaxDistance(CurrentLocation, target.CurrentLocation) * 50 + 500; //50 MS per Step
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + delay, this, magic, damage, target.CurrentLocation);
+            CurrentMap.ActionList.Add(action);
+        }
+
+        public void OneWithNature(MapObject target, UserMagic magic)//ArcherSpells - OneWithNature
+        {
+            int damage = GetAttackPower(MinMC, MaxMC) + magic.GetPower();
+
+            DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time + 500, this, magic, damage, CurrentLocation);
+            CurrentMap.ActionList.Add(action);
+        }
         #endregion
 
         private void CheckSneakRadius()
@@ -6520,6 +6561,7 @@ namespace Server.MirObjects
                     break;
 
                 #endregion
+
                 #region BindingShot                                 ArcherSpells - BindingShot
 
                 case Spell.BindingShot:
@@ -6583,6 +6625,115 @@ namespace Server.MirObjects
 
                 #endregion
 
+                #region VampireShot, PoisonShot, CrippleShot        ArcherSpells -
+                case Spell.VampireShot:
+                case Spell.PoisonShot:
+                case Spell.CrippleShot:
+                    value = (int)data[1];
+                    target = (MapObject)data[2];
+
+                    if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null) return;
+                    if (target.Attacked(this, value, DefenceType.MAC, false) == 0) return;
+
+                    int buffTime = 5 + (5 * magic.Level);
+
+                    bool hasVampBuff = (Buffs.Where(x => x.Type == BuffType.VampireShot).ToList().Count() > 0);
+                    bool hasPoisonBuff = (Buffs.Where(x => x.Type == BuffType.PoisonShot).ToList().Count() > 0);
+
+                    bool doVamp = false, doPoison = false;
+                    if (magic.Spell == Spell.VampireShot)
+                    {
+                        doVamp = true;
+                        if (!hasVampBuff && !hasPoisonBuff && (Envir.Random.Next(20) >= 8))//40% chance
+                        {
+                            AddBuff(new Buff { Type = BuffType.VampireShot, Caster = this, ExpireTime = Envir.Time + (buffTime * 1000), Value = value, Visible = true, ObjectID = this.ObjectID });
+                            Broadcast(GetInfo());
+                        }
+                    }
+                    if (magic.Spell == Spell.PoisonShot)
+                    {
+                        doPoison = true;
+                        if (!hasPoisonBuff && !hasVampBuff && (Envir.Random.Next(20) >= 8))//40% chance
+                        {
+                            AddBuff(new Buff { Type = BuffType.PoisonShot, Caster = this, ExpireTime = Envir.Time + (buffTime * 1000), Value = value, Visible = true, ObjectID = this.ObjectID });
+                            Broadcast(GetInfo());
+                        }
+                    }
+                    if (magic.Spell == Spell.CrippleShot)
+                    {
+                        if (hasVampBuff || hasPoisonBuff)
+                        {
+                            place = target.CurrentLocation;
+                            for (int y = place.Y - 1; y <= place.Y + 1; y++)
+                            {
+                                if (y < 0) continue;
+                                if (y >= CurrentMap.Height) break;
+                                for (int x = place.X - 1; x <= place.X + 1; x++)
+                                {
+                                    if (x < 0) continue;
+                                    if (x >= CurrentMap.Width) break;
+                                    Cell cell = CurrentMap.GetCell(x, y);
+                                    if (!cell.Valid || cell.Objects == null) continue;
+                                    for (int i = 0; i < cell.Objects.Count; i++)
+                                    {
+                                        MapObject targetob = cell.Objects[i];
+                                        if (targetob.Race != ObjectType.Monster && targetob.Race != ObjectType.Player) continue;
+                                        if (targetob == null || !targetob.IsAttackTarget(this) || targetob.Node == null) continue;
+                                        if (targetob.Dead) continue;
+
+                                        if (hasVampBuff)//Vampire Effect
+                                        {
+                                            //cancel out buff
+                                            AddBuff(new Buff { Type = BuffType.VampireShot, Caster = this, ExpireTime = Envir.Time + 1000, Value = value, Visible = true, ObjectID = this.ObjectID });
+
+                                            target.Attacked(this, value, DefenceType.MAC, false);
+                                            if (VampAmount == 0) VampTime = Envir.Time + 1000;
+                                            VampAmount += (ushort)(value * (magic.Level + 1) * 0.25F);
+                                        }
+                                        if (hasPoisonBuff)//Poison Effect
+                                        {
+                                            //cancel out buff
+                                            AddBuff(new Buff { Type = BuffType.PoisonShot, Caster = this, ExpireTime = Envir.Time + 1000, Value = value, Visible = true, ObjectID = this.ObjectID });
+
+                                            targetob.ApplyPoison(new Poison
+                                            {
+                                                Duration = (value * 2) + (magic.Level + 1) * 7,
+                                                Owner = this,
+                                                PType = PoisonType.Green,
+                                                TickSpeed = 2000,
+                                                Value = value / 15 + magic.Level + 1 + Envir.Random.Next(PoisonAttack)
+                                            }, this);
+                                            targetob.OperateTime = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (doVamp)//Vampire Effect
+                        {
+                            if (VampAmount == 0) VampTime = Envir.Time + 1000;
+                            VampAmount += (ushort)(value * (magic.Level + 1) * 0.25F);
+                        }
+                        if (doPoison)//Poison Effect
+                        {
+                            target.ApplyPoison(new Poison
+                            {
+                                Duration = (value * 2) + (magic.Level + 1) * 7,
+                                Owner = this,
+                                PType = PoisonType.Green,
+                                TickSpeed = 2000,
+                                Value = value / 15 + magic.Level + 1 + Envir.Random.Next(PoisonAttack)
+                            }, this);
+                            target.OperateTime = 0;
+                        }
+                    }
+
+                    LevelMagic(magic);
+                    break;
+                #endregion
 
             }
 
@@ -10574,6 +10725,7 @@ namespace Server.MirObjects
                     break;
             }
         }
+
 		#region Awakening
         public void Awakening(ulong UniqueID, AwakeType type)
         {
@@ -10582,52 +10734,46 @@ namespace Server.MirObjects
             for (int i = 0; i < Info.Inventory.Length; i++)
             {
                 UserItem item = Info.Inventory[i];
-                if (item != null)
+                if (item == null || item.UniqueID != UniqueID) continue;
+
+                Awake awake = item.Awake;
+
+                if (awake.IsMaxLevel())
                 {
-                    if (item.UniqueID == UniqueID)
+                    Enqueue(new S.Awakening { result = -2, removeID = -1 });
+                    return;
+                }
+
+                if (Info.AccountInfo.Gold < item.AwakeningPrice())
+                {
+                    Enqueue(new S.Awakening { result = -3, removeID = -1 });
+                    return;
+                }
+
+                if (HasAwakeningNeedMaterials(item, type))
+                {
+                    Info.AccountInfo.Gold -= item.AwakeningPrice();
+                    Enqueue(new S.LoseGold { Gold = item.AwakeningPrice() });
+
+                    bool[] isHit;
+
+                    switch (awake.UpgradeAwake(item, type, out isHit))
                     {
-                        Awake awake = item.Awake;
-
-                        if (awake.IsMaxLevel())
-                        {
-                            Enqueue(new S.Awakening { result = -2, removeID = -1 });
-                            return;
-                        }
-
-                        if (hasAwakeningNeedMaterials(item, type))
-                        {
-                            if (Info.AccountInfo.Gold >= item.AwakeningPrice())
-                            {
-                                Info.AccountInfo.Gold -= item.AwakeningPrice();
-                                Enqueue(new S.LoseGold { Gold = item.AwakeningPrice() });
-
-                                bool[] isHit;
-
-                                switch (awake.UpgradeAwake(item, type, out isHit))
-                                {
-                                    case -1:
-                                        Enqueue(new S.Awakening { result = -1, removeID = -1 });
-                                        break;
-                                    case 0:
-                                        AwakeningEffect(false, isHit);
-                                        Info.Inventory[i] = null;
-                                        Enqueue(new S.Awakening { result = 0, removeID = (long)item.UniqueID });
-                                        break;
-                                    case 1:
-                                        Enqueue(new S.RefreshItem { Item = item });
-                                        AwakeningEffect(true, isHit);
-                                        Enqueue(new S.Awakening { result = 1, removeID = -1 });
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                Enqueue(new S.Awakening { result = -3, removeID = -1 });
-                                return;
-                            }
-                        }
+                        case -1:
+                            Enqueue(new S.Awakening { result = -1, removeID = -1 });
+                            break;
+                        case 0:
+                            AwakeningEffect(false, isHit);
+                            Info.Inventory[i] = null;
+                            Enqueue(new S.Awakening { result = 0, removeID = (long)item.UniqueID });
+                            break;
+                        case 1:
+                            Enqueue(new S.RefreshItem { Item = item });
+                            AwakeningEffect(true, isHit);
+                            Enqueue(new S.Awakening { result = 1, removeID = -1 });
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
@@ -10812,7 +10958,7 @@ namespace Server.MirObjects
             Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = isSuccess ? SpellEffect.AwakeningSuccess : SpellEffect.AwakeningFail, EffectType = 0, DelayTime = 2500 });
         }
 
-        public bool hasAwakeningNeedMaterials(UserItem item, AwakeType type)
+        public bool HasAwakeningNeedMaterials(UserItem item, AwakeType type)
         {
             Awake awake = item.Awake;
 
@@ -10919,7 +11065,6 @@ namespace Server.MirObjects
             return true;
         }
         #endregion
-
 
         #region Groups
 
@@ -11962,7 +12107,7 @@ namespace Server.MirObjects
             byte flexibilityStat = 0;
             sbyte successStat = 0;
 
-            FishingProgressMax = 30;
+            FishingProgressMax = Settings.FishingAttempts;//30;
 
             if (rod == null || (rod.Info.Shape != 49 && rod.Info.Shape != 50))
             {
@@ -11989,7 +12134,7 @@ namespace Server.MirObjects
             }
 
             FishingProgressMax += flexibilityStat;
-            FishingChance = Envir.Random.Next(0, 10) + (int)successStat + FishingChanceCounter * 10;
+            FishingChance = Envir.Random.Next(0, Settings.FishingSuccessStart) + (int)successStat + FishingChanceCounter * Settings.FishingSuccessMultiplier; //10 //10
 
             if (FishingChance > 100)
             {
@@ -12000,7 +12145,7 @@ namespace Server.MirObjects
                 FishingChance = 0;
             }
 
-            FishingTime = Envir.Time + FishingCastDelay;
+            FishingTime = Envir.Time + FishingCastDelay + Settings.FishingDelay;
 
             if (cast)
             {
@@ -12046,9 +12191,9 @@ namespace Server.MirObjects
                             break;
                         }
 
-                        if (Envir.Random.Next(20) == 0)
+                        if (Envir.Random.Next(100 - Settings.FishingMobSpawnChance) == 0)
                         {
-                            MonsterObject mob = MonsterObject.GetMonster(Envir.GetMonsterInfo(Settings.FishMonster));
+                            MonsterObject mob = MonsterObject.GetMonster(Envir.GetMonsterInfo(Settings.FishingMonster));
 
                             if (mob == null) return;
 

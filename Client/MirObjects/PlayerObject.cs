@@ -1080,6 +1080,10 @@ namespace Client.MirObjects
                                 if (ElementCasted) ElementCasted = false;
                                 break;
                             case Spell.BindingShot://ArcherSpells - BindingShot
+                            case Spell.VampireShot://ArcherSpells - VampireShot
+                            case Spell.PoisonShot://ArcherSpells - PoisonShot
+                            case Spell.CrippleShot://ArcherSpells - CrippleShot
+                            case Spell.NapalmShot://ArcherSpells - NapalmShot
                                 Frames.Frames.TryGetValue(MirAction.AttackRange2, out Frame);
                                 CurrentAction = MirAction.AttackRange2;
                                 if (this == User)
@@ -1877,6 +1881,19 @@ namespace Client.MirObjects
 
                             #endregion
 
+                            #region PoisonShot      ArcherSpells - PoisonShot
+                            case Spell.PoisonShot:
+                                Effects.Add(new Effect(Libraries.Magic3, 2300, 8, 1000, this));
+                                break;
+                            #endregion
+
+                            #region OneWithNature       ArcherSpells - OneWithNature
+                            case Spell.OneWithNature:
+                                MapControl.Effects.Add(new Effect(Libraries.Magic3, 2710, 8, 1200, CurrentLocation));
+                                SoundManager.PlaySound(20000 + 139 * 10);
+                                break;
+                            #endregion
+
                         }
 
 
@@ -2385,6 +2402,90 @@ namespace Client.MirObjects
                                                 missile.Complete += (o, e) =>
                                                 {
                                                     SoundManager.PlaySound(20000 + 121 * 10 + 2);
+                                                };
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case Spell.VampireShot://ArcherSpells - VampireShot
+                                case Spell.PoisonShot://ArcherSpells - PoisonShot
+                                case Spell.CrippleShot://ArcherSpells - CrippleShot
+                                    MapObject ob = MapControl.GetObject(TargetID);
+                                    Effect eff;
+                                    int exFrameStart = 0;
+                                    if (Spell == Spell.PoisonShot) exFrameStart = 200;
+                                    if (Spell == Spell.CrippleShot) exFrameStart = 400;
+                                    switch (FrameIndex)
+                                    {
+                                        case 7:
+                                            SoundManager.PlaySound(20000 + ((Spell == Spell.CrippleShot) ? 136 : 121) * 10);//M136-0
+                                            missile = CreateProjectile(1930 + exFrameStart, Libraries.Magic3, true, 5, 10, 5);
+                                            StanceTime = CMain.Time + StanceDelay;
+                                            if (missile.Target != null)
+                                            {
+                                                missile.Complete += (o, e) =>
+                                                {
+                                                    if (ob != null)
+                                                    {
+                                                        if (Spell == Spell.CrippleShot)
+                                                        {
+                                                            int exIdx = 0;
+                                                            if (this == User)
+                                                            {
+                                                                //
+                                                                if (GameScene.Scene.Buffs.Where(x => x.Type == BuffType.VampireShot).Any()) exIdx = 20;
+                                                                if (GameScene.Scene.Buffs.Where(x => x.Type == BuffType.PoisonShot).Any()) exIdx = 10;
+                                                            }
+                                                            else
+                                                            {
+                                                                if (Buffs.Where(x => x == BuffType.VampireShot).Any()) exIdx = 20;
+                                                                if (Buffs.Where(x => x == BuffType.PoisonShot).Any()) exIdx = 10;
+                                                            }
+
+                                                            //GameScene.Scene.ChatDialog.ReceiveChat("Debug: "+exIdx.ToString(),ChatType.System);
+
+                                                            ob.Effects.Add(eff = new Effect(Libraries.Magic3, 2490 + exIdx, 7, 1000, ob));
+                                                            SoundManager.PlaySound(20000 + 136 * 10 + 5 + (exIdx / 10));//sound M136-5/7
+
+                                                            if (exIdx == 20)
+                                                                eff.Complete += (o1, e1) =>
+                                                                {
+                                                                    SoundManager.PlaySound(20000 + 45 * 10 + 2);//sound M45-2
+                                                                    Effects.Add(new Effect(Libraries.Magic3, 2100, 8, 1000, this));
+                                                                };
+                                                        }
+
+                                                        if (Spell == Spell.VampireShot || Spell == Spell.PoisonShot)
+                                                        {
+                                                            ob.Effects.Add(eff = new Effect(Libraries.Magic3, 2090 + exFrameStart, 6, 1000, ob));
+                                                            SoundManager.PlaySound(20000 + (133 + (exFrameStart / 100)) * 10 + 2);//sound M133-2 or M135-2
+                                                            if (Spell == Spell.VampireShot)
+                                                                eff.Complete += (o1, e1) =>
+                                                                {
+                                                                    SoundManager.PlaySound(20000 + 45 * 10 + 2);//sound M45-2
+                                                                    Effects.Add(new Effect(Libraries.Magic3, 2100 + exFrameStart, 8, 1000, this));
+                                                                };
+                                                        }
+                                                    }
+                                                    //SoundManager.PlaySound(20000 + 121 * 10 + 2);//sound M121-2
+                                                };
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case Spell.NapalmShot:
+                                    switch (FrameIndex)
+                                    {
+                                        case 7:
+                                            SoundManager.PlaySound(20000 + 138 * 10);//M138-0
+                                            missile = CreateProjectile(2530, Libraries.Magic3, true, 6, 50, 4);
+                                            StanceTime = CMain.Time + StanceDelay;
+                                            if (missile.Target != null)
+                                            {
+                                                missile.Complete += (o, e) =>
+                                                {
+                                                    SoundManager.PlaySound(20000 + 138 * 10 + 2);//M138-2
+                                                    MapControl.Effects.Add(new Effect(Libraries.Magic3, 2690, 10, 1000, TargetPoint));
                                                 };
                                             }
                                             break;
@@ -2916,6 +3017,16 @@ namespace Client.MirObjects
 
                                     case Spell.CrescentSlash:
                                         SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 2);
+                                        break;
+
+                                    #endregion
+
+                                    #region NapalmShot      ArcherSpells - NapalmShot
+
+                                    case Spell.NapalmShot:
+
+                                        SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 1);
+                                        MapControl.Effects.Add(new Effect(Libraries.Magic3, 1660, 10, 1000, TargetPoint));
                                         break;
 
                                     #endregion

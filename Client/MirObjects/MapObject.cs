@@ -124,6 +124,12 @@ namespace Client.MirObjects
                 case BuffType.DarkBody:
                     if (ob != null) ob.Sneaking = true;
                     break;
+                case BuffType.VampireShot:
+                    Effects.Add(new BuffEffect(Libraries.Magic3, 2110, 6, 1400, this, true, type) { Repeat = false });
+                    break;
+                case BuffType.PoisonShot:
+                    Effects.Add(new BuffEffect(Libraries.Magic3, 2310, 7, 1400, this, true, type) { Repeat = false });
+                    break;
             }
         }
         public void RemoveBuffEffect(BuffType type)
