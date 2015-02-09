@@ -51,8 +51,8 @@ namespace Server.MirDatabase
 
         public uint GoldReward;
         public uint ExpReward;
-        public List<ItemInfo> FixedRewards = new List<ItemInfo>();
-        public List<ItemInfo> SelectRewards = new List<ItemInfo>();
+        public List<QuestItemReward> FixedRewards = new List<QuestItemReward>();
+        public List<QuestItemReward> SelectRewards = new List<QuestItemReward>();
 
         private Regex _regexMessage = new Regex("\"([^\"]*)\"");
 
@@ -125,8 +125,8 @@ namespace Server.MirDatabase
             KillTasks = new List<QuestKillTask>();
             ItemTasks = new List<QuestItemTask>();
             FlagTasks = new List<QuestFlagTask>();
-            FixedRewards = new List<ItemInfo>();
-            SelectRewards = new List<ItemInfo>();
+            FixedRewards = new List<QuestItemReward>();
+            SelectRewards = new List<QuestItemReward>();
             ExpReward = 0;
             GoldReward = 0;
         }
@@ -201,32 +201,12 @@ namespace Server.MirDatabase
                                 break;
                             case fixedRewardsKey:
                                 {
-                                    mInfo = SMain.Envir.GetItemInfo(innerLine);
-                                    if (mInfo == null)
-                                    {
-                                        mInfo = SMain.Envir.GetItemInfo(innerLine + "(M)");
-                                        if (mInfo != null) FixedRewards.Add(mInfo);
-
-                                        mInfo = SMain.Envir.GetItemInfo(innerLine + "(F)");
-                                        if (mInfo != null) FixedRewards.Add(mInfo);
-                                    }
-                                    else
-                                        FixedRewards.Add(mInfo);
+                                    ParseReward(FixedRewards, innerLine);
                                     break;
                                 }
                             case selectRewardsKey:
                                 {
-                                    mInfo = SMain.Envir.GetItemInfo(innerLine);
-                                    if (mInfo == null)
-                                    {
-                                        mInfo = SMain.Envir.GetItemInfo(innerLine + "(M)");
-                                        if (mInfo != null) SelectRewards.Add(mInfo);
-
-                                        mInfo = SMain.Envir.GetItemInfo(innerLine + "(F)");
-                                        if (mInfo != null) SelectRewards.Add(mInfo);
-                                    }
-                                    else
-                                        SelectRewards.Add(mInfo);
+                                    ParseReward(SelectRewards, innerLine);
                                     break;
                                 }
                             case expRewardKey:
@@ -240,6 +220,31 @@ namespace Server.MirDatabase
                 }
 
                 currentHeader++;
+            }
+        }
+
+        public void ParseReward(List<QuestItemReward> list, string line)
+        {
+            if (line.Length < 1) return;
+
+            string[] split = line.Split(' ');
+            uint count = 1;
+
+            if (split.Length > 1) uint.TryParse(split[1], out count);
+
+            ItemInfo mInfo = SMain.Envir.GetItemInfo(split[0]);
+
+            if (mInfo == null)
+            {
+                mInfo = SMain.Envir.GetItemInfo(split[0] + "(M)");
+                if (mInfo != null) list.Add(new QuestItemReward() { Item = mInfo, Count = count });
+
+                mInfo = SMain.Envir.GetItemInfo(split[0] + "(F)");
+                if (mInfo != null) list.Add(new QuestItemReward() { Item = mInfo, Count = count });
+            }
+            else
+            {
+                list.Add(new QuestItemReward() { Item = mInfo, Count = count });
             }
         }
 

@@ -18,7 +18,7 @@ namespace Server.MirObjects
 
         public override string Name
         {
-            get { return Item == null ? string.Empty : Item.Info.Name; }
+            get { return Item == null ? string.Empty : Item.Info.FriendlyName; }
             set { throw new NotSupportedException(); }
         }
 

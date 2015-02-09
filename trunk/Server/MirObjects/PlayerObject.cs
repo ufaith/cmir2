@@ -8,6 +8,7 @@ using Server.MirDatabase;
 using Server.MirEnvir;
 using Server.MirNetwork;
 using S = ServerPackets;
+using System.Text.RegularExpressions;
 
 namespace Server.MirObjects
 {
@@ -738,6 +739,8 @@ namespace Server.MirObjects
 
             for (int i = PoisonList.Count - 1; i >= 0; i--)
             {
+                if (Dead) return;
+
                 Poison poison = PoisonList[i];
 
                 if (poison.Owner != null && poison.Owner.Node == null)
@@ -6498,7 +6501,7 @@ namespace Server.MirObjects
 
                 #endregion
 
-                #region ElementalBarrier, ElementalShot         ArcherSpells - Elemental system
+                #region ElementalBarrier, ElementalShot
 
                 case Spell.ElementalBarrier:
                     if (ElementalBarrier) return;
@@ -6539,7 +6542,7 @@ namespace Server.MirObjects
 
                 #endregion
 
-                #region DelayedExplosion            ArcherSpells - DelayedExplosion
+                #region DelayedExplosion
 
                 case Spell.DelayedExplosion:
                     value = (int)data[1];
@@ -6562,7 +6565,7 @@ namespace Server.MirObjects
 
                 #endregion
 
-                #region BindingShot                                 ArcherSpells - BindingShot
+                #region BindingShot
 
                 case Spell.BindingShot:
                     value = (int)data[1];
@@ -6625,7 +6628,7 @@ namespace Server.MirObjects
 
                 #endregion
 
-                #region VampireShot, PoisonShot, CrippleShot        ArcherSpells -
+                #region VampireShot, PoisonShot, CrippleShot
                 case Spell.VampireShot:
                 case Spell.PoisonShot:
                 case Spell.CrippleShot:
@@ -12350,9 +12353,28 @@ namespace Server.MirObjects
 
             List<UserItem> rewardItems = new List<UserItem>();
 
-            foreach (ItemInfo iInfo in quest.Info.FixedRewards)
+            foreach (var reward in quest.Info.FixedRewards)
             {
-                rewardItems.Add(Envir.CreateDropItem(iInfo));
+                uint count = reward.Count;
+
+                UserItem rewardItem;
+
+                while (count > 0)
+                {
+                    rewardItem = Envir.CreateDropItem(reward.Item);
+                    if (reward.Item.StackSize >= count)
+                    {                   
+                        rewardItem.Count = count;
+                        count = 0;
+                    }
+                    else
+                    {
+                        rewardItem.Count = reward.Item.StackSize;
+                        count -= reward.Item.StackSize;
+                    }
+
+                    rewardItems.Add(rewardItem);
+                }
             }
 
             if (selectedItemIndex >= 0)
@@ -12361,7 +12383,25 @@ namespace Server.MirObjects
                 {
                     if (selectedItemIndex != i) continue;
 
-                    rewardItems.Add(Envir.CreateDropItem(quest.Info.SelectRewards[i]));
+                    uint count = quest.Info.SelectRewards[i].Count;
+                    UserItem rewardItem;
+
+                    while (count > 0)
+                    {
+                        rewardItem = Envir.CreateDropItem(quest.Info.SelectRewards[i].Item);
+                        if (quest.Info.SelectRewards[i].Item.StackSize >= count)
+                        {
+                            rewardItem.Count = count;
+                            count = 0;
+                        }
+                        else
+                        {
+                            rewardItem.Count = quest.Info.SelectRewards[i].Item.StackSize;
+                            count -= quest.Info.SelectRewards[i].Item.StackSize;
+                        }
+
+                        rewardItems.Add(rewardItem);
+                    }
                 }
             }
 
@@ -12467,7 +12507,7 @@ namespace Server.MirObjects
                     GainQuestItem(item);
                     quest.ProcessItem(Info.QuestInventory);
 
-                    Enqueue(new S.SendOutputMessage { Message = string.Format("You found {0}.", item.Name), Type = OutputMessageType.Quest });
+                    Enqueue(new S.SendOutputMessage { Message = string.Format("You found {0}.", item.FriendlyName), Type = OutputMessageType.Quest });
 
                     SendUpdateQuest(quest, QuestState.Update);
                 }

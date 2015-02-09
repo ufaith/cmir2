@@ -3,6 +3,7 @@ using System.Drawing;
 using Client.MirGraphics;
 using Client.MirScenes;
 using Microsoft.DirectX;
+using System.Text.RegularExpressions;
 
 namespace Client.MirControls
 {
@@ -40,7 +41,7 @@ namespace Client.MirControls
         private void Update()
         {
             if (Item == null) return;
-            NameLabel.Text = Item.Name;
+            NameLabel.Text = Item.FriendlyName;
             PriceLabel.Text = string.Format("Price: {0} gold", Item.Price*GameScene.NPCRate);
         }
 

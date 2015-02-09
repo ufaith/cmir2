@@ -27,7 +27,7 @@ namespace Client.MirScenes.Dialogs
 
         public ClientQuestProgress SelectedQuest;
         public QuestMessage Message;
-        public QuestReward Reward;
+        public QuestRewards Reward;
 
         public QuestRow[] Rows = new QuestRow[5];
 
@@ -219,7 +219,7 @@ namespace Client.MirScenes.Dialogs
 
             #region Rewards
 
-            Reward = new QuestReward
+            Reward = new QuestRewards
             {
                 Parent = this,
                 Visible = false,
@@ -470,7 +470,7 @@ namespace Client.MirScenes.Dialogs
 
         public ClientQuestProgress Quest;
         public QuestMessage Message;
-        public QuestReward Reward;
+        public QuestRewards Reward;
 
         public QuestDetailDialog()
         {
@@ -543,7 +543,7 @@ namespace Client.MirScenes.Dialogs
 
             #region Rewards
 
-            Reward = new QuestReward
+            Reward = new QuestRewards
             {
                 Parent = this,
                 Size = new Size(315, 130),
@@ -1334,7 +1334,7 @@ namespace Client.MirScenes.Dialogs
             CurrentLines.Clear();
         }
     }
-    public sealed class QuestReward : MirControl
+    public sealed class QuestRewards : MirControl
     {
         private readonly MirLabel _goldLabel,  _expLabel;
 
@@ -1346,7 +1346,7 @@ namespace Client.MirScenes.Dialogs
         public static QuestCell[] FixedItems = new QuestCell[5];
         public static QuestCell[] SelectItems = new QuestCell[5];
 
-        public QuestReward()
+        public QuestRewards()
         {
             _expLabel = new MirLabel
             {
@@ -1443,7 +1443,8 @@ namespace Client.MirScenes.Dialogs
 
                     FixedItems[i] = new QuestCell
                     {
-                        Item = quest.RewardsFixedItem[i],
+                        Item = quest.RewardsFixedItem[i].Item,
+                        Count = quest.RewardsFixedItem[i].Count,
                         Parent = this,
                         Location = new Point(i * 45 + 15, 24),
                         Fixed = true
@@ -1461,7 +1462,8 @@ namespace Client.MirScenes.Dialogs
 
                     SelectItems[i] = new QuestCell
                     {
-                        Item = selRewards[i],
+                        Item = selRewards[i].Item,
+                        Count = selRewards[i].Count,
                         Parent = this,
                         Location = new Point(i * 45 + 15, 89),
                     };
@@ -1487,13 +1489,15 @@ namespace Client.MirScenes.Dialogs
             }
         }
 
-        public List<ItemInfo> FilterRewards(List<ItemInfo> rewardItems)
+        public List<QuestItemReward> FilterRewards(List<QuestItemReward> rewardItems)
         {
-            List<ItemInfo> filteredRewards =  new List<ItemInfo>();
+            List<QuestItemReward> filteredRewards = new List<QuestItemReward>();
 
             //Only display same sex items
-            foreach (var item in rewardItems)
+            foreach (var reward in rewardItems)
             {
+                ItemInfo item = reward.Item;
+
                 switch (MapObject.User.Gender)
                 {
                     case MirGender.Male:
@@ -1504,7 +1508,7 @@ namespace Client.MirScenes.Dialogs
                         break;
                 }
 
-                filteredRewards.Add(item);
+                filteredRewards.Add(reward);
             }
 
             return filteredRewards;
@@ -1517,7 +1521,7 @@ namespace Client.MirScenes.Dialogs
 
             for (int i = 0; i < Quest.QuestInfo.RewardsSelectItem.Count; i++)
             {
-                ItemInfo item = Quest.QuestInfo.RewardsSelectItem[i];
+                ItemInfo item = Quest.QuestInfo.RewardsSelectItem[i].Item;
 
                 if (item == null || SelectedItem != item) continue;
 
@@ -1549,9 +1553,12 @@ namespace Client.MirScenes.Dialogs
     {
         public ItemInfo Item;
         public UserItem ShowItem;
+        public uint Count;
 
         public bool Selected;
         public bool Fixed;
+
+        private MirLabel CountLabel { get; set; }
 
         public QuestCell()
         {
@@ -1576,12 +1583,14 @@ namespace Client.MirScenes.Dialogs
             ShowItem = null;
         }
 
-        private void DrawItem()
+        protected internal override void DrawControl()
         {
             if (Item == null) return;
 
             Size size = Libraries.Items.GetTrueSize(Item.Image);
             Point offSet = new Point((40 - size.Width) / 2, (32 - size.Height) / 2);
+
+            CreateDisposeLabel();
 
             if (Fixed)
             {
@@ -1595,6 +1604,11 @@ namespace Client.MirScenes.Dialogs
             Libraries.Items.Draw(Item.Image, offSet.X + DisplayLocation.X, offSet.Y + DisplayLocation.Y);
         }
 
+        private void DrawItem()
+        {
+            
+        }
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -1602,6 +1616,36 @@ namespace Client.MirScenes.Dialogs
             Item = null;
             ShowItem = null;
 
+        }
+
+        private void CreateDisposeLabel()
+        {
+            if (Count <= 1)
+            {
+                DisposeCountLabel();
+                return;
+            }
+
+            if (CountLabel == null || CountLabel.IsDisposed)
+            {
+                CountLabel = new MirLabel
+                {
+                    AutoSize = true,
+                    ForeColour = Color.Yellow,
+                    NotControl = true,
+                    OutLine = false,
+                    Parent = this,
+                };
+            }
+
+            CountLabel.Text = Count.ToString("###0");
+            CountLabel.Location = new Point(Size.Width - CountLabel.Size.Width + 8, Size.Height - CountLabel.Size.Height);
+        }
+        private void DisposeCountLabel()
+        {
+            if (CountLabel != null && !CountLabel.IsDisposed)
+                CountLabel.Dispose();
+            CountLabel = null;
         }
     }
     public sealed class QuestGroupQuestItem : MirControl

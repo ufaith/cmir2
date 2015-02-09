@@ -2144,7 +2144,7 @@ namespace Client.MirScenes
             AddItem(p.Item);
             User.RefreshStats();
 
-            OutputMessage(string.Format("You gained {0}.", p.Item.Name));
+            OutputMessage(string.Format("You gained {0}.", p.Item.FriendlyName));
         }
         private void GainedQuestItem(S.GainedQuestItem p)
         {
@@ -4228,8 +4228,8 @@ namespace Client.MirScenes
                 Location = new Point(4, 4),
                 OutLine = true,
                 Parent = ItemLabel,
-                Text = HoverItem.Info.Grade != ItemGrade.None ? Regex.Replace(HoverItem.Info.Name, @"[\d-]", string.Empty) +
-                "\n" + HoverItem.Info.Grade.ToString() : Regex.Replace(HoverItem.Info.Name, @"[\d-]", string.Empty)
+                Text = HoverItem.Info.Grade != ItemGrade.None ? HoverItem.Info.FriendlyName +
+                "\n" + HoverItem.Info.Grade.ToString() : HoverItem.Info.FriendlyName
             };
 
             ItemLabel.Size = new Size(Math.Max(ItemLabel.Size.Width, nameLabel.DisplayRectangle.Right + 4),
@@ -6914,7 +6914,7 @@ namespace Client.MirScenes
                 MirItemCell cell = GameScene.SelectedCell;
                 if (cell.Item.Info.Bind.HasFlag(BindMode.DontDrop))
                 {
-                    MirMessageBox messageBox = new MirMessageBox(string.Format("You cannot drop {0}?", cell.Item.Name), MirMessageBoxButtons.OK);
+                    MirMessageBox messageBox = new MirMessageBox(string.Format("You cannot drop {0}", cell.Item.Name), MirMessageBoxButtons.OK);
                     messageBox.Show();
                     GameScene.SelectedCell = null;
                     return;
@@ -9442,8 +9442,18 @@ namespace Client.MirScenes
                 ItemInfo RealItem = null;
                 if (Grid[(int)EquipmentSlot.Armour].Item != null)
                 {
+                    if (GameScene.User.WingEffect == 1 || GameScene.User.WingEffect == 2)
+                    {
+                        int wingOffset = GameScene.User.WingEffect == 1 ? 2 : 4;
+
+                        int genderOffset = MapObject.User.Gender == MirGender.Male ? 0 : 1;
+
+                        Libraries.Prguse2.DrawBlend(1200 + wingOffset + genderOffset, DisplayLocation, Color.White, true, 1F);
+                    }
+
                     RealItem = Functions.GetRealItem(Grid[(int)EquipmentSlot.Armour].Item.Info, MapObject.User.Level, MapObject.User.Class, GameScene.ItemInfoList);
                     Libraries.StateItems.Draw(RealItem.Image, DisplayLocation, Color.White, true, 1F);
+
                 }
                 if (Grid[(int)EquipmentSlot.Weapon].Item != null)
                 {
@@ -16982,9 +16992,29 @@ namespace Client.MirScenes
             if (Infinite)
                 text += string.Format("Expire: Never\nCaster: {0}", Caster);
             else
-                text += string.Format("Expire: {0} (s)\nCaster: {1}", Math.Round((Expire - CMain.Time) / 1000D), Caster);
+                text += string.Format("Expire: {0}\nCaster: {1}", PrintTimeSpan(Math.Round((Expire - CMain.Time) / 1000D)), Caster);
 
             return text;
+        }
+
+        private string PrintTimeSpan(double secs)
+        {
+            TimeSpan t = TimeSpan.FromSeconds(secs);
+            string answer;
+            if (t.TotalMinutes < 1.0)
+            {
+                answer = string.Format("{0}s", t.Seconds);
+            }
+            else if (t.TotalHours < 1.0)
+            {
+                answer = string.Format("{0}m {1:D2}s", t.Minutes, t.Seconds);
+            }
+            else // more than 1 hour
+            {
+                answer = string.Format("{0}h {1:D2}m {2:D2}s", (int)t.TotalHours, t.Minutes, t.Seconds);
+            }
+
+            return answer;
         }
     }
 }

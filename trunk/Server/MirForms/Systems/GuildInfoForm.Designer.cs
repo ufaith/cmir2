@@ -36,21 +36,6 @@
             this.label80 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.groupBox11 = new System.Windows.Forms.GroupBox();
-            this.label87 = new System.Windows.Forms.Label();
-            this.GuildRequiredPointstextBox = new System.Windows.Forms.TextBox();
-            this.label88 = new System.Windows.Forms.Label();
-            this.GuildMinGuildLeveltextBox = new System.Windows.Forms.TextBox();
-            this.label89 = new System.Windows.Forms.Label();
-            this.GuildRunTimetextBox = new System.Windows.Forms.TextBox();
-            this.label90 = new System.Windows.Forms.Label();
-            this.label91 = new System.Windows.Forms.Label();
-            this.GuildCosttextBox = new System.Windows.Forms.TextBox();
-            this.GuildBuffListcomboBox = new System.Windows.Forms.ComboBox();
-            this.GuildAddBuffbutton = new System.Windows.Forms.Button();
-            this.GuildDeleteBuffbutton = new System.Windows.Forms.Button();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.GuildItemNamecomboBox = new System.Windows.Forms.ComboBox();
             this.label94 = new System.Windows.Forms.Label();
@@ -61,6 +46,7 @@
             this.GuildCreateListcomboBox = new System.Windows.Forms.ComboBox();
             this.GuildAddCreatItembutton = new System.Windows.Forms.Button();
             this.label86 = new System.Windows.Forms.Label();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.label84 = new System.Windows.Forms.Label();
             this.label85 = new System.Windows.Forms.Label();
@@ -70,13 +56,29 @@
             this.GuildMemberCaptextBox = new System.Windows.Forms.TextBox();
             this.label83 = new System.Windows.Forms.Label();
             this.GuildLevelListcomboBox = new System.Windows.Forms.ComboBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.GuildDeleteBuffbutton = new System.Windows.Forms.Button();
+            this.GuildAddBuffbutton = new System.Windows.Forms.Button();
+            this.GuildBuffListcomboBox = new System.Windows.Forms.ComboBox();
+            this.GuildCosttextBox = new System.Windows.Forms.TextBox();
+            this.label91 = new System.Windows.Forms.Label();
+            this.label90 = new System.Windows.Forms.Label();
+            this.GuildRunTimetextBox = new System.Windows.Forms.TextBox();
+            this.label89 = new System.Windows.Forms.Label();
+            this.GuildMinGuildLeveltextBox = new System.Windows.Forms.TextBox();
+            this.label88 = new System.Windows.Forms.Label();
+            this.GuildRequiredPointstextBox = new System.Windows.Forms.TextBox();
+            this.label87 = new System.Windows.Forms.Label();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.groupBox10.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.groupBox9.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.groupBox11.SuspendLayout();
-            this.groupBox10.SuspendLayout();
-            this.groupBox9.SuspendLayout();
             this.SuspendLayout();
             // 
             // GuildExpratetextBox
@@ -135,6 +137,8 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
+            this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Location = new System.Drawing.Point(11, 41);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -151,156 +155,6 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Creation";
             this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.groupBox9);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(348, 160);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Levels";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // tabPage3
-            // 
-            this.tabPage3.Controls.Add(this.groupBox11);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(348, 160);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Buffs";
-            this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // groupBox11
-            // 
-            this.groupBox11.Controls.Add(this.GuildDeleteBuffbutton);
-            this.groupBox11.Controls.Add(this.GuildAddBuffbutton);
-            this.groupBox11.Controls.Add(this.GuildBuffListcomboBox);
-            this.groupBox11.Controls.Add(this.GuildCosttextBox);
-            this.groupBox11.Controls.Add(this.label91);
-            this.groupBox11.Controls.Add(this.label90);
-            this.groupBox11.Controls.Add(this.GuildRunTimetextBox);
-            this.groupBox11.Controls.Add(this.label89);
-            this.groupBox11.Controls.Add(this.GuildMinGuildLeveltextBox);
-            this.groupBox11.Controls.Add(this.label88);
-            this.groupBox11.Controls.Add(this.GuildRequiredPointstextBox);
-            this.groupBox11.Controls.Add(this.label87);
-            this.groupBox11.Location = new System.Drawing.Point(6, 6);
-            this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Size = new System.Drawing.Size(336, 148);
-            this.groupBox11.TabIndex = 50;
-            this.groupBox11.TabStop = false;
-            this.groupBox11.Text = "Available  Buffs";
-            // 
-            // label87
-            // 
-            this.label87.AutoSize = true;
-            this.label87.Location = new System.Drawing.Point(26, 46);
-            this.label87.Name = "label87";
-            this.label87.Size = new System.Drawing.Size(84, 13);
-            this.label87.TabIndex = 32;
-            this.label87.Text = "Required points:";
-            // 
-            // GuildRequiredPointstextBox
-            // 
-            this.GuildRequiredPointstextBox.Location = new System.Drawing.Point(116, 43);
-            this.GuildRequiredPointstextBox.Name = "GuildRequiredPointstextBox";
-            this.GuildRequiredPointstextBox.Size = new System.Drawing.Size(34, 20);
-            this.GuildRequiredPointstextBox.TabIndex = 33;
-            this.GuildRequiredPointstextBox.TextChanged += new System.EventHandler(this.GuildRequiredPointstextBox_TextChanged);
-            // 
-            // label88
-            // 
-            this.label88.AutoSize = true;
-            this.label88.Location = new System.Drawing.Point(6, 69);
-            this.label88.Name = "label88";
-            this.label88.Size = new System.Drawing.Size(104, 13);
-            this.label88.TabIndex = 34;
-            this.label88.Text = "Minimum GuildLevel:";
-            // 
-            // GuildMinGuildLeveltextBox
-            // 
-            this.GuildMinGuildLeveltextBox.Location = new System.Drawing.Point(116, 66);
-            this.GuildMinGuildLeveltextBox.Name = "GuildMinGuildLeveltextBox";
-            this.GuildMinGuildLeveltextBox.Size = new System.Drawing.Size(34, 20);
-            this.GuildMinGuildLeveltextBox.TabIndex = 35;
-            this.GuildMinGuildLeveltextBox.TextChanged += new System.EventHandler(this.GuildMinGuildLeveltextBox_TextChanged);
-            // 
-            // label89
-            // 
-            this.label89.AutoSize = true;
-            this.label89.Location = new System.Drawing.Point(61, 92);
-            this.label89.Name = "label89";
-            this.label89.Size = new System.Drawing.Size(49, 13);
-            this.label89.TabIndex = 36;
-            this.label89.Text = "Runtime:";
-            // 
-            // GuildRunTimetextBox
-            // 
-            this.GuildRunTimetextBox.Location = new System.Drawing.Point(116, 89);
-            this.GuildRunTimetextBox.Name = "GuildRunTimetextBox";
-            this.GuildRunTimetextBox.Size = new System.Drawing.Size(34, 20);
-            this.GuildRunTimetextBox.TabIndex = 37;
-            this.GuildRunTimetextBox.TextChanged += new System.EventHandler(this.GuildRunTimetextBox_TextChanged);
-            // 
-            // label90
-            // 
-            this.label90.AutoSize = true;
-            this.label90.Location = new System.Drawing.Point(156, 92);
-            this.label90.Name = "label90";
-            this.label90.Size = new System.Drawing.Size(168, 13);
-            this.label90.TabIndex = 38;
-            this.label90.Text = "(0: always, other value = seconds)";
-            // 
-            // label91
-            // 
-            this.label91.AutoSize = true;
-            this.label91.Location = new System.Drawing.Point(79, 115);
-            this.label91.Name = "label91";
-            this.label91.Size = new System.Drawing.Size(31, 13);
-            this.label91.TabIndex = 39;
-            this.label91.Text = "Cost:";
-            // 
-            // GuildCosttextBox
-            // 
-            this.GuildCosttextBox.Location = new System.Drawing.Point(116, 112);
-            this.GuildCosttextBox.Name = "GuildCosttextBox";
-            this.GuildCosttextBox.Size = new System.Drawing.Size(34, 20);
-            this.GuildCosttextBox.TabIndex = 40;
-            this.GuildCosttextBox.TextChanged += new System.EventHandler(this.GuildCosttextBox_TextChanged);
-            // 
-            // GuildBuffListcomboBox
-            // 
-            this.GuildBuffListcomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.GuildBuffListcomboBox.FormattingEnabled = true;
-            this.GuildBuffListcomboBox.Location = new System.Drawing.Point(116, 16);
-            this.GuildBuffListcomboBox.Name = "GuildBuffListcomboBox";
-            this.GuildBuffListcomboBox.Size = new System.Drawing.Size(55, 21);
-            this.GuildBuffListcomboBox.TabIndex = 42;
-            this.GuildBuffListcomboBox.SelectedIndexChanged += new System.EventHandler(this.GuildBuffListcomboBox_SelectedIndexChanged);
-            // 
-            // GuildAddBuffbutton
-            // 
-            this.GuildAddBuffbutton.Location = new System.Drawing.Point(177, 15);
-            this.GuildAddBuffbutton.Name = "GuildAddBuffbutton";
-            this.GuildAddBuffbutton.Size = new System.Drawing.Size(21, 21);
-            this.GuildAddBuffbutton.TabIndex = 44;
-            this.GuildAddBuffbutton.Text = "+";
-            this.GuildAddBuffbutton.UseVisualStyleBackColor = true;
-            this.GuildAddBuffbutton.Click += new System.EventHandler(this.GuildAddBuffbutton_Click);
-            // 
-            // GuildDeleteBuffbutton
-            // 
-            this.GuildDeleteBuffbutton.Location = new System.Drawing.Point(206, 15);
-            this.GuildDeleteBuffbutton.Name = "GuildDeleteBuffbutton";
-            this.GuildDeleteBuffbutton.Size = new System.Drawing.Size(21, 21);
-            this.GuildDeleteBuffbutton.TabIndex = 45;
-            this.GuildDeleteBuffbutton.Text = "-";
-            this.GuildDeleteBuffbutton.UseVisualStyleBackColor = true;
-            this.GuildDeleteBuffbutton.Click += new System.EventHandler(this.GuildDeleteBuffbutton_Click);
             // 
             // groupBox10
             // 
@@ -404,6 +258,17 @@
             this.label86.TabIndex = 27;
             this.label86.Text = "Guild Creation Requirements:";
             // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.groupBox9);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(348, 160);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Levels";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
             // groupBox9
             // 
             this.groupBox9.Controls.Add(this.label84);
@@ -494,6 +359,163 @@
             this.GuildLevelListcomboBox.TabIndex = 13;
             this.GuildLevelListcomboBox.SelectedIndexChanged += new System.EventHandler(this.GuildLevelListcomboBox_SelectedIndexChanged);
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.groupBox11);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(348, 160);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Buffs";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // groupBox11
+            // 
+            this.groupBox11.Controls.Add(this.GuildDeleteBuffbutton);
+            this.groupBox11.Controls.Add(this.GuildAddBuffbutton);
+            this.groupBox11.Controls.Add(this.GuildBuffListcomboBox);
+            this.groupBox11.Controls.Add(this.GuildCosttextBox);
+            this.groupBox11.Controls.Add(this.label91);
+            this.groupBox11.Controls.Add(this.label90);
+            this.groupBox11.Controls.Add(this.GuildRunTimetextBox);
+            this.groupBox11.Controls.Add(this.label89);
+            this.groupBox11.Controls.Add(this.GuildMinGuildLeveltextBox);
+            this.groupBox11.Controls.Add(this.label88);
+            this.groupBox11.Controls.Add(this.GuildRequiredPointstextBox);
+            this.groupBox11.Controls.Add(this.label87);
+            this.groupBox11.Location = new System.Drawing.Point(6, 6);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Size = new System.Drawing.Size(336, 148);
+            this.groupBox11.TabIndex = 50;
+            this.groupBox11.TabStop = false;
+            this.groupBox11.Text = "Available  Buffs";
+            // 
+            // GuildDeleteBuffbutton
+            // 
+            this.GuildDeleteBuffbutton.Location = new System.Drawing.Point(206, 15);
+            this.GuildDeleteBuffbutton.Name = "GuildDeleteBuffbutton";
+            this.GuildDeleteBuffbutton.Size = new System.Drawing.Size(21, 21);
+            this.GuildDeleteBuffbutton.TabIndex = 45;
+            this.GuildDeleteBuffbutton.Text = "-";
+            this.GuildDeleteBuffbutton.UseVisualStyleBackColor = true;
+            this.GuildDeleteBuffbutton.Click += new System.EventHandler(this.GuildDeleteBuffbutton_Click);
+            // 
+            // GuildAddBuffbutton
+            // 
+            this.GuildAddBuffbutton.Location = new System.Drawing.Point(177, 15);
+            this.GuildAddBuffbutton.Name = "GuildAddBuffbutton";
+            this.GuildAddBuffbutton.Size = new System.Drawing.Size(21, 21);
+            this.GuildAddBuffbutton.TabIndex = 44;
+            this.GuildAddBuffbutton.Text = "+";
+            this.GuildAddBuffbutton.UseVisualStyleBackColor = true;
+            this.GuildAddBuffbutton.Click += new System.EventHandler(this.GuildAddBuffbutton_Click);
+            // 
+            // GuildBuffListcomboBox
+            // 
+            this.GuildBuffListcomboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.GuildBuffListcomboBox.FormattingEnabled = true;
+            this.GuildBuffListcomboBox.Location = new System.Drawing.Point(116, 16);
+            this.GuildBuffListcomboBox.Name = "GuildBuffListcomboBox";
+            this.GuildBuffListcomboBox.Size = new System.Drawing.Size(55, 21);
+            this.GuildBuffListcomboBox.TabIndex = 42;
+            this.GuildBuffListcomboBox.SelectedIndexChanged += new System.EventHandler(this.GuildBuffListcomboBox_SelectedIndexChanged);
+            // 
+            // GuildCosttextBox
+            // 
+            this.GuildCosttextBox.Location = new System.Drawing.Point(116, 112);
+            this.GuildCosttextBox.Name = "GuildCosttextBox";
+            this.GuildCosttextBox.Size = new System.Drawing.Size(34, 20);
+            this.GuildCosttextBox.TabIndex = 40;
+            this.GuildCosttextBox.TextChanged += new System.EventHandler(this.GuildCosttextBox_TextChanged);
+            // 
+            // label91
+            // 
+            this.label91.AutoSize = true;
+            this.label91.Location = new System.Drawing.Point(79, 115);
+            this.label91.Name = "label91";
+            this.label91.Size = new System.Drawing.Size(31, 13);
+            this.label91.TabIndex = 39;
+            this.label91.Text = "Cost:";
+            // 
+            // label90
+            // 
+            this.label90.AutoSize = true;
+            this.label90.Location = new System.Drawing.Point(156, 92);
+            this.label90.Name = "label90";
+            this.label90.Size = new System.Drawing.Size(168, 13);
+            this.label90.TabIndex = 38;
+            this.label90.Text = "(0: always, other value = seconds)";
+            // 
+            // GuildRunTimetextBox
+            // 
+            this.GuildRunTimetextBox.Location = new System.Drawing.Point(116, 89);
+            this.GuildRunTimetextBox.Name = "GuildRunTimetextBox";
+            this.GuildRunTimetextBox.Size = new System.Drawing.Size(34, 20);
+            this.GuildRunTimetextBox.TabIndex = 37;
+            this.GuildRunTimetextBox.TextChanged += new System.EventHandler(this.GuildRunTimetextBox_TextChanged);
+            // 
+            // label89
+            // 
+            this.label89.AutoSize = true;
+            this.label89.Location = new System.Drawing.Point(61, 92);
+            this.label89.Name = "label89";
+            this.label89.Size = new System.Drawing.Size(49, 13);
+            this.label89.TabIndex = 36;
+            this.label89.Text = "Runtime:";
+            // 
+            // GuildMinGuildLeveltextBox
+            // 
+            this.GuildMinGuildLeveltextBox.Location = new System.Drawing.Point(116, 66);
+            this.GuildMinGuildLeveltextBox.Name = "GuildMinGuildLeveltextBox";
+            this.GuildMinGuildLeveltextBox.Size = new System.Drawing.Size(34, 20);
+            this.GuildMinGuildLeveltextBox.TabIndex = 35;
+            this.GuildMinGuildLeveltextBox.TextChanged += new System.EventHandler(this.GuildMinGuildLeveltextBox_TextChanged);
+            // 
+            // label88
+            // 
+            this.label88.AutoSize = true;
+            this.label88.Location = new System.Drawing.Point(6, 69);
+            this.label88.Name = "label88";
+            this.label88.Size = new System.Drawing.Size(104, 13);
+            this.label88.TabIndex = 34;
+            this.label88.Text = "Minimum GuildLevel:";
+            // 
+            // GuildRequiredPointstextBox
+            // 
+            this.GuildRequiredPointstextBox.Location = new System.Drawing.Point(116, 43);
+            this.GuildRequiredPointstextBox.Name = "GuildRequiredPointstextBox";
+            this.GuildRequiredPointstextBox.Size = new System.Drawing.Size(34, 20);
+            this.GuildRequiredPointstextBox.TabIndex = 33;
+            this.GuildRequiredPointstextBox.TextChanged += new System.EventHandler(this.GuildRequiredPointstextBox_TextChanged);
+            // 
+            // label87
+            // 
+            this.label87.AutoSize = true;
+            this.label87.Location = new System.Drawing.Point(26, 46);
+            this.label87.Name = "label87";
+            this.label87.Size = new System.Drawing.Size(84, 13);
+            this.label87.TabIndex = 32;
+            this.label87.Text = "Required points:";
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(348, 160);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "War";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // tabPage5
+            // 
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Size = new System.Drawing.Size(348, 160);
+            this.tabPage5.TabIndex = 4;
+            this.tabPage5.Text = "Conquest";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
             // GuildInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -511,14 +533,14 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.GuildInfoForm_FormClosed);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.groupBox10.ResumeLayout(false);
+            this.groupBox10.PerformLayout();
             this.tabPage2.ResumeLayout(false);
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.groupBox11.ResumeLayout(false);
             this.groupBox11.PerformLayout();
-            this.groupBox10.ResumeLayout(false);
-            this.groupBox10.PerformLayout();
-            this.groupBox9.ResumeLayout(false);
-            this.groupBox9.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -568,6 +590,8 @@
         private System.Windows.Forms.Label label88;
         private System.Windows.Forms.TextBox GuildRequiredPointstextBox;
         private System.Windows.Forms.Label label87;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.TabPage tabPage5;
 
     }
 }

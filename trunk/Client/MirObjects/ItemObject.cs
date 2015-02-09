@@ -6,6 +6,7 @@ using System.Text;
 using Client.MirGraphics;
 using Client.MirScenes;
 using S = ServerPackets;
+using System.Text.RegularExpressions;
 
 namespace Client.MirObjects
 {
@@ -144,7 +145,7 @@ namespace Client.MirObjects
                 ForeColour = NameColour,
                 OutLine = outline,
                 Border = border,
-                Text = Name,
+                Text = Regex.Replace(Name, @"\d+$", string.Empty),
             };
 
             LabelList.Add(NameLabel);
