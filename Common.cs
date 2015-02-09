@@ -1822,6 +1822,11 @@ public class ItemInfo
     {
         get { return Type == ItemType.Potion || Type == ItemType.Scroll || Type == ItemType.Food; }
     }
+
+    public string FriendlyName
+    {
+        get { return Regex.Replace(Name, @"\d+$", string.Empty); }
+    }
     
     public ItemInfo()
     {
@@ -2412,8 +2417,12 @@ public class UserItem
 
     public string Name
     {
-        get { return Count > 1 ? string.Format("{0} ({1})", Info.Name, Count) : Info.Name; }
-        
+        get { return Count > 1 ? string.Format("{0} ({1})", Info.Name, Count) : Info.Name; }   
+    }
+    
+    public string FriendlyName
+    {
+        get { return Count > 1 ? string.Format("{0} ({1})", Info.FriendlyName, Count) : Info.FriendlyName; }
     }
 
     public UserItem(ItemInfo info)
@@ -2835,8 +2844,8 @@ public class ClientQuestInfo
 
     public uint RewardGold;
     public uint RewardExp;
-    public List<ItemInfo> RewardsFixedItem = new List<ItemInfo>();
-    public List<ItemInfo> RewardsSelectItem = new List<ItemInfo>();
+    public List<QuestItemReward> RewardsFixedItem = new List<QuestItemReward>();
+    public List<QuestItemReward> RewardsSelectItem = new List<QuestItemReward>();
 
     public uint FinishNPCIndex;
 
@@ -2877,12 +2886,12 @@ public class ClientQuestInfo
         count = reader.ReadInt32();
 
         for (int i = 0; i < count; i++ )
-            RewardsFixedItem.Add(new ItemInfo(reader));
+            RewardsFixedItem.Add(new QuestItemReward(reader));
 
         count = reader.ReadInt32();
 
         for (int i = 0; i < count; i++)
-            RewardsSelectItem.Add(new ItemInfo(reader));
+            RewardsSelectItem.Add(new QuestItemReward(reader));
 
         FinishNPCIndex = reader.ReadUInt32();
     }
@@ -3003,6 +3012,26 @@ public class ClientQuestProgress
         writer.Write(Taken);
         writer.Write(Completed);
         writer.Write(New);
+    }
+}
+
+public class QuestItemReward
+{
+    public ItemInfo Item;
+    public uint Count = 1;
+
+    public QuestItemReward() { }
+
+    public QuestItemReward(BinaryReader reader)
+    {
+        Item = new ItemInfo(reader);
+        Count = reader.ReadUInt32();
+    }
+
+    public void Save(BinaryWriter writer)
+    {
+        Item.Save(writer);
+        writer.Write(Count);
     }
 }
 

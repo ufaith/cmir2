@@ -830,6 +830,8 @@ namespace Server.MirObjects
 
             for (int i = PoisonList.Count - 1; i >= 0; i--)
             {
+                if (Dead) return;
+
                 Poison poison = PoisonList[i];
                 if (poison.Owner != null && poison.Owner.Node == null)
                 {
