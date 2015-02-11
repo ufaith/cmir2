@@ -1563,8 +1563,6 @@ namespace Client.MirScenes.Dialogs
         public QuestCell()
         {
             Size = new Size(32, 32);
-
-            AfterDraw += (o, e) => DrawItem();
         }
 
         protected override void OnMouseEnter()
@@ -1604,11 +1602,6 @@ namespace Client.MirScenes.Dialogs
             Libraries.Items.Draw(Item.Image, offSet.X + DisplayLocation.X, offSet.Y + DisplayLocation.Y);
         }
 
-        private void DrawItem()
-        {
-            
-        }
-
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -1616,6 +1609,7 @@ namespace Client.MirScenes.Dialogs
             Item = null;
             ShowItem = null;
 
+            DisposeCountLabel();
         }
 
         private void CreateDisposeLabel()

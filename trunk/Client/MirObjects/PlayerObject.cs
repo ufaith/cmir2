@@ -146,7 +146,7 @@ namespace Client.MirObjects
             Hidden = info.Hidden;
 
             WingEffect = info.WingEffect;
-            CurrentEffect = info.Effect; //Stephenking effect sync test
+            CurrentEffect = info.Effect;
 
             MountType = info.MountType;
             RidingMount = info.RidingMount;
@@ -158,9 +158,9 @@ namespace Client.MirObjects
             if (Dead) ActionFeed.Add(new QueuedAction { Action = MirAction.Dead, Direction = Direction, Location = CurrentLocation });
             if (info.Extra) Effects.Add(new Effect(Libraries.Magic2, 670, 10, 800, this));
 
-            ElementEffect = (int)info.ElementOrbEffect;//ArcherSpells - Elemental system
-            ElementsLevel = (int)info.ElementOrbLvl;//ArcherSpells - Elemental system
-            ElementOrbMax = (int)info.ElementOrbMax;//ArcherSpells - Elemental system
+            ElementEffect = (int)info.ElementOrbEffect;
+            ElementsLevel = (int)info.ElementOrbLvl;
+            ElementOrbMax = (int)info.ElementOrbMax;
 
             Buffs = info.Buffs;
 
@@ -1255,6 +1255,9 @@ namespace Client.MirObjects
                         case MirAction.Attack3:
                             //Network.Enqueue(new C.Attack3 { Direction = Direction });
                             break;
+                        case MirAction.Attack4:
+                            GameScene.AttackTime = CMain.Time + User.AttackSpeed;
+                            break;
 
                         case MirAction.AttackRange1: //ArcherTest
                             GameScene.AttackTime = CMain.Time + User.AttackSpeed + 200;
@@ -1345,8 +1348,8 @@ namespace Client.MirObjects
                                 break;
 
                             case Spell.TwinDrakeBlade:
-                                FrameInterval = FrameInterval * 7 / 10; //70% Faster Animation
-                                EffectFrameInterval = EffectFrameInterval * 7 / 10;
+                                FrameInterval = FrameInterval * 9 / 10; //70% Faster Animation
+                                EffectFrameInterval = EffectFrameInterval * 9 / 10;
                                 action = new QueuedAction { Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>() };
                                 action.Params.Add(Spell);
                                 ActionFeed.Insert(0, action);
@@ -1374,8 +1377,8 @@ namespace Client.MirObjects
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 1);
                                 break;
                             case Spell.TwinDrakeBlade:
-                                FrameInterval = FrameInterval * 8 / 10; //80% Animation Speed
-                                EffectFrameInterval = EffectFrameInterval * 8 / 10;
+                                FrameInterval = FrameInterval * 9 / 10; //80% Animation Speed
+                                EffectFrameInterval = EffectFrameInterval * 9 / 10;
                                 break;
                         }
                         break;

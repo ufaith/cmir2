@@ -9,7 +9,6 @@ using Server.MirEnvir;
 namespace Server.MirDatabase
 {
     #region Notes
-    //kill, item shown as yellow notification top left if quest not on screen
     //better way to store quest progress?
     //clean up new flag methods
     #endregion
@@ -108,6 +107,65 @@ namespace Server.MirDatabase
             writer.Write(FlagTaskSet.Count);
             for (int i = 0; i < FlagTaskSet.Count; i++)
                 writer.Write(FlagTaskSet[i]);
+        }
+
+        public void ResyncTasks()
+        {
+            int dbKillTaskCount = Info.KillTasks.Count;
+            int dbItemTaskCount = Info.ItemTasks.Count;
+            int dbFlagTaskCount = Info.FlagTasks.Count;
+
+            if(dbKillTaskCount != KillTaskCount.Count)
+            {
+                if(KillTaskCount.Count > dbKillTaskCount)
+                {
+                    KillTaskCount.RemoveRange(dbKillTaskCount, KillTaskCount.Count - dbKillTaskCount);
+                }
+                else
+                {
+                    while (KillTaskCount.Count < dbKillTaskCount)
+                    {
+                        KillTaskCount.Add(0);
+                    }
+                }
+
+                EndDateTime = DateTime.MaxValue;
+            }
+
+            if (dbItemTaskCount != ItemTaskCount.Count)
+            {
+                if (ItemTaskCount.Count > dbItemTaskCount)
+                {
+                    ItemTaskCount.RemoveRange(dbKillTaskCount, ItemTaskCount.Count - dbItemTaskCount);
+                }
+                else
+                {
+                    while (ItemTaskCount.Count < dbItemTaskCount)
+                    {
+                        ItemTaskCount.Add(0);
+                    }
+                }
+
+                EndDateTime = DateTime.MaxValue;
+            }
+
+            if(dbFlagTaskCount != FlagTaskSet.Count)
+            {
+                if (FlagTaskSet.Count > dbFlagTaskCount)
+                {
+                    FlagTaskSet.RemoveRange(dbFlagTaskCount, FlagTaskSet.Count - dbFlagTaskCount);
+                }
+                else
+                {
+                    while (FlagTaskSet.Count < dbFlagTaskCount)
+                    {
+                        FlagTaskSet.Add(false);
+                    }
+                }
+
+                EndDateTime = DateTime.MaxValue;
+            }
+
         }
 
         public bool CheckCompleted()

@@ -33,6 +33,7 @@ namespace Server.MirObjects
         public long NextExpUpdate = 0;
         public int MemberCap = 0;
         public List<string> Notice = new List<string>();
+        public List<GuildObject> WarringGuilds = new List<GuildObject>();
 
         public GuildObject()
         {
@@ -524,6 +525,55 @@ namespace Server.MirObjects
                 }
             }
 
+        }
+
+
+        #region Guild Wars
+
+        public bool GoToWar(GuildObject enemyGuild)
+        {
+            if(enemyGuild == null)
+            {
+                return false;
+            }
+
+            if (Envir.GuildsAtWar.Where(e => e.GuildA == this && e.GuildB == enemyGuild).Any() || Envir.GuildsAtWar.Where(e => e.GuildA == enemyGuild || e.GuildB == this).Any())
+            {
+                return false;
+            }
+
+            Envir.GuildsAtWar.Add(new GuildAtWar(this, enemyGuild));
+
+            return true;
+        }
+
+        #endregion
+    }
+
+    public class GuildAtWar
+    {
+        public GuildObject GuildA;
+        public GuildObject GuildB;
+        public long TimeRemaining;
+
+        public GuildAtWar(GuildObject a, GuildObject b)
+        {
+            GuildA = a;
+            GuildB = b;
+
+            GuildA.WarringGuilds.Add(GuildB);
+            GuildB.WarringGuilds.Add(GuildA);
+
+            TimeRemaining = Settings.Minute * 10; //changable in server form
+        }
+
+        public void EndWar()
+        {
+            GuildA.WarringGuilds.Remove(GuildB);
+            GuildB.WarringGuilds.Remove(GuildA);
+
+            GuildA.SendMessage(string.Format("War ended with {0}.", GuildB.Name, ChatType.Guild));
+            GuildB.SendMessage(string.Format("War ended with {0}.", GuildA.Name, ChatType.Guild));
         }
     }
 }
