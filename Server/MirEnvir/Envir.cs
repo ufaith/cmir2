@@ -92,8 +92,10 @@ namespace Server.MirEnvir
         public NPCObject DefaultNPC;
 
         public List<DropInfo> FishingDrops = new List<DropInfo>();
-
         public List<DropInfo> AwakeningDrops = new List<DropInfo>();
+
+        public List<GuildAtWar> GuildsAtWar = new List<GuildAtWar>();
+
         static Envir()
         {
             AccountIDReg =
@@ -109,13 +111,17 @@ namespace Server.MirEnvir
         public static int LastCount = 0, LastRealCount = 0;
         public int MonsterCount;
 
+        public long dayTime, warTime;
+
         private void WorkLoop()
         {
             Time = Stopwatch.ElapsedMilliseconds;
+            dayTime = Time;
+
             long conTime = Time;
             long saveTime = Time + Settings.SaveDelay * Settings.Minute;
             long userTime = Time + Settings.Minute * 5;
-            long dayTime = Time;
+
             long processTime = Time + 1000;
             int processCount = 0;
             int processRealCount = 0;
@@ -198,6 +204,8 @@ namespace Server.MirEnvir
 
                     if (DragonSystem != null) DragonSystem.Process();
 
+                    Process();
+
                     if (Time >= saveTime)
                     {
                         saveTime = Time + Settings.SaveDelay * Settings.Minute;
@@ -213,12 +221,6 @@ namespace Server.MirEnvir
                                 Message = string.Format("Online Players: {0}", Players.Count),
                                 Type = ChatType.Hint
                             });
-                    }
-
-                    if (Time >= dayTime)
-                    {
-                        dayTime = Time + Settings.Day;
-                        ProcessNewDay();
                     }
 
                     //   if (Players.Count == 0) Thread.Sleep(1);
@@ -264,6 +266,31 @@ namespace Server.MirEnvir
             if (oldLights == Lights) return;
 
             Broadcast(new S.TimeOfDay { Lights = Lights });
+        }
+
+        public void Process()
+        {
+            if (Time >= dayTime)
+            {
+                dayTime = Time + Settings.Day;
+                ProcessNewDay();
+            }
+
+            if(Time >= warTime)
+            {
+                for (int i = GuildsAtWar.Count - 1; i >= 0; i--)
+                {
+                    GuildsAtWar[i].TimeRemaining -= Settings.Minute;
+
+                    if (GuildsAtWar[i].TimeRemaining < 0)
+                    {
+                        GuildsAtWar[i].EndWar();
+                        GuildsAtWar.RemoveAt(i);
+                    }
+                }
+                
+                warTime = Time + Settings.Minute;
+            }
         }
 
         public void Broadcast(Packet p)
@@ -636,6 +663,7 @@ namespace Server.MirEnvir
                 return drop1.Item.Type.CompareTo(drop2.Item.Type);
             });
         }
+
         private bool BindCharacter(AuctionInfo auction)
         {
             for (int i = 0; i < CharacterList.Count; i++)
@@ -677,6 +705,7 @@ namespace Server.MirEnvir
 
             for (int i = 0; i < MapInfoList.Count; i++)
                 MapInfoList[i].CreateMap();
+            SMain.Enqueue("Maps Loaded.");
 
             for (int i = 0; i < ItemInfoList.Count; i++)
                 if (ItemInfoList[i].StartItem)
@@ -685,6 +714,10 @@ namespace Server.MirEnvir
             for (int i = 0; i < MonsterInfoList.Count; i++)
                 MonsterInfoList[i].LoadDrops();
 
+            LoadFishingDrops();
+            LoadAwakeningMaterials();
+            SMain.Enqueue("Drops Loaded.");
+
             if (DragonInfo.Enabled)
             {
                 DragonSystem = new Dragon(DragonInfo);
@@ -692,12 +725,11 @@ namespace Server.MirEnvir
                 {
                     if (DragonSystem.Load()) DragonSystem.Info.LoadDrops();
                 }
+
+                SMain.Enqueue("Dragon Loaded.");
             }
 
             DefaultNPC = new NPCObject(new NPCInfo() { Name = "DefaultNPC", FileName = Settings.DefaultNPCFilename, IsDefault = true });
-
-            LoadFishingDrops();
-            LoadAwakeningMaterials();
 
             SMain.Enqueue("Envir Started.");
         }
@@ -1197,7 +1229,7 @@ namespace Server.MirEnvir
             return false;
         }
 
-        public bool BindSlotItems(UserItem item) //FAR - mount
+        public bool BindSlotItems(UserItem item)
         {           
             for (int i = 0; i < item.Slots.Length; i++)
             {

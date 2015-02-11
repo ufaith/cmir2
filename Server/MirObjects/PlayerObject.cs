@@ -956,7 +956,7 @@ namespace Server.MirObjects
                 }
             }
 
-            if (LastHitter != null && LastHitter.Race == ObjectType.Player && !CurrentMap.Info.Fight)
+            if (LastHitter != null && LastHitter.Race == ObjectType.Player && !CurrentMap.Info.Fight && !AtWar((PlayerObject)LastHitter))
             {
                 if (Envir.Time > BrownTime && PKPoints < 200)
                 {
@@ -1469,7 +1469,10 @@ namespace Server.MirObjects
             GetCompletedQuests();
 
             foreach (var quest in CurrentQuests)
+            {
+                quest.ResyncTasks();
                 SendUpdateQuest(quest, QuestState.Add);
+            }
 
             Enqueue(new S.BaseStatsInfo { Stats = Settings.ClassBaseStats[(byte)Class] });
             GetObjectsPassive();
@@ -2443,11 +2446,11 @@ namespace Server.MirObjects
             else if (PKPoints >= 100)
                 colour = Color.Yellow;
 
-
             if (colour == NameColour) return;
 
             NameColour = colour;
             Enqueue(new S.ColourChanged { NameColour = NameColour });
+
             Broadcast(new S.ObjectColourChanged { ObjectID = ObjectID, NameColour = NameColour });
         }
 
@@ -2529,9 +2532,9 @@ namespace Server.MirObjects
                     ReceiveChat(string.Format("You cannot shout for another {0} seconds.", Math.Ceiling((ShoutTime - Envir.Time) / 1000D)), ChatType.System);
                     return;
                 }
-                if (Level < 2)
+                if (Level < 7)
                 {
-                    ReceiveChat("You need to be level 2 before you can shout.", ChatType.System);
+                    ReceiveChat("You need to be level 7 before you can shout.", ChatType.System);
                     return;
                 }
 
@@ -2540,9 +2543,12 @@ namespace Server.MirObjects
 
                 p = new S.Chat { Message = message, Type = ChatType.Shout };
 
-                Envir.Broadcast(p);
-                //for (int i = 0; i < CurrentMap.Players.Count; i++)
-                //     CurrentMap.Players[i].Enqueue(p);
+                //Envir.Broadcast(p);
+                for (int i = 0; i < CurrentMap.Players.Count; i++)
+                {
+                    if (!Functions.InRange(CurrentLocation, CurrentMap.Players[i].CurrentLocation, Globals.DataRange * 2)) continue;
+                    CurrentMap.Players[i].Enqueue(p);
+                }
 
             }
             else if (message.StartsWith("@!"))
@@ -3385,6 +3391,49 @@ namespace Server.MirObjects
                                 }
                             }
                         }
+                        break;
+
+                    case "STARTWAR":
+                        if (!IsGM) return;
+                        if (parts.Length < 2) return;
+
+                        GuildObject enemyGuild = Envir.GetGuild(parts[1]);
+
+                        if(MyGuild == null)
+                        {
+                            ReceiveChat("You are not in a guild.", ChatType.System);
+                        }
+
+                        if (MyGuild.Ranks[0] != MyGuildRank)
+                        {
+                            ReceiveChat("You must be a leader to start a war.", ChatType.System);
+                            return;
+                        }
+
+                        if(enemyGuild == null)
+                        {
+                            ReceiveChat(string.Format("Could not find guild {0}.", parts[1]), ChatType.System);
+                            return;
+                        }
+
+                        if(MyGuild == enemyGuild)
+                        {
+                            ReceiveChat("Cannot go to war with your own guild.", ChatType.System);
+                            return;
+                        }
+
+                        if(MyGuild.WarringGuilds.Contains(enemyGuild))
+                        {
+                            ReceiveChat("Already at war with this guild.", ChatType.System);
+                            return;
+                        }
+
+                        if(MyGuild.GoToWar(enemyGuild))
+                        {
+                            ReceiveChat(string.Format("You started a war with {0}.", parts[1]), ChatType.System);
+                            enemyGuild.SendMessage(string.Format("{0} has started a war", MyGuild.Name), ChatType.System);
+                        }
+
                         break;
 
                     default:
@@ -7097,7 +7146,7 @@ namespace Server.MirObjects
                 MountType = MountType,
                 RidingMount = RidingMount,
                 Fishing = Fishing,
-
+                
                 //ArcherSpells - Elemental system
                 ElementOrbEffect = (uint)GetElementalOrbCount(),
                 ElementOrbLvl = (uint)ElementsLevel,
@@ -7293,7 +7342,7 @@ namespace Server.MirObjects
             LastHitTime = Envir.Time + 10000;
             RegenTime = Envir.Time + RegenDelay;
 
-            if (Envir.Time > BrownTime && PKPoints < 200 && !CurrentMap.Info.Fight)
+            if (Envir.Time > BrownTime && PKPoints < 200 && !CurrentMap.Info.Fight && !AtWar(attacker))
                 attacker.BrownTime = Envir.Time + Settings.Minute;
 
             if (attacker.HasParalysisRing && 1 == Envir.Random.Next(1, 15))
@@ -11738,6 +11787,17 @@ namespace Server.MirObjects
                     break;
             }
 
+        }
+
+        public bool AtWar(PlayerObject attacker)
+        {
+            if (MyGuild == null) return false;
+
+            if (attacker == null || attacker.MyGuild == null) return false;
+
+            if (!MyGuild.WarringGuilds.Contains(attacker.MyGuild)) return false;
+
+            return true;
         }
 
         #endregion
