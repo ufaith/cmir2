@@ -1043,7 +1043,7 @@ namespace Server.MirEnvir
                     return;
                 }
 
-                CharacterInfo info = new CharacterInfo(p, c) {Index = ++NextCharacterID};
+                CharacterInfo info = new CharacterInfo(p, c) { Index = ++NextCharacterID, AccountInfo = c.Account };
 
                 c.Account.Characters.Add(info);
                 CharacterList.Add(info);
