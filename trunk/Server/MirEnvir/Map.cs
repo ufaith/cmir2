@@ -532,23 +532,40 @@ namespace Server.MirEnvir
 
         }
 
+        //private void ProcessRespawns()
+        //{
+        //    bool Succes = true;
+        //    for (int i = 0; i < Respawns.Count; i++)
+        //    {
+        //        MapRespawn respawn = Respawns[i];
+
+        //        if (Envir.Time < respawn.RespawnTime) continue;
+        //        if (respawn.Count < respawn.Info.Count)
+        //        {
+        //            int count = respawn.Info.Count - respawn.Count;
+
+        //            for (int c = 0; c < count; c++)
+        //                Succes = respawn.Spawn();
+        //        }
+        //        if (Succes)
+        //            respawn.RespawnTime = Envir.Time + (respawn.Info.Delay * Settings.Minute);
+        //    }
+        //}
+
         private void ProcessRespawns()
         {
-            bool Succes = true;
             for (int i = 0; i < Respawns.Count; i++)
             {
                 MapRespawn respawn = Respawns[i];
 
-                if (Envir.Time < respawn.RespawnTime) continue;
-                if (respawn.Count < respawn.Info.Count)
-                {
-                    int count = respawn.Info.Count - respawn.Count;
+                if (Envir.Time < respawn.RespawnTime || respawn.Count >= respawn.Info.Count) continue;
 
-                    for (int c = 0; c < count; c++)
-                        Succes = respawn.Spawn();
-                }
-                if (Succes)
-                    respawn.RespawnTime = Envir.Time + (respawn.Info.Delay * Settings.Minute);
+                int count = respawn.Info.Count - respawn.Count;
+
+                for (int c = 0; c < count; c++)
+                   respawn.Spawn();
+
+                respawn.RespawnTime = Envir.Time + (respawn.Info.Delay * Settings.Minute);
             }
         }
 
