@@ -64,6 +64,12 @@
     <Compile Include="..\ServerPackets.cs">
       <Link>MirNetwork\ServerPackets.cs</Link>
     </Compile>
+    <Compile Include="MirForms\Account\PlayerInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MirForms\Account\PlayerInfoForm.Designer.cs">
+      <DependentUpon>PlayerInfoForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MirForms\BalanceConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -275,6 +281,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MirForms\Account\AccountInfoForm.resx">
       <DependentUpon>AccountInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MirForms\Account\PlayerInfoForm.resx">
+      <DependentUpon>PlayerInfoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MirForms\BalanceConfigForm.resx">
       <DependentUpon>BalanceConfigForm.cs</DependentUpon>
