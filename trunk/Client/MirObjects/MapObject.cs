@@ -47,7 +47,7 @@ namespace Client.MirObjects
 
         public MLibrary BodyLibrary;
         public Color DrawColour = Color.White, NameColour = Color.White;
-        public MirLabel NameLabel, ChatLabel;
+        public MirLabel NameLabel, ChatLabel, GuildLabel;
         public long ChatTime;
         public int DrawFrame, DrawWingFrame;
         public Point DrawLocation, Movement, FinalDrawLocation, OffSetMove;
@@ -212,7 +212,7 @@ namespace Client.MirObjects
             ChatLabel.Draw();
         }
 
-        private void CreateLabel()
+        public virtual void CreateLabel()
         {
             NameLabel = null;
 

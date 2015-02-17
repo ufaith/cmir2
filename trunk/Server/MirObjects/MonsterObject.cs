@@ -276,11 +276,11 @@ namespace Server.MirObjects
             CurrentMap.MonsterCount++;
             return true;
         }
-        public void Spawn(MapRespawn respawn)
+        public bool Spawn(MapRespawn respawn)
         {
             Respawn = respawn;
 
-            if (Respawn.Map == null) return;
+            if (Respawn.Map == null) return false;
 
             for (int i = 0; i < 10; i++)
             {
@@ -303,8 +303,9 @@ namespace Server.MirObjects
                 Respawn.Count++;
                 respawn.Map.MonsterCount++;
                 Envir.MonsterCount++;
-                return;
+                return true;
             }
+            return false;
         }
 
         public override void Spawned()

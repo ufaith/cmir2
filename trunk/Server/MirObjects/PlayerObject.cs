@@ -432,7 +432,7 @@ namespace Server.MirObjects
 
             if (Sneaking) CheckSneakRadius();
 
-            if (FlamingSword && Envir.Time >= FlamingSwordTime * 2)
+            if (FlamingSword && Envir.Time >= FlamingSwordTime)
             {
                 FlamingSword = false;
                 Enqueue(new S.SpellToggle { Spell = Spell.FlamingSword, CanUse = false });
@@ -3906,9 +3906,9 @@ namespace Server.MirObjects
                 }
 
                 int distance = Functions.MaxDistance(CurrentLocation, target.CurrentLocation);
-                int damage = GetAttackPower(MinDC * ((distance + 1) / 2) * (Focus ? 2 : 1), MaxDC * ((distance + 1) / 2) * (Focus ? 2 : 1));
+                int damage = GetAttackPower(MinDC * ((distance + 1) / 3) * (Focus ? 2 : 1), MaxDC * ((distance + 1) / 3) * (Focus ? 2 : 1));
 
-                int chanceToHit = 30 + Accuracy - (distance * 2); //Base chance chance = 30%, then add accuracy.
+                int chanceToHit = 40 + (Accuracy*3) - (int)(distance * 1.5); //new rate, orig>>>>//Base chance chance = 30%, then add accuracy.
                 int hitChance = SMain.Envir.Random.Next(100); // Randomise a number between minimum chance and 100       
 
                 if (hitChance < chanceToHit)
@@ -11687,6 +11687,13 @@ namespace Server.MirObjects
             {
                 Enqueue(p);
                 ReceiveChat("You are not part of a guild.", ChatType.System);
+                return;
+            }
+
+            if(!InSafeZone)
+            {
+                Enqueue(p);
+                ReceiveChat("You cannot use guild storage outside safezones.", ChatType.System);
                 return;
             }
 
