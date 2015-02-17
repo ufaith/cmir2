@@ -97,10 +97,6 @@ namespace Server.MirObjects.Monsters
         {
             if (attacker == null || attacker.Master == null) return 0;
             
-            byte _masterLevel = attacker.Master.Level; // max 256
-            byte _masterMaxMC = attacker.Master.MaxMC; // max 256
-            int _total = (_masterLevel * 10) + _masterMaxMC;
-
             if (_currentAttacker != null && _currentAttacker != attacker.Master)
             {
                 OutputAverage();
@@ -132,7 +128,6 @@ namespace Server.MirObjects.Monsters
                     break;
             }
 
-            attacker.PetExp((uint)_total);
             return 1;
         }
 

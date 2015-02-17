@@ -145,6 +145,7 @@ namespace Server
             this.ImportMongenButton = new System.Windows.Forms.Button();
             this.ExportMongenButton = new System.Windows.Forms.Button();
             this.VisualizerButton = new System.Windows.Forms.Button();
+            this.NoFightCheckbox = new System.Windows.Forms.CheckBox();
             this.MapTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage6.SuspendLayout();
@@ -326,6 +327,7 @@ namespace Server
             // 
             // tabPage6
             // 
+            this.tabPage6.Controls.Add(this.NoFightCheckbox);
             this.tabPage6.Controls.Add(this.NeedBridleCheckbox);
             this.tabPage6.Controls.Add(this.NoMountCheckbox);
             this.tabPage6.Controls.Add(this.label19);
@@ -358,7 +360,7 @@ namespace Server
             // NeedBridleCheckbox
             // 
             this.NeedBridleCheckbox.AutoSize = true;
-            this.NeedBridleCheckbox.Location = new System.Drawing.Point(174, 137);
+            this.NeedBridleCheckbox.Location = new System.Drawing.Point(174, 160);
             this.NeedBridleCheckbox.Name = "NeedBridleCheckbox";
             this.NeedBridleCheckbox.Size = new System.Drawing.Size(81, 17);
             this.NeedBridleCheckbox.TabIndex = 42;
@@ -1349,6 +1351,17 @@ namespace Server
             this.VisualizerButton.UseVisualStyleBackColor = true;
             this.VisualizerButton.Click += new System.EventHandler(this.VisualizerButton_Click);
             // 
+            // NoFightCheckbox
+            // 
+            this.NoFightCheckbox.AutoSize = true;
+            this.NoFightCheckbox.Location = new System.Drawing.Point(174, 137);
+            this.NoFightCheckbox.Name = "NoFightCheckbox";
+            this.NoFightCheckbox.Size = new System.Drawing.Size(66, 17);
+            this.NoFightCheckbox.TabIndex = 43;
+            this.NoFightCheckbox.Text = "No Fight";
+            this.NoFightCheckbox.UseVisualStyleBackColor = true;
+            this.NoFightCheckbox.CheckedChanged += new System.EventHandler(this.NoFightCheckbox_CheckedChanged);
+            // 
             // MapInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1503,6 +1516,7 @@ namespace Server
         private CheckBox NoMountCheckbox;
         private Label label34;
         private TextBox RoutePathTextBox;
+        private CheckBox NoFightCheckbox;
 
     }
 }

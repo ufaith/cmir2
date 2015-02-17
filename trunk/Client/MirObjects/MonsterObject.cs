@@ -53,7 +53,6 @@ namespace Client.MirObjects
         public long ShockTime;
         public bool BindingShotCenter;
 
-        public MirLabel TempLabel;
         public Color OldNameColor;
 
         public MonsterObject(uint objectID) : base(objectID)

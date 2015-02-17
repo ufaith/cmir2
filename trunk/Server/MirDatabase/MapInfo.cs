@@ -15,7 +15,7 @@ namespace Server.MirDatabase
         public LightSetting Light;
         public byte MapDarkLight = 0, MineIndex = 0;
 
-        public bool NoTeleport, NoReconnect, NoRandom, NoEscape, NoRecall, NoDrug, NoPosition, 
+        public bool NoTeleport, NoReconnect, NoRandom, NoEscape, NoRecall, NoDrug, NoPosition, NoFight,
             NoThrowItem, NoDropPlayer, NoDropMonster, NoNames, NoMount, NeedBridle, Fight, NeedHole, Fire, Lightning;
 
         public string NoReconnectMap = string.Empty;
@@ -93,6 +93,9 @@ namespace Server.MirDatabase
             if (Envir.LoadVersion < 33) return;
             NoMount = reader.ReadBoolean();
             NeedBridle = reader.ReadBoolean();
+
+            if (Envir.LoadVersion < 42) return;
+            NoFight = reader.ReadBoolean();
         }
 
         public void Save(BinaryWriter writer)
@@ -145,6 +148,8 @@ namespace Server.MirDatabase
 
             writer.Write(NoMount);
             writer.Write(NeedBridle);
+
+            writer.Write(NoFight);
         }
 
 

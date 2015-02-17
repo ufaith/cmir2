@@ -296,6 +296,9 @@ namespace Client
             for (int i = 0; i < MirAnimatedControl.Animations.Count; i++)
                 MirAnimatedControl.Animations[i].UpdateOffSet();
 
+            for (int i = 0; i < MirAnimatedButton.Animations.Count; i++)
+                MirAnimatedButton.Animations[i].UpdateOffSet();
+
             CreateHintLabel();
             CreateDebugLabel();
  
@@ -483,20 +486,6 @@ namespace Client
 
                 image.Save(Path.Combine(path, string.Format("Image {0}.Png", count)), ImageFormat.Png);
             }
-        }
-
-        //FAR - Image to byteArray (screenshots)
-        public static byte[] ImageToByteArray(Image img)
-        {
-            byte[] byteArray = new byte[0];
-            using (MemoryStream stream = new MemoryStream())
-            {
-                img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                stream.Close();
-
-                byteArray = stream.ToArray();
-            }
-            return byteArray;
         }
 
         public static void SaveError(string ex)

@@ -3568,7 +3568,7 @@ namespace Client.MirObjects
 
         }
 
-        public void DrawCurrentEffects()//Stephenking - shows current effect someone is carrying during load of objects, this works :D
+        public void DrawCurrentEffects()
         {
             if (CurrentEffect == SpellEffect.MagicShieldUp && !MagicShield)
             {
@@ -3745,12 +3745,14 @@ namespace Client.MirObjects
             CreateLabel();
 
             if (NameLabel == null) return;
-            if (GuildName != "")
+
+            if (GuildName != "" && GuildLabel != null)
             {
                 GuildLabel.Text = GuildName;
                 GuildLabel.Location = new Point(DisplayRectangle.X + (50 - GuildLabel.Size.Width) / 2, DisplayRectangle.Y - (42 - GuildLabel.Size.Height / 2) + (Dead ? 35 : 8)); //was 48 -
                 GuildLabel.Draw();
             }
+
             NameLabel.Text = Name;
             NameLabel.Location = new Point(DisplayRectangle.X + (50 - NameLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - NameLabel.Size.Height / 2) + (Dead ? 35 : 8)); //was 48 -
             NameLabel.Draw();

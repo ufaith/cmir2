@@ -933,6 +933,12 @@ namespace Server.MirObjects
                     CheckList.Add(new NPCChecks(CheckType.CheckRange, parts[1], parts[2], parts[3]));
                     break;
 
+                case "CHECKMAP":
+                    if (parts.Length < 2) return;
+
+                    CheckList.Add(new NPCChecks(CheckType.CheckMap, parts[1]));
+                    break;
+
                 //cant use stored var
                 case "CHECK":
                     if (parts.Length < 3) return;
@@ -1147,6 +1153,17 @@ namespace Server.MirObjects
                     acts.Add(new NPCActions(ActionType.ChangeClass, parts[1]));
                     break;
 
+                case "CHANGEHAIR":
+                    if (parts.Length < 2)
+                    {
+                        acts.Add(new NPCActions(ActionType.ChangeHair));
+                    }
+                    else
+                    {
+                        acts.Add(new NPCActions(ActionType.ChangeHair, parts[1]));
+                    }
+                    break;
+
                 //cant use stored var
                 case "LINEMESSAGE":
                     var match = regexMessage.Match(line);
@@ -1292,14 +1309,27 @@ namespace Server.MirObjects
 
                     break;
                 case "GIVEBUFF":
-                    if (parts.Length < 5) return;
-                    acts.Add(new NPCActions(ActionType.GiveBuff, parts[1], parts[2], parts[3], parts[4]));
+                    if (parts.Length < 4) return;
+
+                    string infinite = "";
+                    string visible = "";
+
+                    if (parts.Length > 4) infinite = parts[4];
+                    if (parts.Length > 5) infinite = parts[5];
+
+                    acts.Add(new NPCActions(ActionType.GiveBuff, parts[1], parts[2], parts[3], infinite, visible));
                     break;
 
                 case "ADDTOGUILD":
                     if (parts.Length < 2) return;
                     acts.Add(new NPCActions(ActionType.AddToGuild, parts[1]));
                     break;
+
+                case "REMOVEFROMGUILD":
+                    if (parts.Length < 2) return;
+                    acts.Add(new NPCActions(ActionType.RemoveFromGuild, parts[1]));
+                    break;
+
                 case "REFRESHEFFECTS":
                     acts.Add(new NPCActions(ActionType.RefreshEffects));
                     break;
@@ -1621,6 +1651,12 @@ namespace Server.MirObjects
                         failed = !Functions.InRange(player.CurrentLocation, target, range);
                         break;
 
+                    case CheckType.CheckMap:
+                        Map map = SMain.Envir.GetMapByNameAndInstance(param[0]);
+
+                        failed = player.CurrentMap != map;
+                        break;
+
                     case CheckType.Check:
                         uint onCheck;
 
@@ -1644,7 +1680,7 @@ namespace Server.MirObjects
                             break;
                         }
 
-                        var map = SMain.Envir.GetMapByNameAndInstance(param[1], tempInt2);
+                        map = SMain.Envir.GetMapByNameAndInstance(param[1], tempInt2);
                         if (map == null)
                         {
                             failed = true;
@@ -2023,6 +2059,23 @@ namespace Server.MirObjects
                         }
                         break;
 
+                    case ActionType.ChangeHair:
+
+                        if (param.Count < 1)
+                        {
+                            player.Info.Hair = (byte)SMain.Envir.Random.Next(0, 9);
+                        }
+                        else
+                        {
+                            byte.TryParse(param[0], out tempByte);
+
+                            if (tempByte >= 0 && tempByte <= 9)
+                            {
+                                player.Info.Hair = tempByte;
+                            }
+                        }
+                        break;
+
                     case ActionType.ChangeClass:
 
                         MirClass mirClass;
@@ -2257,9 +2310,17 @@ namespace Server.MirObjects
 
                         if (!Enum.IsDefined(typeof(BuffType), param[0])) return;
 
+                        tempBool = false;
+                        bool tempBool2 = false;
+
                         long.TryParse(param[1], out tempLong);
                         int.TryParse(param[2], out tempInt);
-                        bool.TryParse(param[3], out tempBool);
+
+                        if(param[3].Length > 0)
+                            bool.TryParse(param[3], out tempBool);
+
+                        if (param[4].Length > 0)
+                            bool.TryParse(param[4], out tempBool2);
 
                         Buff buff = new Buff
                         {
@@ -2267,7 +2328,8 @@ namespace Server.MirObjects
                             Caster = player,
                             ExpireTime = SMain.Envir.Time + tempLong * 1000,
                             Value = tempInt,
-                            Infinite = tempBool
+                            Infinite = tempBool,
+                            Visible = tempBool2
                         };
 
                         player.AddBuff(buff);
@@ -2282,6 +2344,15 @@ namespace Server.MirObjects
 
                         player.PendingGuildInvite = guild;
                         player.GuildInvite(true);
+                        break;
+
+                    case ActionType.RemoveFromGuild:
+                        if (player.MyGuild == null) return;
+
+                        if (player.MyGuildRank == null) return;
+
+                        player.MyGuild.DeleteMember(player, player.Name);
+
                         break;
 
                     case ActionType.RefreshEffects:
@@ -2405,7 +2476,9 @@ namespace Server.MirObjects
         Calc,
         GiveBuff,
         AddToGuild,
-        RefreshEffects
+        RemoveFromGuild,
+        RefreshEffects,
+        ChangeHair
     }
     public enum CheckType
     {
@@ -2431,6 +2504,7 @@ namespace Server.MirObjects
         PetLevel,
         PetCount,
         CheckCalc,
-        InGuild
+        InGuild,
+        CheckMap
     }
 }

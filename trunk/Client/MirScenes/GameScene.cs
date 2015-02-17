@@ -62,8 +62,8 @@ namespace Client.MirScenes
         public NPCDropDialog NPCDropDialog;
         public NPCAwakeDialog NPCAwakeDialog;
         public HelpDialog HelpDialog;
+        public RankingDialog RankingDialog;
         public KeyboardLayoutDialog KeyboardLayoutDialog;
-        public CraftingDialog CraftingDialog;
         public IntelligentCreatureDialog IntelligentCreatureDialog;
         public MountDialog MountDialog;
         public FishingDialog FishingDialog;
@@ -86,6 +86,7 @@ namespace Client.MirScenes
         public QuestTrackingDialog QuestTrackingDialog;
 
         public SkillBarDialog SkillBarDialog;
+        public ChatOptionDialog ChatOptionDialog;
 
         public static List<ItemInfo> ItemInfoList = new List<ItemInfo>();
         public static List<UserId> UserIdList = new List<UserId>();
@@ -161,9 +162,9 @@ namespace Client.MirScenes
             NPCDropDialog = new NPCDropDialog { Parent = this, Visible = false };
             NPCAwakeDialog = new NPCAwakeDialog { Parent = this, Visible = false };
             //NPCAwakeDialog.Hide();
+            RankingDialog = new RankingDialog { Parent = this, Visible = false };
             HelpDialog = new HelpDialog { Parent = this, Visible = false };
             KeyboardLayoutDialog = new KeyboardLayoutDialog { Parent = this, Visible = false };
-            CraftingDialog = new CraftingDialog { Parent = this, Visible = false };
             IntelligentCreatureDialog = new IntelligentCreatureDialog { Parent = this, Visible = false };
             MountDialog = new MountDialog { Parent = this, Visible = false };
             FishingDialog = new FishingDialog { Parent = this, Visible = false };
@@ -185,6 +186,7 @@ namespace Client.MirScenes
             QuestTrackingDialog = new QuestTrackingDialog { Parent = this, Visible = false };
             QuestLogDialog = new QuestDiaryDialog {Parent = this, Visible = false};
 
+            ChatOptionDialog = new ChatOptionDialog { Parent = this, Visible = false };
             SkillBarDialog = new SkillBarDialog { Parent = this, Visible = false };
 
             for (int i = 0; i < OutputLines.Length; i++)
@@ -359,7 +361,7 @@ namespace Client.MirScenes
                     NPCDialog.Hide();
                     HelpDialog.Hide();
                     KeyboardLayoutDialog.Hide();
-                    CraftingDialog.Hide();
+                    RankingDialog.Hide();
                     IntelligentCreatureDialog.Hide();
                     MountDialog.Hide();
                     FishingDialog.Hide();
@@ -1321,9 +1323,7 @@ namespace Client.MirScenes
                 image.Index = buffImage;
                 image.Library = buffLibrary;
 
-                double timeRemaining = Math.Round((buff.Expire - CMain.Time) / 1000D);
-
-                if (timeRemaining <= 5)
+                if (!buff.Infinite && Math.Round((buff.Expire - CMain.Time) / 1000D) <= 5)
                 {
                     double time = (buff.Expire - CMain.Time) / 100D;
 
@@ -1368,9 +1368,11 @@ namespace Client.MirScenes
                 case BuffType.General:
                     return 903;
                 case BuffType.Exp:
-                    return 907;
+                    return 903;
                 case BuffType.Drop:
                     return 872;
+                case BuffType.Gold:
+                    return 907;
                 case BuffType.Impact:
                     return 893;
                 case BuffType.Magic:
@@ -2056,6 +2058,9 @@ namespace Client.MirScenes
         }
         private void LogOutSuccess(S.LogOutSuccess p)
         {
+            for (int i = 0; i <= 3; i++)//Fix for orbs sound
+                SoundManager.StopSound(20000 + 126 * 10 + 5 + i);
+
             User = null;
             if (Settings.HighResolution)
                 CMain.SetResolution(800, 600);
@@ -2565,13 +2570,15 @@ namespace Client.MirScenes
             User.CurrentLocation = p.Location;
             User.MapLocation = p.Location;
             MapControl.AddObject(User);
-
+            
             User.Direction = p.Direction;
 
             User.QueuedAction = null;
             User.ActionFeed.Clear();
             User.ClearMagic();
             User.SetAction();
+
+            GameScene.CanRun = false;
 
             MapControl.FloorValid = false;
             MapControl.InputDelay = CMain.Time + 400;
@@ -8154,6 +8161,7 @@ namespace Client.MirScenes
     }
     public sealed class ChatDialog : MirImageControl
     {
+        public List<ChatHistory> FullHistory = new List<ChatHistory>();
         public List<ChatHistory> History = new List<ChatHistory>();
         public List<MirLabel> ChatLines = new List<MirLabel>();
 
@@ -8179,7 +8187,6 @@ namespace Client.MirScenes
             KeyDown += ChatPanel_KeyDown;
             MouseWheel += ChatPanel_MouseWheel;
 
-
             ChatTextBox = new MirTextBox
             {
                 BackColour = Color.DarkGray,
@@ -8189,7 +8196,7 @@ namespace Client.MirScenes
                 Location = new Point(1, 54),
                 MaxLength = Globals.MaxChatLength,
                 Visible = false,
-                Font = ChatFont,
+                Font = ChatFont,             
             };
             ChatTextBox.TextBox.KeyPress += ChatTextBox_KeyPress;
             ChatTextBox.TextBox.KeyDown += ChatTextBox_KeyDown;
@@ -8416,13 +8423,43 @@ namespace Client.MirScenes
                 StartIndex += chat.Count;
 
             for (int i = 0; i < chat.Count; i++)
-                History.Add(new ChatHistory { Text = chat[i], BackColour = backColour, ForeColour = foreColour, Type = type });
+                FullHistory.Add(new ChatHistory { Text = chat[i], BackColour = backColour, ForeColour = foreColour, Type = type });
 
             Update();
         }
 
         public void Update()
         {
+            History = new List<ChatHistory>();
+
+            for (int i = StartIndex; i < FullHistory.Count; i++)
+            {
+                switch (FullHistory[i].Type)
+                {
+                    case ChatType.Normal:
+                        if (Settings.FilterNormalChat) continue;
+                        break;
+                    case ChatType.WhisperIn:
+                    case ChatType.WhisperOut:
+                        if (Settings.FilterWhisperChat) continue;
+                        break;
+                    case ChatType.Shout:
+                        if (Settings.FilterShoutChat) continue;
+                        break;
+                    case ChatType.System:
+                        if (Settings.FilterSystemChat) continue;
+                        break;
+                    case ChatType.Group:
+                        if (Settings.FilterGroupChat) continue;
+                        break;
+                    case ChatType.Guild:
+                        if (Settings.FilterGuildChat) continue;
+                        break;
+                }
+
+                History.Add(FullHistory[i]);
+            }
+
             for (int i = 0; i < ChatLines.Count; i++)
                 ChatLines[i].Dispose();
 
@@ -8439,6 +8476,7 @@ namespace Client.MirScenes
             }
 
             int y = 1;
+
             for (int i = StartIndex; i < History.Count; i++)
             {
                 MirLabel temp = new MirLabel
@@ -8716,8 +8754,13 @@ namespace Client.MirScenes
             };
             SettingsButton.Click += (o, e) =>
                 {
-                    GameScene.Scene.ChatDialog.Transparent = !GameScene.Scene.ChatDialog.Transparent;
-                    GameScene.Scene.ChatDialog.UpdateBackground();
+                    if (GameScene.Scene.ChatOptionDialog.Visible)
+                        GameScene.Scene.ChatOptionDialog.Hide();
+                    else
+                        GameScene.Scene.ChatOptionDialog.Show();
+
+                    //GameScene.Scene.ChatDialog.Transparent = !GameScene.Scene.ChatDialog.Transparent;
+                    //GameScene.Scene.ChatDialog.UpdateBackground();
                 };
 
             NormalButton = new MirButton
@@ -11033,6 +11076,7 @@ namespace Client.MirScenes
                          LogOutButton,
                          HelpButton,
                          KeyboardLayoutButton,
+                         RankingButton,
                          CraftingButton,
                          IntelligentCreatureButton,
                          RideButton,
@@ -11102,7 +11146,7 @@ namespace Client.MirScenes
                 PressedIndex = 1975,
                 Parent = this,
                 Library = Libraries.Prguse,
-                Location = new Point(3, 88),
+                Location = new Point(3, 69),
                 Visible = false
             };
             KeyboardLayoutButton.Click += (o, e) =>
@@ -11110,6 +11154,23 @@ namespace Client.MirScenes
                 if (GameScene.Scene.KeyboardLayoutDialog.Visible)
                     GameScene.Scene.KeyboardLayoutDialog.Hide();
                 else GameScene.Scene.KeyboardLayoutDialog.Show();
+            };
+
+            RankingButton = new MirButton
+            {
+                Index = 2000,
+                HoverIndex = 2001,
+                PressedIndex = 2002,
+                Parent = this,
+                Library = Libraries.Prguse,
+                Location = new Point(3, 88),
+                Visible = false
+            };
+            RankingButton.Click += (o, e) =>
+            {
+                if (GameScene.Scene.RankingDialog.Visible)
+                    GameScene.Scene.RankingDialog.Hide();
+                else GameScene.Scene.RankingDialog.Show();
             };
 
             CraftingButton = new MirButton
@@ -11124,9 +11185,7 @@ namespace Client.MirScenes
             };
             CraftingButton.Click += (o, e) =>
             {
-                if (GameScene.Scene.CraftingDialog.Visible)
-                    GameScene.Scene.CraftingDialog.Hide();
-                else GameScene.Scene.CraftingDialog.Show();
+              
             };
 
             IntelligentCreatureButton = new MirButton
@@ -11375,9 +11434,14 @@ namespace Client.MirScenes
             };
             PositionBar.OnMoving += PositionBar_OnMoving;
 
-            QuestButton = new MirButton()
+            QuestButton = new MirAnimatedButton()
             {
-                Index = 284,
+                Animated = true,
+                AnimationCount = 10,
+                Loop = true,
+                AnimationDelay = 130,
+
+                Index = 530,
                 HoverIndex = 285,
                 PressedIndex = 286,
                 Library = Libraries.Title,
@@ -11387,6 +11451,7 @@ namespace Client.MirScenes
                 Sound = SoundList.ButtonA,
                 Visible = false
             };
+            
             QuestButton.Click += (o, e) => GameScene.Scene.QuestListDialog.Toggle();
 
             CloseButton = new MirButton
@@ -16645,53 +16710,7 @@ namespace Client.MirScenes
             Visible = true;
         }
     }
-    public sealed class CraftingDialog : MirImageControl
-    {
-        public MirImageControl TitleLabel;
-        public MirButton CloseButton;
 
-        public CraftingDialog()
-        {
-            Index = 260;
-            Library = Libraries.Prguse2;
-            Movable = true;
-            Sort = true;
-            Location = new Point((800 - Size.Width) / 2, (600 - Size.Height) / 2);
-
-
-            TitleLabel = new MirImageControl
-            {
-                // Index = 7,
-                Library = Libraries.Title,
-                Location = new Point(18, 4),
-                Parent = this
-            };
-
-            CloseButton = new MirButton
-            {
-                HoverIndex = 361,
-                Index = 360,
-                Location = new Point(255, 5),
-                Library = Libraries.Prguse2,
-                Parent = this,
-                PressedIndex = 362,
-                Sound = SoundList.ButtonA,
-            };
-            CloseButton.Click += (o, e) => Hide();
-        }
-
-
-        public void Hide()
-        {
-            if (!Visible) return;
-            Visible = false;
-        }
-        public void Show()
-        {
-            if (Visible) return;
-            Visible = true;
-        }
-    }
     public sealed class IntelligentCreatureDialog : MirImageControl
     {
         public MirImageControl TitleLabel;
@@ -16945,19 +16964,22 @@ namespace Client.MirScenes
                     text = string.Format("Cursed\nDecreases DC/MC/SC/ASpeed by: {0}%.\n", Value);
                     break;
                 case BuffType.MoonLight:
-                    text = "Moon Light\nInvisible to many monsters and able to move.\n";
+                    text = "Moon Light\nInvisible to players and many\nmonsters when at a distance.\n";
                     break;
                 case BuffType.DarkBody:
                     text = "Dark Body\nInvisible to many monsters and able to move.\n";
                     break;
                 case BuffType.General:
-                    text = string.Format("Mirian Advantage\nExpRate increased by x{0}\nDropRate increased by x{0}\n", Value);
+                    text = string.Format("Mirian Advantage\nExpRate increased by {0}%\nDropRate increased by {0}%\n", Value);
                     break;
                 case BuffType.Exp:
-                    text = string.Format("ExpRate\nIncreased by x{0}\n", Value);
+                    text = string.Format("ExpRate\nIncreased by {0}%\n", Value);
+                    break;
+                case BuffType.Gold:
+                    text = string.Format("GoldRate\nIncreased by {0}%\n", Value);
                     break;
                 case BuffType.Drop:
-                    text = string.Format("DropRate\nIncreased by x{0}\n", Value);
+                    text = string.Format("DropRate\nIncreased by {0}%\n", Value);
                     break;
                 case BuffType.Concentration:
                     text = "Concentrating\nIncreases chance on element extraction.\n";

@@ -5,6 +5,7 @@ using Client.MirNetwork;
 using Client.MirScenes;
 using Microsoft.DirectX.Direct3D;
 using S = ServerPackets;
+using C = ClientPackets;
 
 namespace Client.MirControls
 {
@@ -218,8 +219,12 @@ namespace Client.MirControls
                 case 3:
                     MirMessageBox.Show("Disconnected: Server Crashed.", true);
                     break;
+                case 4:
+                    MirMessageBox.Show("Disconnected: Kicked by Admin.", true);
+                    break;
             }
         }
+
         public abstract void Process();
 
         #region Disposable

@@ -8,7 +8,6 @@ using Server.MirObjects;
 using C = ClientPackets;
 using S = ServerPackets;
 
-
 namespace Server.MirNetwork
 {
     public enum GameStage { None, Login, Select, Game, Disconnected }

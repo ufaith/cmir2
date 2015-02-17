@@ -65,7 +65,8 @@ public enum DefaultNPCType : byte
     Trigger = 5,
     CustomCommand = 6,
     OnAcceptQuest = 7,
-    OnFinishQuest = 8
+    OnFinishQuest = 8,
+    Daily = 9
 }
 
 public enum Monster : ushort
@@ -726,6 +727,7 @@ public enum BuffType : byte
     General,
     Exp,
     Drop,
+    Gold,
     Concentration,
     Impact,
     Magic,
@@ -925,7 +927,7 @@ public enum ServerPacketIds : short
     NPCReset,
     AwakeningNeedMaterials,
     AwakeningLockedItem,
-    Awakening,
+    Awakening
 }
 
 public enum ClientPacketIds : short
@@ -1015,7 +1017,7 @@ public enum ClientPacketIds : short
     Awakening,
     DisassembleItem,
     DowngradeAwakening,
-    ResetAddedItem,
+    ResetAddedItem
 }
 
 public class InIReader
@@ -3639,7 +3641,7 @@ public abstract class Packet
             case (short)ServerPacketIds.AwakeningLockedItem:
                 return new S.AwakeningLockedItem();
             case (short)ServerPacketIds.Awakening:
-                return new S.Awakening(); 
+                return new S.Awakening();
             default:
                 throw new NotImplementedException();
         }

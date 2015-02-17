@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 41;
+        public const int Version = 43;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -116,7 +116,6 @@ namespace Server.MirEnvir
         private void WorkLoop()
         {
             Time = Stopwatch.ElapsedMilliseconds;
-            dayTime = Time;
 
             long conTime = Time;
             long saveTime = Time + Settings.SaveDelay * Settings.Minute;
@@ -705,7 +704,7 @@ namespace Server.MirEnvir
 
             for (int i = 0; i < MapInfoList.Count; i++)
                 MapInfoList[i].CreateMap();
-            SMain.Enqueue("Maps Loaded.");
+            SMain.Enqueue(string.Format("{0} Maps Loaded.", MapInfoList.Count));
 
             for (int i = 0; i < ItemInfoList.Count; i++)
                 if (ItemInfoList[i].StartItem)
@@ -1377,28 +1376,34 @@ namespace Server.MirEnvir
 
         public void ProcessNewDay()
         {
-            ClearDailyQuests();
-        }
-
-
-        private void ClearDailyQuests()
-        {
             foreach (CharacterInfo c in CharacterList)
             {
-                CharacterInfo c1 = c;
-                foreach (int flagId in 
-                    from q in QuestInfoList 
-                    let flagId = 1000 + q.Index 
-                    where c1.Flags[flagId] && q.Type == QuestType.Daily 
-                    select flagId)
+                ClearDailyQuests(c);
+
+                c.NewDay = true;
+
+                if(c.Player != null)
                 {
-                    c.Flags[flagId] = false;
+                    c.Player.CallDefaultNPC(DefaultNPCType.Daily);
                 }
             }
+        }
 
-            foreach (PlayerObject p in Players)
+        private void ClearDailyQuests(CharacterInfo info)
+        {
+            CharacterInfo c1 = info;
+            foreach (int flagId in
+                from q in QuestInfoList
+                let flagId = 1000 + q.Index
+                where c1.Flags[flagId] && q.Type == QuestType.Daily
+                select flagId)
             {
-                p.GetCompletedQuests();
+                info.Flags[flagId] = false;
+            }
+
+            if (info.Player != null)
+            {
+                info.Player.GetCompletedQuests();
             }
         }
     }

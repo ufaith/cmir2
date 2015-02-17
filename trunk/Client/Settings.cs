@@ -78,7 +78,8 @@ namespace Client
             LevelEffect = true,
             DropView = true,
             NameView = true,
-            HPView = true;
+            HPView = true,
+            TransparentChat = false;
 
 
         //Chat
@@ -90,6 +91,17 @@ namespace Client
             ShowMentorChat = true,
             ShowGroupChat = true,
             ShowGuildChat = true;
+
+        //Filters
+        public static bool
+            FilterNormalChat = false,
+            FilterWhisperChat = false,
+            FilterShoutChat = false,
+            FilterSystemChat = false,
+            FilterLoverChat = false,
+            FilterMentorChat = false,
+            FilterGroupChat = false,
+            FilterGuildChat = false;
 
         public static void Load()
         {
@@ -133,6 +145,7 @@ namespace Client
             NameView = Reader.ReadBoolean("Game", "NameView", NameView);
             HPView = Reader.ReadBoolean("Game", "HPMPView", HPView);
             FontName = Reader.ReadString("Game", "FontName", FontName);
+            TransparentChat = Reader.ReadBoolean("Game", "TransparentChat", TransparentChat);
 
             //Chat
             ShowNormalChat = Reader.ReadBoolean("Chat", "ShowNormalChat", ShowNormalChat);
@@ -142,6 +155,16 @@ namespace Client
             ShowMentorChat = Reader.ReadBoolean("Chat", "ShowMentorChat", ShowMentorChat);
             ShowGroupChat = Reader.ReadBoolean("Chat", "ShowGroupChat", ShowGroupChat);
             ShowGuildChat = Reader.ReadBoolean("Chat", "ShowGuildChat", ShowGuildChat);
+
+            //Filters
+            FilterNormalChat = Reader.ReadBoolean("Filter", "FilterNormalChat", FilterNormalChat);
+            FilterWhisperChat = Reader.ReadBoolean("Filter", "FilterWhisperChat", FilterWhisperChat);
+            FilterShoutChat = Reader.ReadBoolean("Filter", "FilterShoutChat", FilterShoutChat);
+            FilterSystemChat = Reader.ReadBoolean("Filter", "FilterSystemChat", FilterSystemChat);
+            FilterLoverChat = Reader.ReadBoolean("Filter", "FilterLoverChat", FilterLoverChat);
+            FilterMentorChat = Reader.ReadBoolean("Filter", "FilterMentorChat", FilterMentorChat);
+            FilterGroupChat = Reader.ReadBoolean("Filter", "FilterGroupChat", FilterGroupChat);
+            FilterGuildChat = Reader.ReadBoolean("Filter", "FilterGuildChat", FilterGuildChat);
         }
 
         public static void Save()
@@ -166,6 +189,7 @@ namespace Client
             Reader.Write("Game", "NameView", NameView);
             Reader.Write("Game", "HPMPView", HPView);
             Reader.Write("Game", "FontName", FontName);
+            Reader.Write("Game", "TransparentChat", TransparentChat);
 
             //Chat
             Reader.Write("Chat", "ShowNormalChat", ShowNormalChat);
@@ -176,6 +200,15 @@ namespace Client
             Reader.Write("Chat", "ShowGroupChat", ShowGroupChat);
             Reader.Write("Chat", "ShowGuildChat", ShowGuildChat);
 
+            //Filters
+            Reader.Write("Filter", "FilterNormalChat", FilterNormalChat);
+            Reader.Write("Filter", "FilterWhisperChat", FilterWhisperChat);
+            Reader.Write("Filter", "FilterShoutChat", FilterShoutChat);
+            Reader.Write("Filter", "FilterSystemChat", FilterSystemChat);
+            Reader.Write("Filter", "FilterLoverChat", FilterLoverChat);
+            Reader.Write("Filter", "FilterMentorChat", FilterMentorChat);
+            Reader.Write("Filter", "FilterGroupChat", FilterGroupChat);
+            Reader.Write("Filter", "FilterGuildChat", FilterGuildChat);
         }
     }
 }

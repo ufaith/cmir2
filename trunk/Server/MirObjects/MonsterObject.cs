@@ -347,8 +347,8 @@ namespace Server.MirObjects
 
             if (Info.Name == Settings.SkeletonName ||Info.Name == Settings.ShinsuName ||Info.Name == Settings.AngelName) 
             {
-                MoveSpeed = (ushort)(MoveSpeed - MaxPetLevel * 130);
-                AttackSpeed = (ushort)( AttackSpeed - MaxPetLevel * 70);
+                MoveSpeed = (ushort)(MoveSpeed + MaxPetLevel * 130);
+                AttackSpeed = (ushort)( AttackSpeed + MaxPetLevel * 70);
             }
 
             if (MoveSpeed < 400) MoveSpeed = 400;
@@ -580,7 +580,12 @@ namespace Server.MirObjects
             {
                 DropInfo drop = Info.Drops[i];
 
-                int rate = (int)(drop.Chance / (Settings.DropRate + (EXPOwner != null ? EXPOwner.ItemDropRateOffset : 0))); if (rate < 1) rate = 1;
+                int rate = (int)(drop.Chance / (Settings.DropRate));
+
+                if (EXPOwner != null && EXPOwner.ItemDropRateOffset > 0)
+                    rate -= (int)(rate * (EXPOwner.ItemDropRateOffset / 100));
+                
+                if (rate < 1) rate = 1;
 
                 if (Envir.Random.Next(rate) != 0) continue;
 
