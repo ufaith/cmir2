@@ -3691,6 +3691,7 @@ namespace Client.MirObjects
         public override void CreateLabel()
         {
             NameLabel = null;
+            GuildLabel = null;
 
             for (int i = 0; i < LabelList.Count; i++)
             {
@@ -3699,8 +3700,14 @@ namespace Client.MirObjects
                 break;
             }
 
+            for (int i = 0; i < LabelList.Count; i++)
+            {
+                if (LabelList[i].Text != GuildName || LabelList[i].ForeColour != NameColour) continue;
+                GuildLabel = LabelList[i];
+                break;
+            }
 
-            if (NameLabel != null && !NameLabel.IsDisposed) return;
+            if (NameLabel != null && !NameLabel.IsDisposed && GuildLabel != null && !GuildLabel.IsDisposed) return;
 
             NameLabel = new MirLabel
             {
@@ -3713,20 +3720,7 @@ namespace Client.MirObjects
             };
             NameLabel.Disposing += (o, e) => LabelList.Remove(NameLabel);
             LabelList.Add(NameLabel);
-
-
-            GuildLabel = null;
-
-            for (int i = 0; i < LabelList.Count; i++)
-            {
-                if (LabelList[i].Text != GuildName || LabelList[i].ForeColour != NameColour) continue;
-                GuildLabel = LabelList[i];
-                break;
-            }
-
-
-            if (GuildLabel != null && !GuildLabel.IsDisposed) return;
-
+            
             GuildLabel = new MirLabel
             {
                 AutoSize = true,
@@ -3744,9 +3738,9 @@ namespace Client.MirObjects
         {
             CreateLabel();
 
-            if (NameLabel == null) return;
+            if (NameLabel == null || GuildLabel == null) return;
 
-            if (GuildName != "" && GuildLabel != null)
+            if (GuildName != "")
             {
                 GuildLabel.Text = GuildName;
                 GuildLabel.Location = new Point(DisplayRectangle.X + (50 - GuildLabel.Size.Width) / 2, DisplayRectangle.Y - (42 - GuildLabel.Size.Height / 2) + (Dead ? 35 : 8)); //was 48 -
