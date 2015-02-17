@@ -105,6 +105,7 @@
       <DependentUpon>CMain.cs</DependentUpon>
     </Compile>
     <Compile Include="MirControls\MirAmountBox.cs" />
+    <Compile Include="MirControls\MirAnimatedButton.cs" />
     <Compile Include="MirControls\MirAnimatedControl.cs" />
     <Compile Include="MirControls\MirButton.cs" />
     <Compile Include="MirControls\MirControl.cs" />
@@ -131,7 +132,9 @@
     <Compile Include="MirObjects\PlayerObject.cs" />
     <Compile Include="MirObjects\SpellObject.cs" />
     <Compile Include="MirObjects\UserObject.cs" />
+    <Compile Include="MirScenes\Dialogs\ChatOptionDialog.cs" />
     <Compile Include="MirScenes\Dialogs\HelpDialog.cs" />
+    <Compile Include="MirScenes\Dialogs\RankingDialog.cs" />
     <Compile Include="MirScenes\GameScene.cs" />
     <Compile Include="MirScenes\LoginScene.cs" />
     <Compile Include="MirNetwork\Network.cs" />
