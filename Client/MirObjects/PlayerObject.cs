@@ -7,6 +7,7 @@ using Client.MirGraphics;
 using Client.MirNetwork;
 using Client.MirScenes;
 using Client.MirSounds;
+using Client.MirControls;
 using S = ServerPackets;
 using C = ClientPackets;
 
@@ -3687,6 +3688,74 @@ namespace Client.MirObjects
             return MapControl.MapLocation == CurrentLocation || BodyLibrary != null && BodyLibrary.VisiblePixel(DrawFrame + ArmourOffSet, p.Subtract(FinalDrawLocation), false);
         }
 
+        public override void CreateLabel()
+        {
+            NameLabel = null;
+
+            for (int i = 0; i < LabelList.Count; i++)
+            {
+                if (LabelList[i].Text != Name || LabelList[i].ForeColour != NameColour) continue;
+                NameLabel = LabelList[i];
+                break;
+            }
+
+
+            if (NameLabel != null && !NameLabel.IsDisposed) return;
+
+            NameLabel = new MirLabel
+            {
+                AutoSize = true,
+                BackColour = Color.Transparent,
+                ForeColour = NameColour,
+                OutLine = true,
+                OutLineColour = Color.Black,
+                Text = Name,
+            };
+            NameLabel.Disposing += (o, e) => LabelList.Remove(NameLabel);
+            LabelList.Add(NameLabel);
+
+
+            GuildLabel = null;
+
+            for (int i = 0; i < LabelList.Count; i++)
+            {
+                if (LabelList[i].Text != GuildName || LabelList[i].ForeColour != NameColour) continue;
+                GuildLabel = LabelList[i];
+                break;
+            }
+
+
+            if (GuildLabel != null && !GuildLabel.IsDisposed) return;
+
+            GuildLabel = new MirLabel
+            {
+                AutoSize = true,
+                BackColour = Color.Transparent,
+                ForeColour = NameColour,
+                OutLine = true,
+                OutLineColour = Color.Black,
+                Text = GuildName,
+            };
+            GuildLabel.Disposing += (o, e) => LabelList.Remove(GuildLabel);
+            LabelList.Add(GuildLabel);
+        }
+
+        public override void DrawName()
+        {
+            CreateLabel();
+
+            if (NameLabel == null) return;
+            if (GuildName != "")
+            {
+                GuildLabel.Text = GuildName;
+                GuildLabel.Location = new Point(DisplayRectangle.X + (50 - GuildLabel.Size.Width) / 2, DisplayRectangle.Y - (42 - GuildLabel.Size.Height / 2) + (Dead ? 35 : 8)); //was 48 -
+                GuildLabel.Draw();
+            }
+            NameLabel.Text = Name;
+            NameLabel.Location = new Point(DisplayRectangle.X + (50 - NameLabel.Size.Width) / 2, DisplayRectangle.Y - (32 - NameLabel.Size.Height / 2) + (Dead ? 35 : 8)); //was 48 -
+            NameLabel.Draw();
+        }
+
     }
 
 
@@ -3697,4 +3766,5 @@ namespace Client.MirObjects
         public MirDirection Direction;
         public List<object> Params;
     }
+
 }
