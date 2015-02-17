@@ -9,7 +9,6 @@ using Server.MirEnvir;
 namespace Server.MirDatabase
 {
     #region Notes
-    //better way to store quest progress?
     //clean up new flag methods
     #endregion
 
@@ -111,19 +110,15 @@ namespace Server.MirDatabase
 
         public void ResyncTasks()
         {
-            int dbKillTaskCount = Info.KillTasks.Count;
-            int dbItemTaskCount = Info.ItemTasks.Count;
-            int dbFlagTaskCount = Info.FlagTasks.Count;
-
-            if(dbKillTaskCount != KillTaskCount.Count)
+            if (Info.KillTasks.Count != KillTaskCount.Count)
             {
-                if(KillTaskCount.Count > dbKillTaskCount)
+                if (KillTaskCount.Count > Info.KillTasks.Count)
                 {
-                    KillTaskCount.RemoveRange(dbKillTaskCount, KillTaskCount.Count - dbKillTaskCount);
+                    KillTaskCount.RemoveRange(Info.KillTasks.Count, KillTaskCount.Count - Info.KillTasks.Count);
                 }
                 else
                 {
-                    while (KillTaskCount.Count < dbKillTaskCount)
+                    while (KillTaskCount.Count < Info.KillTasks.Count)
                     {
                         KillTaskCount.Add(0);
                     }
@@ -132,15 +127,15 @@ namespace Server.MirDatabase
                 EndDateTime = DateTime.MaxValue;
             }
 
-            if (dbItemTaskCount != ItemTaskCount.Count)
+            if (Info.ItemTasks.Count != ItemTaskCount.Count)
             {
-                if (ItemTaskCount.Count > dbItemTaskCount)
+                if (ItemTaskCount.Count > Info.ItemTasks.Count)
                 {
-                    ItemTaskCount.RemoveRange(dbKillTaskCount, ItemTaskCount.Count - dbItemTaskCount);
+                    ItemTaskCount.RemoveRange(Info.ItemTasks.Count, ItemTaskCount.Count - Info.ItemTasks.Count);
                 }
                 else
                 {
-                    while (ItemTaskCount.Count < dbItemTaskCount)
+                    while (ItemTaskCount.Count < Info.ItemTasks.Count)
                     {
                         ItemTaskCount.Add(0);
                     }
@@ -149,15 +144,15 @@ namespace Server.MirDatabase
                 EndDateTime = DateTime.MaxValue;
             }
 
-            if(dbFlagTaskCount != FlagTaskSet.Count)
+            if (Info.FlagTasks.Count != FlagTaskSet.Count)
             {
-                if (FlagTaskSet.Count > dbFlagTaskCount)
+                if (FlagTaskSet.Count > Info.FlagTasks.Count)
                 {
-                    FlagTaskSet.RemoveRange(dbFlagTaskCount, FlagTaskSet.Count - dbFlagTaskCount);
+                    FlagTaskSet.RemoveRange(Info.FlagTasks.Count, FlagTaskSet.Count - Info.FlagTasks.Count);
                 }
                 else
                 {
-                    while (FlagTaskSet.Count < dbFlagTaskCount)
+                    while (FlagTaskSet.Count < Info.FlagTasks.Count)
                     {
                         FlagTaskSet.Add(false);
                     }

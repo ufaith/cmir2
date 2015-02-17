@@ -5,6 +5,7 @@ using Server.MirDatabase;
 using Server.MirEnvir;
 using Server.MirObjects.Monsters;
 using S = ServerPackets;
+using System.IO;
 
 namespace Server.MirObjects
 {
@@ -658,5 +659,39 @@ namespace Server.MirObjects
         public long ExpireTime;
         public int Value;
         public bool Infinite;
+
+        public Buff() { }
+
+        public Buff(Buff buff)
+        {
+            Type = buff.Type;
+            Caster = buff.Caster;
+            Visible = buff.Visible;
+            ObjectID = buff.ObjectID;
+            ExpireTime = buff.ExpireTime;
+            Value = buff.Value;
+            Infinite = buff.Infinite;
+        }
+
+        public Buff(BinaryReader reader)
+        {
+            Type = (BuffType)reader.ReadByte();
+            Caster = null;
+            Visible = reader.ReadBoolean();
+            ObjectID = reader.ReadUInt32();
+            ExpireTime = reader.ReadInt64();
+            Value = reader.ReadInt32();
+            Infinite = reader.ReadBoolean();
+        }
+
+        public void Save(BinaryWriter writer)
+        {
+            writer.Write((byte)Type);
+            writer.Write(Visible);
+            writer.Write(ObjectID);
+            writer.Write(ExpireTime);
+            writer.Write(Value);
+            writer.Write(Infinite);
+        }
     }
 }

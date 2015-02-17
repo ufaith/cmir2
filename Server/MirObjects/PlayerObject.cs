@@ -102,6 +102,7 @@ namespace Server.MirObjects
         public byte LifeOnHit;
         public byte HpDrainRate;
         public float HpDrain = 0;
+
         public float ExpRateOffset = 0;
 
         public override int PKPoints
@@ -343,8 +344,17 @@ namespace Server.MirObjects
                     pet.Despawn();
                 }
             }
-
             Pets.Clear();
+
+            for (int i = 0; i < Buffs.Count; i++ )
+            {
+                Buff buff = Buffs[i];
+                buff.ExpireTime -= Envir.Time;
+
+                Info.Buffs.Add(new Buff(buff));
+            }
+            Buffs.Clear();
+
             if (MyGuild != null) MyGuild.PlayerLogged(this, false);
             Envir.Players.Remove(this);
             CurrentMap.RemoveObject(this);
@@ -1160,7 +1170,10 @@ namespace Server.MirObjects
 
         public override void WinExp(uint amount)
         {
-            amount = (uint)(amount * (Settings.ExpRate + ExpRateOffset));
+            amount = (uint)(amount * Settings.ExpRate);
+
+            if (ExpRateOffset > 0)
+                amount += (uint)(amount * (ExpRateOffset / 100));
 
             if (GroupMembers != null)
             {
@@ -1432,6 +1445,11 @@ namespace Server.MirObjects
             //Call Login NPC
             CallDefaultNPC(DefaultNPCType.Login);
 
+            //Call Daily NPC
+            if(Info.NewDay)
+            {
+                CallDefaultNPC(DefaultNPCType.Daily);
+            }
         }
         private void StartGameSuccess()
         {
@@ -1507,10 +1525,25 @@ namespace Server.MirObjects
 
                 monster.SetHP(info.HP);
             }
+
             Info.Pets.Clear();
+
+            for (int i = 0; i < Info.Buffs.Count; i++)
+            {
+                Buff buff = Info.Buffs[i];
+                buff.Caster = this;
+                buff.ExpireTime += Envir.Time;
+
+                AddBuff(buff);
+            }
+
+            Info.Buffs.Clear();
+
             if (MyGuild != null)
                 MyGuild.PlayerLogged(this, true);
+
             SMain.Enqueue(string.Format("{0} has connected.", Info.Name));
+
         }
         private void StartGameFailed()
         {
@@ -2412,6 +2445,9 @@ namespace Server.MirObjects
                     case BuffType.Drop:
                         ItemDropRateOffset = (float)Math.Min(float.MaxValue, ItemDropRateOffset + buff.Value);
                         break;
+                    case BuffType.Gold:
+                        GoldDropRateOffset = (float)Math.Min(float.MaxValue, GoldDropRateOffset + buff.Value);
+                        break;
                     case BuffType.Impact:
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
                         break;
@@ -2477,6 +2513,16 @@ namespace Server.MirObjects
                 return;
             }
 
+            if (Info.ChatBanned)
+            {
+                if (Info.ChatBanExpiryDate > DateTime.Now)
+                {
+                    ReceiveChat("You are currently banned from chatting.", ChatType.System);
+                    return;
+                }
+
+                Info.ChatBanned = false;
+            }
 
             string[] parts;
 
@@ -2526,7 +2572,6 @@ namespace Server.MirObjects
             else if (message.StartsWith("!"))
             {
                 //Shout
-
                 if (Envir.Time < ShoutTime)
                 {
                     ReceiveChat(string.Format("You cannot shout for another {0} seconds.", Math.Ceiling((ShoutTime - Envir.Time) / 1000D)), ChatType.System);
@@ -3908,7 +3953,7 @@ namespace Server.MirObjects
                 int distance = Functions.MaxDistance(CurrentLocation, target.CurrentLocation);
                 int damage = GetAttackPower(MinDC * ((distance + 1) / 3) * (Focus ? 2 : 1), MaxDC * ((distance + 1) / 3) * (Focus ? 2 : 1));
 
-                int chanceToHit = 40 + (Accuracy*3) - (int)(distance * 1.5); //new rate, orig>>>>//Base chance chance = 30%, then add accuracy.
+                int chanceToHit = 40 + (Accuracy * 3) - (int)(distance * 1.5); //new rate, orig>>>>//Base chance chance = 30%, then add accuracy.
                 int hitChance = SMain.Envir.Random.Next(100); // Randomise a number between minimum chance and 100       
 
                 if (hitChance < chanceToHit)
@@ -4795,8 +4840,13 @@ namespace Server.MirObjects
 
             UserMagic spell = GetMagic(Spell.Meditation);
 
-            if(spell != null)
-                meditateLevel = spell.Level;
+            if(spell == null)
+            {
+                ReceiveChat("Skill requires meditation.", ChatType.System);
+                return;
+            }
+
+            meditateLevel = spell.Level;
 
             int maxOrbs = (int)Settings.OrbsExpList[Settings.OrbsExpList.Count - 1];
 
@@ -5490,8 +5540,8 @@ namespace Server.MirObjects
         private void UltimateEnhancer(MapObject target, UserMagic magic, out bool cast)
         {
             cast = false;
-            int count = Buffs.Where(x => x.Type == BuffType.UltimateEnhancer).ToList().Count();
-            if (count > 0) return;
+            //int count = Buffs.Where(x => x.Type == BuffType.UltimateEnhancer).ToList().Count();
+            //if (count > 0) return;
 
             UserItem item = GetAmulet(1);
             if (item == null) return;
@@ -6495,7 +6545,7 @@ namespace Server.MirObjects
                     if (Envir.Random.Next(4) > magic.Level || Envir.Time < target.RevTime) return;
 
                     target.RevTime = Envir.Time + value * 1000;
-                    target.PoisonList.Clear();
+                    //target.PoisonList.Clear();
                     target.OperateTime = 0;
                     target.BroadcastHealthChange();
 
@@ -7163,6 +7213,7 @@ namespace Server.MirObjects
         {
             if (attacker == null || attacker.Node == null) return false;
             if (Dead || InSafeZone || attacker.InSafeZone || attacker == this || GMGameMaster) return false;
+            if (CurrentMap.Info.NoFight) return false;
 
             switch (attacker.AMode)
             {
@@ -7187,6 +7238,7 @@ namespace Server.MirObjects
             if (attacker.Info.AI == 6 || attacker.Info.AI == 58) return PKPoints >= 200;
             if (attacker.Master == null) return true;
             if (InSafeZone || attacker.Master.InSafeZone) return false;
+            
             if (LastHitter != attacker.Master && attacker.Master.LastHitter != this)
             {
                 bool target = false;
@@ -9540,6 +9592,10 @@ namespace Server.MirObjects
                     if (value.Length < 1) return;
                     key = string.Format("OnFinishQuest({0})", value[0]);
                     break;
+                case DefaultNPCType.Daily:
+                    key = "Daily";
+                    Info.NewDay = false;
+                    break;
             }
 
             key = string.Format("[@_{0}]", key);
@@ -11694,7 +11750,7 @@ namespace Server.MirObjects
             {
                 Enqueue(p);
                 ReceiveChat("You cannot use guild storage outside safezones.", ChatType.System);
-                return;
+    	        return;
             }
 
             switch (Type)
@@ -12428,7 +12484,7 @@ namespace Server.MirObjects
 
                 while (count > 0)
                 {
-                    rewardItem = Envir.CreateDropItem(reward.Item);
+                    rewardItem = Envir.CreateFreshItem(reward.Item);
                     if (reward.Item.StackSize >= count)
                     {                   
                         rewardItem.Count = count;
@@ -12455,7 +12511,7 @@ namespace Server.MirObjects
 
                     while (count > 0)
                     {
-                        rewardItem = Envir.CreateDropItem(quest.Info.SelectRewards[i].Item);
+                        rewardItem = Envir.CreateFreshItem(quest.Info.SelectRewards[i].Item);
                         if (quest.Info.SelectRewards[i].Item.StackSize >= count)
                         {
                             rewardItem.Count = count;

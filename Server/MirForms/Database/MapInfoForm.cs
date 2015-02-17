@@ -127,6 +127,7 @@ namespace Server
             NoDropMonsterCheckbox.Checked = mi.NoDropMonster;
             NoNamesCheckbox.Checked = mi.NoNames;
             FightCheckbox.Checked = mi.Fight;
+            NoFightCheckbox.Checked = mi.NoFight;
             FireCheckbox.Checked = mi.Fire;
             FireTextbox.Text = mi.FireDamage.ToString();
             LightningCheckbox.Checked = mi.Lightning;                      
@@ -162,6 +163,7 @@ namespace Server
                 if (NoDropMonsterCheckbox.Checked != mi.NoDropMonster) NoDropMonsterCheckbox.Checked = false;
                 if (NoNamesCheckbox.Checked != mi.NoNames) NoNamesCheckbox.Checked = false;
                 if (FightCheckbox.Checked != mi.Fight) FightCheckbox.Checked = false;
+                if (NoFightCheckbox.Checked != mi.NoFight) NoFightCheckbox.Checked = false;
                 if (FireCheckbox.Checked != mi.Fire) FireCheckbox.Checked = false;
                 if (FireTextbox.Text != mi.FireDamage.ToString()) FireTextbox.Text = string.Empty;
                 if (LightningCheckbox.Checked != mi.Lightning) LightningCheckbox.Checked = false;                             
@@ -1318,6 +1320,7 @@ namespace Server
                     NoDropMonster = MirForms.ConvertMapInfo.MapInfo[i].NoMonsterDrop,
                     NoNames = MirForms.ConvertMapInfo.MapInfo[i].NoNames,
                     Fight = MirForms.ConvertMapInfo.MapInfo[i].Fight,
+                    NoFight = MirForms.ConvertMapInfo.MapInfo[i].NoFight,
                     Fire = MirForms.ConvertMapInfo.MapInfo[i].Fire,
                     Lightning = MirForms.ConvertMapInfo.MapInfo[i].Lightning,
                     Light = MirForms.ConvertMapInfo.MapInfo[i].Light,
@@ -1431,6 +1434,8 @@ namespace Server
                         attributes += " NOMONSTERDROP";
                     if (_selectedMapInfos[i].NoNames)
                         attributes += " NONAMES";
+                    if (_selectedMapInfos[i].NoFight)
+                        attributes += " NOFIGHT";
                     if (_selectedMapInfos[i].Fire)
                         attributes += " FIRE(" + _selectedMapInfos[i].FireDamage + ")";
                     if (_selectedMapInfos[i].Lightning)
@@ -1603,6 +1608,14 @@ namespace Server
 
             for (int i = 0; i < _selectedMapInfos.Count; i++)
                 _selectedMapInfos[i].NeedBridle = NeedBridleCheckbox.Checked;
+        }
+
+        private void NoFightCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+
+            for (int i = 0; i < _selectedMapInfos.Count; i++)
+                _selectedMapInfos[i].NoFight = NoFightCheckbox.Checked;
         }
 
     }

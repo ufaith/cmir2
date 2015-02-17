@@ -17,7 +17,24 @@ namespace Server
             InitializeComponent();
             EditEnvir.LoadDB();
             Envir.Start();
+
+            AutoResize();
         }
+
+        private void AutoResize()
+        {
+            int columnCount = PlayersOnlineListView.Columns.Count;
+
+            foreach (ColumnHeader column in PlayersOnlineListView.Columns)
+            {
+                column.Width = PlayersOnlineListView.Width / (columnCount - 1) - 1;
+            }
+
+            indexHeader.Width = 2;
+        }
+
+
+
         public static void Enqueue(Exception ex)
         {
             if (MessageLog.Count < 100)
@@ -81,10 +98,29 @@ namespace Server
 
                     ChatLogTextBox.AppendText(message);
                 }
+
+                ProcessPlayersOnlineTab();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void ProcessPlayersOnlineTab()
+        {
+            if (PlayersOnlineListView.Items.Count != Envir.Players.Count)
+            {
+                PlayersOnlineListView.Items.Clear();
+
+                for (int i = PlayersOnlineListView.Items.Count; i < Envir.Players.Count; i++)
+                {
+                    Server.MirDatabase.CharacterInfo character = Envir.Players[i].Info;
+
+                    ListViewItem tempItem = character.CreateListView();
+
+                    PlayersOnlineListView.Items.Add(tempItem);
+                }
             }
         }
 
@@ -99,19 +135,9 @@ namespace Server
             Envir.MonsterCount = 0;
         }
 
-        private void gameToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
-        }
-
         private void SMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Envir.Stop();
-        }
-
-        private void accountsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
         }
 
         private void closeServerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -140,11 +166,6 @@ namespace Server
             form.ShowDialog();
         }
 
-        private void dragonInfoToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
-        }
-
         private void balanceConfigToolStripMenuItem_Click(object sender, EventArgs e)
         {
             BalanceConfigForm form = new BalanceConfigForm();
@@ -171,11 +192,6 @@ namespace Server
             BalanceConfigForm form = new BalanceConfigForm();
 
             form.ShowDialog();
-        }
-
-        private void systemToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
         }
 
         private void accountToolStripMenuItem_Click(object sender, EventArgs e)
@@ -246,6 +262,40 @@ namespace Server
             SystemInfoForm form = new SystemInfoForm(0);
 
             form.ShowDialog();
+        }
+
+        private void GlobalMessageButton_Click(object sender, EventArgs e)
+        {
+            if (GlobalMessageTextBox.Text.Length < 1) return;
+
+            foreach (var player in Envir.Players)
+            {
+                player.ReceiveChat(GlobalMessageTextBox.Text, ChatType.Announcement);
+            }
+
+            EnqueueChat(GlobalMessageTextBox.Text);
+            GlobalMessageTextBox.Text = string.Empty;
+        }
+
+        private void PlayersOnlineListView_DoubleClick(object sender, EventArgs e)
+        {
+            ListViewNF list = (ListViewNF)sender;
+
+            if (list.SelectedItems.Count > 0)
+            {
+                ListViewItem item = list.SelectedItems[0];
+                string index = item.SubItems[0].Text;
+
+                PlayerInfoForm form = new PlayerInfoForm(Convert.ToUInt32(index));
+
+                form.ShowDialog();
+            }
+        }
+
+        private void PlayersOnlineListView_ColumnWidthChanging(object sender, ColumnWidthChangingEventArgs e)
+        {
+            e.Cancel = true;
+            e.NewWidth = PlayersOnlineListView.Columns[e.ColumnIndex].Width;
         }
     }
 }

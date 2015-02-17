@@ -104,7 +104,7 @@ namespace Client.MirObjects
 
             // Statues
             NPCs.Add(frame = new FrameSet());
-            frame.Frames.Add(MirAction.Standing, new Frame(0, 1, 0, 0));
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 1, 0, 1500));
 
             // Flags (10 frames)
             NPCs.Add(frame = new FrameSet());

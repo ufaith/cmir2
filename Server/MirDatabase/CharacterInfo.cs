@@ -6,6 +6,7 @@ using MS.Internal.Xml.XPath;
 using Server.MirEnvir;
 using Server.MirNetwork;
 using Server.MirObjects;
+using System.Windows.Forms;
 
 namespace Server.MirDatabase
 {
@@ -26,12 +27,16 @@ namespace Server.MirDatabase
         public string BanReason = string.Empty;
         public DateTime ExpiryDate;
 
+        public bool ChatBanned;
+        public DateTime ChatBanExpiryDate;
+
         public string LastIP = string.Empty;
         public DateTime LastDate;
 
         public bool Deleted;
         public DateTime DeleteDate;
 
+        public ListViewItem ListItem;
 
         //Location
         public int CurrentMapIndex;
@@ -50,12 +55,15 @@ namespace Server.MirDatabase
 
         public int PKPoints;
 
+        public bool NewDay;
+
         public bool Thrusting, HalfMoon, CrossHalfMoon;
         public bool DoubleSlash;
 
         public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14], Trade = new UserItem[10], QuestInventory = new UserItem[40];
         public List<UserMagic> Magics = new List<UserMagic>();
         public List<PetInfo> Pets = new List<PetInfo>();
+        public List<Buff> Buffs = new List<Buff>();
 
         public List<QuestProgressInfo> CurrentQuests = new List<QuestProgressInfo>();
 
@@ -194,9 +202,14 @@ namespace Server.MirDatabase
                 for (int i = 0; i < count; i++)
                     CurrentQuests.Add(new QuestProgressInfo(reader));
             }
+
+            if(Envir.LoadVersion > 42)
+            {
+                count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                    Buffs.Add(new Buff(reader));
+            }
         }
-
-
 
         public void Save(BinaryWriter writer)
         {
@@ -289,6 +302,25 @@ namespace Server.MirDatabase
             writer.Write(CurrentQuests.Count);
             for (int i = 0; i < CurrentQuests.Count; i++)
                 CurrentQuests[i].Save(writer);
+
+            writer.Write(Buffs.Count);
+            for (int i = 0; i < Buffs.Count; i++)
+                Buffs[i].Save(writer);
+        }
+
+        public ListViewItem CreateListView()
+        {
+            if (ListItem != null)
+                ListItem.Remove();
+
+            ListItem = new ListViewItem(Index.ToString()) { Tag = this };
+
+            ListItem.SubItems.Add(Name);
+            ListItem.SubItems.Add(Level.ToString());
+            ListItem.SubItems.Add(Class.ToString());
+            ListItem.SubItems.Add(Gender.ToString());
+
+            return ListItem;
         }
 
         public SelectInfo ToSelectInfo()

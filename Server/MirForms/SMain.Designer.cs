@@ -40,7 +40,17 @@ namespace Server
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.DebugLogTextBox = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.GlobalMessageButton = new System.Windows.Forms.Button();
+            this.GlobalMessageTextBox = new System.Windows.Forms.TextBox();
             this.ChatLogTextBox = new System.Windows.Forms.TextBox();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.PlayersOnlineListView = new Server.ListViewNF();
+            this.indexHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.nameHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.levelHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.classHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.genderHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.StatusBar = new System.Windows.Forms.StatusStrip();
             this.PlayersLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.MonsterLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -65,12 +75,14 @@ namespace Server
             this.dragonSystemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.guildsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.InterfaceTimer = new System.Windows.Forms.Timer(this.components);
             this.fishingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.InterfaceTimer = new System.Windows.Forms.Timer(this.components);
             this.MainTabs.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.StatusBar.SuspendLayout();
             this.MainMenu.SuspendLayout();
             this.SuspendLayout();
@@ -80,11 +92,12 @@ namespace Server
             this.MainTabs.Controls.Add(this.tabPage1);
             this.MainTabs.Controls.Add(this.tabPage2);
             this.MainTabs.Controls.Add(this.tabPage3);
+            this.MainTabs.Controls.Add(this.tabPage4);
             this.MainTabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.MainTabs.Location = new System.Drawing.Point(0, 24);
             this.MainTabs.Name = "MainTabs";
             this.MainTabs.SelectedIndex = 0;
-            this.MainTabs.Size = new System.Drawing.Size(543, 373);
+            this.MainTabs.Size = new System.Drawing.Size(485, 346);
             this.MainTabs.TabIndex = 5;
             // 
             // tabPage1
@@ -93,7 +106,7 @@ namespace Server
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(535, 347);
+            this.tabPage1.Size = new System.Drawing.Size(477, 320);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Logs";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -106,7 +119,7 @@ namespace Server
             this.LogTextBox.Name = "LogTextBox";
             this.LogTextBox.ReadOnly = true;
             this.LogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.LogTextBox.Size = new System.Drawing.Size(529, 341);
+            this.LogTextBox.Size = new System.Drawing.Size(471, 314);
             this.LogTextBox.TabIndex = 2;
             // 
             // tabPage2
@@ -115,7 +128,7 @@ namespace Server
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(535, 347);
+            this.tabPage2.Size = new System.Drawing.Size(477, 320);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Debug Logs";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -128,30 +141,118 @@ namespace Server
             this.DebugLogTextBox.Name = "DebugLogTextBox";
             this.DebugLogTextBox.ReadOnly = true;
             this.DebugLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.DebugLogTextBox.Size = new System.Drawing.Size(529, 341);
+            this.DebugLogTextBox.Size = new System.Drawing.Size(471, 314);
             this.DebugLogTextBox.TabIndex = 3;
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.groupBox1);
             this.tabPage3.Controls.Add(this.ChatLogTextBox);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(535, 347);
+            this.tabPage3.Size = new System.Drawing.Size(477, 320);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Chat Logs";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.GlobalMessageButton);
+            this.groupBox1.Controls.Add(this.GlobalMessageTextBox);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.groupBox1.Location = new System.Drawing.Point(3, 272);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(471, 45);
+            this.groupBox1.TabIndex = 7;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Send Message";
+            // 
+            // GlobalMessageButton
+            // 
+            this.GlobalMessageButton.Location = new System.Drawing.Point(392, 14);
+            this.GlobalMessageButton.Name = "GlobalMessageButton";
+            this.GlobalMessageButton.Size = new System.Drawing.Size(73, 24);
+            this.GlobalMessageButton.TabIndex = 0;
+            this.GlobalMessageButton.Text = "Send";
+            this.GlobalMessageButton.UseVisualStyleBackColor = true;
+            this.GlobalMessageButton.Click += new System.EventHandler(this.GlobalMessageButton_Click);
+            // 
+            // GlobalMessageTextBox
+            // 
+            this.GlobalMessageTextBox.Location = new System.Drawing.Point(6, 17);
+            this.GlobalMessageTextBox.Name = "GlobalMessageTextBox";
+            this.GlobalMessageTextBox.Size = new System.Drawing.Size(380, 20);
+            this.GlobalMessageTextBox.TabIndex = 0;
+            // 
             // ChatLogTextBox
             // 
-            this.ChatLogTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ChatLogTextBox.Location = new System.Drawing.Point(3, 3);
             this.ChatLogTextBox.Multiline = true;
             this.ChatLogTextBox.Name = "ChatLogTextBox";
             this.ChatLogTextBox.ReadOnly = true;
             this.ChatLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ChatLogTextBox.Size = new System.Drawing.Size(529, 341);
+            this.ChatLogTextBox.Size = new System.Drawing.Size(471, 269);
             this.ChatLogTextBox.TabIndex = 4;
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage4.Controls.Add(this.PlayersOnlineListView);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(477, 320);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Players Online";
+            // 
+            // PlayersOnlineListView
+            // 
+            this.PlayersOnlineListView.Activation = System.Windows.Forms.ItemActivation.OneClick;
+            this.PlayersOnlineListView.BackColor = System.Drawing.SystemColors.Window;
+            this.PlayersOnlineListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.indexHeader,
+            this.nameHeader,
+            this.levelHeader,
+            this.classHeader,
+            this.genderHeader});
+            this.PlayersOnlineListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PlayersOnlineListView.FullRowSelect = true;
+            this.PlayersOnlineListView.GridLines = true;
+            this.PlayersOnlineListView.Location = new System.Drawing.Point(3, 3);
+            this.PlayersOnlineListView.Name = "PlayersOnlineListView";
+            this.PlayersOnlineListView.Size = new System.Drawing.Size(471, 314);
+            this.PlayersOnlineListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
+            this.PlayersOnlineListView.TabIndex = 0;
+            this.PlayersOnlineListView.UseCompatibleStateImageBehavior = false;
+            this.PlayersOnlineListView.View = System.Windows.Forms.View.Details;
+            this.PlayersOnlineListView.ColumnWidthChanging += new System.Windows.Forms.ColumnWidthChangingEventHandler(this.PlayersOnlineListView_ColumnWidthChanging);
+            this.PlayersOnlineListView.DoubleClick += new System.EventHandler(this.PlayersOnlineListView_DoubleClick);
+            // 
+            // indexHeader
+            // 
+            this.indexHeader.Text = "Index";
+            this.indexHeader.Width = 71;
+            // 
+            // nameHeader
+            // 
+            this.nameHeader.Text = "Name";
+            this.nameHeader.Width = 93;
+            // 
+            // levelHeader
+            // 
+            this.levelHeader.Text = "Level";
+            this.levelHeader.Width = 90;
+            // 
+            // classHeader
+            // 
+            this.classHeader.Text = "Class";
+            this.classHeader.Width = 100;
+            // 
+            // genderHeader
+            // 
+            this.genderHeader.Text = "Gender";
+            this.genderHeader.Width = 98;
             // 
             // StatusBar
             // 
@@ -159,9 +260,10 @@ namespace Server
             this.PlayersLabel,
             this.MonsterLabel,
             this.ConnectionsLabel});
-            this.StatusBar.Location = new System.Drawing.Point(0, 397);
+            this.StatusBar.Location = new System.Drawing.Point(0, 370);
             this.StatusBar.Name = "StatusBar";
-            this.StatusBar.Size = new System.Drawing.Size(543, 24);
+            this.StatusBar.Size = new System.Drawing.Size(485, 24);
+            this.StatusBar.SizingGrip = false;
             this.StatusBar.TabIndex = 4;
             this.StatusBar.Text = "statusStrip1";
             // 
@@ -201,7 +303,7 @@ namespace Server
             this.configToolStripMenuItem1});
             this.MainMenu.Location = new System.Drawing.Point(0, 0);
             this.MainMenu.Name = "MainMenu";
-            this.MainMenu.Size = new System.Drawing.Size(543, 24);
+            this.MainMenu.Size = new System.Drawing.Size(485, 24);
             this.MainMenu.TabIndex = 3;
             this.MainMenu.Text = "menuStrip1";
             // 
@@ -309,14 +411,14 @@ namespace Server
             // serverToolStripMenuItem
             // 
             this.serverToolStripMenuItem.Name = "serverToolStripMenuItem";
-            this.serverToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.serverToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.serverToolStripMenuItem.Text = "Server";
             this.serverToolStripMenuItem.Click += new System.EventHandler(this.serverToolStripMenuItem_Click);
             // 
             // balanceToolStripMenuItem
             // 
             this.balanceToolStripMenuItem.Name = "balanceToolStripMenuItem";
-            this.balanceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.balanceToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.balanceToolStripMenuItem.Text = "Balance";
             this.balanceToolStripMenuItem.Click += new System.EventHandler(this.balanceToolStripMenuItem_Click);
             // 
@@ -328,50 +430,53 @@ namespace Server
             this.guildsToolStripMenuItem,
             this.fishingToolStripMenuItem});
             this.systemToolStripMenuItem.Name = "systemToolStripMenuItem";
-            this.systemToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.systemToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.systemToolStripMenuItem.Text = "System";
             // 
             // dragonSystemToolStripMenuItem
             // 
             this.dragonSystemToolStripMenuItem.Name = "dragonSystemToolStripMenuItem";
-            this.dragonSystemToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dragonSystemToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
             this.dragonSystemToolStripMenuItem.Text = "Dragon";
             this.dragonSystemToolStripMenuItem.Click += new System.EventHandler(this.dragonSystemToolStripMenuItem_Click);
             // 
             // miningToolStripMenuItem
             // 
             this.miningToolStripMenuItem.Name = "miningToolStripMenuItem";
-            this.miningToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.miningToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
             this.miningToolStripMenuItem.Text = "Mining";
             this.miningToolStripMenuItem.Click += new System.EventHandler(this.miningToolStripMenuItem_Click);
             // 
             // guildsToolStripMenuItem
             // 
             this.guildsToolStripMenuItem.Name = "guildsToolStripMenuItem";
-            this.guildsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.guildsToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
             this.guildsToolStripMenuItem.Text = "Guilds";
             this.guildsToolStripMenuItem.Click += new System.EventHandler(this.guildsToolStripMenuItem_Click);
+            // 
+            // fishingToolStripMenuItem
+            // 
+            this.fishingToolStripMenuItem.Name = "fishingToolStripMenuItem";
+            this.fishingToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+            this.fishingToolStripMenuItem.Text = "Fishing";
+            this.fishingToolStripMenuItem.Click += new System.EventHandler(this.fishingToolStripMenuItem_Click);
             // 
             // InterfaceTimer
             // 
             this.InterfaceTimer.Enabled = true;
             this.InterfaceTimer.Tick += new System.EventHandler(this.InterfaceTimer_Tick);
             // 
-            // fishingToolStripMenuItem
-            // 
-            this.fishingToolStripMenuItem.Name = "fishingToolStripMenuItem";
-            this.fishingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.fishingToolStripMenuItem.Text = "Fishing";
-            this.fishingToolStripMenuItem.Click += new System.EventHandler(this.fishingToolStripMenuItem_Click);
-            // 
             // SMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(543, 421);
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(485, 394);
             this.Controls.Add(this.MainTabs);
             this.Controls.Add(this.StatusBar);
             this.Controls.Add(this.MainMenu);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
             this.Name = "SMain";
             this.Text = "Legend of Mir Server";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SMain_FormClosing);
@@ -382,6 +487,9 @@ namespace Server
             this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
             this.StatusBar.ResumeLayout(false);
             this.StatusBar.PerformLayout();
             this.MainMenu.ResumeLayout(false);
@@ -426,6 +534,16 @@ namespace Server
         private ToolStripMenuItem guildsToolStripMenuItem;
         private ToolStripMenuItem miningToolStripMenuItem;
         private ToolStripMenuItem fishingToolStripMenuItem;
+        private TabPage tabPage4;
+        private GroupBox groupBox1;
+        private Button GlobalMessageButton;
+        private TextBox GlobalMessageTextBox;
+        private ListViewNF PlayersOnlineListView;
+        private ColumnHeader nameHeader;
+        private ColumnHeader levelHeader;
+        private ColumnHeader classHeader;
+        private ColumnHeader genderHeader;
+        private ColumnHeader indexHeader;
     }
 }
 

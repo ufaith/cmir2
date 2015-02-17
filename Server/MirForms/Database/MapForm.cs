@@ -68,6 +68,7 @@ namespace Server.MirForms
                     newMapInfo.NoPlayerDrop = mapAttributes.Any(s => s.Contains("NOPLAYERDROP".ToUpper()));
                     newMapInfo.NoMonsterDrop = mapAttributes.Any(s => s.Contains("NOMONSTERDROP".ToUpper()));
                     newMapInfo.NoNames = mapAttributes.Any(s => s.Contains("NONAMES".ToUpper()));
+                    newMapInfo.NoFight = mapAttributes.Any(s => s.Contains("NOFIGHT".ToUpper()));
                     newMapInfo.Fight = !mapAttributes.Any(s => s.Contains("SAFE".ToUpper()));
                     newMapInfo.Fire = mapAttributes.Any(x => x.StartsWith("FIRE(".ToUpper()));
                     newMapInfo.Lightning = mapAttributes.Any(x => x.StartsWith("LIGHTNING(".ToUpper()));
@@ -279,6 +280,7 @@ namespace Server.MirForms
             NoMonsterDrop = false,
             NoNames = false,
             Fight = false,
+            NoFight = false,
             Fire = false,
             Lightning = false,
             MiniMap = false,

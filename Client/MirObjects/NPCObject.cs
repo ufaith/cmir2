@@ -28,7 +28,6 @@ namespace Client.MirObjects
         public int BaseIndex, FrameIndex, FrameInterval, 
             EffectFrameIndex, EffectFrameInterval, QuestIndex;
 
-        public MirLabel TempLabel;
         public byte Image;
         public QuestIcon QuestIcon = QuestIcon.None;
 
@@ -119,7 +118,7 @@ namespace Client.MirObjects
                 case 117:
                 case 118:
                 case 141:
-                case 142: 
+                case 142:
                 case 151:
                 case 152:
                 case 163:
@@ -128,7 +127,7 @@ namespace Client.MirObjects
                     break;
                 #endregion
 
-                #region 12 frames + animation(10 frames) (large tele) 
+                #region 12 frames + animation(10 frames) (large tele)
                 case 33:
                 case 34:
                     Frames = FrameSet.NPCs[3];
@@ -161,7 +160,7 @@ namespace Client.MirObjects
                 case 40:
                 case 44:
                 case 45:
-                case 46:              
+                case 46:
                 case 50:
                 case 51:
                 case 54:
@@ -202,7 +201,7 @@ namespace Client.MirObjects
                 case 137:
                 case 138:
                 case 139:
-                case 140: 
+                case 140:
                 case 144:
                 case 145:
                 case 146:
@@ -218,7 +217,7 @@ namespace Client.MirObjects
                 #endregion
 
                 #region 10 frames
-                case 53: 
+                case 53:
                 case 153:
                 case 158:
                 case 161:
@@ -336,12 +335,6 @@ namespace Client.MirObjects
 
             SetAction();
         }
-
-        public void BindQuests()
-        {
-
-        }
-
 
         public override void Process()
         {

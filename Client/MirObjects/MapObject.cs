@@ -60,7 +60,7 @@ namespace Client.MirObjects
         //Sound
         public int StruckWeapon;
 
-
+        public MirLabel TempLabel;
 
         protected MapObject(uint objectID)
         {
@@ -237,6 +237,8 @@ namespace Client.MirObjects
             };
             NameLabel.Disposing += (o, e) => LabelList.Remove(NameLabel);
             LabelList.Add(NameLabel);
+
+
 
         }
         public virtual void DrawName()
