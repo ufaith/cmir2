@@ -1804,7 +1804,9 @@ namespace Server.MirObjects
             if (HP > MaxHP) SetHP(MaxHP);
             if (MP > MaxMP) SetMP(MaxMP);
 
-            AttackSpeed = 1400 - ((ASpeed * 60) + Math.Min(370, (Level * 5)));
+            AttackSpeed = 1400 - ((ASpeed * 60) + Math.Min(370, (Level * 14)));
+
+
 
             if (AttackSpeed < 600) AttackSpeed = 600;
         }
