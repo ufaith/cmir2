@@ -1176,7 +1176,7 @@ namespace Client.MirObjects
                             break;
                         case MirAction.Mine:
                             Network.Enqueue(new C.Attack { Direction = Direction, Spell = Spell.None });
-                            GameScene.AttackTime = CMain.Time + (1400 - Math.Min(370, (User.Level * 5)));
+                            GameScene.AttackTime = CMain.Time + (1400 - Math.Min(370, (User.Level * 14)));
                             MapControl.NextAction = CMain.Time + 2500;
                             break;
                         case MirAction.Attack1:
@@ -1334,8 +1334,8 @@ namespace Client.MirObjects
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 + (Gender == MirGender.Male ? 0 : 1));
                                 break;
                             case Spell.DoubleSlash:
-                                FrameInterval = FrameInterval * 5 / 10; //50% Faster Animation
-                                EffectFrameInterval = EffectFrameInterval * 5 / 10;
+                                FrameInterval = (FrameInterval * 5 / 10); //50% Faster Animation
+                                EffectFrameInterval = (EffectFrameInterval * 5 / 10);
                                 action = new QueuedAction { Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>() };
                                 action.Params.Add(Spell);
                                 ActionFeed.Insert(0, action);
