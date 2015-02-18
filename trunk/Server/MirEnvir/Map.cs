@@ -532,40 +532,44 @@ namespace Server.MirEnvir
 
         }
 
-        //private void ProcessRespawns()
-        //{
-        //    bool Succes = true;
-        //    for (int i = 0; i < Respawns.Count; i++)
-        //    {
-        //        MapRespawn respawn = Respawns[i];
-
-        //        if (Envir.Time < respawn.RespawnTime) continue;
-        //        if (respawn.Count < respawn.Info.Count)
-        //        {
-        //            int count = respawn.Info.Count - respawn.Count;
-
-        //            for (int c = 0; c < count; c++)
-        //                Succes = respawn.Spawn();
-        //        }
-        //        if (Succes)
-        //            respawn.RespawnTime = Envir.Time + (respawn.Info.Delay * Settings.Minute);
-        //    }
-        //}
-
         private void ProcessRespawns()
         {
+            bool Succes = true;
             for (int i = 0; i < Respawns.Count; i++)
             {
                 MapRespawn respawn = Respawns[i];
+                if (Envir.Time < respawn.RespawnTime) continue;
+                if (respawn.Count < respawn.Info.Count)
+                {
+                    int count = respawn.Info.Count - respawn.Count;
 
-                if (Envir.Time < respawn.RespawnTime || respawn.Count >= respawn.Info.Count) continue;
+                    for (int c = 0; c < count; c++)
+                        Succes = respawn.Spawn();
+                }
+                if (Succes)
+                {
+                    respawn.ErrorCount = 0;
+                    respawn.RespawnTime = Envir.Time + (respawn.Info.Delay * Settings.Minute);
+                }
+                else
+                {
+                    respawn.RespawnTime = Envir.Time + 1 * Settings.Minute; // each time it fails to spawn, give it a 1 minute cooldown
+                    if (respawn.ErrorCount < 5)
+                        respawn.ErrorCount++;
+                    else
+                    {
+                        if (respawn.ErrorCount == 5)
+                        {
+                            respawn.ErrorCount++;
 
-                int count = respawn.Info.Count - respawn.Count;
+                            File.AppendAllText(@".\SpawnErrors.txt",
+                                String.Format("[{5}]Failed to spawn: mapindex: {0} ,mob info: index: {1} spawncoords ({2}:{3}) range {4}", respawn.Map.Info.Index, respawn.Info.MonsterIndex, respawn.Info.Location.X, respawn.Info.Location.Y, respawn.Info.Spread, DateTime.Now)
+                                       + Environment.NewLine);
+                            //*/
+                        }
 
-                for (int c = 0; c < count; c++)
-                   respawn.Spawn();
-
-                respawn.RespawnTime = Envir.Time + (respawn.Info.Delay * Settings.Minute);
+                    }
+                }
             }
         }
 
@@ -1850,6 +1854,7 @@ namespace Server.MirEnvir
         public Map Map;
         public int Count;
         public long RespawnTime;
+        public byte ErrorCount = 0;
 
         public List<RouteInfo> Route;
 
