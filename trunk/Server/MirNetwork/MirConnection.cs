@@ -653,6 +653,12 @@ namespace Server.MirNetwork
         {
             if (Stage != GameStage.Game) return;
 
+            if (SMain.Envir.Time < Player.LogTime)
+            {
+                Enqueue(new S.LogOutFailed());
+                return;
+            }
+
             Player.StopGame();
 
             Stage = GameStage.Select;

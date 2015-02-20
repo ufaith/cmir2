@@ -42,7 +42,7 @@ namespace Client.MirScenes
             set { MapObject.User = value; }
         }
 
-        public static long MoveTime, AttackTime, NextRunTime;
+        public static long MoveTime, AttackTime, NextRunTime, LogTime;
         public static bool CanMove, CanRun;
 
         public MapControl MapControl;
@@ -518,7 +518,7 @@ namespace Client.MirScenes
 
         private void UseSpell(int key)
         {
-            if (User.RidingMount) return;
+            if (User.RidingMount || User.Fishing) return;
 
             if(!User.HasClassWeapon && User.Weapon >= 0)
             {
@@ -538,7 +538,7 @@ namespace Client.MirScenes
             }
 
             if (magic == null) return;
-
+            
             int cost;
             switch (magic.Spell)
             {
@@ -616,21 +616,35 @@ namespace Client.MirScenes
 
         public void QuitGame()
         {
-            //If Last Combat < 10 CANCEL
-            MirMessageBox messageBox = new MirMessageBox("Do you want to quit Legend of Mir?", MirMessageBoxButtons.YesNo);
-            messageBox.YesButton.Click += (o, e) => Program.Form.Close();
-            messageBox.Show();
+            if (CMain.Time >= LogTime)
+            {
+                //If Last Combat < 10 CANCEL
+                MirMessageBox messageBox = new MirMessageBox("Do you want to quit Legend of Mir?", MirMessageBoxButtons.YesNo);
+                messageBox.YesButton.Click += (o, e) => Program.Form.Close();
+                messageBox.Show();
+            }
+            else
+            {
+                ChatDialog.ReceiveChat("Can not leave game for " + (LogTime - CMain.Time) / 1000 + " seconds.", ChatType.System);
+            }
         }
         public void LogOut()
         {
-            //If Last Combat < 10 CANCEL
-            MirMessageBox messageBox = new MirMessageBox("Do you want to log out of Legend of Mir?", MirMessageBoxButtons.YesNo);
-            messageBox.YesButton.Click += (o, e) =>
+            if (CMain.Time >= LogTime)
             {
-                Network.Enqueue(new C.LogOut());
-                Enabled = false;
-            };
-            messageBox.Show();
+                //If Last Combat < 10 CANCEL
+                MirMessageBox messageBox = new MirMessageBox("Do you want to log out of Legend of Mir?", MirMessageBoxButtons.YesNo);
+                messageBox.YesButton.Click += (o, e) =>
+                {
+                    Network.Enqueue(new C.LogOut());
+                    Enabled = false;
+                };
+                messageBox.Show();
+            }
+            else
+            {
+                ChatDialog.ReceiveChat("Cannot leave game for " + (LogTime - CMain.Time) / 1000 + " seconds.", ChatType.System);
+            }
         }
 
         protected internal override void DrawControl()
@@ -817,6 +831,9 @@ namespace Client.MirScenes
                     break;
                 case (short)ServerPacketIds.LogOutSuccess:
                     LogOutSuccess((S.LogOutSuccess)p);
+                    break;
+                case (short)ServerPacketIds.LogOutFailed:
+                    LogOutFailed((S.LogOutFailed)p);
                     break;
                 case (short)ServerPacketIds.TimeOfDay:
                     TimeOfDay((S.TimeOfDay)p);
@@ -2068,6 +2085,11 @@ namespace Client.MirScenes
 
             Dispose();
         }
+        private void LogOutFailed(S.LogOutFailed p)
+        {
+            Enabled = true;
+        }
+
         private void TimeOfDay(S.TimeOfDay p)
         {
             Lights = p.Lights;
@@ -2189,6 +2211,7 @@ namespace Client.MirScenes
         private void ObjectAttack(S.ObjectAttack p)
         {
             if (p.ObjectID == User.ObjectID) return;
+
             QueuedAction action = null;
 
             for (int i = MapControl.Objects.Count - 1; i >= 0; i--)
@@ -2228,11 +2251,13 @@ namespace Client.MirScenes
         }
         private void Struck(S.Struck p)
         {
+            LogTime = CMain.Time + Globals.LogDelay;
+
             NextRunTime = CMain.Time + 2500;
             User.BlizzardFreezeTime = 0;
             User.ClearMagic();
 
-            if (User.CurrentAction == MirAction.Struck) return;
+            //if (User.CurrentAction == MirAction.Struck) return;
 
             MirDirection dir = User.Direction;
             Point location = User.CurrentLocation;
@@ -2262,7 +2287,7 @@ namespace Client.MirScenes
                 if (ob.ObjectID != p.ObjectID) continue;
 
                 if (ob.SkipFrames) return;
-                if (ob.CurrentAction == MirAction.Struck) return;
+                //if (ob.CurrentAction == MirAction.Struck) return;
                 if (ob.ActionFeed.Count > 0 && ob.ActionFeed[ob.ActionFeed.Count - 1].Action == MirAction.Struck) return;
 
                 if (ob.Race == ObjectType.Player)
@@ -6636,8 +6661,6 @@ namespace Client.MirScenes
                 }
             }
 
-
-
             DXManager.Sprite.Flush();
             float oldOpacity = DXManager.Opacity;
             DXManager.SetOpacity(0.4F);
@@ -6928,7 +6951,7 @@ namespace Client.MirScenes
                 }
                 if (cell.Item.Count == 1)
                 {
-                    MirMessageBox messageBox = new MirMessageBox(string.Format("Are you sure you want to drop {0}?", cell.Item.Name), MirMessageBoxButtons.YesNo);
+                    MirMessageBox messageBox = new MirMessageBox(string.Format("Are you sure you want to drop {0}?", cell.Item.FriendlyName), MirMessageBoxButtons.YesNo);
 
                     messageBox.YesButton.Click += (o, a) =>
                     {
@@ -7011,7 +7034,10 @@ namespace Client.MirScenes
                 if (((MapObject.TargetObject.Name.EndsWith(")") || MapObject.TargetObject is PlayerObject) && CMain.Shift) ||
                     (!MapObject.TargetObject.Name.EndsWith(")") && MapObject.TargetObject is MonsterObject))
                 {
-                    if (User.Class == MirClass.Archer && User.HasClassWeapon && !User.RidingMount)//ArcherTest - non aggressive targets (player / pets)
+
+                    GameScene.LogTime = CMain.Time + Globals.LogDelay;
+
+                    if (User.Class == MirClass.Archer && User.HasClassWeapon && !User.RidingMount && !User.Fishing)//ArcherTest - non aggressive targets (player / pets)
                     {
                         if (Functions.InRange(MapObject.TargetObject.CurrentLocation, User.CurrentLocation, 9))
                         {
@@ -7117,6 +7143,9 @@ namespace Client.MirScenes
                                     User.QueuedAction.Params.Add(Functions.PointMove(User.CurrentLocation, MouseDirection(), 10));
                                     return;
                                 }
+                                
+                                //stops double slash from being used without empty hand or assassin weapon (otherwise bugs on second swing)
+                                if (GameScene.DoubleSlash && (!User.HasClassWeapon && User.Weapon > -1)) return;
 
                                 User.QueuedAction = new QueuedAction { Action = MirAction.Attack1, Direction = direction, Location = User.CurrentLocation };
                             }
@@ -7470,6 +7499,8 @@ namespace Client.MirScenes
                 return;
             }
 
+            GameScene.LogTime = CMain.Time + Globals.LogDelay;
+
             User.QueuedAction = new QueuedAction { Action = MirAction.Spell, Direction = dir, Location = User.CurrentLocation, Params = new List<object>() };
             User.QueuedAction.Params.Add(magic.Spell);
             User.QueuedAction.Params.Add(target != null ? target.ObjectID : 0);
@@ -7559,6 +7590,7 @@ namespace Client.MirScenes
         private bool CanRun(MirDirection dir)
         {
             if (User.InTrapRock) return false;
+            if (User.CurrentBagWeight > User.MaxBagWeight) return false;
 
             if (CanWalk(dir) && EmptyCell(Functions.PointMove(User.CurrentLocation, dir, 2)))
             {
@@ -8432,7 +8464,7 @@ namespace Client.MirScenes
         {
             History = new List<ChatHistory>();
 
-            for (int i = StartIndex; i < FullHistory.Count; i++)
+            for (int i = 0; i < FullHistory.Count; i++)
             {
                 switch (FullHistory[i].Type)
                 {

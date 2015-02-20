@@ -170,8 +170,6 @@ namespace Server.MirDatabase
                         if (innerLine.StartsWith("[")) break;
                         if (string.IsNullOrEmpty(lines[j])) continue;
 
-                        ItemInfo mInfo;
-
                         switch (line)
                         {
                             case descriptionCollectKey:

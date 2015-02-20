@@ -43,6 +43,7 @@
             this.MaximizeBox = false;
             this.Name = "CMain";
             this.Text = "Legend of Mir";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CMain_FormClosing);
             this.Load += new System.EventHandler(this.CMain_Load);
             this.ResumeLayout(false);
 

@@ -197,6 +197,11 @@ namespace Server.MirObjects
         public uint HP, MaxHP;
         public ushort MoveSpeed;
 
+        public virtual uint Experience 
+        { 
+            get { return Info.Experience; } 
+        }     
+
         public const int RegenDelay = 10000, EXPOwnerDelay = 5000, DeadDelay = 180000, SearchDelay = 3000, RoamDelay = 1000, HealDelay = 600, RevivalDelay = 2000;
         public long ActionTime, MoveTime, AttackTime, RegenTime, DeadTime, SearchTime, RoamTime, HealTime;
         public long ShockTime, RageTime, HallucinationTime;
@@ -286,7 +291,7 @@ namespace Server.MirObjects
             {
                 CurrentLocation = new Point(Respawn.Info.Location.X + Envir.Random.Next(-Respawn.Info.Spread, Respawn.Info.Spread + 1),
                                             Respawn.Info.Location.Y + Envir.Random.Next(-Respawn.Info.Spread, Respawn.Info.Spread + 1));
-                
+
                 if (!respawn.Map.ValidPoint(CurrentLocation)) continue;
 
                 respawn.Map.AddObject(this);
@@ -347,8 +352,8 @@ namespace Server.MirObjects
 
             if (Info.Name == Settings.SkeletonName ||Info.Name == Settings.ShinsuName ||Info.Name == Settings.AngelName) 
             {
-                MoveSpeed = (ushort)(MoveSpeed + MaxPetLevel * 130);
-                AttackSpeed = (ushort)( AttackSpeed + MaxPetLevel * 70);
+                MoveSpeed = (ushort)Math.Min(ushort.MaxValue, (Math.Max(ushort.MinValue, MoveSpeed - MaxPetLevel * 130)));
+                AttackSpeed = (ushort)Math.Min(ushort.MaxValue, (Math.Max(ushort.MinValue, AttackSpeed - MaxPetLevel * 70)));
             }
 
             if (MoveSpeed < 400) MoveSpeed = 400;
@@ -482,7 +487,7 @@ namespace Server.MirObjects
 
             if (EXPOwner != null && Master == null && EXPOwner.Race == ObjectType.Player)
             {
-                EXPOwner.WinExp(Info.Experience);
+                EXPOwner.WinExp(Experience);
 
                 PlayerObject playerObj = (PlayerObject)EXPOwner;
                 playerObj.CheckGroupQuestKill(Info);
@@ -520,6 +525,7 @@ namespace Server.MirObjects
         public override int Pushed(MapObject pusher, MirDirection dir, int distance)
         {
             if (!Info.CanPush) return 0;
+            if (!CanMove) return 0; //stops mobs that can't move (like cannibalplants) from being pushed
 
             int result = 0;
             MirDirection reverse = Functions.ReverseDirection(dir);
@@ -1657,7 +1663,7 @@ namespace Server.MirObjects
 
             if ((attacker.CriticalRate * Settings.CriticalRateWeight) > Envir.Random.Next(100))
             {
-                Broadcast(new S.ObjectEffect { ObjectID =ObjectID, Effect = SpellEffect.Critical});
+                Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Critical});
                 damage = Math.Min(int.MaxValue, damage + (int)Math.Floor(damage * (((double)attacker.CriticalDamage / (double)Settings.CriticalDamageWeight) * 10)));
             }
 

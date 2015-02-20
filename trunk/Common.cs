@@ -794,6 +794,7 @@ public enum ServerPacketIds : short
     PlayerUpdate,
     PlayerInspect,
     LogOutSuccess,
+    LogOutFailed,
     TimeOfDay,
     ChangeAMode,
     ChangePMode,
@@ -1473,6 +1474,8 @@ public static class Globals
         FlagIndexCount = 1999,
 
         MaxConcurrentQuests = 20,
+
+        LogDelay = 10000,
 
         DataRange = 24;
 
@@ -3372,6 +3375,8 @@ public abstract class Packet
                 return new S.PlayerInspect();
             case (short)ServerPacketIds.LogOutSuccess:
                 return new S.LogOutSuccess();
+            case (short)ServerPacketIds.LogOutFailed:
+                return new S.LogOutFailed();
             case (short)ServerPacketIds.TimeOfDay:
                 return new S.TimeOfDay();
             case (short)ServerPacketIds.ChangeAMode:
