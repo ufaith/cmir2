@@ -6,6 +6,7 @@ using Server.MirEnvir;
 using Server.MirObjects.Monsters;
 using S = ServerPackets;
 using System.IO;
+using System.Linq;
 
 namespace Server.MirObjects
 {
@@ -50,7 +51,7 @@ namespace Server.MirObjects
             get { return (byte) (Health/(float) MaxHealth*100); }
 
         }
-        
+
         public byte MinAC, MaxAC, MinMAC, MaxMAC;
         public byte MinDC, MaxDC, MinMC, MaxMC, MinSC, MaxSC;
 
@@ -444,33 +445,23 @@ namespace Server.MirObjects
             
             return true;
         }
+
         public virtual bool TeleportRandom(int attempts, int distance, Map map = null)
         {
             if (map == null) map = CurrentMap;
-            byte edgeoffset = 0;
+            if (map.Cells == null) return false;
 
-            if (map.Width < 150)
-            {
-                if (map.Height < 30) edgeoffset = 2;
-                else edgeoffset = 20;
-            }
-            else edgeoffset = 50;
+            var walkableCells = new List<Point>();
+            for (var x = 0; x < map.Cells.GetLength(0); x++)
+                for (var y = 0; y < map.Cells.GetLength(1); y++)
+                    if (map.Cells[x, y] != null && map.Cells[x, y].Attribute == CellAttribute.Walk)
+                        walkableCells.Add(new Point(x, y));
 
-            for (int i = 0; i < attempts; i++)
-            {
-                Point location;
+            if (!walkableCells.Any()) return false;
 
-                if (distance <= 0)
-                    location = new Point(edgeoffset + Envir.Random.Next(map.Width - edgeoffset), edgeoffset + Envir.Random.Next(map.Height - edgeoffset)); //Can adjust Random Range...
-                else
-                    location = new Point(CurrentLocation.X + Envir.Random.Next(-distance, distance + 1),
-                                         CurrentLocation.Y + Envir.Random.Next(-distance, distance + 1));
+            var randomCell = Envir.Random.Next(0, walkableCells.Count - 1);
 
-
-                if (Teleport(map, location)) return true;
-            }
-
-            return false;
+            return Teleport(map, new Point(walkableCells[randomCell].X, walkableCells[randomCell].Y));
         }
 
         public Point GetRandomPoint(int attempts, int distance, Map map)

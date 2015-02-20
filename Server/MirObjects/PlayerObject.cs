@@ -158,7 +158,7 @@ namespace Server.MirObjects
         }
         public bool CanRun
         {
-            get { return !Dead && Envir.Time >= ActionTime && (_stepCounter > 0 || FastRun) && CurrentPoison != PoisonType.Slow && (!Sneaking || ActiveSwiftFeet); }
+            get { return !Dead && Envir.Time >= ActionTime && (_stepCounter > 0 || FastRun) && CurrentPoison != PoisonType.Slow && (!Sneaking || ActiveSwiftFeet) && CurrentBagWeight <= MaxBagWeight; }
         }
         public bool CanAttack
         {
@@ -182,7 +182,7 @@ namespace Server.MirObjects
         }
 
         public const long TurnDelay = 350, MoveDelay = 600, HarvestDelay = 350, RegenDelay = 10000, PotDelay = 200, HealDelay = 600, DuraDelay = 10000, VampDelay = 500, LoyaltyDelay = 1000, FishingCastDelay = 750, FishingDelay = 200;
-        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, DecreaseLoyaltyTime, IncreaseLoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, FishingTime;
+        public long ActionTime, RunTime, RegenTime, PotTime, HealTime, AttackTime, TorchTime, DuraTime, DecreaseLoyaltyTime, IncreaseLoyaltyTime, ShoutTime, SpellTime, VampTime, SearchTime, FishingTime, LogTime;
 
         public bool MagicShield;
         public byte MagicShieldLv;
@@ -2931,6 +2931,18 @@ namespace Server.MirObjects
                         ReceiveChat(string.Format("The time is : {0}", DateTime.Now.ToString("hh:mm tt")), ChatType.System);
                         break;
 
+                    case "ROLL":
+                        int diceNum = Envir.Random.Next(5) + 1;
+
+                        if (GroupMembers == null) { return; }
+
+                        for (int i = 0; i < GroupMembers.Count; i++)
+                        {
+                            PlayerObject playerSend = GroupMembers[i];
+                            playerSend.ReceiveChat(string.Format("{0} has rolled a {1}", Name, diceNum), ChatType.Group);
+                        }
+                        break;
+
                     case "MAP":
                         var mapName = CurrentMap.Info.FileName;
                         var mapTitle = CurrentMap.Info.Title;
@@ -3979,6 +3991,8 @@ namespace Server.MirObjects
         }
         public void Attack(MirDirection dir, Spell spell)
         {
+            LogTime = Envir.Time + Globals.LogDelay;
+
             bool Mined = false;
             bool MoonLightAttack = false;
             bool DarkBodyAttack = false;
@@ -4295,10 +4309,10 @@ namespace Server.MirObjects
                         magic = GetMagic(Spell.FlamingSword);
                         damage = damage + (damage / 100 * ((4 + magic.Level * 4) * 10));
                         FlamingSword = false;
-                        action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
-                        ActionList.Add(action);
+                        defence = DefenceType.ACAgility;
+                        //action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
+                        //ActionList.Add(action);
                         LevelMagic(magic);
-
                         break;
                 }
 
@@ -4482,7 +4496,6 @@ namespace Server.MirObjects
 
         public void Magic(Spell spell, MirDirection dir, uint targetID, Point location)
         {
-
             if (!CanCast)
             {
                 Enqueue(new S.UserLocation { Direction = Direction, Location = CurrentLocation });
@@ -4492,6 +4505,7 @@ namespace Server.MirObjects
             AttackTime = Envir.Time + MoveDelay;
             SpellTime = Envir.Time + 1800; //Spell Delay
             ActionTime = Envir.Time + MoveDelay;
+            LogTime = Envir.Time + Globals.LogDelay;
 
             UserMagic magic = GetMagic(spell);
 
@@ -5996,7 +6010,7 @@ namespace Server.MirObjects
 
                 target.ApplyPoison(new Poison
                 {
-                    Duration = power / 10 + magic.Level * 3,
+                    Duration = 3 + power / 10 + magic.Level * 3,
                     Owner = this,
                     PType = PoisonType.Green,
                     TickSpeed = 1000,
@@ -6562,7 +6576,7 @@ namespace Server.MirObjects
                     value = (int)data[1];
                     target = (MapObject)data[2];
 
-                    if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null ||
+                    if (target == null || !target.IsAttackTarget(this) || target.CurrentMap != CurrentMap || target.Node == null || target.Race != ObjectType.Monster ||
                         Functions.MaxDistance(CurrentLocation, target.CurrentLocation) > 7 || target.Level >= Level + 5 + Envir.Random.Next(8)) return;
 
                     MirDirection pulldirection = (MirDirection)((byte)(Direction - 4) % 8);
@@ -7395,6 +7409,7 @@ namespace Server.MirObjects
             LastHitter = attacker;
             LastHitTime = Envir.Time + 10000;
             RegenTime = Envir.Time + RegenDelay;
+            LogTime = Envir.Time + Globals.LogDelay;
 
             if (Envir.Time > BrownTime && PKPoints < 200 && !CurrentMap.Info.Fight && !AtWar(attacker))
                 attacker.BrownTime = Envir.Time + Settings.Minute;
@@ -7491,6 +7506,7 @@ namespace Server.MirObjects
             LastHitter = attacker.Master ?? attacker;
             LastHitTime = Envir.Time + 10000;
             RegenTime = Envir.Time + RegenDelay;
+            LogTime = Envir.Time + Globals.LogDelay;
 
             DamageDura();
             ActiveBlizzard = false;

@@ -9,6 +9,11 @@ namespace Server.MirObjects.Monsters
         public int LifeCount;
         public long RevivalTime, DieTime;
 
+        public override uint Experience
+        {
+            get { return Info.Experience * (100 - (25 * RevivalCount)) / 100; }
+        }
+
         protected internal RevivingZombie(MonsterInfo info)
             : base(info)
         {

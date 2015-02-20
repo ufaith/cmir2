@@ -938,7 +938,9 @@ namespace Client.MirObjects
                                 Frames.Frames.TryGetValue(CurrentAction, out Frame);
                                 break;
                             case MirClass.Assassin:
-                                if (CMain.Shift)
+                                if(GameScene.DoubleSlash)
+                                    Frames.Frames.TryGetValue(MirAction.Attack1, out Frame);
+                                else if (CMain.Shift)
                                     Frames.Frames.TryGetValue(CMain.Random.Next(100) >= 20 ? (CMain.Random.Next(100) > 40 ? MirAction.Attack1 : MirAction.Attack4) : (CMain.Random.Next(100) > 10 ? MirAction.Attack2 : MirAction.Attack3), out Frame);
                                 else
                                     Frames.Frames.TryGetValue(CMain.Random.Next(100) >= 40 ? MirAction.Attack1 : MirAction.Attack4, out Frame);
@@ -1119,12 +1121,12 @@ namespace Client.MirObjects
                 }
 
                 //Assassin sneekyness
-                if (Sneaking && Class == MirClass.Assassin && (CurrentAction == MirAction.Walking || CurrentAction == MirAction.Running))
+                if (Class == MirClass.Assassin && Sneaking && (CurrentAction == MirAction.Walking || CurrentAction == MirAction.Running))
                 {
                     Frames.Frames.TryGetValue(MirAction.Sneek, out Frame);
                 }
 
-                SetLibraries(); //ArcherTest - calls after every cycle to refresh libraries
+                SetLibraries();
 
                 FrameIndex = 0;
                 EffectFrameIndex = 0;
@@ -1245,7 +1247,9 @@ namespace Client.MirObjects
                                 GameScene.FlamingSword = false;
 
                             magic = User.GetMagic(Spell);
+
                             if (magic != null) SpellLevel = magic.Level;
+
 
                             GameScene.AttackTime = CMain.Time + User.AttackSpeed;
                             MapControl.NextAction = CMain.Time + 2500;
@@ -1256,9 +1260,10 @@ namespace Client.MirObjects
                         case MirAction.Attack3:
                             //Network.Enqueue(new C.Attack3 { Direction = Direction });
                             break;
-                        case MirAction.Attack4:
-                            GameScene.AttackTime = CMain.Time + User.AttackSpeed;
-                            break;
+                        //case MirAction.Attack4:
+                        //    GameScene.AttackTime = CMain.Time;// + User.AttackSpeed;
+                        //    MapControl.NextAction = CMain.Time;
+                        //    break;
 
                         case MirAction.AttackRange1: //ArcherTest
                             GameScene.AttackTime = CMain.Time + User.AttackSpeed + 200;
@@ -1334,8 +1339,8 @@ namespace Client.MirObjects
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 + (Gender == MirGender.Male ? 0 : 1));
                                 break;
                             case Spell.DoubleSlash:
-                                FrameInterval = (FrameInterval * 5 / 10); //50% Faster Animation
-                                EffectFrameInterval = (EffectFrameInterval * 5 / 10);
+                                FrameInterval = (FrameInterval * 7 / 10); //50% Faster Animation
+                                EffectFrameInterval = (EffectFrameInterval * 7 / 10);
                                 action = new QueuedAction { Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>() };
                                 action.Params.Add(Spell);
                                 ActionFeed.Insert(0, action);
@@ -1349,11 +1354,11 @@ namespace Client.MirObjects
                                 break;
 
                             case Spell.TwinDrakeBlade:
-                                FrameInterval = FrameInterval * 9 / 10; //70% Faster Animation
-                                EffectFrameInterval = EffectFrameInterval * 9 / 10;
-                                action = new QueuedAction { Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>() };
-                                action.Params.Add(Spell);
-                                ActionFeed.Insert(0, action);
+                                //FrameInterval = FrameInterval * 9 / 10; //70% Faster Animation
+                                //EffectFrameInterval = EffectFrameInterval * 9 / 10;
+                                //action = new QueuedAction { Action = MirAction.Attack4, Direction = Direction, Location = CurrentLocation, Params = new List<object>() };
+                                //action.Params.Add(Spell);
+                                //ActionFeed.Insert(0, action);
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10);
                                 break;
 
@@ -1373,8 +1378,8 @@ namespace Client.MirObjects
                         switch (Spell)
                         {
                             case Spell.DoubleSlash:
-                                FrameInterval = FrameInterval * 5 / 10; //50% Animation Speed
-                                EffectFrameInterval = EffectFrameInterval * 5 / 10;
+                                FrameInterval = FrameInterval * 7 / 10; //50% Animation Speed
+                                EffectFrameInterval = EffectFrameInterval * 7 / 10;
                                 SoundManager.PlaySound(20000 + (ushort)Spell * 10 + 1);
                                 break;
                             case Spell.TwinDrakeBlade:
@@ -3473,7 +3478,7 @@ namespace Client.MirObjects
 
             if (this != User) DrawWings();
 
-            if (this != User) DrawCurrentEffects(); //Stephenking effect sync test
+            if (this != User) DrawCurrentEffects();
 
             if (!RidingMount)
             {
