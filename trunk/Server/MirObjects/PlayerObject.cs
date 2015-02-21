@@ -2488,10 +2488,11 @@ namespace Server.MirObjects
                 colour = Color.SaddleBrown;
             else if (PKPoints >= 100)
                 colour = Color.Yellow;
-
+            
             if (colour == NameColour) return;
-
+            if (NameColour != GetNameColour(this)) return;
             NameColour = colour;
+            
             Enqueue(new S.ColourChanged { NameColour = NameColour });
 
             BroadcastColourChange();
