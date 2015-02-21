@@ -812,7 +812,7 @@ namespace Server.MirObjects
 
 
                 if (HP < MaxHP)
-                    healthRegen += (int)(MaxHP * 0.05F) + 1;
+                    healthRegen += (int)(MaxHP * 0.022F) + 1;
             }
 
 
