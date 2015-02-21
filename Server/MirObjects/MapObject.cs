@@ -108,8 +108,10 @@ namespace Server.MirObjects
             {
                 if (_observer == value) return;
                 _observer = value;
-
-                Broadcast(_observer ? new S.ObjectRemove {ObjectID = ObjectID} : GetInfo());
+                if (_observer)
+                    BroadcastInfo();
+                else
+                    Broadcast(new S.ObjectRemove { ObjectID = ObjectID });
             }
         }
 
@@ -243,7 +245,13 @@ namespace Server.MirObjects
         }
         public virtual void Add(PlayerObject player)
         {
-            player.Enqueue(GetInfo());
+            if (Race == ObjectType.Player)
+            {
+                PlayerObject me = (PlayerObject)this;
+                player.Enqueue(me.GetInfoEx(player));
+            }
+            else
+                player.Enqueue(GetInfo());
         }
         public virtual void Remove(MonsterObject monster)
         {
@@ -281,7 +289,7 @@ namespace Server.MirObjects
             OperateTime = Envir.Time + Envir.Random.Next(OperateDelay);
 
             InSafeZone = CurrentMap != null && CurrentMap.GetSafeZone(CurrentLocation) != null;
-            Broadcast(GetInfo());
+            BroadcastInfo();
             BroadcastHealthChange();
         }
         public virtual void Despawn()
@@ -340,6 +348,12 @@ namespace Server.MirObjects
                 if (Functions.InRange(CurrentLocation, player.CurrentLocation, Globals.DataRange))
                     player.Enqueue(p);
             }
+        }
+
+        public virtual void BroadcastInfo()
+        {
+            Broadcast(GetInfo());
+            return;
         }
 
         public abstract bool IsAttackTarget(PlayerObject attacker);
@@ -436,8 +450,7 @@ namespace Server.MirObjects
             InTrapRock = false;
 
             CurrentMap.AddObject(this);
-
-            Broadcast(GetInfo());
+            BroadcastInfo();
 
             if (effects) Broadcast(new S.ObjectTeleportIn { ObjectID = ObjectID, Type = effectnumber });
             

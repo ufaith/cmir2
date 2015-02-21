@@ -263,7 +263,7 @@ namespace Server.MirObjects
             {
                 player.MyGuildRank = Ranks[RankIndex];
                 player.Enqueue(new ServerPackets.GuildMemberChange() { Name = Self.Info.Name, Status = (byte)8, Ranks = NewRankList });
-                player.Broadcast(player.GetInfo());
+                player.BroadcastInfo();
             }
 
             for (int i = 0; i < Ranks.Count; i++)
@@ -352,7 +352,7 @@ namespace Server.MirObjects
                         player.Enqueue(new ServerPackets.GuildMemberChange() { Name = Self.Info.Name, Status = (byte)7, Ranks = NewRankList });
                         player.GuildMembersChanged = true;
                         if (i == RankIndex)
-                            player.Broadcast(player.GetInfo());
+                            player.BroadcastInfo();
                     }
                 }
             NeedSave = true;
@@ -422,7 +422,7 @@ namespace Server.MirObjects
                 formermember.MyGuildRank = null;
                 formermember.ReceiveChat(kickself ? "You have left your guild." : "You have been removed from your guild.", ChatType.Guild);
                 formermember.Enqueue(new ServerPackets.GuildStatus() { GuildName = "", GuildRankName = "", MyOptions = (RankOptions)0 });
-                formermember.Broadcast(formermember.GetInfo());
+                formermember.BroadcastInfo();
             }
         }
 
@@ -543,10 +543,45 @@ namespace Server.MirObjects
             }
 
             Envir.GuildsAtWar.Add(new GuildAtWar(this, enemyGuild));
-
+            UpdatePlayersColours();
+            enemyGuild.UpdatePlayersColours();
             return true;
         }
 
+        public void UpdatePlayersColours()
+        {
+            //in a way this is a horrible spam situation, it should only broadcast to your  own guild or enemy or allies guild but not sure i wanna code yet another broadcast for that
+            PlayerObject player = null;
+            for (int i = 0; i < Ranks.Count; i++)
+                for (int j = 0; j < Ranks[i].Members.Count; j++)
+                {
+                    player = (PlayerObject)Ranks[i].Members[j].Player;
+                    if (player != null)
+                    {
+                        //player.Enqueue(player.GetInfoEx(player));
+                        player.Enqueue(new ServerPackets.ColourChanged { NameColour = player.GetNameColour(player) });
+                        player.BroadcastInfo();
+                    }
+                }
+        }
+
+        public bool IsAtWar()
+        {
+            if (WarringGuilds.Count == 0) return false;
+            return true;
+        }
+
+        public bool IsEnemy(GuildObject enemyGuild)
+        {
+            if (enemyGuild == null) return false;
+            if (enemyGuild.IsAtWar() != true) return false;
+            for (int i = 0; i < WarringGuilds.Count; i++)
+            {
+                if (WarringGuilds[i] == enemyGuild)
+                    return true;
+            }
+            return false;
+        }
         #endregion
     }
 
@@ -564,7 +599,7 @@ namespace Server.MirObjects
             GuildA.WarringGuilds.Add(GuildB);
             GuildB.WarringGuilds.Add(GuildA);
 
-            TimeRemaining = Settings.Minute * 10; //changable in server form
+            TimeRemaining = Settings.Minute * 10; //make this changable in server form
         }
 
         public void EndWar()
@@ -574,6 +609,8 @@ namespace Server.MirObjects
 
             GuildA.SendMessage(string.Format("War ended with {0}.", GuildB.Name, ChatType.Guild));
             GuildB.SendMessage(string.Format("War ended with {0}.", GuildA.Name, ChatType.Guild));
+            GuildA.UpdatePlayersColours();
+            GuildB.UpdatePlayersColours();
         }
     }
 }

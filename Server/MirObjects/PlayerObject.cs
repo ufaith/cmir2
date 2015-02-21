@@ -1659,7 +1659,7 @@ namespace Server.MirObjects
                 Name = Name,
                 GuildName = guildname,
                 GuildRank = guildrank,
-                NameColour = NameColour,
+                NameColour = GetNameColour(this),
                 Class = Class,
                 Gender = Gender,
                 Level = Level,
@@ -1769,8 +1769,13 @@ namespace Server.MirObjects
                             tt++;
                         }
                         //if (ob.Race == ObjectType.Player && ob.Observer) continue;
-
-                        Enqueue(ob.GetInfo());
+                        if (ob.Race == ObjectType.Player)
+                        {
+                            PlayerObject Player = (PlayerObject)ob;
+                            Enqueue(Player.GetInfoEx(this));
+                        }
+                        else
+                            Enqueue(ob.GetInfo());
 
                         if (ob.Race == ObjectType.Player || ob.Race == ObjectType.Monster)
                             ob.SendHealth(this);
@@ -2489,7 +2494,53 @@ namespace Server.MirObjects
             NameColour = colour;
             Enqueue(new S.ColourChanged { NameColour = NameColour });
 
-            Broadcast(new S.ObjectColourChanged { ObjectID = ObjectID, NameColour = NameColour });
+            BroadcastColourChange();
+        }
+
+        public Color GetNameColour(PlayerObject player)
+        {
+            if (player == null) return NameColour;
+            if (MyGuild != null)
+                if (MyGuild.IsAtWar())
+                    if (player.MyGuild == MyGuild)
+                        return Color.Blue;
+                    else
+                        if (MyGuild.IsEnemy(player.MyGuild))
+                            return Color.Orange;
+            return NameColour;
+        }
+
+        public void BroadcastColourChange()
+        {
+            if (CurrentMap == null) return;
+
+            for (int i = CurrentMap.Players.Count - 1; i >= 0; i--)
+            {
+                PlayerObject player = CurrentMap.Players[i];
+                if (player == this) continue;
+
+                if (Functions.InRange(CurrentLocation, player.CurrentLocation, Globals.DataRange))
+                    player.Enqueue(new S.ObjectColourChanged { ObjectID = ObjectID, NameColour = GetNameColour(player) });
+            }
+        }
+
+        public override void BroadcastInfo()
+        {
+            Packet p;
+            if (CurrentMap == null) return;
+
+            for (int i = CurrentMap.Players.Count - 1; i >= 0; i--)
+            {
+                PlayerObject player = CurrentMap.Players[i];
+                if (player == this) continue;
+
+                if (Functions.InRange(CurrentLocation, player.CurrentLocation, Globals.DataRange))
+                {
+                    p = GetInfoEx(player);
+                    if (p != null)
+                        player.Enqueue(p);
+                }
+            }
         }
 
         public void Chat(string message)
@@ -6765,7 +6816,7 @@ namespace Server.MirObjects
                         if (!hasVampBuff && !hasPoisonBuff && (Envir.Random.Next(20) >= 8))//40% chance
                         {
                             AddBuff(new Buff { Type = BuffType.VampireShot, Caster = this, ExpireTime = Envir.Time + (buffTime * 1000), Value = value, Visible = true, ObjectID = this.ObjectID });
-                            Broadcast(GetInfo());
+                            BroadcastInfo();
                         }
                     }
                     if (magic.Spell == Spell.PoisonShot)
@@ -6774,7 +6825,7 @@ namespace Server.MirObjects
                         if (!hasPoisonBuff && !hasVampBuff && (Envir.Random.Next(20) >= 8))//40% chance
                         {
                             AddBuff(new Buff { Type = BuffType.PoisonShot, Caster = this, ExpireTime = Envir.Time + (buffTime * 1000), Value = value, Visible = true, ObjectID = this.ObjectID });
-                            Broadcast(GetInfo());
+                            BroadcastInfo();
                         }
                     }
                     if (magic.Spell == Spell.CrippleShot)
@@ -7184,8 +7235,9 @@ namespace Server.MirObjects
             };
         }
 
-        public override Packet GetInfo()
+        public override Packet GetInfo() 
         {
+            //should never use this but i leave it in for safety
             if (Observer) return null;
 
             return new S.ObjectPlayer
@@ -7193,6 +7245,46 @@ namespace Server.MirObjects
                 ObjectID = ObjectID,
                 Name = CurrentMap.Info.NoNames ? "?????" : Name,
                 NameColour = NameColour,
+                GuildName = CurrentMap.Info.NoNames ? "?????" : MyGuild != null ? MyGuild.Name : "",
+                GuildRankName = CurrentMap.Info.NoNames ? "?????" : MyGuildRank != null ? MyGuildRank.Name : "",
+                Class = Class,
+                Gender = Gender,
+                Level = Level,
+                Location = CurrentLocation,
+                Direction = Direction,
+                Hair = Hair,
+                Weapon = Looks_Weapon,
+                Armour = Looks_Armour,
+                Light = Light,
+                Poison = CurrentPoison,
+                Dead = Dead,
+                Hidden = Hidden,
+                Effect = MagicShield ? SpellEffect.MagicShieldUp : (ElementalBarrier ? SpellEffect.ElementBarrierUp : SpellEffect.None),//ArcherSpells - Elemental system
+                WingEffect = Looks_Wings,
+                MountType = MountType,
+                RidingMount = RidingMount,
+                Fishing = Fishing,
+
+                //ArcherSpells - Elemental system
+                ElementOrbEffect = (uint)GetElementalOrbCount(),
+                ElementOrbLvl = (uint)ElementsLevel,
+                ElementOrbMax = (uint)Settings.OrbsExpList[Settings.OrbsExpList.Count - 1],
+
+                Buffs = Buffs.Where(d => d.Visible).Select(e => e.Type).ToList(),
+
+                LevelEffects = LevelEffects
+            };
+        }
+
+        public Packet GetInfoEx(PlayerObject player)
+        {
+            if (Observer) return null;
+
+            return new S.ObjectPlayer
+            {
+                ObjectID = ObjectID,
+                Name = CurrentMap.Info.NoNames ? "?????" : Name,
+                NameColour = GetNameColour(player),
                 GuildName = CurrentMap.Info.NoNames ? "?????" : MyGuild != null ? MyGuild.Name : "",
                 GuildRankName = CurrentMap.Info.NoNames ? "?????" : MyGuildRank != null ? MyGuildRank.Name : "",
                 Class = Class,
@@ -10766,8 +10858,7 @@ namespace Server.MirObjects
             if (player == this) return;
 
             base.Add(player);
-
-            Enqueue(player.GetInfo());
+            Enqueue(player.GetInfoEx(this));
 
             player.SendHealth(this);
             SendHealth(player);
@@ -11497,7 +11588,7 @@ namespace Server.MirObjects
             GuildNoticeChanged = true;
             GuildCanRequestItems = true;
             //tell us we now have a guild
-            Broadcast(GetInfo());
+            BroadcastInfo();
             MyGuild.SendGuildStatus(this);
             return true;
         }
@@ -11650,7 +11741,7 @@ namespace Server.MirObjects
             GuildMembersChanged = true;
             GuildNoticeChanged = true;
             //tell us we now have a guild
-            Broadcast(GetInfo());
+            BroadcastInfo();
             MyGuild.SendGuildStatus(this);
             PendingGuildInvite = null;
             EnableGuildInvite = false;
