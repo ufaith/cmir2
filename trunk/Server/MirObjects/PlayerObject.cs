@@ -2481,7 +2481,7 @@ namespace Server.MirObjects
         public void RefreshNameColour()
         {
             Color colour = Color.White;
-
+            
             if (PKPoints >= 200)
                 colour = Color.Red;
             else if (Envir.Time < BrownTime)
@@ -2490,10 +2490,11 @@ namespace Server.MirObjects
                 colour = Color.Yellow;
             
             if (colour == NameColour) return;
-            if (NameColour != GetNameColour(this)) return;
-            NameColour = colour;
+
             
-            Enqueue(new S.ColourChanged { NameColour = NameColour });
+            NameColour = colour;
+            if ((MyGuild == null) || (!MyGuild.IsAtWar()))
+                Enqueue(new S.ColourChanged { NameColour = NameColour });
 
             BroadcastColourChange();
         }
