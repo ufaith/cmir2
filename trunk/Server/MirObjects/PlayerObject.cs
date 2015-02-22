@@ -8350,7 +8350,7 @@ namespace Server.MirObjects
                                 Enqueue(p);
                                 return;
                             }
-                            temp.MaxDura = (ushort)Math.Max(0, temp.MaxDura - Math.Min(5000, temp.MaxDura - temp.CurrentDura) / 8);
+                            temp.MaxDura = (ushort)Math.Max(0, temp.MaxDura - Math.Min(5000, temp.MaxDura - temp.CurrentDura) / 30);
 
                             temp.CurrentDura = (ushort)Math.Min(temp.MaxDura, temp.CurrentDura + 5000);
                             temp.DuraChanged = false;
@@ -8404,7 +8404,7 @@ namespace Server.MirObjects
                     switch (item.Info.Shape)
                     {
                         case 0:
-                            temp.MaxDura = (ushort)Math.Max(0, temp.MaxDura - Math.Min(1000, temp.MaxDura - (temp.CurrentDura / 8)));
+                            temp.MaxDura = (ushort)Math.Max(0, temp.MaxDura - Math.Min(1000, temp.MaxDura - (temp.CurrentDura / 30)));
                             break;
                     }
 
@@ -9873,7 +9873,7 @@ namespace Server.MirObjects
                 Account.Gold -= cost;
                 Enqueue(new S.LoseGold { Gold = cost });
 
-                if (!special) temp.MaxDura = (ushort)Math.Max(0, temp.MaxDura - (temp.MaxDura - temp.CurrentDura) / 8);
+                if (!special) temp.MaxDura = (ushort)Math.Max(0, temp.MaxDura - (temp.MaxDura - temp.CurrentDura) / 30);
 
                 temp.CurrentDura = temp.MaxDura;
                 temp.DuraChanged = false;
