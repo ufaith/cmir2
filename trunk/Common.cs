@@ -888,6 +888,7 @@ public enum ServerPacketIds : short
     GuildStorageGoldChange,
     GuildStorageItemChange,
     GuildStorageList,
+    GuildRequestWar,
     DefaultNPC,
     NPCUpdate,
     TradeRequest,
@@ -996,6 +997,7 @@ public enum ClientPacketIds : short
     RequestGuildInfo,
     GuildStorageGoldChange,
     GuildStorageItemChange,
+    GuildWarReturn,
     TradeRequest,
     TradeReply,
     TradeGold,
@@ -3240,6 +3242,8 @@ public abstract class Packet
                 return new C.GuildStorageGoldChange();
             case (short)ClientPacketIds.GuildStorageItemChange:
                 return new C.GuildStorageItemChange();
+            case (short)ClientPacketIds.GuildWarReturn:
+                return new C.GuildWarReturn();
             case (short)ClientPacketIds.TradeRequest:
                 return new C.TradeRequest();
             case (short)ClientPacketIds.TradeReply:
@@ -3563,6 +3567,8 @@ public abstract class Packet
                 return new S.GuildStorageItemChange();
             case (short)ServerPacketIds.GuildStorageList:
                 return new S.GuildStorageList();
+            case (short)ServerPacketIds.GuildRequestWar:
+                return new S.GuildRequestWar();
             case (short)ServerPacketIds.DefaultNPC:
                 return new S.DefaultNPC();
             case (short)ServerPacketIds.NPCUpdate:

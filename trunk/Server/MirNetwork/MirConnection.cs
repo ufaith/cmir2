@@ -381,6 +381,9 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.GuildStorageItemChange:
                     GuildStorageItemChange((C.GuildStorageItemChange)p);
                     return;
+                case (short)ClientPacketIds.GuildWarReturn:
+                    GuildWarReturn((C.GuildWarReturn)p);
+                    return;
                 case (short)ClientPacketIds.TradeRequest:
                     TradeRequest((C.TradeRequest)p);
                     return;
@@ -1034,7 +1037,11 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
             Player.GuildStorageItemChange(p.Type, p.From, p.To);
         }
-
+        private void GuildWarReturn(C.GuildWarReturn p)
+        {
+            if (Stage != GameStage.Game) return;
+            Player.GuildWarReturn(p.Name);
+        }
         private void TradeRequest(C.TradeRequest p)
         {
             if (Stage != GameStage.Game) return;

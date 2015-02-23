@@ -3543,7 +3543,16 @@ namespace ServerPackets
         }
 
     }
-
+    public sealed class GuildRequestWar : Packet
+    {
+        public override short Index { get { return (short)ServerPacketIds.GuildRequestWar; } }
+        protected override void ReadPacket(BinaryReader reader)
+        {
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+        }
+    }
     public sealed class DefaultNPC : Packet
     {
         public override short Index { get { return (short)ServerPacketIds.DefaultNPC; } }

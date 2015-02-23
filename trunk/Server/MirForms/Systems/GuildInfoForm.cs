@@ -51,6 +51,9 @@ namespace Server
             GuildMinOwnerLeveltextBox.Text = Settings.Guild_RequiredLevel.ToString();
             GuildPPLtextBox.Text = Settings.Guild_PointPerLevel.ToString();
             GuildExpratetextBox.Text = Settings.Guild_ExpRate.ToString();
+            WarLengthTextBox.Text = Settings.Guild_WarTime.ToString();
+            WarCostTextBox.Text = Settings.Guild_WarCost.ToString();
+
             if ((GuildLevelListcomboBox.SelectedItem == null) || (GuildLevelListcomboBox.SelectedIndex >= Settings.Guild_ExperienceList.Count) || (GuildLevelListcomboBox.SelectedIndex >= Settings.Guild_MembercapList.Count))
             {
                 GuildExpNeededtextBox.Text = string.Empty;
@@ -360,6 +363,36 @@ namespace Server
             ActiveControl.BackColor = SystemColors.Window;
             Settings.Guild_BuffList[GuildBuffListcomboBox.SelectedIndex].Cost = temp;
             UpdateGuildInterface();
+            GuildsChanged = true;
+        }
+
+        private void WarLengthTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+            long temp;
+
+            if (!long.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+            Settings.Guild_WarTime = temp;
+            GuildsChanged = true;
+        }
+
+        private void WarCostTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (ActiveControl != sender) return;
+            uint temp;
+
+            if (!uint.TryParse(ActiveControl.Text, out temp))
+            {
+                ActiveControl.BackColor = Color.Red;
+                return;
+            }
+            ActiveControl.BackColor = SystemColors.Window;
+            Settings.Guild_WarCost = temp;
             GuildsChanged = true;
         }
 

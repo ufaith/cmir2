@@ -127,7 +127,7 @@ namespace Server.MirObjects.Monsters
         {
             if (Master != null && Master is PlayerObject)
             {
-                ((PlayerObject)Master).ChangeMP(-amount);
+                ((PlayerObject)Master).ChangeMP(amount);
                 return;
             }
 

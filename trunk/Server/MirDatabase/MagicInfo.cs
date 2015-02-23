@@ -374,6 +374,9 @@ namespace Server.MirDatabase
                 case Spell.SlashingBurst:
                     return 1;
 
+                case Spell.HeavenlySword:
+                    return 8;
+
                 case Spell.StraightShot:
                     return 7;
                 case Spell.DoubleShot:

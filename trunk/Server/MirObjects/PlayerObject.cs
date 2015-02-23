@@ -970,6 +970,13 @@ namespace Server.MirObjects
             {
                 if (Envir.Time > BrownTime && PKPoints < 200)
                 {
+                    PlayerObject hitter = (PlayerObject)LastHitter;
+
+                    if(hitter.Info.Equipment[(byte)EquipmentSlot.Weapon] != null && Envir.Random.Next(4) == 0)
+                    {
+                        hitter.Info.Equipment[(byte)EquipmentSlot.Weapon].Cursed = true;
+                    }
+
                     LastHitter.PKPoints = Math.Min(int.MaxValue, LastHitter.PKPoints + 100);
                     LastHitter.ReceiveChat(string.Format("You have murdered {0}", Name), ChatType.System);
                     ReceiveChat(string.Format("You have been murdered by {0}", LastHitter.Name), ChatType.System);
@@ -3293,7 +3300,7 @@ namespace Server.MirObjects
                         }
                         player.CanCreateGuild = true;
                         if (player.CreateGuild(parts[2]))
-                            ReceiveChat(string.Format("Succesfully created guild {0}", parts[2]), ChatType.System);
+                            ReceiveChat(string.Format("Successfully created guild {0}", parts[2]), ChatType.System);
                         else
                             ReceiveChat("Failed to create guild", ChatType.System);
                         player.CanCreateGuild = false;
@@ -3422,6 +3429,31 @@ namespace Server.MirObjects
                         decoOb.Spawned();
 
                         Enqueue(decoOb.GetInfo());
+                        break;
+
+                    case "ADJUSTPKPOINT":
+                        if (!IsGM) return;
+                        if (parts.Length < 2) return;
+                        
+                        int tempInt;
+
+                        if(parts.Length > 2)
+                        {
+                            player = Envir.GetPlayer(parts[1]);
+
+                            if (player == null) return;
+
+                            
+                            int.TryParse(parts[2], out tempInt);
+                        }
+                        else
+                        {
+                            player = this;
+                            int.TryParse(parts[1], out tempInt);
+                        }
+
+                        player.PKPoints = tempInt;
+
                         break;
 
 					case "AWAKENING":
@@ -4018,13 +4050,14 @@ namespace Server.MirObjects
                 }
 
                 int distance = Functions.MaxDistance(CurrentLocation, target.CurrentLocation);
-                int damage = GetAttackPower(MinDC * ((distance + 1) / 3) * (Focus ? 2 : 1), MaxDC * ((distance + 1) / 3) * (Focus ? 2 : 1));
+                int damage = GetAttackPower(MinDC * (1 + (distance) / 3) * (Focus ? 2 : 1), MaxDC * (1 + (distance) / 3) * (Focus ? 2 : 1));
 
                 int chanceToHit = 40 + (Accuracy * 3) - (int)(distance * 1.5); //new rate, orig>>>>//Base chance chance = 30%, then add accuracy.
                 int hitChance = SMain.Envir.Random.Next(100); // Randomise a number between minimum chance and 100       
 
                 if (hitChance < chanceToHit)
                 {
+                    ReceiveChat(string.Format("Hit at {0}", damage), ChatType.Shout);
                     if (target.CurrentLocation != location)
                         location = target.CurrentLocation;
 
@@ -4360,7 +4393,7 @@ namespace Server.MirObjects
                         break;
                     case Spell.FlamingSword:
                         magic = GetMagic(Spell.FlamingSword);
-                        damage = damage + (damage / 100 * ((4 + magic.Level * 4) * 10));
+                        damage = (damage * 2) + (int)(((double)damage / 100) * ((4 + magic.Level * 4) * 10));
                         FlamingSword = false;
                         defence = DefenceType.ACAgility;
                         //action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
@@ -6404,6 +6437,18 @@ namespace Server.MirObjects
                             target.ApplyPoison(new Poison
                             {
                                 Owner = this,
+                                Duration = target.Race == ObjectType.Player ? 4 : 5 + Envir.Random.Next(5),
+                                PType = PoisonType.Slow,
+                                TickSpeed = 1000,
+                            }, this);
+                            target.OperateTime = 0;
+                        }
+
+                        if (Level + (target.Race == ObjectType.Player ? 2 : 10) >= target.Level && Envir.Random.Next(target.Race == ObjectType.Player ? 100 : 40) <= magic.Level)
+                        {
+                            target.ApplyPoison(new Poison
+                            {
+                                Owner = this,
                                 Duration = target.Race == ObjectType.Player ? 2 : 5 + Envir.Random.Next(Freezing),
                                 PType = PoisonType.Frozen,
                                 TickSpeed = 1000,
@@ -6665,6 +6710,8 @@ namespace Server.MirObjects
                     target.Target = null;
 
                     ConsumeItem(item, 1);
+
+                    LevelMagic(magic);
                     break;
 
                 #endregion
@@ -6729,6 +6776,7 @@ namespace Server.MirObjects
                     }, this);
 
                     target.OperateTime = 0;
+                    LevelMagic(magic);
                     break;
 
                 #endregion
@@ -11806,6 +11854,13 @@ namespace Server.MirObjects
                 ReceiveChat("You are not part of a guild.", ChatType.System);
                 return;
             }
+
+            if (!InSafeZone)
+            {
+                ReceiveChat("You cannot use guild storage outside safezones.", ChatType.System);
+                return;
+            }
+
             if (Type == 0)//donate
             {
                 if (Account.Gold < Amount)
@@ -11841,6 +11896,7 @@ namespace Server.MirObjects
                     ReceiveChat("Insufficient rank.", ChatType.System);
                     return;
                 }
+
                 MyGuild.Gold -= Amount;
                 GainGold(Amount);
                 MyGuild.SendServerPacket(new S.GuildStorageGoldChange() { Type = 1, Name = Info.Name, Amount = Amount });
@@ -11961,6 +12017,44 @@ namespace Server.MirObjects
                     break;
             }
 
+        }
+        public void GuildWarReturn(string Name)
+        {
+            if (MyGuild == null || MyGuildRank != MyGuild.Ranks[0]) return;
+
+            GuildObject enemyGuild = Envir.GetGuild(Name);
+
+            if (enemyGuild == null)
+            {
+                ReceiveChat(string.Format("Could not find guild {0}.", Name), ChatType.System);
+                return;
+            }
+
+            if (MyGuild == enemyGuild)
+            {
+                ReceiveChat("Cannot go to war with your own guild.", ChatType.System);
+                return;
+            }
+
+            if (MyGuild.WarringGuilds.Contains(enemyGuild))
+            {
+                ReceiveChat("Already at war with this guild.", ChatType.System);
+                return;
+            }
+
+            if(MyGuild.Gold < Settings.Guild_WarCost)
+            {
+                ReceiveChat("Not enough funds in guild bank.", ChatType.System);
+                return;
+            }
+
+            if (MyGuild.GoToWar(enemyGuild))
+            {
+                ReceiveChat(string.Format("You started a war with {0}.", Name), ChatType.System);
+                enemyGuild.SendMessage(string.Format("{0} has started a war", MyGuild.Name), ChatType.System);
+
+                MyGuild.Gold -= Settings.Guild_WarCost;
+            }
         }
 
         public bool AtWar(PlayerObject attacker)

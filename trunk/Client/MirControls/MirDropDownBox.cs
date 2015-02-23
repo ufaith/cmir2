@@ -195,7 +195,7 @@ namespace Client.MirControls
             _ScrollDown.Click += (o, e) => ScrollDown();
             _ScrollBar = new MirImageControl
             {
-                Index = 2011,
+                Index = 2012,
                 Library = Libraries.Prguse,
                 Location = new Point(Size.Width - 8, 22),
                 Parent = this,
