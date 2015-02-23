@@ -599,7 +599,7 @@ namespace Server.MirObjects
             GuildA.WarringGuilds.Add(GuildB);
             GuildB.WarringGuilds.Add(GuildA);
 
-            TimeRemaining = Settings.Minute * 10; //make this changable in server form
+            TimeRemaining = Settings.Minute * Settings.Guild_WarTime; //make this changable in server form
         }
 
         public void EndWar()

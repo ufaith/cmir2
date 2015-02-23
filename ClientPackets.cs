@@ -1099,6 +1099,22 @@ namespace ClientPackets
             writer.Write(Name);
         }
     }
+    public sealed class GuildWarReturn : Packet
+    {
+        public override short Index
+        {
+            get { return (short)ClientPacketIds.GuildWarReturn; }
+        }
+        public string Name;
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Name = reader.ReadString();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Name);
+        }
+    }
     public sealed class GuildStorageGoldChange: Packet
     {
         public override short Index

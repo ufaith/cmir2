@@ -625,7 +625,7 @@ namespace Client.MirScenes
             }
             else
             {
-                ChatDialog.ReceiveChat("Can not leave game for " + (LogTime - CMain.Time) / 1000 + " seconds.", ChatType.System);
+                ChatDialog.ReceiveChat("Cannot leave game for " + (LogTime - CMain.Time) / 1000 + " seconds.", ChatType.System);
             }
         }
         public void LogOut()
@@ -1114,6 +1114,9 @@ namespace Client.MirScenes
                     break;
                 case (short)ServerPacketIds.GuildStorageList:
                     GuildStorageList((S.GuildStorageList)p);
+                    break;
+                case (short)ServerPacketIds.GuildRequestWar:
+                    GuildRequestWar((S.GuildRequestWar)p);
                     break;
                 case (short)ServerPacketIds.DefaultNPC:
                     DefaultNPC((S.DefaultNPC)p);
@@ -3807,6 +3810,18 @@ namespace Client.MirScenes
                     inputBox.InputTextBox.Text = "";
                 }
                 Network.Enqueue(new C.GuildNameReturn { Name = inputBox.InputTextBox.Text });
+                inputBox.Dispose();
+            };
+            inputBox.Show();
+        }
+
+        private void GuildRequestWar(S.GuildRequestWar p)
+        {
+            MirInputBox inputBox = new MirInputBox("Please enter the guild you would like to go to war with.");
+
+            inputBox.OKButton.Click += (o, e) =>
+            {
+                Network.Enqueue(new C.GuildWarReturn { Name = inputBox.InputTextBox.Text });
                 inputBox.Dispose();
             };
             inputBox.Show();
@@ -12103,6 +12118,8 @@ namespace Client.MirScenes
 
         private void Confirm()
         {
+            if (TargetItem == null) return;
+
             switch (PType)
             {
                 case PanelType.Sell:

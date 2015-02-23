@@ -77,7 +77,7 @@ namespace Server
 
         public static string SkeletonName = "BoneFamiliar",
                              ShinsuName = "Shinsu",
-                             BugBatName = "Bug Bat",
+                             BugBatName = "BugBat",
                              Zuma1 = "ZumaStatue",
                              Zuma2 = "ZumaGuardian",
                              Zuma3 = "ZumaArcher",
@@ -141,6 +141,9 @@ namespace Server
         //guild related settings
         public static byte Guild_RequiredLevel = 22, Guild_PointPerLevel = 0;
         public static float Guild_ExpRate = 0.01f;
+        public static uint Guild_WarCost = 3000;
+        public static long Guild_WarTime = 180;
+
         public static List<ItemVolume> Guild_CreationCostList = new List<ItemVolume>();
         public static List<long> Guild_ExperienceList = new List<long>();
         public static List<int> Guild_MembercapList = new List<int>();
@@ -701,6 +704,9 @@ namespace Server
             Guild_RequiredLevel = reader.ReadByte("Guilds", "MinimuLevel", Guild_RequiredLevel);
             Guild_ExpRate = reader.ReadFloat("Guilds", "ExpRate", Guild_ExpRate);
             Guild_PointPerLevel = reader.ReadByte("Guilds", "PointPerLevel", Guild_PointPerLevel);
+            Guild_WarTime = reader.ReadInt64("Guilds", "WarTime", Guild_WarTime);
+            Guild_WarCost = reader.ReadUInt32("Guilds", "WarCost", Guild_WarCost);
+
             int i = 0;
             while (reader.ReadUInt32("Required-" + i.ToString(),"Amount",0) != 0)
             {
@@ -736,6 +742,8 @@ namespace Server
                 });
             }
 
+
+
         }
         public static void SaveGuildSettings()
         {
@@ -745,6 +753,9 @@ namespace Server
             reader.Write("Guilds", "ExpRate", Guild_ExpRate);
             reader.Write("Guilds", "PointPerLevel", Guild_PointPerLevel);
             reader.Write("Guilds", "TotalBuffs", Guild_BuffList.Count);
+            reader.Write("Guilds", "WarTime", Guild_WarTime);
+            reader.Write("Guilds", "WarCost", Guild_WarCost);
+
             int i = 0;
             for (i = 0; i < Guild_ExperienceList.Count; i++)
             {

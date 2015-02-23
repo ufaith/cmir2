@@ -32,10 +32,13 @@ namespace Server.MirObjects
             ConsignKey = "[@CONSIGN]",
             MarketKey = "[@MARKET]",
             ConsignmentsKey = "[@CONSIGNMENT]",
+
             TradeKey = "[TRADE]",
             TypeKey = "[TYPES]",
-            GuildCreateKey = "[@CREATEGUILD]",
             QuestKey = "[QUESTS]",
+
+            GuildCreateKey = "[@CREATEGUILD]",
+            RequestWarKey = "[@REQUESTWAR]",
             AwakeningKey = "[@AWAKENING]",
             DisassembleKey = "[@DISASSEMBLE]",
             DowngradeKey = "[@DOWNGRADE]",
@@ -134,6 +137,11 @@ namespace Server.MirObjects
             GoodsIndex = new List<int>();
             Types = new List<ItemType>();
             NPCSections = new List<NPCPage>();
+
+            if(Info.IsDefault)
+            {
+                SMain.Envir.CustomCommands.Clear();
+            }
         }
 
         private void ParseDefault(List<string> lines)
@@ -741,6 +749,21 @@ namespace Server.MirObjects
                     }
                     else
                         player.ReceiveChat("You are already part of a guild.", ChatType.System);
+                    break;
+                case RequestWarKey:
+                    if (player.MyGuild != null)
+                    {
+                        if (player.MyGuildRank != player.MyGuild.Ranks[0])
+                        {
+                            player.ReceiveChat("You must be the leader to request a war.", ChatType.System);
+                            return;
+                        }
+                        player.Enqueue(new S.GuildRequestWar());
+                    }
+                    else
+                    {
+                        player.ReceiveChat("You are not in a guild.", ChatType.System);
+                    }
                     break;
                 case AwakeningKey:
                     player.Enqueue(new S.NPCAwakening());
@@ -1451,6 +1474,12 @@ namespace Server.MirObjects
                         case "PKPOINT":
                             SayCommandCheck = player.PKPoints.ToString();
                             break;
+                        case "GUILDWARTIME":
+                            SayCommandCheck = Settings.Guild_WarTime.ToString();
+                            break;
+                        case "GUILDWARFEE":
+                            SayCommandCheck = Settings.Guild_WarCost.ToString();
+                            break;
 
                         default:
                             SayCommandCheck = string.Empty;
@@ -1552,27 +1581,27 @@ namespace Server.MirObjects
                         break;
 
                     case CheckType.CheckGender:
-                        if (!Enum.IsDefined(typeof(MirGender), param[0]))
+                        MirGender gender;
+
+                        if (!MirGender.TryParse(param[0], false, out gender))
                         {
                             failed = true;
                             break;
                         }
 
-                        tempByte = (byte)Enum.Parse(typeof(MirGender), param[0]);
-
-                        failed = (byte)player.Gender != tempByte;
+                        failed = player.Gender != gender;
                         break;
 
                     case CheckType.CheckClass:
-                        if (!Enum.IsDefined(typeof(MirClass), param[0]))
+                        MirClass mirClass;
+
+                        if (!MirClass.TryParse(param[0], false, out mirClass))
                         {
                             failed = true;
                             break;
                         }
 
-                        tempByte = (byte)Enum.Parse(typeof(MirClass), param[0]);
-
-                        failed = (byte)player.Class != tempByte;
+                        failed = player.Class != mirClass;
                         break;
 
                     case CheckType.CheckDay:
