@@ -1300,7 +1300,8 @@ namespace Server.MirObjects
             CellTime = Envir.Time + 500;
             ActionTime = Envir.Time + 300;
             MoveTime = Envir.Time + MoveSpeed;
-            AttackTime = MoveTime;
+            if (MoveTime > AttackTime)
+                AttackTime = MoveTime;
 
             InSafeZone = CurrentMap.GetSafeZone(CurrentLocation) != null;
 
