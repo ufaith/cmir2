@@ -1002,7 +1002,6 @@ namespace Server.MirEnvir
                 case Spell.NapalmShot://ArcherSpells - NapalmShot
                     value = (int)data[2];
                     location = (Point)data[3];
-
                     for (int y = location.Y - 2; y <= location.Y + 2; y++)
                     {
                         if (y < 0) continue;
@@ -1027,9 +1026,7 @@ namespace Server.MirEnvir
                                         //Only targets
                                         if (!target.IsAttackTarget(player)) break;
 
-                                        if (magic.Spell == Spell.NapalmShot) value = value * 10;//ArcherSpells - NapalmShot
-
-                                        if (target.Attacked(player, magic.Spell == Spell.FlameField || target.Undead ? value : value / 10, DefenceType.MAC, false) <= 0) break;
+                                        if (target.Attacked(player, magic.Spell == Spell.ThunderStorm && !target.Undead ? value / 10 : value , DefenceType.MAC, false) <= 0) break;
 
                                         train = true;
                                         break;
@@ -1548,20 +1545,28 @@ namespace Server.MirEnvir
                         if (cast)
                         {
                             player.LevelMagic(magic);
-                            SpellObject ob = new SpellObject
+                            System.Drawing.Point[] Traps = new Point[3];
+                            Traps[0] = front;
+                            Traps[1] = Functions.Left(front, player.Direction);
+                            Traps[2] = Functions.Right(front, player.Direction);
+                            for (int i = 0; i <= 2; i++)
                             {
-                                Spell = Spell.ExplosiveTrap,
-                                Value = value,
-                                ExpireTime = Envir.Time + (10 + value / 2) * 1000,
-                                TickSpeed = 500,
-                                Caster = player,
-                                CurrentLocation = front,
-                                CurrentMap = this,
-                                ExplosiveTrapID = trapID
-                            };
-                            AddObject(ob);
-                            ob.Spawned();
-                            player.ArcherTrapObjectsArray[trapID] = ob;
+                                SpellObject ob = new SpellObject
+                                {
+                                    Spell = Spell.ExplosiveTrap,
+                                    Value = value,
+                                    ExpireTime = Envir.Time + (10 + value / 2) * 1000,
+                                    TickSpeed = 500,
+                                    Caster = player,
+                                    CurrentLocation = Traps[i],
+                                    CurrentMap = this,
+                                    ExplosiveTrapID = trapID,
+                                    ExplosiveTrapCount = i
+                                };
+                                AddObject(ob);
+                                ob.Spawned();
+                                player.ArcherTrapObjectsArray[trapID, i] = ob;
+                            }
                         }
                     }
                     break;

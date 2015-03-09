@@ -605,6 +605,11 @@ namespace Client.MirScenes
                     }
                     Network.Enqueue(new C.SpellToggle { Spell = magic.Spell, CanUse = true });
                     break;
+                case Spell.MentalState:
+                    if (CMain.Time < ToggleTime) return;
+                    ToggleTime = CMain.Time + 500;
+                    Network.Enqueue(new C.SpellToggle { Spell = magic.Spell, CanUse = true });
+                    break;
                 default:
                     User.NextMagic = magic;
                     User.NextMagicLocation = MapControl.MapLocation;
@@ -1411,6 +1416,8 @@ namespace Client.MirScenes
                     return 200 + 20000; //MagIcon
                 case BuffType.PoisonShot://ArcherSpells - PoisonShot
                     return 204 + 20000; //MagIcon
+                case BuffType.MentalState:
+                    return 905;//todo replace with it's own custom buff icon (maybe make it change depending on state)
                 default:
                     return 0;
             }
@@ -1968,6 +1975,7 @@ namespace Client.MirScenes
                 if (player != null)
                 {
                     player.FishingUpdate(p);
+                    
                 }
                 break;
             }
@@ -3257,6 +3265,26 @@ namespace Client.MirScenes
                 return;
             }
         }
+
+        private void ShowMentalState(Buff buff)
+        {
+            if (buff.Type == BuffType.MentalState)
+            {
+                switch (buff.Value)
+                {
+                    case 0:
+                        ChatDialog.ReceiveChat("Mentalstate: Agressive.", ChatType.Hint);
+                        break;
+                    case 1:
+                        ChatDialog.ReceiveChat("Mentalstate: Trick shot.", ChatType.Hint);
+                        break;
+                    case 2:
+                        ChatDialog.ReceiveChat("Mentalstate: Group mode.", ChatType.Hint);
+                        break;
+                }
+
+            }
+        }
         private void AddBuff(S.AddBuff p)
         {
             Buff buff = new Buff { Type = p.Type, Caster = p.Caster, Expire = CMain.Time + p.Expire, Value = p.Value, Infinite = p.Infinite, ObjectID = p.ObjectID, Visible = p.Visible };
@@ -3269,12 +3297,15 @@ namespace Client.MirScenes
 
                     Buffs[i] = buff;
                     User.RefreshStats();
+                    ShowMentalState(buff);
                     return;
                 }
 
                 Buffs.Add(buff);
                 CreateBuff(buff);
                 User.RefreshStats();
+                ShowMentalState(buff);
+                
             }
 
             if (!buff.Visible || buff.ObjectID <= 0) return;
@@ -7772,6 +7803,8 @@ namespace Client.MirScenes
             get { return MapObject.User; }
             set { MapObject.User = value; }
         }
+
+        
 
         public MirImageControl ExperienceBar, WeightBar;
         public MirButton GameShopButton, MenuButton, InventoryButton, CharacterButton, SkillButton, QuestButton, OptionButton;
@@ -17057,6 +17090,20 @@ namespace Client.MirScenes
                     break;
                 case BuffType.PoisonShot:
                     text = string.Format("PoisonShot\nGives you a poison ability\nthat can be released with\ncertain skills.\n", Value);
+                    break;
+                case BuffType.MentalState:
+                    switch (Value)
+                    {
+                        case 0:
+                            text = string.Format("Agressive:\nFull damage\nCan't shoot over walls.", Value);
+                            break;
+                        case 1:
+                            text = string.Format("Trick shot:\nMinimal damage\nCan shoot over walls.", Value);
+                            break;
+                        case 2:
+                            text = string.Format("Group Mode:\nMedium damage\nDont steal agro.", Value);
+                            break;
+                    }
                     break;
             }
 

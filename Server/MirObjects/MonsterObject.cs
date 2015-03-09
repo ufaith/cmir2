@@ -1632,7 +1632,9 @@ namespace Server.MirObjects
         {
 
             if (Target == null && attacker.IsAttackTarget(this))
+            {
                 Target = attacker;
+            }
 
             int armour = 0;
 
@@ -1674,7 +1676,15 @@ namespace Server.MirObjects
                 attacker.ChangeHP(attacker.LifeOnHit);
 
             if (Target != this && attacker.IsAttackTarget(this))
-                Target = attacker;
+            {
+                if (attacker.Info.MentalState == 2)
+                {
+                    if (Functions.MaxDistance(CurrentLocation, attacker.CurrentLocation) < (8 - attacker.Info.MentalStateLvl))
+                        Target = attacker;
+                }
+                else
+                    Target = attacker;
+            }
 
             if (BindingShotCenter) ReleaseBindingShot();
             ShockTime = 0;
