@@ -667,6 +667,7 @@ public enum Spell : byte
     NapalmShot = 138,
     OneWithNature = 139,
     BindingShot = 140,
+    MentalState = 141,
     
 
     //Map Events
@@ -736,7 +737,8 @@ public enum BuffType : byte
     HealthAid,
     ManaAid,
     VampireShot,
-    PoisonShot
+    PoisonShot,
+    MentalState
 }
 
 public enum DefenceType : byte
@@ -1665,6 +1667,69 @@ public static class Functions
                 break;
             case MirDirection.UpLeft:
                 p.Offset(-i, -i);
+                break;
+        }
+        return p;
+    }
+    public static Point Left(Point p, MirDirection d)
+    {
+        switch (d)
+        {
+            case MirDirection.Up:
+                p.Offset(-1, 0);
+                break;
+            case MirDirection.UpRight:
+                p.Offset(-1, -1);
+                break;
+            case MirDirection.Right:
+                p.Offset(0, -1);
+                break;
+            case MirDirection.DownRight:
+                p.Offset(1, -1);
+                break;
+            case MirDirection.Down:
+                p.Offset(1, 0);
+                break;
+            case MirDirection.DownLeft:
+                p.Offset(1, 1);
+                break;
+            case MirDirection.Left:
+                p.Offset(0, 1);
+                break;
+            case MirDirection.UpLeft:
+                p.Offset(-1, 1);
+                break;
+        }
+        return p;
+    }
+
+    public static Point Right(Point p, MirDirection d)
+    {
+        switch (d)
+        {
+            case MirDirection.Up:
+                p.Offset(1, 0);
+                break;
+            case MirDirection.UpRight:
+                p.Offset(1, 1);
+                break;
+            case MirDirection.Right:
+                p.Offset(0, 1);
+                break;
+            case MirDirection.DownRight:
+                p.Offset(-1, 1);
+                break;
+            case MirDirection.Down:
+                p.Offset(-1, 0);
+                break;
+            case MirDirection.DownLeft:
+                p.Offset(-1,-1);
+                break;
+            case MirDirection.Left:
+                p.Offset(0, -1);
+                break;
+            case MirDirection.UpLeft:
+                p.Offset(1, -1);
                 break;
         }
         return p;

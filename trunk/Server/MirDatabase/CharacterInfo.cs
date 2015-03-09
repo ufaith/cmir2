@@ -59,6 +59,8 @@ namespace Server.MirDatabase
 
         public bool Thrusting, HalfMoon, CrossHalfMoon;
         public bool DoubleSlash;
+        public byte MentalState;
+        public byte MentalStateLvl;
 
         public UserItem[] Inventory = new UserItem[46], Equipment = new UserItem[14], Trade = new UserItem[10], QuestInventory = new UserItem[40];
         public List<UserMagic> Magics = new List<UserMagic>();

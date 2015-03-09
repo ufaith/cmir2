@@ -36,6 +36,7 @@ namespace Server.MirObjects
         public bool Show;
 
         public int ExplosiveTrapID;//ArcherSpells - Explosive Trap
+        public int ExplosiveTrapCount;
         public bool DetonatedTrap;//ArcherSpells - Explosive Trap
 
         public override uint Health
@@ -318,7 +319,29 @@ namespace Server.MirObjects
             }
 
             if (Spell == Spell.ExplosiveTrap && Caster != null)//ArcherSpells - Explosive Trap
-                Caster.ExplosiveTrapDetonated(ExplosiveTrapID);
+                Caster.ExplosiveTrapDetonated(ExplosiveTrapID, ExplosiveTrapCount);
+        }
+
+        public override void BroadcastInfo()
+        {
+            if ((Spell != Spell.ExplosiveTrap) || (Caster == null))
+                base.BroadcastInfo();
+            Packet p;
+            if (CurrentMap == null) return;
+
+            for (int i = CurrentMap.Players.Count - 1; i >= 0; i--)
+            {
+                PlayerObject player = CurrentMap.Players[i];
+                if (Functions.InRange(CurrentLocation, player.CurrentLocation, Globals.DataRange))
+                {
+                    if ((player == Caster) || (player.IsFriendlyTarget(Caster)))
+                    {
+                        p = GetInfo();
+                        if (p != null)
+                            player.Enqueue(p);
+                    }
+                }
+            }
         }
     }
 }

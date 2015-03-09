@@ -108,7 +108,7 @@ namespace Server.MirDatabase
                                 ElementalShot,
                                 Concentration,
                                 BindingShot,
-                                //Stonetrap,
+            //Stonetrap,
                                 ElementalBarrier,
                                 SummonVampire,
                                 VampireShot,//linked to crippleshot ?
@@ -117,7 +117,8 @@ namespace Server.MirDatabase
                                 CrippleShot,//buffs vampireshot and poisonshot ?
                                 SummonSnakes,
                                 NapalmShot,
-                                OneWithNature;//buffs vampireshot and poisonshot ?
+                                OneWithNature,//buffs vampireshot and poisonshot ?
+                                MentalState;
 
 
         public Spell Spell;
@@ -214,27 +215,28 @@ namespace Server.MirDatabase
 
 
             //Archer
-            Focus = new MagicInfo { Spell = Spell.Focus, Icon = 88, Level1 = 23, Level2 = 38, Level3 = 54, Need1 = 100, Need2 = 200, Need3 = 300 };
-            StraightShot = new MagicInfo { Spell = Spell.StraightShot, Icon = 89, Level1 = 12, Level2 = 15, Level3 = 18, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 3, LevelCost = 2 };
-            DoubleShot = new MagicInfo { Spell = Spell.DoubleShot, Icon = 90, Level1 = 15, Level2 = 19, Level3 = 23, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 3, LevelCost = 2 };
-            ExplosiveTrap = new MagicInfo { Spell = Spell.ExplosiveTrap, Icon = 91, Level1 = 27, Level2 = 39, Level3 = 51, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 10, LevelCost = 2 };
-            DelayedExplosion = new MagicInfo { Spell = Spell.DelayedExplosion, Icon = 92, Level1 = 27, Level2 = 31, Level3 = 35, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 8, LevelCost = 2 };
+            Focus = new MagicInfo { Spell = Spell.Focus, Icon = 88, Level1 = 7, Level2 = 13, Level3 = 17, Need1 = 270, Need2 = 600, Need3 = 1300 };
+            StraightShot = new MagicInfo { Spell = Spell.StraightShot, Icon = 89, Level1 = 9, Level2 = 12, Level3 = 16, Need1 = 350, Need2 = 750, Need3 = 1400, BaseCost = 3, LevelCost = 2 };
+            DoubleShot = new MagicInfo { Spell = Spell.DoubleShot, Icon = 90, Level1 = 14, Level2 = 18, Level3 = 21, Need1 = 700, Need2 = 1500, Need3 = 2100, BaseCost = 3, LevelCost = 2 };
+            ExplosiveTrap = new MagicInfo { Spell = Spell.ExplosiveTrap, Icon = 91, Level1 = 22, Level2 = 25, Level3 = 30, Need1 = 2000, Need2 = 3500, Need3 = 5000, BaseCost = 10, LevelCost = 3 };
+            DelayedExplosion = new MagicInfo { Spell = Spell.DelayedExplosion, Icon = 92, Level1 = 31, Level2 = 34, Level3 = 39, Need1 = 3000, Need2 = 7000, Need3 = 10000, BaseCost = 8, LevelCost = 2 };
             //ArcherSpells Elemental system
-            Meditation = new MagicInfo { Spell = Spell.Meditation, Icon = 93, Level1 = 27, Level2 = 35, Level3 = 43, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 8, LevelCost = 2 };
-            ElementalShot = new MagicInfo { Spell = Spell.ElementalShot, Icon = 94, Level1 = 24, Level2 = 29, Level3 = 34, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 8, LevelCost = 2 };
-            Concentration = new MagicInfo { Spell = Spell.Concentration, Icon = 96, Level1 = 36, Level2 = 42, Level3 = 48, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 8, LevelCost = 2 };
-            ElementalBarrier = new MagicInfo { Spell = Spell.ElementalBarrier, Icon = 98, Level1 = 42, Level2 = 47, Level3 = 52, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 2 };
+            Meditation = new MagicInfo { Spell = Spell.Meditation, Icon = 93, Level1 = 19, Level2 = 24, Level3 = 29, Need1 = 1800, Need2 = 2600, Need3 = 5600, BaseCost = 8, LevelCost = 2 };
+            ElementalShot = new MagicInfo { Spell = Spell.ElementalShot, Icon = 94, Level1 = 20, Level2 = 25, Level3 = 31, Need1 = 1800, Need2 = 2700, Need3 = 6000, BaseCost = 8, LevelCost = 2 };
+            Concentration = new MagicInfo { Spell = Spell.Concentration, Icon = 96, Level1 = 23, Level2 = 27, Level3 = 32, Need1 = 2100, Need2 = 3800, Need3 = 6500, BaseCost = 8, LevelCost = 2 };
+            ElementalBarrier = new MagicInfo { Spell = Spell.ElementalBarrier, Icon = 98, Level1 = 33, Level2 = 38, Level3 = 44, Need1 = 3000, Need2 = 7000, Need3 = 10000, BaseCost = 10, LevelCost = 2 };
             //
-            BackStep = new MagicInfo { Spell = Spell.BackStep, Icon = 95, Level1 = 31, Level2 = 36, Level3 = 41, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 2 };
-            BindingShot = new MagicInfo { Spell = Spell.BindingShot, Icon = 97, Level1 = 43, Level2 = 46, Level3 = 49, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 7, LevelCost = 3 };
+            BackStep = new MagicInfo { Spell = Spell.BackStep, Icon = 95, Level1 = 30, Level2 = 34, Level3 = 38, Need1 = 2400, Need2 = 3000, Need3 = 6000, BaseCost = 12, LevelCost = 2 };
+            BindingShot = new MagicInfo { Spell = Spell.BindingShot, Icon = 97, Level1 = 35, Level2 =39, Level3 = 42, Need1 = 400, Need2 = 7000, Need3 = 9500, BaseCost = 7, LevelCost = 3 };
             //SummonVampire Icon = 99
-            VampireShot = new MagicInfo { Spell = Spell.VampireShot, Icon = 100, Level1 = 45, Level2 = 48, Level3 = 51, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 12, LevelCost = 3 };//ArcherSpells - VampireShot
+            VampireShot = new MagicInfo { Spell = Spell.VampireShot, Icon = 100, Level1 = 26, Level2 = 32, Level3 = 36, Need1 = 3000, Need2 = 6000, Need3 = 12000, BaseCost = 12, LevelCost = 3 };//ArcherSpells - VampireShot
             //SummonToad Icon = 101
-            PoisonShot = new MagicInfo { Spell = Spell.PoisonShot, Icon = 102, Level1 = 53, Level2 = 56, Level3 = 59, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 10, LevelCost = 4 };//ArcherSpells - PoisonShot
-            CrippleShot = new MagicInfo { Spell = Spell.CrippleShot, Icon = 103, Level1 = 53, Level2 = 56, Level3 = 59, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 15, LevelCost = 3 };//ArcherSpells - CrippleShot
+            PoisonShot = new MagicInfo { Spell = Spell.PoisonShot, Icon = 102, Level1 = 40, Level2 = 45, Level3 = 49, Need1 = 6000, Need2 = 14000, Need3 = 16000, BaseCost = 10, LevelCost = 4 };//ArcherSpells - PoisonShot
+            CrippleShot = new MagicInfo { Spell = Spell.CrippleShot, Icon = 103, Level1 = 43, Level2 = 47, Level3 = 50, Need1 = 12000, Need2 = 15000, Need3 = 18000, BaseCost = 15, LevelCost = 3 };//ArcherSpells - CrippleShot
             //SummonSnakes Icon = 104
-            NapalmShot = new MagicInfo { Spell = Spell.NapalmShot, Icon = 105, Level1 = 60, Level2 = 61, Level3 = 62, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 40, LevelCost = 10 };//ArcherSpells - NapalmShot
-            OneWithNature = new MagicInfo { Spell = Spell.OneWithNature, Icon = 106, Level1 = 64, Level2 = 66, Level3 = 68, Need1 = 100, Need2 = 200, Need3 = 300, BaseCost = 80, LevelCost = 15 };//ArcherSpells - OneWithNature
+            NapalmShot = new MagicInfo { Spell = Spell.NapalmShot, Icon = 105, Level1 = 48, Level2 = 52, Level3 = 55, Need1 = 15000, Need2 = 18000, Need3 = 21000, BaseCost = 40, LevelCost = 10 };//ArcherSpells - NapalmShot
+            OneWithNature = new MagicInfo { Spell = Spell.OneWithNature, Icon = 106, Level1 = 50, Level2 = 53, Level3 = 56, Need1 = 17000, Need2 = 19000, Need3 = 24000, BaseCost = 80, LevelCost = 15 };//ArcherSpells - OneWithNature
+            MentalState = new MagicInfo { Spell = Spell.MentalState, Icon = 81, Level1 = 11, Level2 = 15, Level3 = 22, Need1 = 500, Need2 = 900, Need3 = 1800, BaseCost = 1, LevelCost = 1 };//todo make this proper
         }
 
         public MagicInfo()
@@ -378,23 +380,27 @@ namespace Server.MirDatabase
                     return 8;
 
                 case Spell.StraightShot:
-                    return 7;
+                    return 8;
                 case Spell.DoubleShot:
-                    return 4;
+                    return 6;
                 case Spell.ExplosiveTrap://ArcherSpells - Explosive Trap
-                    return 30;
+                    return 15;
                 case Spell.DelayedExplosion://ArcherSpells - DelayedExplosion
                     return 30;
+                case Spell.ElementalBarrier:
+                    return 15;
                 case Spell.ElementalShot://ArcherSpells - Elemental system
                     return 6;
                 case Spell.VampireShot://ArcherSpells - VampireShot
-                    return 5;
+                    return 10;
                 case Spell.PoisonShot://ArcherSpells - PoisonShot
-                    return 5;
+                    return 10;
                 case Spell.CrippleShot://ArcherSpells - CrippleShot
-                    return 5;
+                    return SMain.Envir.Random.Next(10,30);
                 case Spell.NapalmShot://ArcherSpells - NapalmShot
-                    return 35;
+                    return SMain.Envir.Random.Next(25,50);
+                case Spell.OneWithNature:
+                    return SMain.Envir.Random.Next(75, 110);
 
                 default:
                     return 0;
@@ -456,13 +462,15 @@ namespace Server.MirDatabase
                 case Spell.ElementalBarrier://ArcherSpells - Elemental system
                     return 5;
                 case Spell.VampireShot://ArcherSpells - VampireShot
-                    return 5;
+                    return 7;
                 case Spell.PoisonShot://ArcherSpells - PoisonShot
-                    return 5;
+                    return 10;
                 case Spell.CrippleShot://ArcherSpells - CrippleShot
-                    return 5;
+                    return 10;
                 case Spell.NapalmShot://ArcherSpells - NapalmShot
-                    return 20;
+                    return 25;
+                case Spell.OneWithNature:
+                    return SMain.Envir.Random.Next(30, 50);
 
                 default:
                     return 0;
