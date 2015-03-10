@@ -413,12 +413,14 @@ namespace Client.MirObjects
         public static List<TrackableEffect> effectlist = new List<TrackableEffect>();
         public string EffectName = "default";
 
-        public TrackableEffect(Effect baseEffect)
+        public TrackableEffect(Effect baseEffect, string effName = "null")
             : base(baseEffect.Library, baseEffect.BaseIndex, baseEffect.Count, baseEffect.Duration, baseEffect.Owner, baseEffect.Start)
         {
             Repeat = baseEffect.Repeat;
             RepeatUntil = baseEffect.RepeatUntil;
             Blend = baseEffect.Blend;
+
+            EffectName = effName;
 
             effectlist.Add(this);
         }
@@ -437,6 +439,9 @@ namespace Client.MirObjects
         public override void Process()
         {
             base.Process();
+
+            if (Owner == null) Remove();
+            else if (Owner.Dead) Remove();
         }
 
         public override void Remove()

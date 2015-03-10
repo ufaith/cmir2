@@ -347,6 +347,18 @@ namespace Client.MirObjects
                 case Monster.Guard1:
                     Frames = FrameSet.Monsters[48];
                     break;
+                case Monster.VampireSpider://SummonVampire
+                    Frames = FrameSet.Monsters[49];
+                    break;
+                case Monster.SpittingToad://SummonToad
+                    Frames = FrameSet.Monsters[50];
+                    break;
+                case Monster.SnakeTotem://SummonSnakes Totem
+                    Frames = FrameSet.Monsters[51];
+                    break;
+                case Monster.CharmedSnake://SummonSnakes
+                    Frames = FrameSet.Monsters[52];
+                    break;
                 default:
                     Frames = FrameSet.Monsters[0];
                     break;
@@ -603,6 +615,7 @@ namespace Client.MirObjects
                             case Monster.Shinsu1:
                             case Monster.HolyDeva:
                             case Monster.GuardianRock:
+                            case Monster.CharmedSnake://SummonSnakes
                                 Remove();
                                 return false;
                             default:
@@ -788,6 +801,12 @@ namespace Client.MirObjects
                             case Monster.BlackFoxman:
                                 Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.BlackFoxman], 224, 10, Frame.Count * Frame.Interval, this));
                                 break;
+                            case Monster.VampireSpider://SummonVampire
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.VampireSpider], 296, 5, Frame.Count * Frame.Interval, this));
+                                break;
+                            case Monster.CharmedSnake://SummonSnakes
+                                Effects.Add(new Effect(Libraries.Monsters[(ushort)Monster.CharmedSnake], 40, 8, Frame.Count * Frame.Interval, this));
+                                break;
                         }
                         PlayDieSound();
                         break;
@@ -956,6 +975,14 @@ namespace Client.MirObjects
 
                         if (UpdateFrame() >= Frame.Count)
                         {
+                            if (CurrentAction == MirAction.Standing)
+                                switch (BaseImage)
+                                {
+                                    case Monster.SnakeTotem://SummonSnakes Totem
+                                        if (TrackableEffect.GetOwnerEffectID(this.ObjectID, "SnakeTotem") < 0)
+                                            Effects.Add(new TrackableEffect(new Effect(Libraries.Monsters[(ushort)Monster.SnakeTotem], 16, 10, 1500, this) { Repeat = true }, "SnakeTotem"));
+                                        break;
+                                }
                             FrameIndex = Frame.Count - 1;
                             SetAction();
                         }
@@ -1258,6 +1285,10 @@ namespace Client.MirObjects
                                             case Monster.ArcherGuard:
                                                 if (MapControl.GetObject(TargetID) != null)
                                                     CreateProjectile(38, Libraries.Monsters[(ushort)Monster.ArcherGuard], false, 3, 30, 6);
+                                                break;
+                                            case Monster.SpittingToad://SummonToad
+                                                if (MapControl.GetObject(TargetID) != null)
+                                                    CreateProjectile(280, Libraries.Monsters[(ushort)Monster.SpittingToad], true, 6, 30, 0);
                                                 break;
                                             }
                                         break;

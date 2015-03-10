@@ -133,6 +133,14 @@ namespace Server.MirObjects
                     return new Guard(info);
                 case 59:
                     return new HumanAssassin(info);
+                case 60:
+                    return new VampireSpider(info);//SummonVampire
+                case 61:
+                    return new SpittingToad(info);//SummonToad
+                case 62:
+                    return new SnakeTotem(info);//SummonSnakes Totem
+                case 63:
+                    return new CharmedSnake(info);//SummonSnakes
                 default:
                     return new MonsterObject(info);
             }
@@ -1527,8 +1535,17 @@ namespace Server.MirObjects
                 case AttackMode.Group:
                     return Master.GroupMembers == null || !Master.GroupMembers.Contains(attacker);
                 case AttackMode.Guild:
-                    //TODO GuildWars
-                    return true;
+                    {
+                        if (!(Master is PlayerObject)) return false;
+                        PlayerObject master = (PlayerObject)Master;
+                        return master.MyGuild == null || master.MyGuild != attacker.MyGuild;
+                    }
+                case AttackMode.EnemyGuild:
+                    {
+                        if (!(Master is PlayerObject)) return false;
+                        PlayerObject master = (PlayerObject)Master;
+                        return (master.MyGuild != null && attacker.MyGuild != null) && master.MyGuild.IsEnemy(attacker.MyGuild);
+                    }
                 case AttackMode.RedBrown:
                     return Master.PKPoints >= 200 || Envir.Time < Master.BrownTime;
                 default:
@@ -1570,6 +1587,8 @@ namespace Server.MirObjects
                         if (Master.GroupMembers != null && Master.GroupMembers.Contains((PlayerObject)attacker.Master)) return false;
                         break;
                     case AttackMode.Guild:
+                        break;
+                    case AttackMode.EnemyGuild:
                         break;
                     case AttackMode.RedBrown:
                         if (attacker.Master.PKPoints < 200 || Envir.Time > attacker.Master.BrownTime) return false;
@@ -1613,6 +1632,8 @@ namespace Server.MirObjects
                     return Master.GroupMembers != null && Master.GroupMembers.Contains(ally);
                 case AttackMode.Guild:
                     return false;
+                case AttackMode.EnemyGuild:
+                    return true;
                 case AttackMode.RedBrown:
                     return Master.PKPoints < 200 & Envir.Time > Master.BrownTime;
             }
