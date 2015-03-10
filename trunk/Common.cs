@@ -235,10 +235,10 @@ public enum Monster : ushort
     //GingerBreadman = 150,
     //HalloweenScythe = 151,
 
-    VampireSpider = 359,//SummonVampire
-    SpittingToad = 360,//SummonToad
-    SnakeTotem = 361,//SummonSnakes   Totem
-    CharmedSnake = 368,//SummonSnakes   Snake
+    VampireSpider = 359,
+    SpittingToad = 360,
+    SnakeTotem = 361,
+    CharmedSnake = 368,
 
     EvilMir = 900,
     EvilMirBody = 901,
