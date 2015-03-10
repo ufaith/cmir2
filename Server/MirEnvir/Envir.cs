@@ -299,9 +299,6 @@ namespace Server.MirEnvir
                 {
                     MailInfo mail = Mail[i];
 
-                    //if (mail.Gold > 0 && !Settings.MailAutoSendGold) continue;
-                    //if (mail.Items.Count > 0 && !Settings.MailAutoSendItems) continue;
-
                     if(mail.Receive())
                     {
                         if (mail.Items.Count > 0 || mail.Gold > 0)
