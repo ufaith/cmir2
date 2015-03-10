@@ -79,6 +79,7 @@
     <Compile Include="..\ServerPackets.cs">
       <Link>MirNetwork\ServerPackets.cs</Link>
     </Compile>
+    <Compile Include="MirDatabase\MailInfo.cs" />
     <Compile Include="MirForms\Account\PlayerInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -208,6 +209,7 @@
     <Compile Include="MirObjects\ItemObject.cs" />
     <Compile Include="MirObjects\MapObject.cs" />
     <Compile Include="MirObjects\MonsterObject.cs" />
+    <Compile Include="MirObjects\Monsters\ArcherSummons.cs" />
     <Compile Include="MirObjects\Monsters\AxeSkeleton.cs" />
     <Compile Include="MirObjects\Monsters\BoneFamiliar.cs" />
     <Compile Include="MirObjects\Monsters\BugBagMaggot.cs" />
@@ -217,6 +219,7 @@
     <Compile Include="MirObjects\Monsters\BoneLord.cs" />
     <Compile Include="MirObjects\Monsters\BombSpider.cs" />
     <Compile Include="MirObjects\Monsters\BlackFoxman.cs" />
+    <Compile Include="MirObjects\Monsters\CharmedSnake.cs" />
     <Compile Include="MirObjects\Monsters\HumanAssassin.cs" />
     <Compile Include="MirObjects\Monsters\HumanWizard.cs" />
     <Compile Include="MirObjects\Monsters\DragonStatue.cs" />
@@ -224,11 +227,14 @@
     <Compile Include="MirObjects\Monsters\EvilMir.cs" />
     <Compile Include="MirObjects\Monsters\HedgeKekTal.cs" />
     <Compile Include="MirObjects\Monsters\GreatFoxSpirit.cs" />
+    <Compile Include="MirObjects\Monsters\SnakeTotem.cs" />
+    <Compile Include="MirObjects\Monsters\SpittingToad.cs" />
     <Compile Include="MirObjects\Monsters\ThunderElement.cs" />
     <Compile Include="MirObjects\Monsters\GuardianRock.cs" />
     <Compile Include="MirObjects\Monsters\TownArcher.cs" />
     <Compile Include="MirObjects\Monsters\Trainer.cs" />
     <Compile Include="MirObjects\Monsters\TrapRock.cs" />
+    <Compile Include="MirObjects\Monsters\VampireSpider.cs" />
     <Compile Include="MirObjects\Monsters\WhiteFoxman.cs" />
     <Compile Include="MirObjects\Monsters\RedFoxman.cs" />
     <Compile Include="MirObjects\Monsters\OmaKing.cs" />

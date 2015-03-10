@@ -39,6 +39,8 @@ namespace Server.MirObjects
 
             GuildCreateKey = "[@CREATEGUILD]",
             RequestWarKey = "[@REQUESTWAR]",
+            SendParcelKey = "[@SENDPARCEL]",
+            CollectParcelKey = "[@COLLECTPARCEL]",
             AwakeningKey = "[@AWAKENING]",
             DisassembleKey = "[@DISASSEMBLE]",
             DowngradeKey = "[@DOWNGRADE]",
@@ -765,6 +767,27 @@ namespace Server.MirObjects
                         player.ReceiveChat("You are not in a guild.", ChatType.System);
                     }
                     break;
+                case SendParcelKey:
+                    player.Enqueue(new S.MailSendRequest());
+                    break;
+                case CollectParcelKey:
+
+                    sbyte result = 0;
+
+                    if (player.GetMailAwaitingCollectionAmount() < 1)
+                    {
+                        result = -1;
+                    }
+                    else
+                    {
+                        foreach (var mail in player.Info.Mail)
+                        {
+                            if (mail.Parcel) mail.Collected = true;
+                        }
+                    }
+                    player.Enqueue(new S.ParcelCollected { Result = result });
+                    player.GetMail();
+                    break;
                 case AwakeningKey:
                     player.Enqueue(new S.NPCAwakening());
                     break;
@@ -1028,7 +1051,11 @@ namespace Server.MirObjects
                     break;
 
                 case "INGUILD":
-                    CheckList.Add(new NPCChecks(CheckType.InGuild));
+                    string guildName = string.Empty;
+
+                    if (parts.Length > 1) guildName = parts[1];
+
+                    CheckList.Add(new NPCChecks(CheckType.InGuild, guildName));
                     break;
             }
 
@@ -1481,6 +1508,10 @@ namespace Server.MirObjects
                             SayCommandCheck = Settings.Guild_WarCost.ToString();
                             break;
 
+                        case "PARCELAMOUNT":
+                            SayCommandCheck = player.GetMailAwaitingCollectionAmount().ToString();
+                            break;
+
                         default:
                             SayCommandCheck = string.Empty;
                             break;
@@ -1833,6 +1864,12 @@ namespace Server.MirObjects
                         }
                         break;
                     case CheckType.InGuild:
+                        if(param[0].Length > 0)
+                        {
+                            failed = player.MyGuild == null || player.MyGuild.Name != param[0];
+                            break;
+                        }
+
                         failed = player.MyGuild == null;
                         break;
                 }

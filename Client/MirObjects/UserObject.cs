@@ -47,6 +47,7 @@ namespace Client.MirObjects
 
         public List<ClientQuestProgress> CurrentQuests = new List<ClientQuestProgress>();
         public List<int> CompletedQuests = new List<int>();
+        public List<ClientMail> Mail = new List<ClientMail>();
 
         public ClientMagic NextMagic;
         public Point NextMagicLocation;
@@ -132,7 +133,7 @@ namespace Client.MirObjects
             RefreshSkills();
             RefreshBuffs();
             RefreshMountStats();
-            RefreshFishingStats();
+            //RefreshFishingStats();
 
             SetLibraries();
             SetEffects();
@@ -591,6 +592,12 @@ namespace Client.MirObjects
                         break;
                     case BuffType.Rage:
                         MaxDC = (byte)Math.Min(byte.MaxValue, MaxDC + buff.Value);
+                        break;
+                    case BuffType.CounterAttack:
+                        MinAC = (byte)Math.Min(byte.MaxValue, MinAC + buff.Value);
+                        MinMAC = (byte)Math.Min(byte.MaxValue, MinMAC + buff.Value);
+                        MaxAC = (byte)Math.Min(byte.MaxValue, MaxAC + buff.Value);
+                        MaxMAC = (byte)Math.Min(byte.MaxValue, MaxMAC + buff.Value);
                         break;
                     case BuffType.Curse:
                         byte rMaxDC = (byte)(((int)MaxDC / 100) * buff.Value);

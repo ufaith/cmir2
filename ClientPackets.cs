@@ -1440,4 +1440,123 @@ public sealed class AwakeningNeedMaterials : Packet
             writer.Write(UniqueID);
         }
     }
+
+    public sealed class SendMail : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.SendMail; } }
+
+        public string Name;
+        public string Message;
+        public uint Gold;
+        public ulong[] ItemsIdx = new ulong[5];
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            Name = reader.ReadString();
+            Message = reader.ReadString();
+            Gold = reader.ReadUInt32();
+
+            for (int i = 0; i < 5; i++)
+            {
+                ItemsIdx[i] = reader.ReadUInt64();
+            }
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(Name);
+            writer.Write(Message);
+            writer.Write(Gold);
+
+            for (int i = 0; i < 5; i++)
+            {
+                writer.Write(ItemsIdx[i]);
+            }
+        }
+    }
+
+    public sealed class ReadMail : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.ReadMail; } }
+
+        public ulong MailID;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            MailID = reader.ReadUInt64();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(MailID);
+        }
+    }
+
+    public sealed class CollectParcel : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.CollectParcel; } }
+
+        public ulong MailID;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            MailID = reader.ReadUInt64();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(MailID);
+        }
+    }
+
+    public sealed class DeleteMail : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.DeleteMail; } }
+
+        public ulong MailID;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            MailID = reader.ReadUInt64();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(MailID);
+        }
+    }
+
+    public sealed class LockMail : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.LockMail; } }
+
+        public ulong MailID;
+        public bool Lock;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            MailID = reader.ReadUInt64();
+            Lock = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(MailID);
+            writer.Write(Lock);
+        }
+    }
+
+    public sealed class MailLockedItem : Packet
+    {
+        public override short Index { get { return (short)ClientPacketIds.MailLockedItem; } }
+
+        public ulong UniqueID;
+        public bool Locked;
+
+        protected override void ReadPacket(BinaryReader reader)
+        {
+            UniqueID = reader.ReadUInt64();
+            Locked = reader.ReadBoolean();
+        }
+        protected override void WritePacket(BinaryWriter writer)
+        {
+            writer.Write(UniqueID);
+            writer.Write(Locked);
+        }
+    }
 }

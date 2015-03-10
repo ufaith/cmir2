@@ -447,6 +447,24 @@ namespace Server.MirNetwork
                 case (short)ClientPacketIds.ResetAddedItem:
                     ResetAddedItem((C.ResetAddedItem)p);
                     break;
+                case (short)ClientPacketIds.SendMail:
+                    SendMail((C.SendMail)p);
+                    break;
+                case (short)ClientPacketIds.ReadMail:
+                    ReadMail((C.ReadMail)p);
+                    break;
+                case (short)ClientPacketIds.CollectParcel:
+                    CollectParcel((C.CollectParcel)p);
+                    break;
+                case (short)ClientPacketIds.DeleteMail:
+                    DeleteMail((C.DeleteMail)p);
+                    break;
+                case (short)ClientPacketIds.LockMail:
+                    LockMail((C.LockMail)p);
+                    break;
+                case (short)ClientPacketIds.MailLockedItem:
+                    Enqueue(new S.MailLockedItem { UniqueID = ((C.MailLockedItem)p).UniqueID, Locked = ((C.MailLockedItem)p).Locked });
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1175,6 +1193,48 @@ namespace Server.MirNetwork
             if (Stage != GameStage.Game) return;
 
             Player.ResetAddedItem(p.UniqueID);
+        }
+
+        public void SendMail(C.SendMail p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            if (p.Gold > 0 || p.ItemsIdx.Length > 0)
+            {
+                Player.SendParcel(p.Name, p.Message, p.Gold, p.ItemsIdx);
+            }
+            else
+            {
+                Player.SendMail(p.Name, p.Message);
+            }
+        }
+
+        public void ReadMail(C.ReadMail p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.ReadMail(p.MailID);
+        }
+
+        public void CollectParcel(C.CollectParcel p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.CollectParcel(p.MailID);
+        }
+
+        public void DeleteMail(C.DeleteMail p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.DeleteMail(p.MailID);
+        }
+
+        public void LockMail(C.LockMail p)
+        {
+            if (Stage != GameStage.Game) return;
+
+            Player.LockMail(p.MailID, p.Lock);
         }
     }
 }

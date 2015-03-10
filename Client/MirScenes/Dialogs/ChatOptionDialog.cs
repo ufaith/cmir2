@@ -353,7 +353,8 @@ namespace Client.MirScenes.Dialogs
         {
             if (Settings.TransparentChat)
             {
-                GameScene.Scene.ChatDialog.Opacity = 0.5F;
+                GameScene.Scene.ChatDialog.ForeColour = Color.FromArgb(190, 15, 0, 0);
+                GameScene.Scene.ChatDialog.BackColour = Color.FromArgb(190, 15, 0, 0);
 
                 TransparencyOnButton.Index = 474;
                 TransparencyOnButton.HoverIndex = 475;
@@ -363,7 +364,8 @@ namespace Client.MirScenes.Dialogs
             }
             else
             {
-                GameScene.Scene.ChatDialog.Opacity = 1F;
+                GameScene.Scene.ChatDialog.ForeColour = Color.White;
+                GameScene.Scene.ChatDialog.BackColour = Color.White;
 
                 TransparencyOnButton.Index = 473;
                 TransparencyOnButton.HoverIndex = 473;

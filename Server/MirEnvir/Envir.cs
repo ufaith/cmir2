@@ -19,7 +19,7 @@ namespace Server.MirEnvir
         public static object AccountLock = new object();
         public static object LoadLock = new object();
 
-        public const int Version = 43;
+        public const int Version = 44;
         public const string DatabasePath = @".\Server.MirDB";
         public const string AccountPath = @".\Server.MirADB";
         public const string BackUpPath = @".\Back Up\";
@@ -72,7 +72,7 @@ namespace Server.MirEnvir
 
         //User DB
         public int NextAccountID, NextCharacterID;
-        public ulong NextUserItemID, NextAuctionID;
+        public ulong NextUserItemID, NextAuctionID, NextMailID;
         public List<AccountInfo> AccountList = new List<AccountInfo>();
         public List<CharacterInfo> CharacterList = new List<CharacterInfo>(); 
         public LinkedList<AuctionInfo> Auctions = new LinkedList<AuctionInfo>();
@@ -82,7 +82,8 @@ namespace Server.MirEnvir
         //Live Info
         public List<Map> MapList = new List<Map>();
         public List<SafeZoneInfo> StartPoints = new List<SafeZoneInfo>(); 
-        public List<ItemInfo> StartItems = new List<ItemInfo>(); 
+        public List<ItemInfo> StartItems = new List<ItemInfo>();
+        public List<MailInfo> Mail = new List<MailInfo>();
         public List<PlayerObject> Players = new List<PlayerObject>();
         public bool Saving = false;
         public LightSetting Lights;
@@ -90,6 +91,7 @@ namespace Server.MirEnvir
         public List<string> CustomCommands = new List<string>();
         public Dragon DragonSystem;
         public NPCObject DefaultNPC;
+
 
         public List<DropInfo> FishingDrops = new List<DropInfo>();
         public List<DropInfo> AwakeningDrops = new List<DropInfo>();
@@ -111,7 +113,7 @@ namespace Server.MirEnvir
         public static int LastCount = 0, LastRealCount = 0;
         public int MonsterCount;
 
-        public long dayTime, warTime;
+        public long dayTime, warTime, mailTime;
 
         private void WorkLoop()
         {
@@ -290,6 +292,39 @@ namespace Server.MirEnvir
                 
                 warTime = Time + Settings.Minute;
             }
+
+            if (Time >= mailTime)
+            {
+                for (int i = Mail.Count - 1; i >= 0; i--)
+                {
+                    MailInfo mail = Mail[i];
+
+                    //if (mail.Gold > 0 && !Settings.MailAutoSendGold) continue;
+                    //if (mail.Items.Count > 0 && !Settings.MailAutoSendItems) continue;
+
+                    if(mail.Receive())
+                    {
+                        if (mail.Items.Count > 0 || mail.Gold > 0)
+                        {
+                            if (mail.Items.Count > 0)
+                            {
+                                SMain.EnqueueDebugging("Parcel recieved " + mail.Items[0].Info.Name);
+                            }
+                            else
+                            {
+                                SMain.EnqueueDebugging("Parcel recieved " + mail.Gold);
+                            }
+                        }
+                        else
+                        {
+                            SMain.EnqueueDebugging("Mail recieved");
+                            //collected mail ok
+                        }
+                    }
+                }
+
+                mailTime = Time + (Settings.Second * 10);
+            }
         }
 
         public void Broadcast(Packet p)
@@ -371,6 +406,11 @@ namespace Server.MirEnvir
                 writer.Write(Auctions.Count);
                 foreach (AuctionInfo auction in Auctions)
                     auction.Save(writer);
+
+                writer.Write(NextMailID);
+                writer.Write(Mail.Count);
+                foreach (MailInfo mail in Mail)
+                        mail.Save(writer);
             }
         }
 
@@ -562,6 +602,19 @@ namespace Server.MirEnvir
                             if (auction.Sold && auction.Expired) auction.Expired = false;
 
                             auction.AuctionID = ++NextAuctionID;
+                        }
+                    }
+
+                    if(LoadVersion > 43)
+                    {
+                        NextMailID = reader.ReadUInt64();
+
+                        Mail.Clear();
+
+                        count = reader.ReadInt32();
+                        for (int i = 0; i < count; i++)
+                        {
+                            Mail.Add(new MailInfo(reader));
                         }
                     }
                 }

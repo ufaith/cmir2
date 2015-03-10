@@ -48,7 +48,8 @@ namespace Client.MirObjects
 
             //Assassin
             Players.Frames.Add(MirAction.Sneek, new Frame(464, 6, 0, 100, 496, 6, 0, 100));
-            
+            Players.Frames.Add(MirAction.DashAttack, new Frame(80, 3, 3, 100, 112, 3, 3, 100));
+
             //Archer
             Players.Frames.Add(MirAction.WalkingBow, new Frame(0, 6, 0, 100, 0, 6, 0, 100));
             Players.Frames.Add(MirAction.RunningBow, new Frame(48, 6, 0, 100, 48, 6, 0, 100));
@@ -634,6 +635,44 @@ namespace Client.MirObjects
             frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
             frame.Frames.Add(MirAction.Attack1, new Frame(32, 6, 0, 100));
 
+            //49 - Archer SummonVampire
+            Monsters.Add(frame = new FrameSet());
+            //frame.Frames.Add(MirAction.???, new Frame(0, 3, 0, 500));// dunno what miraction to assign to this ?
+            frame.Frames.Add(MirAction.Show, new Frame(24, 6, 0, 150));
+            frame.Frames.Add(MirAction.Hide, new Frame(29, 6, 0, 150) { Reverse = true });
+            frame.Frames.Add(MirAction.Standing, new Frame(72, 4, 0, 500));
+            frame.Frames.Add(MirAction.Walking, new Frame(104, 6, 0, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(152, 5, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(192, 3, 0, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(216, 10, 0, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(225, 1, 9, 1000));
+
+            //50 - Archer SummonToad
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 4, 0, 500));
+            frame.Frames.Add(MirAction.AttackRange1, new Frame(32, 9, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(104, 3, 0, 200));
+            frame.Frames.Add(MirAction.Die, new Frame(128, 10, 0, 100));
+            frame.Frames.Add(MirAction.Hide, new Frame(208, 4, 0, 100));
+            frame.Frames.Add(MirAction.Show, new Frame(211, 4, 0, 100) { Reverse = true });
+            frame.Frames.Add(MirAction.Dead, new Frame(137, 1, 9, 1000));
+
+            //51 - Archer SummonSnakes Totem
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 2, 0, 500));
+            frame.Frames.Add(MirAction.Walking, new Frame(0, 2, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(0, 1, 0, 100));
+            frame.Frames.Add(MirAction.Die, new Frame(0, 1, 0, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(0, 1, 0, 100));
+
+            //52 - Archer SummonSnakes Snake
+            Monsters.Add(frame = new FrameSet());
+            frame.Frames.Add(MirAction.Standing, new Frame(0, 5, 0, 200));
+            frame.Frames.Add(MirAction.Walking, new Frame(0, 5, 0, 100));
+            frame.Frames.Add(MirAction.Attack1, new Frame(0, 5, 0, 100));
+            frame.Frames.Add(MirAction.Struck, new Frame(0, 5, 0, 100));
+            frame.Frames.Add(MirAction.Die, new Frame(52, 8, 0, 100));
+            frame.Frames.Add(MirAction.Dead, new Frame(59, 1, 7, 1000));
             #endregion
 
         }

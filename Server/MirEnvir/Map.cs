@@ -1778,6 +1778,22 @@ namespace Server.MirEnvir
                     break;
 
                 #endregion
+
+                #region ArcherSummons
+
+                case Spell.SummonVampire:
+                case Spell.SummonToad:
+                case Spell.SummonSnakes:
+                    monster = (MonsterObject)data[2];
+                    front = (Point)data[3];
+
+                    if (ValidPoint(front))
+                        monster.Spawn(this, front);
+                    else
+                        monster.Spawn(player.CurrentMap, player.CurrentLocation);
+                    break;
+
+                #endregion
             }
 
             if (train)

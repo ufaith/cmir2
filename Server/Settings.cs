@@ -93,7 +93,11 @@ namespace Server
                              AngelName = "HolyDeva",
                              BombSpiderName = "BombSpider",
                              CloneName = "Clone",
-                             AssassinCloneName = "AssassinClone";
+                             AssassinCloneName = "AssassinClone",
+                             VampireName = "VampireSpider",//SummonVampire
+                             ToadName = "SpittingToad",//SummonToad
+                             SnakeTotemName = "SnakeTotem",//SummonSnakes Totem
+                             SnakesName = "CharmedSnake";//SummonSnakes
 
         public static string HealRing = "Healing",
                              FireRing = "FireBall",
@@ -107,7 +111,11 @@ namespace Server
         public static long FishingDelay = 0;
         public static int FishingMobSpawnChance = 5;
         public static string FishingMonster = "GiantKeratoid";
-                            
+
+        //Mail Settings
+        public static bool MailAutoSendLetters = true;
+        public static bool MailAutoSendGold = false;
+        public static bool MailAutoSendItems = false;
 
         //character settings
         private static String[] BaseStatClassNames = { "Warrior", "Wizard", "Taoist", "Assassin", "Archer" };
@@ -206,6 +214,10 @@ namespace Server
             CloneName = Reader.ReadString("Game", "CloneName", CloneName);
             FishingMonster = Reader.ReadString("Game", "FishMonster", FishingMonster);
             AssassinCloneName = Reader.ReadString("Game", "AssassinCloneName", AssassinCloneName);
+            VampireName = Reader.ReadString("Game", "VampireName", VampireName);//SummonVampire
+            ToadName = Reader.ReadString("Game", "ToadName", ToadName);//SummonToad
+            SnakeTotemName = Reader.ReadString("Game", "SnakeTotemName", SnakeTotemName);//SummonSnakes Totem
+            SnakesName = Reader.ReadString("Game", "SnakesName", SnakesName);//SummonSnakes
 
             //Items
             HealRing = Reader.ReadString("Items", "HealRing", HealRing);
@@ -369,6 +381,11 @@ namespace Server
             Reader.Write("Game", "BombSpiderName", BombSpiderName);
             Reader.Write("Game", "CloneName", CloneName);
             Reader.Write("Game", "AssassinCloneName", AssassinCloneName);
+
+            Reader.Write("Game", "VampireName", VampireName);//SummonVampire
+            Reader.Write("Game", "ToadName", ToadName);//SummonToad
+            Reader.Write("Game", "SnakeTotemName", SnakeTotemName);//SummonSnakes Totem
+            Reader.Write("Game", "SnakesName", SnakesName);//SummonSnakes
 
             Reader.Write("Items", "HealRing", HealRing);
             Reader.Write("Items", "FireRing", FireRing);
@@ -701,7 +718,7 @@ namespace Server
                 return;
             }
             InIReader reader = new InIReader(ConfigPath + @".\GuildSettings.ini");
-            Guild_RequiredLevel = reader.ReadByte("Guilds", "MinimuLevel", Guild_RequiredLevel);
+            Guild_RequiredLevel = reader.ReadByte("Guilds", "MinimumLevel", Guild_RequiredLevel);
             Guild_ExpRate = reader.ReadFloat("Guilds", "ExpRate", Guild_ExpRate);
             Guild_PointPerLevel = reader.ReadByte("Guilds", "PointPerLevel", Guild_PointPerLevel);
             Guild_WarTime = reader.ReadInt64("Guilds", "WarTime", Guild_WarTime);

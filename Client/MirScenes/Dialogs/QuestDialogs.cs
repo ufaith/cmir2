@@ -712,18 +712,6 @@ namespace Client.MirScenes.Dialogs
             };
             closeButton.Click += (o, e) => Hide();
 
-            //MirButton helpButton = new MirButton
-            //{
-            //    Index = 257,
-            //    HoverIndex = 258,
-            //    PressedIndex = 259,
-            //    Library = Libraries.Prguse2,
-            //    Parent = this,
-            //    Location = new Point(266, 3),
-            //    Sound = SoundList.ButtonA,
-            //};
-            //helpButton.Click += (o, e) => GameScene.Scene.HelpDialog.DisplayPage("Quests");
-
         }
 
         public void DisplayQuests()

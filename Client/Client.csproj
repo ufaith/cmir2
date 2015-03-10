@@ -134,6 +134,7 @@
     <Compile Include="MirObjects\UserObject.cs" />
     <Compile Include="MirScenes\Dialogs\ChatOptionDialog.cs" />
     <Compile Include="MirScenes\Dialogs\HelpDialog.cs" />
+    <Compile Include="MirScenes\Dialogs\MailDialogs.cs" />
     <Compile Include="MirScenes\Dialogs\RankingDialog.cs" />
     <Compile Include="MirScenes\GameScene.cs" />
     <Compile Include="MirScenes\LoginScene.cs" />

@@ -13,17 +13,20 @@ namespace Server.MirObjects
         Recall,
         MapMovement,
         Mine,
-        NPC
+        NPC,
+        Poison,
     }
 
     public class DelayedAction
     {
         public DelayedType Type;
         public long Time;
+        public long StartTime;
         public object[] Params;
 
         public DelayedAction(DelayedType type, long time, params object[] p)
         {
+            StartTime = SMain.Envir.Time;
             Type = type;
             Time = time;
             Params = p;

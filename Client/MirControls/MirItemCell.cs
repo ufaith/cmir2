@@ -6,6 +6,7 @@ using Client.MirNetwork;
 using Client.MirObjects;
 using Client.MirScenes;
 using Client.MirSounds;
+using Client.MirScenes.Dialogs;
 using C = ClientPackets;
 
 namespace Client.MirControls
@@ -69,6 +70,8 @@ namespace Client.MirControls
                         return MapObject.User.QuestInventory;
                     case MirGridType.AwakenItem:
                         return NPCAwakeDialog.Items;
+                    case MirGridType.Mail:
+                        return MailComposeParcelDialog.Items;
                     default:
                         throw new NotImplementedException();
                 }
@@ -171,7 +174,9 @@ namespace Client.MirControls
         {
             if (Locked) return;
 
-            if (GameScene.PickedUpGold || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant || GridType == MirGridType.QuestInventory || GridType == MirGridType.Fishing || GridType == MirGridType.Mount) return;
+            if (GameScene.PickedUpGold || GridType == MirGridType.Inspect || GridType == MirGridType.TrustMerchant || GridType == MirGridType.QuestInventory) return;
+
+            if(GameScene.SelectedCell == null && (GridType == MirGridType.Mail)) return;
 
             base.OnMouseClick(e);
             
@@ -1249,6 +1254,31 @@ namespace Client.MirControls
                             }
                         }
                         return;
+                    #endregion
+                    #region To Mail
+                    case MirGridType.Mail: //To Mail
+                        if (GameScene.SelectedCell.GridType == MirGridType.Inventory)
+                        {
+                            if (Item != null)
+                            {
+                                GameScene.Scene.ChatDialog.ReceiveChat("You cannot swap items.", ChatType.System);
+                                return;
+                            }
+                            //if (!GuildDialog.MyOptions.HasFlag(RankOptions.CanStoreItem))
+                            //{
+                            //    GameScene.Scene.ChatDialog.ReceiveChat("Insufficient rights to store items.", ChatType.System);
+                            //    return;
+                            //}
+                            if (ItemArray[ItemSlot] == null)
+                            {
+                                Item = GameScene.SelectedCell.Item;
+                                GameScene.SelectedCell.Locked = true;
+                                MailComposeParcelDialog.ItemsIdx[_itemSlot] = GameScene.SelectedCell.Item.UniqueID;
+                                GameScene.SelectedCell = null;                              
+                                return;
+                            }
+                        }
+                        break;
                     #endregion
                 }
 
