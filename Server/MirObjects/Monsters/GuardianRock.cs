@@ -29,6 +29,7 @@ namespace Server.MirObjects.Monsters
         }
         protected override void CompleteAttack(IList<object> data)
         {
+            if (Target == null) return;
             if (!Target.IsAttackTarget(this))
             {
                 Target = null;
@@ -45,7 +46,11 @@ namespace Server.MirObjects.Monsters
         {
             MirDirection pushdir = Functions.DirectionFromPoint(Target.CurrentLocation, CurrentLocation);
             if (Envir.Random.Next(Settings.MagicResistWeight) < Target.MagicResist) return;
-            Target.Pushed(this, pushdir, 4);
+            int distance = Functions.MaxDistance(Target.CurrentLocation, CurrentLocation) -1;
+            if (distance <= 0) return;
+            if (distance > 4) distance = 4;
+            
+            Target.Pushed(this, pushdir, distance);
         }
 
         protected override void ProcessTarget()
