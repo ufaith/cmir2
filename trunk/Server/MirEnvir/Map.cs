@@ -1624,6 +1624,8 @@ namespace Server.MirEnvir
 
                                             int tempValue = value + (magic.Level + 1) * 2;
 
+                                            if (poison == PoisonType.Green)
+                                                tempValue = value / 15 + magic.Level + 1;
                                             if (poison != PoisonType.None)
                                                 target.ApplyPoison(new Poison { PType = poison, Duration = value + (magic.Level + 1) * 5, TickSpeed = 1000, Value = tempValue }, player);
 

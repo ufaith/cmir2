@@ -4441,7 +4441,7 @@ namespace Server.MirObjects
                         break;
                     case Spell.FlamingSword:
                         magic = GetMagic(Spell.FlamingSword);
-                        damage = (damage * 2) + (int)(((double)damage / 100) * ((4 + magic.Level * 4) * 10));
+                        damage = (damage) + (int)(((double)damage / 100) * ((4 + magic.Level * 4) * 10));
                         FlamingSword = false;
                         defence = DefenceType.AC;
                         //action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
@@ -6396,7 +6396,7 @@ namespace Server.MirObjects
             if ((Info.MentalState != 1) && !CanFly(target.CurrentLocation)) return false;
             int distance = Functions.MaxDistance(CurrentLocation, target.CurrentLocation);
             int damage = (GetAttackPower(MinMC, MaxMC) + magic.GetPower());
-            damage = (int)(damage * Math.Max(1, (distance * 0.40)));//range boost
+            damage = (int)(damage * Math.Max(1, (distance * 0.35)));//range boost
             damage = ApplyArcherState(damage);
             int delay = distance * 50 + 500; //50 MS per Step
 
@@ -7839,7 +7839,7 @@ namespace Server.MirObjects
                 {
                     switch (Buffs[i].Type)
                     {
-                        case BuffType.Hiding:
+                        //case BuffType.Hiding:
                         case BuffType.MoonLight:
                         case BuffType.DarkBody:
                             Buffs[i].ExpireTime = 0;
@@ -7964,7 +7964,7 @@ namespace Server.MirObjects
                 {
                     switch (Buffs[i].Type)
                     {
-                        case BuffType.Hiding:
+                        //case BuffType.Hiding:
                         case BuffType.MoonLight:
                         case BuffType.DarkBody:
                             Buffs[i].ExpireTime = 0;
@@ -8048,6 +8048,7 @@ namespace Server.MirObjects
                 if (PoisonList[i].PType != p.PType) continue;
                 if ((PoisonList[i].PType == PoisonType.Green) && (PoisonList[i].Value > p.Value)) return;//cant cast weak poison to cancel out strong poison
                 if ((PoisonList[i].PType != PoisonType.Green) && ((PoisonList[i].Duration - PoisonList[i].Time) > p.Duration)) return;//cant cast 1 second poison to make a 1minute poison go away!
+                if ((PoisonList[i].PType == PoisonType.Frozen) || (PoisonList[i].PType == PoisonType.Slow) || (PoisonList[i].PType == PoisonType.Paralysis)) return;//prevents mobs from being perma frozen/slowed
                 if (p.PType == PoisonType.DelayedExplosion) return;
                 ReceiveChat("You have been poisoned.", ChatType.System2);
                 PoisonList[i] = p;
