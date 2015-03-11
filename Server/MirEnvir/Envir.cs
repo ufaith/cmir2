@@ -376,8 +376,14 @@ namespace Server.MirEnvir
 
             try
             {
-                using (FileStream stream = File.Create(AccountPath))
+                using (FileStream stream = File.Create(AccountPath + "n"))
                     SaveAccounts(stream);
+                if (File.Exists(AccountPath))
+                    File.Move(AccountPath, AccountPath + "o");
+                File.Move(AccountPath + "n", AccountPath);
+                if (File.Exists(AccountPath + "o"))
+                File.Delete(AccountPath + "o");
+
             }
             catch (Exception ex)
             {
@@ -437,9 +443,11 @@ namespace Server.MirEnvir
                 string newfilename = fStream.Name;
                 fStream.EndWrite(result);
                 fStream.Dispose();
-                File.Move(oldfilename, oldfilename + 'o');
+                if (File.Exists(oldfilename))
+                    File.Move(oldfilename, oldfilename + "o");
                 File.Move(newfilename, oldfilename);
-                File.Delete(oldfilename + 'o');
+                if (File.Exists(oldfilename + "o"))
+                    File.Delete(oldfilename + "o");
             }
 
         }
@@ -461,7 +469,7 @@ namespace Server.MirEnvir
                 }
 
                 SaveAccounts(mStream);
-                FileStream fStream = new FileStream(AccountPath, FileMode.Create);
+                FileStream fStream = new FileStream(AccountPath + "n", FileMode.Create);
 
                 byte[] data = mStream.ToArray();
                 fStream.BeginWrite(data, 0, data.Length, EndSaveAccounts, fStream);
@@ -474,8 +482,15 @@ namespace Server.MirEnvir
 
             if (fStream != null)
             {
+                string oldfilename = fStream.Name.Substring(0, fStream.Name.Length - 1);
+                string newfilename = fStream.Name;
                 fStream.EndWrite(result);
                 fStream.Dispose();
+                if (File.Exists(oldfilename))
+                    File.Move(oldfilename, oldfilename + "o");
+                File.Move(newfilename, oldfilename);
+                if (File.Exists(oldfilename + "o"))
+                    File.Delete(oldfilename + "o");
             }
 
             Saving = false;

@@ -4341,7 +4341,7 @@ namespace Server.MirObjects
 
                         defence = DefenceType.ACAgility;
 
-                        S.ObjectEffect p = new S.ObjectEffect { ObjectID = ob.ObjectID, Effect = SpellEffect.MPEater };
+                        S.ObjectEffect p = new S.ObjectEffect { ObjectID = ob.ObjectID, Effect = SpellEffect.MPEater, EffectType = ObjectID };
                         CurrentMap.Broadcast(p, ob.CurrentLocation);
 
                         int addMp = 5 * (magic.Level + Accuracy / 4);
@@ -4408,7 +4408,7 @@ namespace Server.MirObjects
 
                         if (defence == DefenceType.ACAgility) defence = DefenceType.MACAgility;
 
-                        action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
+                        action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, false);
                         ActionList.Add(action);
                         LevelMagic(magic);
                         break;
@@ -4428,7 +4428,7 @@ namespace Server.MirObjects
                         magic = GetMagic(Spell.TwinDrakeBlade);
                         damage = damage * (magic.Level + 8) / 10; // 110% Damage level 3
                         TwinDrakeBlade = false;
-                        action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
+                        action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, false);
                         ActionList.Add(action);
                         LevelMagic(magic);
 
@@ -4443,7 +4443,7 @@ namespace Server.MirObjects
                         magic = GetMagic(Spell.FlamingSword);
                         damage = (damage * 2) + (int)(((double)damage / 100) * ((4 + magic.Level * 4) * 10));
                         FlamingSword = false;
-                        defence = DefenceType.ACAgility;
+                        defence = DefenceType.AC;
                         //action = new DelayedAction(DelayedType.Damage, Envir.Time + 400, ob, damage, DefenceType.Agility, true);
                         //ActionList.Add(action);
                         LevelMagic(magic);
@@ -4476,7 +4476,7 @@ namespace Server.MirObjects
                     magic = GetMagic(spell);
                     damage = damage * (magic.Level + 1) / 4;
 
-                    ob.Attacked(this, damage, DefenceType.Agility);
+                    ob.Attacked(this, damage, DefenceType.Agility,false);
                     break;
                 }
 
@@ -4506,7 +4506,7 @@ namespace Server.MirObjects
                         if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) continue;
                         if (!ob.IsAttackTarget(this)) continue;
 
-                        ob.Attacked(this, damage, DefenceType.Agility);
+                        ob.Attacked(this, damage, DefenceType.Agility, false);
                         break;
                     }
                 }
@@ -4535,7 +4535,7 @@ namespace Server.MirObjects
                         if (ob.Race != ObjectType.Player && ob.Race != ObjectType.Monster) continue;
                         if (!ob.IsAttackTarget(this)) continue;
 
-                        ob.Attacked(this, damage, DefenceType.Agility);
+                        ob.Attacked(this, damage, DefenceType.Agility, false);
                         break;
                     }
                 }
