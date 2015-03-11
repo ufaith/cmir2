@@ -16235,7 +16235,7 @@ namespace Client.MirScenes
                 MapObject ob = MapControl.Objects[i];
 
 
-                if (ob.Race == ObjectType.Item || ob.Dead || ob.Race == ObjectType.Spell) continue;
+                if (ob.Race == ObjectType.Item || ob.Dead || ob.Race == ObjectType.Spell || (ob.SneakingActive && (ob.ObjectID != MapObject.User.ObjectID))) continue;
                 float x = ((ob.CurrentLocation.X - startPointX) * scaleX) + Location.X;
                 float y = ((ob.CurrentLocation.Y - startPointY) * scaleY) + Location.Y;
 
