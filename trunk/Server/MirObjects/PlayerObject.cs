@@ -4082,14 +4082,16 @@ namespace Server.MirObjects
             Spell spell = Spell.None;
             bool Focus = false;
 
-            magic = GetMagic(Spell.Focus);
-            if (!CanFly(target.CurrentLocation) && (Info.MentalState != 1))
+            if (target != null && !CanFly(target.CurrentLocation) && (Info.MentalState != 1))
             {
                 target = null;
                 targetID = 0;
             }
+
             if (target != null)
             {
+                magic = GetMagic(Spell.Focus);
+
                 if (magic != null && Envir.Random.Next(5) <= magic.Level)
                 {
                     Focus = true;
