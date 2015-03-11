@@ -3000,8 +3000,16 @@ namespace Client.MirScenes
                     case SpellEffect.TwinDrakeBlade:
                         ob.Effects.Add(new Effect(Libraries.Magic2, 380, 6, 800, ob));
                         break;
-                    case SpellEffect.MPEater:
-                        User.Effects.Add(new Effect(Libraries.Magic2, 2411, 19, 1900, User));
+                   case SpellEffect.MPEater:
+                        for (int j = MapControl.Objects.Count - 1; j >= 0; j++)
+                        {
+                            MapObject ob2 = MapControl.Objects[j];
+                            if (ob2.ObjectID == p.EffectType)
+                            {
+                                ob2.Effects.Add(new Effect(Libraries.Magic2, 2411, 19, 1900, ob2));
+                                break; ;
+                            }
+                        }
                         ob.Effects.Add(new Effect(Libraries.Magic2, 2400, 9, 900, ob));
                         SoundManager.PlaySound(20000 + (ushort)Spell.FatalSword * 10);
                         break;
@@ -6949,7 +6957,7 @@ namespace Client.MirScenes
             {
                 for (int i = 0; i < Objects.Count; i++)
                 {
-                    if (Objects[i] is ItemObject || Objects[i].Dead) continue;
+                    if (Objects[i] is ItemObject || Objects[i].Dead || Objects[i].Hidden) continue;
                     Objects[i].DrawName();
                 }
             }
