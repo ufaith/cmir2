@@ -3437,6 +3437,7 @@ namespace Server.MirObjects
                         break;
 
                     case "DIE":
+                        LastHitter = null;
                         Die();
                         break;
 
