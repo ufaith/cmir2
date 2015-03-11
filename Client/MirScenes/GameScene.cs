@@ -6957,7 +6957,7 @@ namespace Client.MirScenes
             {
                 for (int i = 0; i < Objects.Count; i++)
                 {
-                    if (Objects[i] is ItemObject || Objects[i].Dead || Objects[i].Hidden) continue;
+                    if (Objects[i] is ItemObject || Objects[i].Dead || (Objects[i].SneakingActive && (Objects[i].ObjectID != User.ObjectID))) continue;
                     Objects[i].DrawName();
                 }
             }
