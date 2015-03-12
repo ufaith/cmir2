@@ -5705,7 +5705,7 @@ namespace Server.MirObjects
             cast = false;
             //int count = Buffs.Where(x => x.Type == BuffType.UltimateEnhancer).ToList().Count();
             //if (count > 0) return;
-
+            if (target == null || !target.IsFriendlyTarget(this)) return;
             UserItem item = GetAmulet(1);
             if (item == null) return;
 
