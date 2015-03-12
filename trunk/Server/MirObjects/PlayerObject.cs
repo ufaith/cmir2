@@ -1024,17 +1024,17 @@ namespace Server.MirObjects
 
         private void DeathDrop(MapObject killer)
         {
+            bool pkbodydrop = true;
             if (CurrentMap.Info.NoDropPlayer && Race == ObjectType.Player) return;
 
-            if (killer == null || killer.Race != ObjectType.Player)
+            if ((killer == null) || ((pkbodydrop) || (killer.Race != ObjectType.Player)))
             {
                 UserItem temp = Info.Equipment[(int)EquipmentSlot.Stone];
-                if (temp != null)
+                if ((temp != null) && (killer.Race != ObjectType.Player))
                 {
                     Info.Equipment[(int)EquipmentSlot.Stone] = null;
                     Enqueue(new S.DeleteItem { UniqueID = temp.UniqueID, Count = temp.Count });
                 }
-
 
                 for (int i = 0; i < Info.Equipment.Length; i++)
                 {
@@ -9196,7 +9196,7 @@ namespace Server.MirObjects
                     canUpgrade = true;
 
                     byte itemType = (byte)tempTo.Info.Type;
-
+                    
                     if ((tempFrom.Info.MaxDC + tempFrom.DC) > 0 && (itemType != 2 && itemType != 9 && itemType != 4 && itemType != 10))
                     {
                         if (succeeded) tempTo.DC = (byte)Math.Min(byte.MaxValue, tempTo.DC + tempFrom.Info.MaxDC + tempFrom.DC);
