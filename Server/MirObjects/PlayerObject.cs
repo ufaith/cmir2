@@ -6399,7 +6399,7 @@ namespace Server.MirObjects
             if ((Info.MentalState != 1) && !CanFly(target.CurrentLocation)) return false;
             int distance = Functions.MaxDistance(CurrentLocation, target.CurrentLocation);
             int damage = (GetAttackPower(MinMC, MaxMC) + magic.GetPower());
-            damage = (int)(damage * Math.Max(1, (distance * 0.35)));//range boost
+            damage = (int)(damage * Math.Max(1, (distance * 0.25)));//range boost
             damage = ApplyArcherState(damage);
             int delay = distance * 50 + 500; //50 MS per Step
 
