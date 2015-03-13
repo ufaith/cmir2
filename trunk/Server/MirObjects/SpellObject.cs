@@ -334,6 +334,7 @@ namespace Server.MirObjects
                 PlayerObject player = CurrentMap.Players[i];
                 if (Functions.InRange(CurrentLocation, player.CurrentLocation, Globals.DataRange))
                 {
+                    if ((Caster == null) || (player == null)) continue;
                     if ((player == Caster) || (player.IsFriendlyTarget(Caster)))
                     {
                         p = GetInfo();
