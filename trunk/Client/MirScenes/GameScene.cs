@@ -3001,13 +3001,13 @@ namespace Client.MirScenes
                         ob.Effects.Add(new Effect(Libraries.Magic2, 380, 6, 800, ob));
                         break;
                    case SpellEffect.MPEater:
-                        for (int j = MapControl.Objects.Count - 1; j >= 0; j++)
+                        for (int j = MapControl.Objects.Count - 1; j >= 0; j--)
                         {
                             MapObject ob2 = MapControl.Objects[j];
                             if (ob2.ObjectID == p.EffectType)
                             {
                                 ob2.Effects.Add(new Effect(Libraries.Magic2, 2411, 19, 1900, ob2));
-                                break; ;
+                                break;
                             }
                         }
                         ob.Effects.Add(new Effect(Libraries.Magic2, 2400, 9, 900, ob));
