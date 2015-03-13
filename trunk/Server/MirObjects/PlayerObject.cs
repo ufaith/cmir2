@@ -6273,6 +6273,7 @@ namespace Server.MirObjects
 
         private void FlashDash(UserMagic magic)
         {
+            bool success = false;
             ActionTime = Envir.Time;
 
             int travel = 0;
@@ -6341,10 +6342,10 @@ namespace Server.MirObjects
                                 {
                                     DelayedAction action = new DelayedAction(DelayedType.Damage, AttackTime, ob, GetAttackPower(MinDC, MaxDC), DefenceType.AC, true);
                                     ActionList.Add(action);
-
+                                    success = true;
                                     if ((((ob.Race != ObjectType.Player) || Settings.PvpCanResistPoison) && (Envir.Random.Next(Settings.PoisonAttackWeight) >= ob.PoisonResist)) && (Envir.Random.Next(15) <= magic.Level + 1))
                                     {
-                                        DelayedAction pa = new DelayedAction(DelayedType.Poison, AttackTime, ob, PoisonType.Stun, SpellEffect.TwinDrakeBlade, 1, 1000);
+                                        DelayedAction pa = new DelayedAction(DelayedType.Poison, AttackTime, ob, PoisonType.Stun, SpellEffect.TwinDrakeBlade, magic.Level + 1, 1000);
                                         ActionList.Add(pa);
                                     }
                                 }
@@ -6353,6 +6354,8 @@ namespace Server.MirObjects
                     }
                 }
             }
+            if (success) //technicaly this makes flashdash lvl when it casts rather then when it hits (it wont lvl if it's not hitting!)
+                LevelMagic(magic);
         }
         #endregion
 
